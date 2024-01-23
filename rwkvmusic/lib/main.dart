@@ -1,18 +1,14 @@
-import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-// import 'package:webview_flutter/webview_flutter.dart';
-import "package:webview_universal/webview_universal.dart";
-import 'package:dio/dio.dart';
-import 'dart:io';
-import 'package:dio/dio.dart';
+import 'package:webview_flutter/webview_flutter.dart';
+// import "package:webview_universal/webview_universal.dart";
 
 void main(List<String> args) {
-  强制横屏显示
+  // 强制横屏显示
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.landscapeLeft,
     DeviceOrientation.landscapeRight,
@@ -29,22 +25,25 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  WebViewController webViewController1 = WebViewController();
-  WebViewController webViewController2 = WebViewController();
+  late WebViewController controller1;
+  late WebViewController controller2;
+  String filePath1 = 'assets/piano/index.html';
+  String filePath2 = 'assets/piano/keyboard.html';
+  String filePath3 = 'assets/player/player.html';
   var selectstate = 0;
   @override
   void initState() {
     super.initState();
-    webViewController1.init(
-      context: context,
-      setState: setState,
-      uri: Uri.parse("https://www.baidu.com"),
-    );
-    webViewController2.init(
-      context: context,
-      setState: setState,
-      uri: Uri.parse("https://www.qq.com/"),
-    );
+    // webViewController1.init(
+    //   context: context,
+    //   setState: setState,
+    //   uri: Uri.parse("https://www.baidu.com"),
+    // );
+    // webViewController2.init(
+    //   context: context,
+    //   setState: setState,
+    //   uri: Uri.parse("https://www.qq.com/"),
+    // );
   }
 
   @override
@@ -64,14 +63,24 @@ class _MyAppState extends State<MyApp> {
         Expanded(
           flex: 2,
           child: WebView(
-            controller: webViewController1,
-          ),
+        initialUrl: '',
+        javascriptMode: JavascriptMode.unrestricted,
+        onWebViewCreated: (WebViewController controller) {
+          this.controller1 = controller;
+          _loadHtmlFromAssets(filePath1,controller);
+        },
+      ),
         ),
         Expanded(
           flex: 2,
           child: WebView(
-            controller: webViewController2,
-          ),
+        initialUrl: '',
+        javascriptMode: JavascriptMode.unrestricted,
+        onWebViewCreated: (WebViewController controller) {
+          this.controller2 = controller;
+          _loadHtmlFromAssets(filePath2,controller);
+        },
+      ),
         ),
         Expanded(
           flex: 1,
@@ -233,5 +242,14 @@ class _MyAppState extends State<MyApp> {
       // 处理错误
       print('请求发生错误: $error');
     });
+  }
+
+
+  // 加载显示html文件；
+  _loadHtmlFromAssets(String filePath,WebViewController controller) async {
+    String fileHtmlContents = await rootBundle.loadString(filePath);
+    controller.loadUrl(Uri.dataFromString(fileHtmlContents,
+            mimeType: 'text/html', encoding: Encoding.getByName('utf-8'))
+        .toString());
   }
 }

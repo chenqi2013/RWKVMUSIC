@@ -1,0 +1,16 @@
+- name: core.viewport.margin
+  data:
+    t: 0.00
+    b: 0.00
+- name: vendor.i18n
+  data:
+    native: en
+- name: vendor.platform.native.ad
+  data:
+    banner:
+      b: 2
+- name: feature.ad
+  data:
+    interstitial:
+      cooldown: 40
+      overflow: 0.375

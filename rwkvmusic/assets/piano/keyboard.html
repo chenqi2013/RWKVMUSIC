@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Piano</title>
+  <style>
+    html,
+    body {
+      margin: 0;
+      font-family: 'Noto Serif', serif;
+    }
+
+    body {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 2px;
+      right: 2px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    * {
+      overflow: hidden;
+      user-select: none;
+    }
+
+    :root {
+      --keyboard: hsl(300, 100%, 16%);
+      --keyboard-shadow: hsla(19, 50%, 66%, 0.2);
+      --keyboard-border: hsl(20, 91%, 5%);
+      --black-10: hsla(0, 0%, 0%, 0.1);
+      --black-20: hsla(0, 0%, 0%, 0.2);
+      --black-30: hsla(0, 0%, 0%, 0.3);
+      --black-50: hsla(0, 0%, 0%, 0.5);
+      --black-60: hsla(0, 0%, 0%, 0.6);
+      --white-20: hsla(0, 0%, 100%, 0.2);
+      --white-50: hsla(0, 0%, 100%, 0.5);
+      --white-80: hsla(0, 0%, 100%, 0.8);
+    }
+
+    .white,
+    .black {
+      position: relative;
+      float: left;
+      display: flex;
+      justify-content: center;
+      align-items: flex-end;
+      user-select: none;
+      cursor: pointer;
+      font-size: 12px;
+    }
+
+    .white {
+      height: 100%;
+      z-index: 1;
+      border-left: 1px solid hsl(0, 0%, 73%);
+      border-bottom: 1px solid hsl(0, 0%, 73%);
+      border-radius: 0 0 5px 5px;
+      box-shadow: -1px 0 0 var(--white-80) inset, 0 0 5px hsl(0, 0%, 80%) inset,
+        0 0 3px var(--black-20);
+      background: linear-gradient(to bottom, hsl(0, 0%, 99%) 0%, white 100%);
+      color: var(--black-30);
+    }
+
+    .black {
+      position: absolute;
+      width: 10px;
+      height: 62%;
+      z-index: 2;
+      border: 1px solid black;
+      border-radius: 0 0 3px 3px;
+      box-shadow: -1px -1px 2px var(--white-20) inset,
+        0 -5px 2px 3px var(--black-60) inset, 0 2px 4px var(--black-50);
+      background: linear-gradient(45deg, hsl(0, 0%, 13%) 0%, hsl(0, 0%, 33%) 100%);
+      color: var(--white-50);
+    }
+
+    .white.pressed {
+      border-top: 1px solid hsl(0, 0%, 47%);
+      border-left: 1px solid hsl(0, 0%, 60%);
+      border-bottom: 1px solid hsl(0, 0%, 60%);
+      box-shadow: 2px 0 3px var(--black-10) inset,
+        -5px 5px 20px var(--black-20) inset, 0 0 3px var(--black-20);
+      background: linear-gradient(to bottom, white 0%, hsl(0, 0%, 91%) 100%);
+      outline: none;
+    }
+
+    .black.pressed {
+      box-shadow: -1px -1px 2px var(--white-20) inset,
+        0 -2px 2px 3px var(--black-60) inset, 0 1px 2px var(--black-50);
+      background: linear-gradient(to right,
+          hsl(0, 0%, 27%) 0%,
+          hsl(0, 0%, 13%) 100%);
+      outline: none;
+    }
+
+    .offset {
+      margin: 0 0 0 -1rem;
+    }
+
+    #keyboard {
+      width: 100%;
+      height: calc(100% - 2px);
+      position: absolute;
+
+      display: flex;
+      justify-content: space-between;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="keyboard">
+    <!-- 生成88个黑白钢琴键 -->
+  </div>
+  <script>
+    // JavaScript 代码用于动态创建钢琴键盘
+    window.setPiano = function (start, end) {
+      const existElements = document.querySelectorAll(".key");
+      if (existElements?.length) {
+        existElements.forEach((element) => {
+          element.removeEventListener("touchstart", handleMouseDown);
+          element.removeEventListener("touchend", handleMouseUp);
+          element.removeEventListener("touchcancel", handleMouseUp);
+          element.remove();
+        });
+      }
+      if (start < 21 || end > 108) {
+        alert('please set number between 21 and 108')
+        return;
+      }
+      const piano = document.querySelector('#keyboard');
+      const blackKeyArray = [1, 3, 6, 8, 10]; // 黑键的键位
+      // 定义起始和结束键位
+      let startNote = start; // 21对应A0音符，根据需要修改
+      let endNote = end;  // 108对应C8音符，根据需要修改
+      // 这里是兼容情况，如果起始和结束键位是黑键，则向前或向后移动一位
+      if (blackKeyArray.includes(startNote % 12)) {
+        startNote = startNote - 1;
+      }
+      if (blackKeyArray.includes(endNote % 12)) {
+        endNote = endNote + 1;
+      }
+      let whiteCount = 0;
+      for (let i = startNote; i <= endNote; i++) {
+        if (!blackKeyArray.includes(i % 12)) {
+          whiteCount = whiteCount + 1;
+        }
+      }
+      const everyWhiteKeyWidth = 100 / whiteCount;
+
+      console.log(whiteCount)
+
+      let prevWhiteKeyCount = 0;
+      for (let i = startNote; i <= endNote; i++) {
+        midiKey = i;
+        const key = document.createElement('div');
+        key.classList.add('key');
+        if (blackKeyArray.includes(i % 12)) {
+          key.classList.add('black');
+          const keyWidth = everyWhiteKeyWidth * (2 / 3);
+          key.style.width = `${keyWidth}%`
+          // 根据白色键的位置计算黑色键的位置
+          key.style.left = `calc(${((prevWhiteKeyCount) * everyWhiteKeyWidth) - (keyWidth / 2)}% - 0.5px)`;
+        } else {
+          key.classList.add('white');
+          prevWhiteKeyCount = prevWhiteKeyCount + 1;
+
+          const renderMidiKey = midiKey - 20;
+          const whichGroup = parseInt(renderMidiKey / 12);
+          const currentNum = renderMidiKey % 12;
+          // 每七个白键为一组，分别为ABCDEFG，这里要展示C键和第几组
+          if (currentNum === 4) {
+            key.innerText = `C${whichGroup + 1}`;
+          }
+        }
+        key.setAttribute('data-midiKey', midiKey);
+        piano.appendChild(key);
+      }
+      // 计算所有白色键的宽度，1px是因为有
+      const allWhiteKeys = document.querySelectorAll('.white');
+      allWhiteKeys.forEach((key) => {
+        key.style.width = `calc(${everyWhiteKeyWidth}% - 1px)`;
+      });
+
+      // 开始键盘监听逻辑
+      const keyElements = document.querySelectorAll(".key");
+      console.log(keyElements.length)
+      // 坚挺多个事件
+      keyElements.forEach((element) => {
+        element.addEventListener("touchstart", handleMouseDown);
+        element.addEventListener("touchend", handleMouseUp);
+        element.addEventListener("touchcancel", handleMouseUp);
+      });
+
+      function handleMouseDown(event) {
+        event.preventDefault();
+        event.stopPropagation();
+        const midiKey = event.target.getAttribute("data-midiKey");
+        if (!midiKey) return;
+        const key = document.querySelector(`.key[data-midiKey="${midiKey}"]`);
+        key.classList.add("pressed");
+        console.log('mousedown midiKey: ', midiKey);
+        // 由这里调用安卓程序
+        if (typeof controller !== "undefined") {
+          controller.onNoteOn(parseInt(midiKey));
+        } else {
+          alert("Running outside Android app down");
+        }
+      }
+
+      function handleMouseUp(e) {
+        event.preventDefault();
+        event.stopPropagation();
+        const keyElements = document.querySelectorAll(`.key`);
+        const midiKey = event.target.getAttribute("data-midiKey");
+
+        keyElements.forEach((element) => {
+          element.classList.remove("pressed");
+        });
+
+        // 由这里调用安卓程序
+        if (typeof controller !== "undefined") {
+          controller.onNoteOff(parseInt(midiKey));
+        } else {
+          alert("Running outside Android app up");
+        }
+      }
+    }
+    setPiano(21, 108);
+  </script>
+</body>
+
+</html>
