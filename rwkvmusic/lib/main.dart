@@ -115,12 +115,25 @@ class _MyAppState extends State<MyApp> {
                   javascriptMode: JavascriptMode.unrestricted,
                   onWebViewCreated: (WebViewController controller) {
                     this.controller1 = controller;
-                    _loadHtmlFromAssets(filePath1, controller);
+                    _loadHtmlFromAssets(filePath3, controller);
                   },
-                  onPageFinished: (url) {
-                    var javascript = "setAbcString('%%MIDI program 40\nL:1/4\nM:4/4\nK:D\n D A F F', false)";
-                    controller1.runJavascript(javascript);
+                  onPageFinished: (url) async {
+                    var javascript = 'setAbcString("%%MIDI program 0\nL:1/4\nM:4/4\nK:C\n|", false)';
+                    await controller1.runJavascript(javascript);
+                    // controller1.runJavascript("setStyle()");
+                    // controller1.runJavascript("setPiano(55,76)");
                     // _executeJavaScript(javascript);
+
+                    // try {
+//   var result = await controller1.evaluateJavascript(javascript);
+//   print('JavaScript execution result: $result');
+// } catch (e) {
+//   print('JavaScript execution error: $e');
+// }
+                  },
+                  navigationDelegate: (navigation) {
+                    //其他请求正常跳转
+                    return NavigationDecision.navigate;
                   },
                 ),
               ),
@@ -162,7 +175,7 @@ class _MyAppState extends State<MyApp> {
   }
 
   // 执行JavaScript脚本的方法
-   _executeJavaScript(String jsstr)  {
+  _executeJavaScript(String jsstr) {
     print(jsstr);
     // controller1.evaluateJavascript("console.log('Hello from Flutter!');");
     controller1.runJavascript(jsstr);
