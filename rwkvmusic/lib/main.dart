@@ -5,6 +5,9 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:webview_flutter/webview_flutter.dart';
+
+import 'widget/BorderBtnWidget.dart';
+import 'widget/BtnImageTextWidget.dart';
 // import "package:webview_universal/webview_universal.dart";
 
 void main(List<String> args) {
@@ -13,9 +16,9 @@ void main(List<String> args) {
     DeviceOrientation.landscapeLeft,
     DeviceOrientation.landscapeRight,
   ]);
-  runApp(const MaterialApp(
-    home: MyApp(),
-  ));
+  runApp(
+    MyApp(),
+  );
 }
 
 class MyApp extends StatefulWidget {
@@ -48,89 +51,121 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        // appBar: AppBar(
-        //   leading: MaterialButton(
-        //     onPressed: () {
-        //       webViewController1.goBackSync();
-        //       webViewController2.goBackSync();
-        //     },
-        //     child: Icon(Icons.arrow_back),
-        //   ),
-        // ),
-        body: Column(
-      children: [
-        Expanded(
-          flex: 2,
-          child: WebView(
-        initialUrl: '',
-        javascriptMode: JavascriptMode.unrestricted,
-        onWebViewCreated: (WebViewController controller) {
-          this.controller1 = controller;
-          _loadHtmlFromAssets(filePath1,controller);
-        },
-      ),
-        ),
-        Expanded(
-          flex: 2,
-          child: WebView(
-        initialUrl: '',
-        javascriptMode: JavascriptMode.unrestricted,
-        onWebViewCreated: (WebViewController controller) {
-          this.controller2 = controller;
-          _loadHtmlFromAssets(filePath2,controller);
-        },
-      ),
-        ),
-        Expanded(
-          flex: 1,
-          child: Container(
-            color: Colors.grey,
-            child: Row(
-              children: [
-                Expanded(
-                  child: creatBottomBtn('Prompts'),
-                  flex: 2,
-                ),
-                Expanded(
-                  child: creatBottomBtn('Sounds Effect'),
-                  flex: 2,
-                ),
-                Expanded(
-                  child: createButtonImageWithText('Generate', Icons.edit),
-                  flex: 1,
-                ),
-                Expanded(
-                  child: createButtonImageWithText('Play', Icons.play_arrow),
-                  flex: 1,
-                ),
-                Expanded(
-                  child: createButtonImageWithText('Settings', Icons.settings),
-                  flex: 1,
-                ),
-                Expanded(
-                  child: CupertinoSegmentedControl(
-                    children: const {
-                      0: Text('Preset Mode'),
-                      1: Text('Creative Mode'),
-                    },
-                    onValueChanged: (int newValue) {
-                      // 当选择改变时执行的操作
-                      print('选择了选项 $newValue');
-                      setState(() {
-                        selectstate = newValue;
-                      });
-                    },
-                    groupValue: selectstate, // 当前选中的选项值
+    return MaterialApp(
+        debugShowCheckedModeBanner: false,
+        home: Scaffold(
+            // appBar: AppBar(
+            //   leading: MaterialButton(
+            //     onPressed: () {
+            //       webViewController1.goBackSync();
+            //       webViewController2.goBackSync();
+            //     },
+            //     child: Icon(Icons.arrow_back),
+            //   ),
+            // ),
+            body: Container(
+          color: Color(0xff3a3a3a),
+          child: Column(
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  Text(
+                    'RWKV AI Music Composer',
+                    style: TextStyle(
+                        color: Colors.white, fontWeight: FontWeight.bold),
                   ),
-                  flex: 3,
+                  Container(
+                      height: 50,
+                      child: Expanded(
+                        child: CupertinoSegmentedControl(
+                          children: const {
+                            0: Text(
+                              'Preset Mode',
+                              style: TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold),
+                            ),
+                            1: Text(
+                              'Creative Mode',
+                              style: TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold),
+                            ),
+                          },
+                          onValueChanged: (int newValue) {
+                            // 当选择改变时执行的操作
+                            print('选择了选项 $newValue');
+                            setState(() {
+                              selectstate = newValue;
+                            });
+                          },
+                          groupValue: selectstate, // 当前选中的选项值
+                          selectedColor: Color(0xff44be1c),
+                          unselectedColor: Colors.transparent,
+                          borderColor: Color(0xff6d6d6d),
+                        ),
+                      )),
+                ],
+              ),
+              Expanded(
+                flex: 2,
+                child: WebView(
+                  initialUrl: '',
+                  javascriptMode: JavascriptMode.unrestricted,
+                  onWebViewCreated: (WebViewController controller) {
+                    this.controller1 = controller;
+                    _loadHtmlFromAssets(filePath1, controller);
+                  },
+                  onPageFinished: (url) {
+                    var javascript = "setAbcString('%%MIDI program 40\nL:1/4\nM:4/4\nK:D\n D A F F', false)";
+                    controller1.runJavascript(javascript);
+                    // _executeJavaScript(javascript);
+                  },
                 ),
-              ],
-            ),
+              ),
+              Expanded(
+                flex: 1,
+                child: WebView(
+                  initialUrl: '',
+                  javascriptMode: JavascriptMode.unrestricted,
+                  onWebViewCreated: (WebViewController controller) {
+                    this.controller2 = controller;
+                    _loadHtmlFromAssets(filePath2, controller);
+                  },
+                ),
+              ),
+              Expanded(
+                child: Container(
+                  padding: EdgeInsets.symmetric(horizontal: 15, vertical: 3),
+                  color: Color(0xff3a3a3a),
+                  child: Row(
+                    children: [
+                      creatBottomBtn('Prompts'),
+                      SizedBox(
+                        width: 8,
+                      ),
+                      creatBottomBtn('Sounds Effect'),
+                      SizedBox(
+                        width: 300,
+                      ),
+                      createButtonImageWithText('Generate', Icons.edit),
+                      createButtonImageWithText('Play', Icons.play_arrow),
+                      createButtonImageWithText('Settings', Icons.settings),
+                    ],
+                  ),
+                ),
+              )
+            ],
           ),
-        )
-      ],
-    ));
+        )));
+  }
+
+  // 执行JavaScript脚本的方法
+   _executeJavaScript(String jsstr)  {
+    print(jsstr);
+    // controller1.evaluateJavascript("console.log('Hello from Flutter!');");
+    controller1.runJavascript(jsstr);
   }
 
   Widget createwidget(int state) {
@@ -144,70 +179,6 @@ class _MyAppState extends State<MyApp> {
         print('选择了选项 $newValue');
       },
       groupValue: state, // 当前选中的选项值
-    );
-  }
-
-  Widget createButtonImageWithText(String text, IconData icondata) {
-    return InkWell(
-      onTap: () {
-        establishSSEConnection();
-      },
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 9),
-        decoration: BoxDecoration(
-          // color: Colors.blue, // 设置背景色
-          borderRadius: BorderRadius.circular(8), // 设置圆角
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              icondata,
-              color: Colors.white, // 设置图标颜色
-            ),
-            const SizedBox(height: 8),
-            Text(
-              text,
-              style: const TextStyle(
-                color: Colors.white, // 设置文本颜色
-                fontSize: 16,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget creatBottomBtn(String text) {
-    return InkWell(
-      onTap: () {
-        // 按钮被点击时执行的操作
-      },
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 9),
-        decoration: BoxDecoration(
-          // color: Colors.blue, // 设置背景色
-          borderRadius: BorderRadius.circular(8), // 设置圆角
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: [
-            Text(
-              text,
-              style: const TextStyle(
-                color: Colors.white, // 设置文本颜色
-                fontSize: 16,
-              ),
-            ),
-            const SizedBox(width: 8),
-            const Icon(
-              Icons.arrow_drop_down_sharp,
-              color: Colors.white, // 设置图标颜色
-            ),
-          ],
-        ),
-      ),
     );
   }
 
@@ -226,7 +197,8 @@ class _MyAppState extends State<MyApp> {
     HttpClient httpClient = HttpClient();
     HttpClientRequest request = await httpClient
         .postUrl(Uri.parse('http://13.113.191.60/openapi/v1/chat/completions'));
-    request.headers.contentType = ContentType.json;//这个要设置，否则报错{"error":{"message":"当前分组 reverse-times 下对于模型  计费模式 [按次计费] 无可用渠道 (request id: 20240122102439864867952mIY4Ma3k)","type":"shell_api_error"}}
+    request.headers.contentType = ContentType
+        .json; //这个要设置，否则报错{"error":{"message":"当前分组 reverse-times 下对于模型  计费模式 [按次计费] 无可用渠道 (request id: 20240122102439864867952mIY4Ma3k)","type":"shell_api_error"}}
     request.write(jsonEncode(dic));
     // request.headers.add('Accept', 'text/event-stream');
     HttpClientResponse response = await request.close();
@@ -244,9 +216,8 @@ class _MyAppState extends State<MyApp> {
     });
   }
 
-
   // 加载显示html文件；
-  _loadHtmlFromAssets(String filePath,WebViewController controller) async {
+  _loadHtmlFromAssets(String filePath, WebViewController controller) async {
     String fileHtmlContents = await rootBundle.loadString(filePath);
     controller.loadUrl(Uri.dataFromString(fileHtmlContents,
             mimeType: 'text/html', encoding: Encoding.getByName('utf-8'))
