@@ -4,22 +4,23 @@ import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:rwkvmusic/webviewtest.dart';
-import 'package:webview_flutter/webview_flutter.dart';
+import 'package:rwkvmusic/test4.dart';
+// import 'package:webview_flutter/webview_flutter.dart';
 
 import 'widget/BorderBtnWidget.dart';
 import 'widget/BtnImageTextWidget.dart';
 // import "package:webview_universal/webview_universal.dart";
+import 'package:webview_flutter_plus/webview_flutter_plus.dart';
 
 void main(List<String> args) {
-    WidgetsFlutterBinding.ensureInitialized();
+  WidgetsFlutterBinding.ensureInitialized();
   // 强制横屏显示
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.landscapeLeft,
     DeviceOrientation.landscapeRight,
   ]);
   runApp(
-    TestPage(),
+    MyApp(),
   );
 }
 
@@ -30,8 +31,8 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  late WebViewController controller1;
-  late WebViewController controller2;
+  late WebViewControllerPlus controller1;
+  late WebViewControllerPlus controller2;
   String filePath1 = 'assets/piano/index.html';
   String filePath2 = 'assets/piano/keyboard.html';
   String filePath3 = 'assets/player/player.html';
@@ -39,16 +40,33 @@ class _MyAppState extends State<MyApp> {
   @override
   void initState() {
     super.initState();
-    // webViewController1.init(
-    //   context: context,
-    //   setState: setState,
-    //   uri: Uri.parse("https://www.baidu.com"),
-    // );
-    // webViewController2.init(
-    //   context: context,
-    //   setState: setState,
-    //   uri: Uri.parse("https://www.qq.com/"),
-    // );
+    controller1 = WebViewControllerPlus()
+      ..setJavaScriptMode(JavaScriptMode.unrestricted)
+      ..setBackgroundColor(const Color(0x00000000))
+      ..setNavigationDelegate(
+        NavigationDelegate(
+          onPageStarted: (url) {
+            controller1.onLoaded((msg) {
+              controller1.getWebViewHeight().then((value) {});
+            });
+          },
+        ),
+      )
+      ..loadFlutterAssetServer(filePath3);
+
+    controller2 = WebViewControllerPlus()
+      ..setJavaScriptMode(JavaScriptMode.unrestricted)
+      ..setBackgroundColor(const Color(0x00000000))
+      ..setNavigationDelegate(
+        NavigationDelegate(
+          onPageStarted: (url) {
+            controller2.onLoaded((msg) {
+              controller2.getWebViewHeight().then((value) {});
+            });
+          },
+        ),
+      )
+      ..loadFlutterAssetServer(filePath2);
   }
 
   @override
@@ -56,15 +74,6 @@ class _MyAppState extends State<MyApp> {
     return MaterialApp(
         debugShowCheckedModeBanner: false,
         home: Scaffold(
-            // appBar: AppBar(
-            //   leading: MaterialButton(
-            //     onPressed: () {
-            //       webViewController1.goBackSync();
-            //       webViewController2.goBackSync();
-            //     },
-            //     child: Icon(Icons.arrow_back),
-            //   ),
-            // ),
             body: Container(
           color: Color(0xff3a3a3a),
           child: Column(
@@ -110,6 +119,18 @@ class _MyAppState extends State<MyApp> {
                       )),
                 ],
               ),
+              SizedBox(
+                height: 100,
+                child: WebViewWidget(
+                  controller: controller1,
+                ),
+              ),
+              SizedBox(
+                height: 100,
+                child: WebViewWidget(
+                  controller: controller2,
+                ),
+              ),
               Expanded(
                 child: Container(
                   padding: EdgeInsets.symmetric(horizontal: 15, vertical: 3),
@@ -134,13 +155,6 @@ class _MyAppState extends State<MyApp> {
             ],
           ),
         )));
-  }
-
-  // 执行JavaScript脚本的方法
-  _executeJavaScript(String jsstr) {
-    print(jsstr);
-    // controller1.evaluateJavascript("console.log('Hello from Flutter!');");
-    controller1.runJavaScript(jsstr);
   }
 
   Widget createwidget(int state) {
@@ -189,13 +203,5 @@ class _MyAppState extends State<MyApp> {
       // 处理错误
       print('请求发生错误: $error');
     });
-  }
-
-  // 加载显示html文件；
-  _loadHtmlFromAssets(String filePath, WebViewController controller) async {
-    String fileHtmlContents = await rootBundle.loadString(filePath);
-    controller.loadHtmlString(Uri.dataFromString(fileHtmlContents,
-            mimeType: 'text/html', encoding: Encoding.getByName('utf-8'))
-        .toString());
   }
 }
