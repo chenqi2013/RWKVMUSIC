@@ -37,9 +37,67 @@ dependencies:
   cupertino_icons: ^1.0.2
   webview_flutter: ^4.4.4
   # webview_universal: ^0.0.5
-  dio:
-  path_provider:
   webview_flutter_plus: ^0.4.4
+
+  # GetX
+  get: ^4.1.4
+
+  # 日期
+  intl: ^0.18.1
+
+  # 屏幕适配
+  flutter_screenutil: ^5.0.0+2
+
+  # 下拉刷新
+  pull_to_refresh: ^2.0.0
+
+  # toast
+  fluttertoast: ^8.0.7
+
+  # easyloading
+  flutter_easyloading: ^3.0.3
+
+  # # http
+  dio: ^4.0.0
+  dio_cookie_manager: ^2.0.0
+  cookie_jar: ^3.0.1
+
+  # # 缓存
+  shared_preferences: ^2.2.2 
+  cached_network_image: ^3.3.1
+  sqflite: ^2.3.2
+  sqflite_common:
+  flutter_cache_manager: 
+
+  # 加密安全 SHA
+  crypto: ^3.0.1
+
+  # # # webView
+  # # webview_flutter: ^2.0.4
+
+  # loading
+  loading_animations: ^2.2.0
+
+  # share
+  share: ^2.0.1
+
+  # 设备信息
+  device_info: ^2.0.0
+
+  # 包信息
+  package_info: ^2.0.0
+
+  # 路径查询
+  path_provider: ^2.0.1
+
+  # permission 权限
+  permission_handler: ^7.1.0
+
+  # 错误收集
+  sentry: ^5.0.0
+
+  # 通过 scheme 打开APP 获取 参数
+  uni_links: ^0.5.1
 
 dev_dependencies:
   flutter_test:
