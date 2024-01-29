@@ -4,7 +4,6 @@ import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:rwkvmusic/test4.dart';
 // import 'package:webview_flutter/webview_flutter.dart';
 
 import 'widget/BorderBtnWidget.dart';
@@ -20,7 +19,7 @@ void main(List<String> args) {
     DeviceOrientation.landscapeRight,
   ]);
   runApp(
-    MyApp(),
+    const MyApp(),
   );
 }
 
@@ -31,8 +30,8 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  late WebViewControllerPlus controller1;
-  late WebViewControllerPlus controller2;
+  late WebViewControllerPlus controllerPiano;
+  late WebViewControllerPlus controllerKeyboard;
   String filePath1 = 'assets/piano/index.html';
   String filePath2 = 'assets/piano/keyboard.html';
   String filePath3 = 'assets/player/player.html';
@@ -40,28 +39,28 @@ class _MyAppState extends State<MyApp> {
   @override
   void initState() {
     super.initState();
-    controller1 = WebViewControllerPlus()
+    controllerPiano = WebViewControllerPlus()
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
       ..setBackgroundColor(const Color(0x00000000))
       ..setNavigationDelegate(
         NavigationDelegate(
           onPageStarted: (url) {
-            controller1.onLoaded((msg) {
-              controller1.getWebViewHeight().then((value) {});
+            controllerPiano.onLoaded((msg) {
+              controllerPiano.getWebViewHeight().then((value) {});
             });
           },
         ),
       )
       ..loadFlutterAssetServer(filePath3);
 
-    controller2 = WebViewControllerPlus()
+    controllerKeyboard = WebViewControllerPlus()
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
       ..setBackgroundColor(const Color(0x00000000))
       ..setNavigationDelegate(
         NavigationDelegate(
           onPageStarted: (url) {
-            controller2.onLoaded((msg) {
-              controller2.getWebViewHeight().then((value) {});
+            controllerKeyboard.onLoaded((msg) {
+              controllerKeyboard.getWebViewHeight().then((value) {});
             });
           },
         ),
@@ -122,13 +121,13 @@ class _MyAppState extends State<MyApp> {
               SizedBox(
                 height: 100,
                 child: WebViewWidget(
-                  controller: controller1,
+                  controller: controllerPiano,
                 ),
               ),
               SizedBox(
                 height: 100,
                 child: WebViewWidget(
-                  controller: controller2,
+                  controller: controllerKeyboard,
                 ),
               ),
               Expanded(
