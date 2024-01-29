@@ -6,8 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 // import 'package:webview_flutter/webview_flutter.dart';
 
-import 'widget/BorderBtnWidget.dart';
-import 'widget/BtnImageTextWidget.dart';
+import 'mainwidget/BorderBtnWidget.dart';
+import 'mainwidget/BtnImageTextWidget.dart';
 // import "package:webview_universal/webview_universal.dart";
 import 'package:webview_flutter_plus/webview_flutter_plus.dart';
 
@@ -140,17 +140,30 @@ class _MyAppState extends State<MyApp> {
                   color: Color(0xff3a3a3a),
                   child: Row(
                     children: [
-                      creatBottomBtn('Prompts'),
+                      creatBottomBtn('Prompts',(){
+                        print("Promptss");
+                      }),
                       SizedBox(
                         width: 8,
                       ),
-                      creatBottomBtn('Sounds Effect'),
+                      creatBottomBtn('Sounds Effect',(){
+                        print("Sounds Effect");
+                      }),
                       SizedBox(
                         width: 300,
                       ),
-                      createButtonImageWithText('Generate', Icons.edit),
-                      createButtonImageWithText('Play', Icons.play_arrow),
-                      createButtonImageWithText('Settings', Icons.settings),
+                      createButtonImageWithText('Generate', Icons.edit,() {
+                        print('Generate');
+                        // establishSSEConnection();
+                        controllerPiano.runJavaScript("setAbcString(\"%%MIDI program 40\\nL:1/4\\nM:4/4\\nK:D\\n\\\"D\\\" A F F\", false)");
+                      }),
+                      createButtonImageWithText('Play', Icons.play_arrow,(){
+                        print('Play');
+                        controllerPiano.runJavaScript("setAbcString(\"%%MIDI program 40\\nX:1\\nT:Example\\nM:4/4\\nL:1/4\\nK:D\\nA2A2 | A2A2 | A2A2 | A2A2 |A2A2 |A2A2 |A2A2 |A2A2 |A2A2 |A2A2 |A2A2 |A2A2 |A2A2 |A2A2 |A2A2 |A2A2 |A2A2 |A2A2 |A2A2 |A2A2 |A2A2 |A2A2 |A2A2 |A2A2 |A2A2 |A2A2 |A2A2 |A2A2 |A2A2 |A2A2 |A2A2 |A2A2 |A2A2 |A2A2 |A2A2 |A2A2 |A2A2 |A2A2 |A2A2 |A2A2 |A2A2 |A2A2 |A2A2 |A2A2 |A2A2 |\", false)");
+                      }),
+                      createButtonImageWithText('Settings', Icons.settings,() {
+                        print('Settings');
+                      }),
                     ],
                   ),
                 ),

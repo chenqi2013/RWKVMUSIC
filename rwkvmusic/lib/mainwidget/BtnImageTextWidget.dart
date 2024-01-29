@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
-Widget createButtonImageWithText(String text, IconData icondata) {
+Widget createButtonImageWithText(String text, IconData icondata,VoidCallback onPressed) {
     return InkWell(
       onTap: () {
-       
+       onPressed();
       },
       child: Container(
         width: 80,

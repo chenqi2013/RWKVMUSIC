@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 
-Widget creatBottomBtn(String text) {
+Widget creatBottomBtn(String text, VoidCallback onPressed) {
   return InkWell(
     onTap: () {
       // 按钮被点击时执行的操作
+        onPressed();
     },
     child: Container(
       padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 4),
