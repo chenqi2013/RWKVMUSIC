@@ -41,7 +41,6 @@ class _MyAppState extends State<MyApp> {
     super.initState();
     controllerPiano = WebViewControllerPlus()
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
-      ..setBackgroundColor(const Color(0x00000000))
       ..setNavigationDelegate(
         NavigationDelegate(
           onPageStarted: (url) {
@@ -49,19 +48,24 @@ class _MyAppState extends State<MyApp> {
               controllerPiano.getWebViewHeight().then((value) {});
             });
           },
+          onPageFinished: (url) {
+            print("controllerPiano onPageFinished"+url);
+          }, 
         ),
       )
       ..loadFlutterAssetServer(filePath3);
 
     controllerKeyboard = WebViewControllerPlus()
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
-      ..setBackgroundColor(const Color(0x00000000))
       ..setNavigationDelegate(
         NavigationDelegate(
           onPageStarted: (url) {
             controllerKeyboard.onLoaded((msg) {
               controllerKeyboard.getWebViewHeight().then((value) {});
             });
+          },
+          onPageFinished: (url) {
+           print("controllerKeyboard onPageFinished"+url); 
           },
         ),
       )

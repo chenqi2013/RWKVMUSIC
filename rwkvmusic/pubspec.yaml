@@ -52,7 +52,7 @@ dependencies:
   pull_to_refresh: ^2.0.0
 
   # toast
-  fluttertoast: ^8.0.7
+  fluttertoast: ^8.2.4
 
   # easyloading
   flutter_easyloading: ^3.0.3
@@ -82,7 +82,7 @@ dependencies:
   share: ^2.0.1
 
   # 设备信息
-  device_info: ^2.0.0
+  device_info:
 
   # 包信息
   package_info: ^2.0.0
