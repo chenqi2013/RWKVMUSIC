@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:rwkvmusic/webviewtest.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
 import 'widget/BorderBtnWidget.dart';
@@ -11,13 +12,14 @@ import 'widget/BtnImageTextWidget.dart';
 // import "package:webview_universal/webview_universal.dart";
 
 void main(List<String> args) {
+    WidgetsFlutterBinding.ensureInitialized();
   // 强制横屏显示
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.landscapeLeft,
     DeviceOrientation.landscapeRight,
   ]);
   runApp(
-    MyApp(),
+    TestPage(),
   );
 }
 
@@ -109,46 +111,6 @@ class _MyAppState extends State<MyApp> {
                 ],
               ),
               Expanded(
-                flex: 2,
-                child: WebView(
-                  initialUrl: '',
-                  javascriptMode: JavascriptMode.unrestricted,
-                  onWebViewCreated: (WebViewController controller) {
-                    this.controller1 = controller;
-                    _loadHtmlFromAssets(filePath3, controller);
-                  },
-                  onPageFinished: (url) async {
-                    var javascript = 'setAbcString("%%MIDI program 0\nL:1/4\nM:4/4\nK:C\n|", false)';
-                    await controller1.runJavascript(javascript);
-                    // controller1.runJavascript("setStyle()");
-                    // controller1.runJavascript("setPiano(55,76)");
-                    // _executeJavaScript(javascript);
-
-                    // try {
-//   var result = await controller1.evaluateJavascript(javascript);
-//   print('JavaScript execution result: $result');
-// } catch (e) {
-//   print('JavaScript execution error: $e');
-// }
-                  },
-                  navigationDelegate: (navigation) {
-                    //其他请求正常跳转
-                    return NavigationDecision.navigate;
-                  },
-                ),
-              ),
-              Expanded(
-                flex: 1,
-                child: WebView(
-                  initialUrl: '',
-                  javascriptMode: JavascriptMode.unrestricted,
-                  onWebViewCreated: (WebViewController controller) {
-                    this.controller2 = controller;
-                    _loadHtmlFromAssets(filePath2, controller);
-                  },
-                ),
-              ),
-              Expanded(
                 child: Container(
                   padding: EdgeInsets.symmetric(horizontal: 15, vertical: 3),
                   color: Color(0xff3a3a3a),
@@ -178,7 +140,7 @@ class _MyAppState extends State<MyApp> {
   _executeJavaScript(String jsstr) {
     print(jsstr);
     // controller1.evaluateJavascript("console.log('Hello from Flutter!');");
-    controller1.runJavascript(jsstr);
+    controller1.runJavaScript(jsstr);
   }
 
   Widget createwidget(int state) {
@@ -232,7 +194,7 @@ class _MyAppState extends State<MyApp> {
   // 加载显示html文件；
   _loadHtmlFromAssets(String filePath, WebViewController controller) async {
     String fileHtmlContents = await rootBundle.loadString(filePath);
-    controller.loadUrl(Uri.dataFromString(fileHtmlContents,
+    controller.loadHtmlString(Uri.dataFromString(fileHtmlContents,
             mimeType: 'text/html', encoding: Encoding.getByName('utf-8'))
         .toString());
   }
