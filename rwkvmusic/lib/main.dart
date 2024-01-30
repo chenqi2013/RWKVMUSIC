@@ -36,6 +36,9 @@ class _MyAppState extends State<MyApp> {
   String filePath2 = 'assets/piano/keyboard.html';
   String filePath3 = 'assets/player/player.html';
   var selectstate = 0;
+  StringBuffer stringBuffer = StringBuffer();
+  int addGap = 5;//间隔多少刷新
+  int addCount = 0;//刷新次数
   @override
   void initState() {
     super.initState();
@@ -49,8 +52,8 @@ class _MyAppState extends State<MyApp> {
             });
           },
           onPageFinished: (url) {
-            print("controllerPiano onPageFinished"+url);
-          }, 
+            print("controllerPiano onPageFinished" + url);
+          },
         ),
       )
       ..loadFlutterAssetServer(filePath3);
@@ -65,7 +68,7 @@ class _MyAppState extends State<MyApp> {
             });
           },
           onPageFinished: (url) {
-           print("controllerKeyboard onPageFinished"+url); 
+            print("controllerKeyboard onPageFinished" + url);
           },
         ),
       )
@@ -140,28 +143,26 @@ class _MyAppState extends State<MyApp> {
                   color: Color(0xff3a3a3a),
                   child: Row(
                     children: [
-                      creatBottomBtn('Prompts',(){
+                      creatBottomBtn('Prompts', () {
                         print("Promptss");
                       }),
                       SizedBox(
                         width: 8,
                       ),
-                      creatBottomBtn('Sounds Effect',(){
+                      creatBottomBtn('Sounds Effect', () {
                         print("Sounds Effect");
                       }),
                       SizedBox(
                         width: 300,
                       ),
-                      createButtonImageWithText('Generate', Icons.edit,() {
+                      createButtonImageWithText('Generate', Icons.edit, () {
                         print('Generate');
-                        // establishSSEConnection();
-                        controllerPiano.runJavaScript("setAbcString(\"%%MIDI program 40\\nL:1/4\\nM:4/4\\nK:D\\n\\\"D\\\" A F F\", false)");
+                        getABCData();
                       }),
-                      createButtonImageWithText('Play', Icons.play_arrow,(){
+                      createButtonImageWithText('Play', Icons.play_arrow, () {
                         print('Play');
-                        controllerPiano.runJavaScript("setAbcString(\"%%MIDI program 40\\nX:1\\nT:Example\\nM:4/4\\nL:1/4\\nK:D\\nA2A2 | A2A2 | A2A2 | A2A2 |A2A2 |A2A2 |A2A2 |A2A2 |A2A2 |A2A2 |A2A2 |A2A2 |A2A2 |A2A2 |A2A2 |A2A2 |A2A2 |A2A2 |A2A2 |A2A2 |A2A2 |A2A2 |A2A2 |A2A2 |A2A2 |A2A2 |A2A2 |A2A2 |A2A2 |A2A2 |A2A2 |A2A2 |A2A2 |A2A2 |A2A2 |A2A2 |A2A2 |A2A2 |A2A2 |A2A2 |A2A2 |A2A2 |A2A2 |A2A2 |A2A2 |\", false)");
                       }),
-                      createButtonImageWithText('Settings', Icons.settings,() {
+                      createButtonImageWithText('Settings', Icons.settings, () {
                         print('Settings');
                       }),
                     ],
@@ -187,12 +188,59 @@ class _MyAppState extends State<MyApp> {
     );
   }
 
+  void getABCData() async {
+    var dic = {
+      "frequency_penalty": 0.4,
+      "max_tokens": 1000,
+      "model": "rwkv",
+      "presence_penalty": 0.4,
+      "prompt": "S:2",
+      "stream": true,
+      "temperature": 1.2,
+      "top_p": 0.5
+    };
+    HttpClient httpClient = HttpClient();
+    HttpClientRequest request = await httpClient
+        .postUrl(Uri.parse('http://10.125.34.204:8000/completions'));
+    request.headers.contentType = ContentType
+        .json; //这个要设置，否则报错{"error":{"message":"当前分组 reverse-times 下对于模型  计费模式 [按次计费] 无可用渠道 (request id: 20240122102439864867952mIY4Ma3k)","type":"shell_api_error"}}
+    request.write(jsonEncode(dic));
+    // request.headers.add('Accept', 'text/event-stream');
+    HttpClientResponse response = await request.close();
+    response.listen((List<int> chunk) {
+      // 处理数据流的每个块
+      String responseData = utf8.decode(chunk);
+      String textstr = extractTextValue(responseData)!;
+      stringBuffer.write(textstr);
+      textstr = escapeString(stringBuffer.toString());
+      if (textstr.length > addCount*addGap) {
+        addCount++;
+        StringBuffer sb = StringBuffer();
+        sb.write("setAbcString(\"");
+        sb.write(textstr);
+        sb.write("\",false)");
+        setState(() {
+          print('final runJavaScript==${sb.toString()}');
+          controllerPiano.runJavaScript(sb.toString());
+        });
+      }
+      // print(responseData);
+    }, onDone: () {
+      // 数据流接收完成
+      print('请求完成');
+      httpClient.close();
+    }, onError: (error) {
+      // 处理错误
+      print('请求发生错误: $error');
+    });
+  }
+
   void establishSSEConnection() async {
     var dic = {
       'temperature': 0.5,
       'presence_penalty': 0,
       'top_p': 1,
-      'max_tokens': 1024,
+      'max_tokens': 10,
       'model': 'gpt-4-gizmo-g-qdhTcI4hP',
       'stream': true,
       'messages': [
@@ -219,5 +267,29 @@ class _MyAppState extends State<MyApp> {
       // 处理错误
       print('请求发生错误: $error');
     });
+  }
+
+  String? extractTextValue(String jsonData) {
+    // 正则表达式匹配 "text" 字段的值
+    RegExp regExp = RegExp(r'"text":\s*"(.*?)"');
+
+    // 查找匹配项
+    RegExpMatch? match = regExp.firstMatch(jsonData);
+
+    // 返回匹配的值（如果存在）
+    return match!.group(1);
+  }
+
+  String escapeString(String input) {
+    input = input.replaceAll("\r\n", "\n");
+    input = input.replaceAll("\\|\\s+", "|");
+    input = input.replaceAll("\\|\n", "|");
+    return input
+        .replaceAll("\\", "\\\\")
+        .replaceAll("\"", "\\\"")
+        .replaceAll("\'", "\\\'")
+        .replaceAll("\n", "\\n")
+        .replaceAll("\r", "\\r")
+        .replaceAll("\t", "\\t");
   }
 }
