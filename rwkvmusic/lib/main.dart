@@ -57,6 +57,10 @@ class _MyAppState extends State<MyApp> {
           },
           onPageFinished: (url) {
             print("controllerPiano onPageFinished" + url);
+            controllerPiano.runJavaScript(
+                "setAbcString(\"%%MIDI program 40\\nL:1/4\\nM:4/4\\nK:D\\n\\\"D\\\" A F F\", false)");
+            controllerPiano.runJavaScript("setPromptNoteNumberCount(3)");
+            controllerPiano.runJavaScript("setStyle()");
           },
         ),
       )
@@ -73,6 +77,8 @@ class _MyAppState extends State<MyApp> {
           },
           onPageFinished: (url) {
             print("controllerKeyboard onPageFinished" + url);
+            controllerKeyboard.runJavaScript('resetPlay()');
+            // controllerKeyboard.runJavaScript('setPiano(55, 76)');
           },
         ),
       )
@@ -119,6 +125,7 @@ class _MyAppState extends State<MyApp> {
                           // 当选择改变时执行的操作
                           print('选择了选项 $newValue');
                           selectstate.value = newValue;
+                          segmengChange(newValue);
                         },
                         groupValue: selectstate.value, // 当前选中的选项值
                         selectedColor: Color(0xff44be1c),
@@ -167,7 +174,8 @@ class _MyAppState extends State<MyApp> {
                             !isPlay.value ? Icons.play_arrow : Icons.pause, () {
                           print('Play');
                           if (!isPlay.value) {
-                            controllerPiano.runJavaScript("startPlay()");
+                            controllerPiano.runJavaScript("ABCtoEvents(\"L:1/4\\nM:4/4\\nK:D\\n\\\"D\\\" A F F\")");
+                            controllerPiano.runJavaScript("startPlay(\"[[0,\\\"on\\\",49],[333,\\\"on\\\",46],[333,\\\"off\\\",49],[1000,\\\"off\\\",46]]\")");
                           } else {
                             controllerPiano.runJavaScript("pausePlay()");
                           }
@@ -310,5 +318,21 @@ class _MyAppState extends State<MyApp> {
         ),
       ],
     );
+  }
+
+  void segmengChange(int index) {
+    if (index == 0) {//preset
+      controllerPiano.runJavaScript(
+          "setAbcString(\"%%MIDI program 40\\nL:1/4\\nM:4/4\\nK:D\\n\\\"D\\\" A F F\", false)");
+      controllerPiano.runJavaScript("setPromptNoteNumberCount(3)");
+      controllerKeyboard.runJavaScript('resetPlay()');
+      controllerKeyboard.runJavaScript('setPiano(55, 76)');
+    } else {//creative
+      controllerPiano.runJavaScript(
+          "setAbcString(\"%%MIDI program 0\\nL:1/4\\nM:4/4\\nK:C\\n|\", false)");
+      controllerPiano.runJavaScript("setPromptNoteNumberCount(0)");
+      controllerKeyboard.runJavaScript('resetPlay()');
+      controllerKeyboard.runJavaScript('setPiano(55, 76)');
+    }
   }
 }
