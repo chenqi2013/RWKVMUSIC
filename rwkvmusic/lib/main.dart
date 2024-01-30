@@ -20,7 +20,7 @@ void main(List<String> args) {
     DeviceOrientation.landscapeLeft,
     DeviceOrientation.landscapeRight,
   ]);
-  SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual,overlays: []);
+  SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: []);
   runApp(
     MyApp(),
   );
@@ -42,6 +42,7 @@ class _MyAppState extends State<MyApp> {
   StringBuffer stringBuffer = StringBuffer();
   int addGap = 5; //间隔多少刷新
   int addCount = 0; //刷新次数
+  var isPlay = false.obs;
   @override
   void initState() {
     super.initState();
@@ -160,9 +161,18 @@ class _MyAppState extends State<MyApp> {
                         print('Generate');
                         getABCData();
                       }),
-                      createButtonImageWithText('Play', Icons.play_arrow, () {
-                        print('Play');
-                        controllerPiano.runJavaScript("startPlay()");
+                      Obx(() {
+                        return createButtonImageWithText(
+                            !isPlay.value ? 'Play' : 'Pause',
+                            !isPlay.value ? Icons.play_arrow : Icons.pause, () {
+                          print('Play');
+                          if (!isPlay.value) {
+                            controllerPiano.runJavaScript("startPlay()");
+                          } else {
+                            controllerPiano.runJavaScript("pausePlay()");
+                          }
+                          isPlay.value = !isPlay.value;
+                        });
                       }),
                       createButtonImageWithText('Settings', Icons.settings, () {
                         print('Settings');
