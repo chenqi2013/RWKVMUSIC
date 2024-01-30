@@ -1,9 +1,11 @@
 import 'dart:convert';
 import 'dart:io';
-
+import 'package:flutter/services.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:get/get.dart';
+import 'package:rwkvmusic/widgets/widgets.dart';
 // import 'package:webview_flutter/webview_flutter.dart';
 
 import 'mainwidget/BorderBtnWidget.dart';
@@ -18,8 +20,9 @@ void main(List<String> args) {
     DeviceOrientation.landscapeLeft,
     DeviceOrientation.landscapeRight,
   ]);
+  SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual,overlays: []);
   runApp(
-    const MyApp(),
+    MyApp(),
   );
 }
 
@@ -35,10 +38,10 @@ class _MyAppState extends State<MyApp> {
   String filePath1 = 'assets/piano/index.html';
   String filePath2 = 'assets/piano/keyboard.html';
   String filePath3 = 'assets/player/player.html';
-  var selectstate = 0;
+  var selectstate = 0.obs;
   StringBuffer stringBuffer = StringBuffer();
-  int addGap = 5;//间隔多少刷新
-  int addCount = 0;//刷新次数
+  int addGap = 5; //间隔多少刷新
+  int addCount = 0; //刷新次数
   @override
   void initState() {
     super.initState();
@@ -77,69 +80,69 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return GetMaterialApp(
         debugShowCheckedModeBanner: false,
         home: Scaffold(
             body: Container(
           color: Color(0xff3a3a3a),
           child: Column(
             children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  Text(
-                    'RWKV AI Music Composer',
-                    style: TextStyle(
-                        color: Colors.white, fontWeight: FontWeight.bold),
-                  ),
-                  Container(
-                      height: 50,
-                      child: Expanded(
-                        child: CupertinoSegmentedControl(
-                          children: const {
-                            0: Text(
-                              'Preset Mode',
-                              style: TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold),
-                            ),
-                            1: Text(
-                              'Creative Mode',
-                              style: TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold),
-                            ),
-                          },
-                          onValueChanged: (int newValue) {
-                            // 当选择改变时执行的操作
-                            print('选择了选项 $newValue');
-                            setState(() {
-                              selectstate = newValue;
-                            });
-                          },
-                          groupValue: selectstate, // 当前选中的选项值
-                          selectedColor: Color(0xff44be1c),
-                          unselectedColor: Colors.transparent,
-                          borderColor: Color(0xff6d6d6d),
-                        ),
-                      )),
-                ],
+              Container(
+                padding: EdgeInsets.symmetric(horizontal: 25, vertical: 15),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Text(
+                      'RWKV AI Music Composer',
+                      style: TextStyle(
+                          color: Colors.white, fontWeight: FontWeight.bold),
+                    ),
+                    Spacer(),
+                    Container(child: Obx(() {
+                      return CupertinoSegmentedControl(
+                        children: const {
+                          0: Text(
+                            'Preset Mode',
+                            style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold),
+                          ),
+                          1: Text(
+                            'Creative Mode',
+                            style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold),
+                          ),
+                        },
+                        onValueChanged: (int newValue) {
+                          // 当选择改变时执行的操作
+                          print('选择了选项 $newValue');
+                          selectstate.value = newValue;
+                        },
+                        groupValue: selectstate.value, // 当前选中的选项值
+                        selectedColor: Color(0xff44be1c),
+                        unselectedColor: Colors.transparent,
+                        borderColor: Color(0xff6d6d6d),
+                      );
+                    })),
+                  ],
+                ),
               ),
-              SizedBox(
-                height: 100,
+              Flexible(
+                flex: 2,
                 child: WebViewWidget(
                   controller: controllerPiano,
                 ),
               ),
-              SizedBox(
-                height: 100,
+              Flexible(
+                flex: 1,
                 child: WebViewWidget(
                   controller: controllerKeyboard,
                 ),
               ),
               Expanded(
                 child: Container(
-                  padding: EdgeInsets.symmetric(horizontal: 15, vertical: 3),
+                  padding: EdgeInsets.symmetric(horizontal: 25, vertical: 5),
                   color: Color(0xff3a3a3a),
                   child: Row(
                     children: [
@@ -152,15 +155,14 @@ class _MyAppState extends State<MyApp> {
                       creatBottomBtn('Sounds Effect', () {
                         print("Sounds Effect");
                       }),
-                      SizedBox(
-                        width: 300,
-                      ),
+                      Spacer(),
                       createButtonImageWithText('Generate', Icons.edit, () {
                         print('Generate');
                         getABCData();
                       }),
                       createButtonImageWithText('Play', Icons.play_arrow, () {
                         print('Play');
+                        controllerPiano.runJavaScript("startPlay()");
                       }),
                       createButtonImageWithText('Settings', Icons.settings, () {
                         print('Settings');
@@ -172,20 +174,6 @@ class _MyAppState extends State<MyApp> {
             ],
           ),
         )));
-  }
-
-  Widget createwidget(int state) {
-    return CupertinoSegmentedControl(
-      children: const {
-        0: Text('Preset Mode'),
-        1: Text('Creative Mode'),
-      },
-      onValueChanged: (int newValue) {
-        // 当选择改变时执行的操作
-        print('选择了选项 $newValue');
-      },
-      groupValue: state, // 当前选中的选项值
-    );
   }
 
   void getABCData() async {
@@ -213,7 +201,7 @@ class _MyAppState extends State<MyApp> {
       String textstr = extractTextValue(responseData)!;
       stringBuffer.write(textstr);
       textstr = escapeString(stringBuffer.toString());
-      if (textstr.length > addCount*addGap) {
+      if (textstr.length > addCount * addGap) {
         addCount++;
         StringBuffer sb = StringBuffer();
         sb.write("setAbcString(\"");
@@ -291,5 +279,26 @@ class _MyAppState extends State<MyApp> {
         .replaceAll("\n", "\\n")
         .replaceAll("\r", "\\r")
         .replaceAll("\t", "\\t");
+  }
+
+  void showPromptDialog(BuildContext context) {
+    showMenu(
+      context: context,
+      position: RelativeRect.fromLTRB(100, 100, 0, 0),
+      items: [
+        PopupMenuItem(
+          value: 'Option 1',
+          child: Text('Option 1'),
+        ),
+        PopupMenuItem(
+          value: 'Option 2',
+          child: Text('Option 2'),
+        ),
+        PopupMenuItem(
+          value: 'Option 3',
+          child: Text('Option 3'),
+        ),
+      ],
+    );
   }
 }

@@ -7,7 +7,7 @@ Widget creatBottomBtn(String text, VoidCallback onPressed) {
         onPressed();
     },
     child: Container(
-      padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 4),
+      padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 6),
       decoration: BoxDecoration(
         // color: Colors.blue, // 设置背景色
         borderRadius: BorderRadius.circular(8), // 设置圆角

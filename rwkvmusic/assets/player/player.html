@@ -19,8 +19,7 @@
     var isGenerateAbc = false;
 
     window.onload = function () {
-      alert("window.onload");
-    //  showDelayedAlert();
+      print("window.onload");
       console.log("window.onload");
       abcjsEditor = new ABCJS.Editor("abc", {
         canvas_id: "paper",
@@ -41,11 +40,6 @@
       document.querySelector(".abcjs-midi-start").addEventListener("click", startTimer);
     };
 
-    // 延时显示 alert 弹窗
-    function showDelayedAlert() {
-      setAbcString("%%MIDI program 40\nL:1/4\nM:4/4\nK:D\n\"D\" A F F", false);
-    }
-
     function afterParsing(tune, tuneNumber, abcString) {
       if (self.isGenerateAbc != true) {
         var a = countNotesInEditor(tune)
@@ -55,7 +49,7 @@
         if (typeof controller !== "undefined") {
           controller.onCountPromptNoteNumber(a);
         } else {
-          alert("Running outside Android app");
+          print("Running outside Android app");
         }
       }
     }
@@ -129,7 +123,7 @@
       if (typeof controller !== "undefined") {
         controller.onEvents("" + eventJson + "");
       } else {
-        alert("Running outside Android app");
+        print("Running outside Android app");
       }
       return eventJson
     }
@@ -346,7 +340,7 @@
         if (typeof controller !== "undefined") {
           controller.onPlayFinish();
         } else {
-          alert("Running outside Android app");
+          print("Running outside Android app");
         }
       };
     }
@@ -366,7 +360,7 @@
       if (typeof controller !== "undefined") {
         controller.onStartPlay(isUserClick, duration);
       } else {
-        alert("Running outside Android app");
+        print("Running outside Android app");
       }
     }
 
@@ -375,7 +369,7 @@
       if (typeof controller !== "undefined") {
         controller.onPausePlay();
       } else {
-        alert("Running outside Android app");
+        print("Running outside Android app");
       }
     }
 
@@ -383,7 +377,7 @@
       if (typeof controller !== "undefined") {
         controller.onResumePlay();
       } else {
-        alert("Running outside Android app");
+        print("Running outside Android app");
       }
     }
 
