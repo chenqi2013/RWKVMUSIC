@@ -98,6 +98,7 @@ dependencies:
 
   # 通过 scheme 打开APP 获取 参数
   uni_links: ^0.5.1
+  flutter_inappwebview: ^6.0.0
 
 dev_dependencies:
   flutter_test:
@@ -126,6 +127,11 @@ flutter:
     - assets/images/
     - assets/fonts/
     - assets/sounds/
+    - assets/player/soundfont/acoustic_grand_piano-mp3/
+    - assets/player/soundfont/acoustic_guitar_steel-mp3/
+    - assets/player/soundfont/cello-mp3/
+    - assets/player/soundfont/ocarina-mp3/
+    - assets/player/soundfont/violin-mp3/
     - assets/icons/
     - assets/piano/
     - assets/player/
