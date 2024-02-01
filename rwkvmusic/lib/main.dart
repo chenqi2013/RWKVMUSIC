@@ -5,6 +5,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:rwkvmusic/test/bletest.dart';
 import 'package:rwkvmusic/widgets/widgets.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
@@ -184,6 +185,7 @@ class _MyAppState extends State<MyApp> {
                       }),
                       createButtonImageWithText('Settings', Icons.settings, () {
                         print('Settings');
+                        Get.to(FlutterBlueApp());
                       }),
                     ],
                   ),
