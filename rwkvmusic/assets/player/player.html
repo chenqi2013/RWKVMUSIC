@@ -19,9 +19,8 @@
     var isGenerateAbc = false;
 
     window.onload = function () {
-    alert("window.onload");
     //  showDelayedAlert();
-      // console.log("window.onload");
+      console.log("window.onload");
       abcjsEditor = new ABCJS.Editor("abc", {
         canvas_id: "paper",
 		render_options: { },
@@ -47,7 +46,7 @@
  // 延时显示 alert 弹窗
   function showDelayedAlert() {
     setTimeout(function() {
-      // alert('这是延时显示的 Alert 弹窗！');
+      // print('这是延时显示的 Alert 弹窗！');
       startPlay();
     }, 4000); // 延时 3000 毫秒 (3 秒)
   }
@@ -61,7 +60,7 @@
          if(typeof controller !== "undefined"){
               controller.onCountPromptNoteNumber(a);
           } else {
-              alert("Running outside Android app");
+            console.log("Running outside Android app");
           }
        }
     }
@@ -135,7 +134,7 @@
       if(typeof controller !== "undefined"){
           controller.onEvents("" + eventJson + "");
       } else {
-          alert("Running outside Android app");
+        console.log("Running outside Android app");
       }
       return eventJson
     }
@@ -209,7 +208,7 @@
     }
 	  
     function setAbcString(output, isGenerateAbc) {
-      console.log("setAbcString:" + output + ", isGenerateAbc:" + isGenerateAbc)
+      // console.log("setAbcString:" + output + ", isGenerateAbc:" + isGenerateAbc)
       self.isGenerateAbc = isGenerateAbc;
       const textarea = document.getElementById("abc");
       textarea.value = output;
@@ -352,7 +351,7 @@
           if(typeof controller !== "undefined"){
               controller.onPlayFinish();
           } else {
-              alert("Running outside Android app");
+            console.log("Running outside Android app");
           }
       };
   }
@@ -372,7 +371,7 @@ function onStartPlay(isUserClick, duration) {
   if(typeof controller !== "undefined"){
       controller.onStartPlay(isUserClick, duration);
   } else {
-      alert("Running outside Android app");
+    console.log("Running outside Android app");
   }
 }
 
@@ -381,7 +380,7 @@ function onPausePlay() {
     if(typeof controller !== "undefined"){
         controller.onPausePlay();
     } else {
-        alert("Running outside Android app");
+      console.log("Running outside Android app");
     }
 }
 
@@ -389,7 +388,7 @@ function onResumePlay() {
     if(typeof controller !== "undefined"){
         controller.onResumePlay();
     } else {
-        alert("Running outside Android app");
+      console.log("Running outside Android app");
     }
 }
 

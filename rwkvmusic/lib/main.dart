@@ -175,8 +175,8 @@ class _MyAppState extends State<MyApp> {
                             !isPlay.value ? Icons.play_arrow : Icons.pause, () {
                           print('Play');
                           if (!isPlay.value) {
-                            controllerPiano.runJavaScript("ABCtoEvents(\"L:1/4\\nM:4/4\\nK:D\\n\\\"D\\\" A F F\")");
-                            controllerPiano.runJavaScript("startPlay(\"[[0,\\\"on\\\",49],[333,\\\"on\\\",46],[333,\\\"off\\\",49],[1000,\\\"off\\\",46]]\")");
+                            // controllerPiano.runJavaScript("ABCtoEvents(\"L:1/4\\nM:4/4\\nK:D\\n\\\"D\\\" A F F\")");
+                            controllerPiano.runJavaScript("startPlay()");
                           } else {
                             controllerPiano.runJavaScript("pausePlay()");
                           }
@@ -227,10 +227,10 @@ class _MyAppState extends State<MyApp> {
         sb.write("setAbcString(\"");
         sb.write(textstr);
         sb.write("\",false)");
-        setState(() {
-          print('final runJavaScript==${sb.toString()}');
+        // setState(() {
+        //   print('final runJavaScript==${sb.toString()}');
           controllerPiano.runJavaScript(sb.toString());
-        });
+        // });
       }
       // print(responseData);
     }, onDone: () {
