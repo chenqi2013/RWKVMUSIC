@@ -14,6 +14,7 @@ void main() {
 }
 
 class FlutterBlueApp extends StatelessWidget {
+  var list = [].obs;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -30,16 +31,17 @@ class FlutterBlueApp extends StatelessWidget {
         child: Container(
           child: Column(
             children: [
-              MaterialButton(
+              Expanded(child: getlistwidget(),flex: 5,),
+              Expanded(child:  MaterialButton(
                 onPressed: () {
                   scanble();
                 },
                 child: Text('scan'),
-              ),
-              MaterialButton(
+              ),flex: 1,),
+             Expanded(child: MaterialButton(
                 onPressed: () {},
                 child: Text('stop'),
-              ),
+              ),flex: 1,),
             ],
             mainAxisAlignment: MainAxisAlignment.center,
           ),
@@ -56,7 +58,11 @@ class FlutterBlueApp extends StatelessWidget {
     var subscription = flutterBlue.scanResults.listen((results) {
       // do something with scan results
       for (ScanResult r in results) {
-        print('${r.device.name} found! rssi: ${r.rssi}');
+                String name = r.device.name;
+        print('$name found! rssi: ${r.rssi}');
+        if (!name.isEmpty && !list.contains(name)) {
+          list.add(name);
+        }
       }
     });
 
@@ -65,4 +71,16 @@ class FlutterBlueApp extends StatelessWidget {
   }
 
   void stopScan() {}
+
+  Widget getlistwidget() {
+    return Obx(() => ListView.builder(
+          itemBuilder: (BuildContext context, int index) {
+            return ListTile(
+              leading: Icon(Icons.star),
+              title: Text(list[index]),
+            );
+          },
+          itemCount: list.length,
+        ));
+  }
 }
