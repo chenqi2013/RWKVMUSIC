@@ -14476,7 +14476,7 @@ var getNote = function getNote(url, instrument, name, audioContext) {
   var instrumentCache = soundsCache[instrument];
   if (!instrumentCache[name]) instrumentCache[name] = new Promise(function (resolve, reject) {
     var xhr = new XMLHttpRequest();
-    var noteUrl = "file:///android_asset/player/soundfont/"+ instrument + "-mp3/" + name + ".mp3";
+    var noteUrl = "../player/soundfont/"+ instrument + "-mp3/" + name + ".mp3";
     console.log(noteUrl)
     xhr.open("GET", noteUrl, true);
     xhr.responseType = "arraybuffer";
