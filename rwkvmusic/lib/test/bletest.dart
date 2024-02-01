@@ -31,17 +31,26 @@ class FlutterBlueApp extends StatelessWidget {
         child: Container(
           child: Column(
             children: [
-              Expanded(child: getlistwidget(),flex: 5,),
-              Expanded(child:  MaterialButton(
-                onPressed: () {
-                  scanble();
-                },
-                child: Text('scan'),
-              ),flex: 1,),
-             Expanded(child: MaterialButton(
-                onPressed: () {},
-                child: Text('stop'),
-              ),flex: 1,),
+              Expanded(
+                child: getlistwidget(),
+                flex: 5,
+              ),
+              Expanded(
+                child: MaterialButton(
+                  onPressed: () {
+                    scanble();
+                  },
+                  child: Text('scan'),
+                ),
+                flex: 1,
+              ),
+              Expanded(
+                child: MaterialButton(
+                  onPressed: () {},
+                  child: Text('stop'),
+                ),
+                flex: 1,
+              ),
             ],
             mainAxisAlignment: MainAxisAlignment.center,
           ),
@@ -58,7 +67,7 @@ class FlutterBlueApp extends StatelessWidget {
     var subscription = flutterBlue.scanResults.listen((results) {
       // do something with scan results
       for (ScanResult r in results) {
-                String name = r.device.name;
+        String name = r.device.name;
         print('$name found! rssi: ${r.rssi}');
         if (!name.isEmpty && !list.contains(name)) {
           list.add(name);
