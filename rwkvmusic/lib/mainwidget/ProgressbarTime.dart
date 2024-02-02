@@ -1,36 +1,50 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
-Widget ProgressbarTime(double _currentSliderValue) {
-  return Row(children: [
-    // 播放进度条
-    Slider(
-      value: _currentSliderValue,
-      min: 0.0,
-      max: 1.0,
-      onChanged: (value) {
-        // setState(() {
-        _currentSliderValue = value;
-        // _currentTime = Duration(seconds: (_totalDuration.inSeconds * value).round());
-        // });
-      },
-    ),
-
-    // 时间显示
-    Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(formatDuration(Duration(seconds: 0))),
-            Text(formatDuration(Duration(seconds: 20))),
-          ],
-        ))
-  ]);
+Widget ProgressbarTime(RxDouble _currentSliderValue, double totalTime) {
+  return Obx(() => Row(children: [
+        // 播放进度条
+        SliderTheme(
+          data: SliderThemeData(
+            activeTrackColor: Colors.black, // 进度颜色
+            inactiveTrackColor: Colors.white, // 未选中的轨道颜色
+            thumbColor: Colors.white, // 圆点颜色
+            overlayColor: Colors.white.withOpacity(0.3), // 圆点覆盖颜色
+            valueIndicatorColor: Colors.white, // 数值指示器颜色
+            valueIndicatorTextStyle:
+                TextStyle(color: Colors.white), // 数值指示器文本样式
+          ),
+          child: Slider(
+            value: _currentSliderValue.value,
+            min: 0.0,
+            max: 1.0,
+            onChanged: (value) {
+              _currentSliderValue.value = value;
+            },
+          ),
+        ),
+        // 时间显示
+        Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Obx(
+                  () => Text(
+                    formatDuration(Duration(
+                        seconds:
+                            (totalTime * _currentSliderValue.value).toInt())),
+                    style: TextStyle(color: Colors.white),
+                  ),
+                )
+              ],
+            ))
+      ]));
 }
 
 String formatDuration(Duration duration) {
   int minutes = duration.inMinutes;
   int seconds = duration.inSeconds % 60;
-  return '$minutes:${seconds.toString().padLeft(2, '0')}';
+  return '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
 }

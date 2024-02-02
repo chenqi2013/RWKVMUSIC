@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/services.dart';
@@ -46,6 +47,9 @@ class _MyAppState extends State<MyApp> {
   int addGap = 5; //间隔多少刷新
   int addCount = 0; //刷新次数
   var isPlay = false.obs;
+  var playProgress = 0.0.obs;
+  var pianoAllTime = 20.0;
+  var timer;
   @override
   void initState() {
     super.initState();
@@ -68,24 +72,30 @@ class _MyAppState extends State<MyApp> {
         ),
       )
       ..loadFlutterAssetServer(filePath3);
-      controllerPiano.addJavaScriptChannel("onStartPlay", onMessageReceived: (JavaScriptMessage jsMessage){
-            print('onStartPlay onMessageReceived='+jsMessage.message);
-      });
-      controllerPiano.addJavaScriptChannel("onPausePlay", onMessageReceived: (JavaScriptMessage jsMessage){
-            print('onPausePlay onMessageReceived='+jsMessage.message);
-      });
-      controllerPiano.addJavaScriptChannel("onResumePlay", onMessageReceived: (JavaScriptMessage jsMessage){
-            print('onResumePlay onMessageReceived='+jsMessage.message);
-      });
-      controllerPiano.addJavaScriptChannel("onCountPromptNoteNumber", onMessageReceived: (JavaScriptMessage jsMessage){
-            print('onCountPromptNoteNumber onMessageReceived='+jsMessage.message);
-      });
-      controllerPiano.addJavaScriptChannel("onEvents", onMessageReceived: (JavaScriptMessage jsMessage){
-            print('onEvents onMessageReceived='+jsMessage.message);
-      });
-      controllerPiano.addJavaScriptChannel("onPlayFinish", onMessageReceived: (JavaScriptMessage jsMessage){
-            print('onPlayFinish onMessageReceived='+jsMessage.message);
-      });
+    controllerPiano.addJavaScriptChannel("onStartPlay",
+        onMessageReceived: (JavaScriptMessage jsMessage) {
+      print('onStartPlay onMessageReceived=' + jsMessage.message);
+    });
+    controllerPiano.addJavaScriptChannel("onPausePlay",
+        onMessageReceived: (JavaScriptMessage jsMessage) {
+      print('onPausePlay onMessageReceived=' + jsMessage.message);
+    });
+    controllerPiano.addJavaScriptChannel("onResumePlay",
+        onMessageReceived: (JavaScriptMessage jsMessage) {
+      print('onResumePlay onMessageReceived=' + jsMessage.message);
+    });
+    controllerPiano.addJavaScriptChannel("onCountPromptNoteNumber",
+        onMessageReceived: (JavaScriptMessage jsMessage) {
+      print('onCountPromptNoteNumber onMessageReceived=' + jsMessage.message);
+    });
+    controllerPiano.addJavaScriptChannel("onEvents",
+        onMessageReceived: (JavaScriptMessage jsMessage) {
+      print('onEvents onMessageReceived=' + jsMessage.message);
+    });
+    controllerPiano.addJavaScriptChannel("onPlayFinish",
+        onMessageReceived: (JavaScriptMessage jsMessage) {
+      print('onPlayFinish onMessageReceived=' + jsMessage.message);
+    });
 
     controllerKeyboard = WebViewControllerPlus()
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
@@ -104,9 +114,9 @@ class _MyAppState extends State<MyApp> {
         ),
       )
       ..loadFlutterAssetServer(filePath2);
-      // controllerKeyboard.addJavaScriptChannel("controller", onMessageReceived: (JavaScriptMessage jsMessage){
-      //       print('controllerKeyboard onMessageReceived='+jsMessage.message);
-      // });
+    // controllerKeyboard.addJavaScriptChannel("controller", onMessageReceived: (JavaScriptMessage jsMessage){
+    //       print('controllerKeyboard onMessageReceived='+jsMessage.message);
+    // });
   }
 
   @override
@@ -187,30 +197,50 @@ class _MyAppState extends State<MyApp> {
                       creatBottomBtn('Sounds Effect', () {
                         print("Sounds Effect");
                       }),
-                      ProgressbarTime(0.5),
-                      createButtonImageWithText('Generate', Icons.edit, () {
-                        print('Generate');
-                        getABCData();
-                      }),
-                      Obx(() {
-                        return createButtonImageWithText(
-                            !isPlay.value ? 'Play' : 'Pause',
-                            !isPlay.value ? Icons.play_arrow : Icons.pause, () {
-                          print('Play');
-                          if (!isPlay.value) {
-                            // controllerPiano.runJavaScript("ABCtoEvents(\"L:1/4\\nM:4/4\\nK:D\\n\\\"D\\\" A F F\")");
-                            controllerPiano.runJavaScript("startPlay()");
-                          } else {
-                            controllerPiano.runJavaScript("pausePlay()");
-                          }
-                          isPlay.value = !isPlay.value;
-                        });
-                      }),
-                      createButtonImageWithText('Settings', Icons.settings, () {
-                        print('Settings');
-                        Get.to(FlutterBlueApp());
-                        // Get.to(MyApp11());
-                      }),
+                      ProgressbarTime(playProgress, pianoAllTime),
+                      Spacer(),
+                      Container(
+                        child: Row(
+                          children: [
+                            createButtonImageWithText('Generate', Icons.edit,
+                                () {
+                              print('Generate');
+                              getABCData();
+                            }),
+                            Obx(() {
+                              return createButtonImageWithText(
+                                  !isPlay.value ? 'Play' : 'Pause',
+                                  !isPlay.value
+                                      ? Icons.play_arrow
+                                      : Icons.pause, () {
+                                print('Play');
+                                if (!isPlay.value) {
+                                  // controllerPiano.runJavaScript("ABCtoEvents(\"L:1/4\\nM:4/4\\nK:D\\n\\\"D\\\" A F F\")");
+                                  controllerPiano.runJavaScript("startPlay()");
+                                } else {
+                                  controllerPiano.runJavaScript("pausePlay()");
+                                }
+                                isPlay.value = !isPlay.value;
+                              });
+                            }),
+                            createButtonImageWithText(
+                                'Settings', Icons.settings, () {
+                              print('Settings');
+                              // Get.to(FlutterBlueApp());
+                              // Get.to(MyApp11());
+                              timer = Timer.periodic(
+                                  Duration(milliseconds: 500), (Timer timer) {
+                                if (playProgress.value >= 1) {
+                                  playProgress.value = 1;
+                                  timer.cancel();
+                                } else {
+                                  playProgress.value += 0.05;
+                                }
+                              });
+                            }),
+                          ],
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -253,7 +283,7 @@ class _MyAppState extends State<MyApp> {
         sb.write("\",false)");
         // setState(() {
         //   print('final runJavaScript==${sb.toString()}');
-          controllerPiano.runJavaScript(sb.toString());
+        controllerPiano.runJavaScript(sb.toString());
         // });
       }
       // print(responseData);
@@ -347,13 +377,15 @@ class _MyAppState extends State<MyApp> {
   }
 
   void segmengChange(int index) {
-    if (index == 0) {//preset
+    if (index == 0) {
+      //preset
       controllerPiano.runJavaScript(
           "setAbcString(\"%%MIDI program 40\\nL:1/4\\nM:4/4\\nK:D\\n\\\"D\\\" A F F\", false)");
       controllerPiano.runJavaScript("setPromptNoteNumberCount(3)");
       controllerKeyboard.runJavaScript('resetPlay()');
       controllerKeyboard.runJavaScript('setPiano(55, 76)');
-    } else {//creative
+    } else {
+      //creative
       controllerPiano.runJavaScript(
           "setAbcString(\"%%MIDI program 0\\nL:1/4\\nM:4/4\\nK:C\\n|\", false)");
       controllerPiano.runJavaScript("setPromptNoteNumberCount(0)");
