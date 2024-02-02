@@ -5,7 +5,9 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:rwkvmusic/mainwidget/ProgressbarTime.dart';
 import 'package:rwkvmusic/test/bletest.dart';
+import 'package:rwkvmusic/test/mididevicetest.dart';
 import 'package:rwkvmusic/widgets/widgets.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
@@ -66,6 +68,24 @@ class _MyAppState extends State<MyApp> {
         ),
       )
       ..loadFlutterAssetServer(filePath3);
+      controllerPiano.addJavaScriptChannel("onStartPlay", onMessageReceived: (JavaScriptMessage jsMessage){
+            print('onStartPlay onMessageReceived='+jsMessage.message);
+      });
+      controllerPiano.addJavaScriptChannel("onPausePlay", onMessageReceived: (JavaScriptMessage jsMessage){
+            print('onPausePlay onMessageReceived='+jsMessage.message);
+      });
+      controllerPiano.addJavaScriptChannel("onResumePlay", onMessageReceived: (JavaScriptMessage jsMessage){
+            print('onResumePlay onMessageReceived='+jsMessage.message);
+      });
+      controllerPiano.addJavaScriptChannel("onCountPromptNoteNumber", onMessageReceived: (JavaScriptMessage jsMessage){
+            print('onCountPromptNoteNumber onMessageReceived='+jsMessage.message);
+      });
+      controllerPiano.addJavaScriptChannel("onEvents", onMessageReceived: (JavaScriptMessage jsMessage){
+            print('onEvents onMessageReceived='+jsMessage.message);
+      });
+      controllerPiano.addJavaScriptChannel("onPlayFinish", onMessageReceived: (JavaScriptMessage jsMessage){
+            print('onPlayFinish onMessageReceived='+jsMessage.message);
+      });
 
     controllerKeyboard = WebViewControllerPlus()
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
@@ -84,6 +104,9 @@ class _MyAppState extends State<MyApp> {
         ),
       )
       ..loadFlutterAssetServer(filePath2);
+      // controllerKeyboard.addJavaScriptChannel("controller", onMessageReceived: (JavaScriptMessage jsMessage){
+      //       print('controllerKeyboard onMessageReceived='+jsMessage.message);
+      // });
   }
 
   @override
@@ -164,7 +187,7 @@ class _MyAppState extends State<MyApp> {
                       creatBottomBtn('Sounds Effect', () {
                         print("Sounds Effect");
                       }),
-                      Spacer(),
+                      ProgressbarTime(0.5),
                       createButtonImageWithText('Generate', Icons.edit, () {
                         print('Generate');
                         getABCData();
@@ -186,6 +209,7 @@ class _MyAppState extends State<MyApp> {
                       createButtonImageWithText('Settings', Icons.settings, () {
                         print('Settings');
                         Get.to(FlutterBlueApp());
+                        // Get.to(MyApp11());
                       }),
                     ],
                   ),
