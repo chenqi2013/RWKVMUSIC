@@ -50,6 +50,9 @@ class _MyAppState extends State<MyApp> {
   var playProgress = 0.0.obs;
   var pianoAllTime = 20.0;
   var timer;
+  var subscription;
+  var isGenerating = false.obs;
+  var httpClient;
   @override
   void initState() {
     super.initState();
@@ -198,15 +201,23 @@ class _MyAppState extends State<MyApp> {
                         print("Sounds Effect");
                       }),
                       ProgressbarTime(playProgress, pianoAllTime),
+                      Obx(() => isGenerating.value
+                          ? CircularProgressIndicator(valueColor: AlwaysStoppedAnimation<Color>(Colors.white),)
+                          : Container(
+                              child: null,
+                            )),
                       Spacer(),
                       Container(
                         child: Row(
                           children: [
-                            createButtonImageWithText('Generate', Icons.edit,
+                            Obx(() => createButtonImageWithText(!isGenerating.value?'Generate':'Stop', !isGenerating.value?Icons.edit:Icons.refresh,
                                 () {
                               print('Generate');
-                              getABCData();
-                            }),
+                              isGenerating.value = !isGenerating.value;
+                              if (isGenerating.value) {
+                                getABCData();
+                              }
+                            })),
                             Obx(() {
                               return createButtonImageWithText(
                                   !isPlay.value ? 'Play' : 'Pause',
@@ -261,7 +272,7 @@ class _MyAppState extends State<MyApp> {
       "temperature": 1.2,
       "top_p": 0.5
     };
-    HttpClient httpClient = HttpClient();
+    httpClient = HttpClient();
     HttpClientRequest request = await httpClient
         .postUrl(Uri.parse('http://10.125.34.204:8000/completions'));
     request.headers.contentType = ContentType
@@ -269,7 +280,12 @@ class _MyAppState extends State<MyApp> {
     request.write(jsonEncode(dic));
     // request.headers.add('Accept', 'text/event-stream');
     HttpClientResponse response = await request.close();
-    response.listen((List<int> chunk) {
+    subscription = response.listen((List<int> chunk) {
+      if (!isGenerating.value) {
+        subscription.cancel();
+        httpClient.close();
+        stringBuffer = StringBuffer();
+      }
       // 处理数据流的每个块
       String responseData = utf8.decode(chunk);
       String textstr = extractTextValue(responseData)!;
