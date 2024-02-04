@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:ffi';
 import 'dart:io';
 import 'package:flutter/services.dart';
 import 'package:flutter/cupertino.dart';
@@ -48,7 +49,7 @@ class _MyAppState extends State<MyApp> {
   int addCount = 0; //刷新次数
   var isPlay = false.obs;
   var playProgress = 0.0.obs;
-  var pianoAllTime = 20.0;
+  var pianoAllTime = 0.0.obs;
   var timer;
   var subscription;
   var isGenerating = false.obs;
@@ -74,31 +75,47 @@ class _MyAppState extends State<MyApp> {
           },
         ),
       )
-      ..loadFlutterAssetServer(filePath3);
-    controllerPiano.addJavaScriptChannel("onStartPlay",
-        onMessageReceived: (JavaScriptMessage jsMessage) {
-      print('onStartPlay onMessageReceived=' + jsMessage.message);
-    });
-    controllerPiano.addJavaScriptChannel("onPausePlay",
-        onMessageReceived: (JavaScriptMessage jsMessage) {
-      print('onPausePlay onMessageReceived=' + jsMessage.message);
-    });
-    controllerPiano.addJavaScriptChannel("onResumePlay",
-        onMessageReceived: (JavaScriptMessage jsMessage) {
-      print('onResumePlay onMessageReceived=' + jsMessage.message);
-    });
-    controllerPiano.addJavaScriptChannel("onCountPromptNoteNumber",
-        onMessageReceived: (JavaScriptMessage jsMessage) {
-      print('onCountPromptNoteNumber onMessageReceived=' + jsMessage.message);
-    });
-    controllerPiano.addJavaScriptChannel("onEvents",
-        onMessageReceived: (JavaScriptMessage jsMessage) {
-      print('onEvents onMessageReceived=' + jsMessage.message);
-    });
-    controllerPiano.addJavaScriptChannel("onPlayFinish",
-        onMessageReceived: (JavaScriptMessage jsMessage) {
-      print('onPlayFinish onMessageReceived=' + jsMessage.message);
-    });
+      ..loadFlutterAssetServer(filePath3)
+      ..addJavaScriptChannel("flutteronStartPlay",
+          onMessageReceived: (JavaScriptMessage jsMessage) {
+        String message = jsMessage.message;
+        print('flutteronStartPlay onMessageReceived=' + message);
+        pianoAllTime.value = double.parse(message.split(',')[1]);
+        print('pianoAllTime:${pianoAllTime.value}');
+        playProgress.value = 0.0;
+        timer = Timer.periodic(Duration(milliseconds: 1000), (Timer timer) {
+          if (playProgress.value >= 1) {
+            playProgress.value = 1;
+            timer.cancel();
+          } else {
+            playProgress.value += 1000.0 / pianoAllTime.value;
+          }
+        });
+        isPlay.value = true;
+      })
+      ..addJavaScriptChannel("flutteronPausePlay",
+          onMessageReceived: (JavaScriptMessage jsMessage) {
+        print('flutteronPausePlay onMessageReceived=' + jsMessage.message);
+        isPlay.value = false;
+      })
+      ..addJavaScriptChannel("flutteronResumePlay",
+          onMessageReceived: (JavaScriptMessage jsMessage) {
+        print('flutteronResumePlay onMessageReceived=' + jsMessage.message);
+      })
+      ..addJavaScriptChannel("flutteronCountPromptNoteNumber",
+          onMessageReceived: (JavaScriptMessage jsMessage) {
+        print('flutteronCountPromptNoteNumber onMessageReceived=' +
+            jsMessage.message);
+      })
+      ..addJavaScriptChannel("flutteronEvents",
+          onMessageReceived: (JavaScriptMessage jsMessage) {
+        print('flutteronEvents onMessageReceived=' + jsMessage.message);
+      })
+      ..addJavaScriptChannel("flutteronPlayFinish",
+          onMessageReceived: (JavaScriptMessage jsMessage) {
+        print('flutteronPlayFinish onMessageReceived=' + jsMessage.message);
+        isPlay.value = false;
+      });
 
     controllerKeyboard = WebViewControllerPlus()
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
@@ -202,7 +219,10 @@ class _MyAppState extends State<MyApp> {
                       }),
                       ProgressbarTime(playProgress, pianoAllTime),
                       Obx(() => isGenerating.value
-                          ? CircularProgressIndicator(valueColor: AlwaysStoppedAnimation<Color>(Colors.white),)
+                          ? CircularProgressIndicator(
+                              valueColor:
+                                  AlwaysStoppedAnimation<Color>(Colors.white),
+                            )
                           : Container(
                               child: null,
                             )),
@@ -210,14 +230,17 @@ class _MyAppState extends State<MyApp> {
                       Container(
                         child: Row(
                           children: [
-                            Obx(() => createButtonImageWithText(!isGenerating.value?'Generate':'Stop', !isGenerating.value?Icons.edit:Icons.refresh,
-                                () {
-                              print('Generate');
-                              isGenerating.value = !isGenerating.value;
-                              if (isGenerating.value) {
-                                getABCData();
-                              }
-                            })),
+                            Obx(() => createButtonImageWithText(
+                                    !isGenerating.value ? 'Generate' : 'Stop',
+                                    !isGenerating.value
+                                        ? Icons.edit
+                                        : Icons.refresh, () {
+                                  print('Generate');
+                                  isGenerating.value = !isGenerating.value;
+                                  if (isGenerating.value) {
+                                    getABCData();
+                                  }
+                                })),
                             Obx(() {
                               return createButtonImageWithText(
                                   !isPlay.value ? 'Play' : 'Pause',
@@ -231,7 +254,7 @@ class _MyAppState extends State<MyApp> {
                                 } else {
                                   controllerPiano.runJavaScript("pausePlay()");
                                 }
-                                isPlay.value = !isPlay.value;
+                                // isPlay.value = !isPlay.value;
                               });
                             }),
                             createButtonImageWithText(
@@ -239,15 +262,6 @@ class _MyAppState extends State<MyApp> {
                               print('Settings');
                               // Get.to(FlutterBlueApp());
                               // Get.to(MyApp11());
-                              timer = Timer.periodic(
-                                  Duration(milliseconds: 500), (Timer timer) {
-                                if (playProgress.value >= 1) {
-                                  playProgress.value = 1;
-                                  timer.cancel();
-                                } else {
-                                  playProgress.value += 0.05;
-                                }
-                              });
                             }),
                           ],
                         ),
@@ -274,7 +288,7 @@ class _MyAppState extends State<MyApp> {
     };
     httpClient = HttpClient();
     HttpClientRequest request = await httpClient
-        .postUrl(Uri.parse('http://10.125.34.204:8000/completions'));
+        .postUrl(Uri.parse('http://192.168.3.4:8000/completions'));
     request.headers.contentType = ContentType
         .json; //这个要设置，否则报错{"error":{"message":"当前分组 reverse-times 下对于模型  计费模式 [按次计费] 无可用渠道 (request id: 20240122102439864867952mIY4Ma3k)","type":"shell_api_error"}}
     request.write(jsonEncode(dic));

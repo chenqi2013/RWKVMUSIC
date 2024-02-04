@@ -2,7 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-Widget ProgressbarTime(RxDouble _currentSliderValue, double totalTime) {
+Widget ProgressbarTime(RxDouble _currentSliderValue, RxDouble totalTime) {
   return Obx(() => Row(children: [
         // 播放进度条
         SliderTheme(
@@ -30,14 +30,12 @@ Widget ProgressbarTime(RxDouble _currentSliderValue, double totalTime) {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Obx(
-                  () => Text(
+               Text(
                     formatDuration(Duration(
                         seconds:
-                            (totalTime * _currentSliderValue.value).toInt())),
+                            (totalTime.value/1000.0 * _currentSliderValue.value).toInt())),
                     style: TextStyle(color: Colors.white),
                   ),
-                )
               ],
             ))
       ]));
@@ -46,5 +44,6 @@ Widget ProgressbarTime(RxDouble _currentSliderValue, double totalTime) {
 String formatDuration(Duration duration) {
   int minutes = duration.inMinutes;
   int seconds = duration.inSeconds % 60;
+  print('second==$seconds');
   return '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
 }
