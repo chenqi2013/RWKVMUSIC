@@ -44,19 +44,20 @@ class _MyAppState extends State<MyApp> {
   String filePath2 = 'assets/piano/keyboard.html';
   String filePath3 = 'assets/player/player.html';
   var selectstate = 0.obs;
-  StringBuffer stringBuffer = StringBuffer();
-  int addGap = 5; //间隔多少刷新
+  late StringBuffer stringBuffer;
+  int addGap = 2; //间隔多少刷新
   int addCount = 0; //刷新次数
   var isPlay = false.obs;
   var playProgress = 0.0.obs;
   var pianoAllTime = 0.0.obs;
-  var timer;
-  var subscription;
+  late Timer timer;
+  late StreamSubscription subscription;
   var isGenerating = false.obs;
-  var httpClient;
+  late HttpClient httpClient;
   @override
   void initState() {
     super.initState();
+    stringBuffer = StringBuffer();
     controllerPiano = WebViewControllerPlus()
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
       ..setNavigationDelegate(
@@ -83,24 +84,20 @@ class _MyAppState extends State<MyApp> {
         pianoAllTime.value = double.parse(message.split(',')[1]);
         print('pianoAllTime:${pianoAllTime.value}');
         playProgress.value = 0.0;
-        timer = Timer.periodic(Duration(milliseconds: 1000), (Timer timer) {
-          if (playProgress.value >= 1) {
-            playProgress.value = 1;
-            timer.cancel();
-          } else {
-            playProgress.value += 1000.0 / pianoAllTime.value;
-          }
-        });
+        createTimer();
         isPlay.value = true;
       })
       ..addJavaScriptChannel("flutteronPausePlay",
           onMessageReceived: (JavaScriptMessage jsMessage) {
         print('flutteronPausePlay onMessageReceived=' + jsMessage.message);
+        timer.cancel();
         isPlay.value = false;
       })
       ..addJavaScriptChannel("flutteronResumePlay",
           onMessageReceived: (JavaScriptMessage jsMessage) {
         print('flutteronResumePlay onMessageReceived=' + jsMessage.message);
+        createTimer();
+        isPlay.value = true;
       })
       ..addJavaScriptChannel("flutteronCountPromptNoteNumber",
           onMessageReceived: (JavaScriptMessage jsMessage) {
@@ -137,6 +134,24 @@ class _MyAppState extends State<MyApp> {
     // controllerKeyboard.addJavaScriptChannel("controller", onMessageReceived: (JavaScriptMessage jsMessage){
     //       print('controllerKeyboard onMessageReceived='+jsMessage.message);
     // });
+  }
+
+  void createTimer() {
+    timer = Timer.periodic(Duration(milliseconds: 1000), (Timer timer) {
+      if (playProgress.value >= 1) {
+        playProgress.value = 1;
+        timer.cancel();
+      } else {
+        playProgress.value += 1000.0 / pianoAllTime.value;
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    timer.cancel();
+    httpClient.close();
+    super.dispose();
   }
 
   @override
@@ -238,6 +253,8 @@ class _MyAppState extends State<MyApp> {
                                   print('Generate');
                                   isGenerating.value = !isGenerating.value;
                                   if (isGenerating.value) {
+                                    playProgress.value = 0.0;
+                                    pianoAllTime.value = 0.0;
                                     getABCData();
                                   }
                                 })),
@@ -298,9 +315,10 @@ class _MyAppState extends State<MyApp> {
       if (!isGenerating.value) {
         subscription.cancel();
         httpClient.close();
+        stringBuffer.clear();
         stringBuffer = StringBuffer();
-      }
-      // 处理数据流的每个块
+        return;
+      } // 处理数据流的每个块
       String responseData = utf8.decode(chunk);
       String textstr = extractTextValue(responseData)!;
       stringBuffer.write(textstr);
@@ -321,9 +339,11 @@ class _MyAppState extends State<MyApp> {
       // 数据流接收完成
       print('请求完成');
       httpClient.close();
+      isGenerating.value = false;
     }, onError: (error) {
       // 处理错误
       print('请求发生错误: $error');
+      isGenerating.value = false;
     });
   }
 
