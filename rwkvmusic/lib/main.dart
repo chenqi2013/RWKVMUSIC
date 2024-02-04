@@ -101,8 +101,8 @@ class _MyAppState extends State<MyApp> {
       })
       ..addJavaScriptChannel("flutteronCountPromptNoteNumber",
           onMessageReceived: (JavaScriptMessage jsMessage) {
-        print('flutteronCountPromptNoteNumber onMessageReceived=' +
-            jsMessage.message);
+        // print('flutteronCountPromptNoteNumber onMessageReceived=' +
+        //     jsMessage.message);
       })
       ..addJavaScriptChannel("flutteronEvents",
           onMessageReceived: (JavaScriptMessage jsMessage) {
@@ -255,6 +255,10 @@ class _MyAppState extends State<MyApp> {
                                   if (isGenerating.value) {
                                     playProgress.value = 0.0;
                                     pianoAllTime.value = 0.0;
+                                    // controllerPiano.runJavaScript(
+                                    //     "setAbcString(\"%%MIDI program 40\\nL:1/4\\nM:4/4\\nK:D\\n\\\"D\\\" A F F\", false)");
+                                    // controllerPiano.runJavaScript(
+                                    //     'resetTimingCallbacks()');
                                     getABCData();
                                   }
                                 })),
@@ -317,10 +321,12 @@ class _MyAppState extends State<MyApp> {
         httpClient.close();
         stringBuffer.clear();
         stringBuffer = StringBuffer();
+        addCount = 0;
         return;
       } // 处理数据流的每个块
       String responseData = utf8.decode(chunk);
       String textstr = extractTextValue(responseData)!;
+      // print('responseData=$textstr');
       stringBuffer.write(textstr);
       textstr = escapeString(stringBuffer.toString());
       if (textstr.length > addCount * addGap) {

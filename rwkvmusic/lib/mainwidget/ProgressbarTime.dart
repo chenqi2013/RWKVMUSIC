@@ -44,6 +44,6 @@ Widget ProgressbarTime(RxDouble _currentSliderValue, RxDouble totalTime) {
 String formatDuration(Duration duration) {
   int minutes = duration.inMinutes;
   int seconds = duration.inSeconds % 60;
-  print('second==$seconds');
+  // print('second==$seconds');
   return '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
 }
