@@ -19,7 +19,6 @@
     var isGenerateAbc = false;
 
     window.onload = function () {
-    //  showDelayedAlert();
       console.log("window.onload");
       abcjsEditor = new ABCJS.Editor("abc", {
         canvas_id: "paper",
@@ -39,17 +38,9 @@
 
       document.querySelector(".abcjs-midi-start").addEventListener("click", startTimer);
 
-      setAbcString("\nL:1/4\nM:4/4\nK:D\n\"D\" A F F", false);
+      // setAbcString("\nL:1/4\nM:4/4\nK:D\n\"D\" A F F", false);
 
     };
-
- // 延时显示 alert 弹窗
-  function showDelayedAlert() {
-    setTimeout(function() {
-      // print('这是延时显示的 Alert 弹窗！');
-      startPlay();
-    }, 4000); // 延时 3000 毫秒 (3 秒)
-  }
 
     function afterParsing(tune, tuneNumber, abcString){
       if (self.isGenerateAbc != true) {
@@ -57,11 +48,12 @@
          console.log("afterParsing:" + a)
          countofnotes = a
 
-         if(typeof controller !== "undefined"){
-              controller.onCountPromptNoteNumber(a);
-          } else {
-            console.log("Running outside Android app");
-          }
+        //  if(typeof controller !== "undefined"){
+        //       controller.onCountPromptNoteNumber(a);
+        //   } else {
+        //       alert("Running outside Android app");
+        //   }
+        flutteronCountPromptNoteNumber.postMessage(a);
        }
     }
 
@@ -131,11 +123,12 @@
       }
       var eventJson = JSON.stringify(events)
 
-      if(typeof controller !== "undefined"){
-          controller.onEvents("" + eventJson + "");
-      } else {
-        console.log("Running outside Android app");
-      }
+      // if(typeof controller !== "undefined"){
+      //     controller.onEvents("" + eventJson + "");
+      // } else {
+      //     alert("Running outside Android app");
+      // }
+      flutteronEvents.postMessage("" + eventJson + "");
       return eventJson
     }
 
@@ -208,7 +201,7 @@
     }
 	  
     function setAbcString(output, isGenerateAbc) {
-      // console.log("setAbcString:" + output + ", isGenerateAbc:" + isGenerateAbc)
+      console.log("setAbcString:" + output + ", isGenerateAbc:" + isGenerateAbc)
       self.isGenerateAbc = isGenerateAbc;
       const textarea = document.getElementById("abc");
       textarea.value = output;
@@ -218,7 +211,7 @@
       function delay(time) {
         return new Promise(resolve => setTimeout(resolve, time));
       }
-      delay(100).then(() => {
+      delay(0).then(() => {
         const paper = document.getElementById("paper")
         var pElements = paper.querySelectorAll("g")
         pElements[pElements.length - 1].scrollIntoView()
@@ -348,11 +341,12 @@
                   element.classList.remove('hide-note');
           }
 
-          if(typeof controller !== "undefined"){
-              controller.onPlayFinish();
-          } else {
-            console.log("Running outside Android app");
-          }
+          // if(typeof controller !== "undefined"){
+          //     controller.onPlayFinish();
+          // } else {
+          //     alert("Running outside Android app");
+          // }
+          flutteronPlayFinish.postMessage(true);
       };
   }
 
@@ -368,28 +362,31 @@
 
 function onStartPlay(isUserClick, duration) {
   console.log("onStartPlay isUserClick=" + isUserClick + " duration=" + duration)
-  if(typeof controller !== "undefined"){
-      controller.onStartPlay(isUserClick, duration);
-  } else {
-    console.log("Running outside Android app");
-  }
+  // if(typeof controller !== "undefined"){
+      // controller.onStartPlay(isUserClick, duration);
+  // } else {
+  //     alert("Running outside Android app");
+  // }
+  flutteronStartPlay.postMessage(isUserClick+','+duration);
 }
 
 
 function onPausePlay() {
-    if(typeof controller !== "undefined"){
-        controller.onPausePlay();
-    } else {
-      console.log("Running outside Android app");
-    }
+    // if(typeof controller !== "undefined"){
+    //     controller.onPausePlay();
+    // } else {
+        // alert("Running outside Android app");
+    // }
+    flutteronPausePlay.postMessage(true);
 }
 
 function onResumePlay() {
-    if(typeof controller !== "undefined"){
-        controller.onResumePlay();
-    } else {
-      console.log("Running outside Android app");
-    }
+    // if(typeof controller !== "undefined"){
+    //     controller.onResumePlay();
+    // } else {
+    //     alert("Running outside Android app");
+    // }
+    flutteronResumePlay.postMessage(true);
 }
 
 function startTimer(event) {
@@ -432,7 +429,7 @@ function pausePlay() {
 }
 
 
-function saveMidiFile(abcString, fileName) {
+function exportMidiFile(abcString, fileName) {
   var midi = ABCJS.synth.getMidiFile(abcString, { midiOutputType: 'binary', fileName: fileName });
   console.log("saveMidiFile midi=" + midi)
   return midi.toString();
