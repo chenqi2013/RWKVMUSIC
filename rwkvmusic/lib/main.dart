@@ -142,7 +142,11 @@ class _MyAppState extends State<MyApp> {
         playProgress.value = 1;
         timer.cancel();
       } else {
-        playProgress.value += 1000.0 / pianoAllTime.value;
+        if (playProgress.value + 1000.0 / pianoAllTime.value > 1.0) {
+          playProgress.value = 1.0;
+        } else {
+          playProgress.value += 1000.0 / pianoAllTime.value;
+        }
       }
     });
   }
