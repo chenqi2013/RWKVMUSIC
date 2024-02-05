@@ -1,22 +1,18 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:ffi';
 import 'dart:io';
 import 'package:flutter/services.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:rwkvmusic/mainwidget/ProgressbarTime.dart';
 import 'package:rwkvmusic/test/bletest.dart';
-import 'package:rwkvmusic/test/mididevicetest.dart';
-import 'package:rwkvmusic/widgets/widgets.dart';
-import 'package:webview_flutter/webview_flutter.dart';
+import 'package:rwkvmusic/values/constantdata.dart';
 
 import 'mainwidget/BorderBtnWidget.dart';
 import 'mainwidget/BtnImageTextWidget.dart';
-// import "package:webview_universal/webview_universal.dart";
 import 'package:webview_flutter_plus/webview_flutter_plus.dart';
+import 'package:on_popup_window_widget/on_popup_window_widget.dart';
 
 void main(List<String> args) {
   WidgetsFlutterBinding.ensureInitialized();
@@ -54,6 +50,9 @@ class _MyAppState extends State<MyApp> {
   late StreamSubscription subscription;
   var isGenerating = false.obs;
   late HttpClient httpClient;
+  int preTimestamp = 0;
+  int preCount = 0;
+  int listenCount = 0;
   @override
   void initState() {
     super.initState();
@@ -285,8 +284,7 @@ class _MyAppState extends State<MyApp> {
                             createButtonImageWithText(
                                 'Settings', Icons.settings, () {
                               print('Settings');
-                              // Get.to(FlutterBlueApp());
-                              // Get.to(MyApp11());
+                              Get.to(FlutterBlueApp());
                             }),
                           ],
                         ),
@@ -328,23 +326,34 @@ class _MyAppState extends State<MyApp> {
         addCount = 0;
         return;
       } // 处理数据流的每个块
+      listenCount++;
       String responseData = utf8.decode(chunk);
       String textstr = extractTextValue(responseData)!;
       // print('responseData=$textstr');
       stringBuffer.write(textstr);
       textstr = escapeString(stringBuffer.toString());
-      if (textstr.length > addCount * addGap) {
-        addCount++;
-        StringBuffer sb = StringBuffer();
-        sb.write("setAbcString(\"");
-        sb.write(textstr);
-        sb.write("\",false)");
-        // setState(() {
-        //   print('final runJavaScript==${sb.toString()}');
+      String sb = "setAbcString(\"" + textstr + "\",false)";
+      // 方案一
+      // int currentTimestamp = DateTime.now().millisecondsSinceEpoch;
+      // int gap = currentTimestamp - preTimestamp;
+      // if (gap > 200) {
+      //   preTimestamp = currentTimestamp;
+      //   controllerPiano.runJavaScript(sb.toString());
+      // }
+
+      // // 方案二
+      // int currentCount = sb.length;
+      // int gap = currentCount - preCount;
+      // // debugPrint('gap==$gap');
+      // if (gap >= 5) {
+      //   preCount = currentCount;
+      //   controllerPiano.runJavaScript(sb.toString());
+      // }
+
+      // 方案三
+      if (listenCount % 3 == 0) {
         controllerPiano.runJavaScript(sb.toString());
-        // });
       }
-      // print(responseData);
     }, onDone: () {
       // 数据流接收完成
       print('请求完成');
@@ -452,5 +461,27 @@ class _MyAppState extends State<MyApp> {
       controllerKeyboard.runJavaScript('resetPlay()');
       controllerKeyboard.runJavaScript('setPiano(55, 76)');
     }
+  }
+
+  void popupwindow11(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => OnPopupWindowWidget(
+          title: const Text("Please select your Language"),
+          footer: Text('close'),
+          child: Container(
+            color: Colors.red,
+          )),
+    );
+  }
+
+  List<Widget> children(BuildContext context) {
+    List<Widget> res = prompts
+        .map(
+          (e) => Text(e),
+        )
+        .toList();
+
+    return res + res;
   }
 }
