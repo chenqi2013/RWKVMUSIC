@@ -3,10 +3,9 @@
 // BSD-style license that can be found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_blue/flutter_blue.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 
 void main() {
@@ -14,7 +13,9 @@ void main() {
 }
 
 class FlutterBlueApp extends StatelessWidget {
-  var list = [].obs;
+  List<BluetoothDevice> list = <BluetoothDevice>[].obs;
+  FlutterBlue flutterBlue = FlutterBlue.instance;
+  late BluetoothDevice currentDevice;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -38,7 +39,7 @@ class FlutterBlueApp extends StatelessWidget {
               Expanded(
                 child: MaterialButton(
                   onPressed: () {
-                    scanble();
+                    startScanBLE();
                   },
                   child: Text('scan'),
                 ),
@@ -46,7 +47,9 @@ class FlutterBlueApp extends StatelessWidget {
               ),
               Expanded(
                 child: MaterialButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    stopScanBLE();
+                  },
                   child: Text('stop'),
                 ),
                 flex: 1,
@@ -59,37 +62,104 @@ class FlutterBlueApp extends StatelessWidget {
     );
   }
 
-  void scanble() {
-    FlutterBlue flutterBlue = FlutterBlue.instance;
-// Start scanning
+  void startScanBLE() {
     flutterBlue.startScan(timeout: Duration(seconds: 4));
-// Listen to scan results
     var subscription = flutterBlue.scanResults.listen((results) {
       // do something with scan results
       for (ScanResult r in results) {
         String name = r.device.name;
         print('$name found! rssi: ${r.rssi}');
-        if (!name.isEmpty && !list.contains(name)) {
-          list.add(name);
+        if (!name.isEmpty && !list.contains(r.device)) {
+          list.add(r.device);
         }
       }
     });
+    flutterBlue.state.listen((state) {
+      if (state == BluetoothState.on) {
+        print('chenqi Bluetooth is on');
+        // Bluetooth is on, you can start scanning or do other tasks.
+      } else {
+        print('chenqi Bluetooth is off');
+        // Bluetooth is off, handle accordingly.
+      }
+    });
 
-// Stop scanning
-    flutterBlue.stopScan();
+    // Listen to device connection and disconnection events
+    flutterBlue.connectedDevices
+        .asStream()
+        .listen((List<BluetoothDevice> devices) {
+      for (BluetoothDevice device in devices) {
+        print('chenqi Connected to device: ${device.name}');
+        // Handle device connection
+      }
+    });
   }
 
-  void stopScan() {}
+  void stopScanBLE() {
+    flutterBlue.stopScan();
+  }
 
   Widget getlistwidget() {
     return Obx(() => ListView.builder(
           itemBuilder: (BuildContext context, int index) {
-            return ListTile(
-              leading: Icon(Icons.star),
-              title: Text(list[index]),
+            return GestureDetector(
+              onTap: () async {
+                print('chenqi index==$index');
+                currentDevice = list[index];
+                currentDevice.connect().asStream().listen((event) {
+                  // disconnected, connecting, connected, disconnecting
+                  print('chenqi connect state=${currentDevice.state}');
+                });
+                currentDevice.state.listen((state) {
+                  switch (state) {
+                    case BluetoothDeviceState.connected:
+                      print('chenqi Device is connected.');
+                      Fluttertoast.showToast(msg: 'Device is connected');
+                      stopScanBLE();
+                      test();
+                      break;
+                    case BluetoothDeviceState.connecting:
+                      print('chenqi Device is connecting.');
+                      Fluttertoast.showToast(msg: 'Device is connecting');
+                      break;
+                    case BluetoothDeviceState.disconnected:
+                      print('chenqi Device is disconnected.');
+                      Fluttertoast.showToast(msg: 'Device is disconnected');
+                      currentDevice.connect();
+                      break;
+                    default:
+                    // Handle other states if needed
+                  }
+                });
+              },
+              child: ListTile(
+                leading: Icon(Icons.star),
+                title: Text(list[index].name),
+              ),
             );
           },
           itemCount: list.length,
         ));
+  }
+
+  Future<void> test() async {
+    List<BluetoothService> services = await currentDevice.discoverServices();
+    services.forEach((service) async {
+      // Reads all characteristics
+      var characteristics = service.characteristics;
+      for (BluetoothCharacteristic characteristic in characteristics) {
+        // List<int> value = await characteristic.read();
+        // print('chenqi characteristic.read()==$value');
+        // var descriptors = characteristic.descriptors;
+        // for (BluetoothDescriptor descriptor in descriptors) {
+        //   List<int> value = await descriptor.read();
+        //   print('chenqi descriptor.read()==$value');
+        // }
+        characteristic.setNotifyValue(true);
+        characteristic.value.listen((value) {
+          print('chenqi characteristic.value.listen==$value');
+        });
+      }
+    });
   }
 }
