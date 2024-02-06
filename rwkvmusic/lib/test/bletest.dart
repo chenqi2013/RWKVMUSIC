@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_blue/flutter_blue.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
+import 'package:rwkvmusic/widgets/toast.dart';
 
 void main() {
   runApp(FlutterBlueApp());
@@ -79,7 +80,7 @@ class FlutterBlueApp extends StatelessWidget {
         print('chenqi Bluetooth is on');
         // Bluetooth is on, you can start scanning or do other tasks.
       } else {
-        print('chenqi Bluetooth is off');
+        toastInfo(msg:'请先打开你手机上的蓝牙');
         // Bluetooth is off, handle accordingly.
       }
     });
@@ -114,17 +115,17 @@ class FlutterBlueApp extends StatelessWidget {
                   switch (state) {
                     case BluetoothDeviceState.connected:
                       print('chenqi Device is connected.');
-                      Fluttertoast.showToast(msg: 'Device is connected');
+                      toastInfo(msg: 'Device is connected');
                       stopScanBLE();
                       test();
                       break;
                     case BluetoothDeviceState.connecting:
                       print('chenqi Device is connecting.');
-                      Fluttertoast.showToast(msg: 'Device is connecting');
+                      toastInfo(msg: 'Device is connecting');
                       break;
                     case BluetoothDeviceState.disconnected:
                       print('chenqi Device is disconnected.');
-                      Fluttertoast.showToast(msg: 'Device is disconnected');
+                      toastInfo(msg: 'Device is disconnected');
                       currentDevice.connect();
                       break;
                     default:

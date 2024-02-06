@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:flutter/services.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:rwkvmusic/mainwidget/ProgressbarTime.dart';
 import 'package:rwkvmusic/test/bletest.dart';
@@ -159,143 +160,148 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
-    return GetMaterialApp(
-        debugShowCheckedModeBanner: false,
-        home: Scaffold(
-            body: Container(
-          color: Color(0xff3a3a3a),
-          child: Column(
-            children: [
-              Container(
-                padding: EdgeInsets.symmetric(horizontal: 25, vertical: 15),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Text(
-                      'RWKV AI Music Composer',
-                      style: TextStyle(
-                          color: Colors.white, fontWeight: FontWeight.bold),
-                    ),
-                    Spacer(),
-                    Container(child: Obx(() {
-                      return CupertinoSegmentedControl(
-                        children: const {
-                          0: Text(
-                            'Preset Mode',
-                            style: TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold),
-                          ),
-                          1: Text(
-                            'Creative Mode',
-                            style: TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold),
-                          ),
-                        },
-                        onValueChanged: (int newValue) {
-                          // 当选择改变时执行的操作
-                          print('选择了选项 $newValue');
-                          selectstate.value = newValue;
-                          segmengChange(newValue);
-                        },
-                        groupValue: selectstate.value, // 当前选中的选项值
-                        selectedColor: Color(0xff44be1c),
-                        unselectedColor: Colors.transparent,
-                        borderColor: Color(0xff6d6d6d),
-                      );
-                    })),
-                  ],
-                ),
-              ),
-              Flexible(
-                flex: 2,
-                child: WebViewWidget(
-                  controller: controllerPiano,
-                ),
-              ),
-              Flexible(
-                flex: 1,
-                child: WebViewWidget(
-                  controller: controllerKeyboard,
-                ),
-              ),
-              Expanded(
-                child: Container(
-                  padding: EdgeInsets.symmetric(horizontal: 25, vertical: 5),
-                  color: Color(0xff3a3a3a),
+    return ScreenUtilInit(
+      designSize: Size(375, 812),
+      child: GetMaterialApp(
+          debugShowCheckedModeBanner: false,
+          home: Scaffold(
+              body: Container(
+            color: Color(0xff3a3a3a),
+            child: Column(
+              children: [
+                Container(
+                  padding: EdgeInsets.symmetric(horizontal: 25, vertical: 15),
                   child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      creatBottomBtn('Prompts', () {
-                        print("Promptss");
-                      }),
-                      SizedBox(
-                        width: 8,
+                      Text(
+                        'RWKV AI Music Composer',
+                        style: TextStyle(
+                            color: Colors.white, fontWeight: FontWeight.bold),
                       ),
-                      creatBottomBtn('Sounds Effect', () {
-                        print("Sounds Effect");
-                      }),
-                      ProgressbarTime(playProgress, pianoAllTime),
-                      Obx(() => isGenerating.value
-                          ? CircularProgressIndicator(
-                              valueColor:
-                                  AlwaysStoppedAnimation<Color>(Colors.white),
-                            )
-                          : Container(
-                              child: null,
-                            )),
                       Spacer(),
-                      Container(
-                        child: Row(
-                          children: [
-                            Obx(() => createButtonImageWithText(
-                                    !isGenerating.value ? 'Generate' : 'Stop',
-                                    !isGenerating.value
-                                        ? Icons.edit
-                                        : Icons.refresh, () {
-                                  print('Generate');
-                                  isGenerating.value = !isGenerating.value;
-                                  if (isGenerating.value) {
-                                    playProgress.value = 0.0;
-                                    pianoAllTime.value = 0.0;
-                                    // controllerPiano.runJavaScript(
-                                    //     "setAbcString(\"%%MIDI program 40\\nL:1/4\\nM:4/4\\nK:D\\n\\\"D\\\" A F F\", false)");
-                                    // controllerPiano.runJavaScript(
-                                    //     'resetTimingCallbacks()');
-                                    getABCData();
-                                  }
-                                })),
-                            Obx(() {
-                              return createButtonImageWithText(
-                                  !isPlay.value ? 'Play' : 'Pause',
-                                  !isPlay.value
-                                      ? Icons.play_arrow
-                                      : Icons.pause, () {
-                                print('Play');
-                                if (!isPlay.value) {
-                                  // controllerPiano.runJavaScript("ABCtoEvents(\"L:1/4\\nM:4/4\\nK:D\\n\\\"D\\\" A F F\")");
-                                  controllerPiano.runJavaScript("startPlay()");
-                                } else {
-                                  controllerPiano.runJavaScript("pausePlay()");
-                                }
-                                // isPlay.value = !isPlay.value;
-                              });
-                            }),
-                            createButtonImageWithText(
-                                'Settings', Icons.settings, () {
-                              print('Settings');
-                              Get.to(FlutterBlueApp());
-                            }),
-                          ],
-                        ),
-                      ),
+                      Container(child: Obx(() {
+                        return CupertinoSegmentedControl(
+                          children: const {
+                            0: Text(
+                              'Preset Mode',
+                              style: TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold),
+                            ),
+                            1: Text(
+                              'Creative Mode',
+                              style: TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold),
+                            ),
+                          },
+                          onValueChanged: (int newValue) {
+                            // 当选择改变时执行的操作
+                            print('选择了选项 $newValue');
+                            selectstate.value = newValue;
+                            segmengChange(newValue);
+                          },
+                          groupValue: selectstate.value, // 当前选中的选项值
+                          selectedColor: Color(0xff44be1c),
+                          unselectedColor: Colors.transparent,
+                          borderColor: Color(0xff6d6d6d),
+                        );
+                      })),
                     ],
                   ),
                 ),
-              )
-            ],
-          ),
-        )));
+                Flexible(
+                  flex: 2,
+                  child: WebViewWidget(
+                    controller: controllerPiano,
+                  ),
+                ),
+                Flexible(
+                  flex: 1,
+                  child: WebViewWidget(
+                    controller: controllerKeyboard,
+                  ),
+                ),
+                Expanded(
+                  child: Container(
+                    padding: EdgeInsets.symmetric(horizontal: 25, vertical: 5),
+                    color: Color(0xff3a3a3a),
+                    child: Row(
+                      children: [
+                        creatBottomBtn('Prompts', () {
+                          print("Promptss");
+                        }),
+                        SizedBox(
+                          width: 8,
+                        ),
+                        creatBottomBtn('Sounds Effect', () {
+                          print("Sounds Effect");
+                        }),
+                        ProgressbarTime(playProgress, pianoAllTime),
+                        Obx(() => isGenerating.value
+                            ? CircularProgressIndicator(
+                                valueColor:
+                                    AlwaysStoppedAnimation<Color>(Colors.white),
+                              )
+                            : Container(
+                                child: null,
+                              )),
+                        Spacer(),
+                        Container(
+                          child: Row(
+                            children: [
+                              Obx(() => createButtonImageWithText(
+                                      !isGenerating.value ? 'Generate' : 'Stop',
+                                      !isGenerating.value
+                                          ? Icons.edit
+                                          : Icons.refresh, () {
+                                    print('Generate');
+                                    isGenerating.value = !isGenerating.value;
+                                    if (isGenerating.value) {
+                                      playProgress.value = 0.0;
+                                      pianoAllTime.value = 0.0;
+                                      // controllerPiano.runJavaScript(
+                                      //     "setAbcString(\"%%MIDI program 40\\nL:1/4\\nM:4/4\\nK:D\\n\\\"D\\\" A F F\", false)");
+                                      // controllerPiano.runJavaScript(
+                                      //     'resetTimingCallbacks()');
+                                      getABCData();
+                                    }
+                                  })),
+                              Obx(() {
+                                return createButtonImageWithText(
+                                    !isPlay.value ? 'Play' : 'Pause',
+                                    !isPlay.value
+                                        ? Icons.play_arrow
+                                        : Icons.pause, () {
+                                  print('Play');
+                                  if (!isPlay.value) {
+                                    // controllerPiano.runJavaScript("ABCtoEvents(\"L:1/4\\nM:4/4\\nK:D\\n\\\"D\\\" A F F\")");
+                                    controllerPiano
+                                        .runJavaScript("startPlay()");
+                                  } else {
+                                    controllerPiano
+                                        .runJavaScript("pausePlay()");
+                                  }
+                                  // isPlay.value = !isPlay.value;
+                                });
+                              }),
+                              createButtonImageWithText(
+                                  'Settings', Icons.settings, () {
+                                print('Settings');
+                                Get.to(FlutterBlueApp());
+                              }),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                )
+              ],
+            ),
+          ))),
+    );
   }
 
   void getABCData() async {

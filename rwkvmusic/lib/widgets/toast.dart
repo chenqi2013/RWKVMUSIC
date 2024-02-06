@@ -10,10 +10,10 @@ Future<bool?> toastInfo({
   return Fluttertoast.showToast(
     msg: msg,
     toastLength: Toast.LENGTH_SHORT,
-    gravity: ToastGravity.TOP,
+    gravity: ToastGravity.CENTER,
     timeInSecForIosWeb: 1,
     backgroundColor: backgroundColor,
     textColor: textColor,
-    fontSize: 16.sp,
+    fontSize: 9.sp,
   );
 }
