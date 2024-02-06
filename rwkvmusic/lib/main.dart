@@ -23,9 +23,13 @@ void main(List<String> args) {
     DeviceOrientation.landscapeRight,
   ]);
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: []);
-  runApp(
-    MyApp(),
-  );
+  runApp(ScreenUtilInit(
+    designSize: Size(375, 812),
+    child: GetMaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: MyApp(),
+    ),
+  ));
 }
 
 class MyApp extends StatefulWidget {
@@ -160,148 +164,140 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
-    return ScreenUtilInit(
-      designSize: Size(375, 812),
-      child: GetMaterialApp(
-          debugShowCheckedModeBanner: false,
-          home: Scaffold(
-              body: Container(
-            color: Color(0xff3a3a3a),
-            child: Column(
+    return Scaffold(
+        body: Container(
+      color: Color(0xff3a3a3a),
+      child: Column(
+        children: [
+          Container(
+            padding: EdgeInsets.symmetric(horizontal: 25, vertical: 15),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                Container(
-                  padding: EdgeInsets.symmetric(horizontal: 25, vertical: 15),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Text(
-                        'RWKV AI Music Composer',
+                Text(
+                  'RWKV AI Music Composer',
+                  style: TextStyle(
+                      color: Colors.white, fontWeight: FontWeight.bold),
+                ),
+                Spacer(),
+                Container(child: Obx(() {
+                  return CupertinoSegmentedControl(
+                    children: const {
+                      0: Text(
+                        'Preset Mode',
                         style: TextStyle(
                             color: Colors.white, fontWeight: FontWeight.bold),
                       ),
-                      Spacer(),
-                      Container(child: Obx(() {
-                        return CupertinoSegmentedControl(
-                          children: const {
-                            0: Text(
-                              'Preset Mode',
-                              style: TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold),
-                            ),
-                            1: Text(
-                              'Creative Mode',
-                              style: TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold),
-                            ),
-                          },
-                          onValueChanged: (int newValue) {
-                            // 当选择改变时执行的操作
-                            print('选择了选项 $newValue');
-                            selectstate.value = newValue;
-                            segmengChange(newValue);
-                          },
-                          groupValue: selectstate.value, // 当前选中的选项值
-                          selectedColor: Color(0xff44be1c),
-                          unselectedColor: Colors.transparent,
-                          borderColor: Color(0xff6d6d6d),
-                        );
-                      })),
-                    ],
+                      1: Text(
+                        'Creative Mode',
+                        style: TextStyle(
+                            color: Colors.white, fontWeight: FontWeight.bold),
+                      ),
+                    },
+                    onValueChanged: (int newValue) {
+                      // 当选择改变时执行的操作
+                      print('选择了选项 $newValue');
+                      selectstate.value = newValue;
+                      segmengChange(newValue);
+                    },
+                    groupValue: selectstate.value, // 当前选中的选项值
+                    selectedColor: Color(0xff44be1c),
+                    unselectedColor: Colors.transparent,
+                    borderColor: Color(0xff6d6d6d),
+                  );
+                })),
+              ],
+            ),
+          ),
+          Flexible(
+            flex: 2,
+            child: WebViewWidget(
+              controller: controllerPiano,
+            ),
+          ),
+          Flexible(
+            flex: 1,
+            child: WebViewWidget(
+              controller: controllerKeyboard,
+            ),
+          ),
+          Expanded(
+            child: Container(
+              padding: EdgeInsets.symmetric(horizontal: 25, vertical: 5),
+              color: Color(0xff3a3a3a),
+              child: Row(
+                children: [
+                  creatBottomBtn('Prompts', () {
+                    print("Promptss");
+                    showPromptDialog(context, 'Prompts');
+                  }),
+                  SizedBox(
+                    width: 8,
                   ),
-                ),
-                Flexible(
-                  flex: 2,
-                  child: WebViewWidget(
-                    controller: controllerPiano,
-                  ),
-                ),
-                Flexible(
-                  flex: 1,
-                  child: WebViewWidget(
-                    controller: controllerKeyboard,
-                  ),
-                ),
-                Expanded(
-                  child: Container(
-                    padding: EdgeInsets.symmetric(horizontal: 25, vertical: 5),
-                    color: Color(0xff3a3a3a),
+                  creatBottomBtn('Sounds Effect', () {
+                    print("Sounds Effect");
+                    showPromptDialog(context, 'Sounds Effect');
+                  }),
+                  ProgressbarTime(playProgress, pianoAllTime),
+                  Obx(() => isGenerating.value
+                      ? CircularProgressIndicator(
+                          valueColor:
+                              AlwaysStoppedAnimation<Color>(Colors.white),
+                        )
+                      : Container(
+                          child: null,
+                        )),
+                  Spacer(),
+                  Container(
                     child: Row(
                       children: [
-                        creatBottomBtn('Prompts', () {
-                          print("Promptss");
+                        Obx(() => createButtonImageWithText(
+                                !isGenerating.value ? 'Generate' : 'Stop',
+                                !isGenerating.value
+                                    ? Icons.edit
+                                    : Icons.refresh, () {
+                              print('Generate');
+                              isGenerating.value = !isGenerating.value;
+                              if (isGenerating.value) {
+                                playProgress.value = 0.0;
+                                pianoAllTime.value = 0.0;
+                                // controllerPiano.runJavaScript(
+                                //     "setAbcString(\"%%MIDI program 40\\nL:1/4\\nM:4/4\\nK:D\\n\\\"D\\\" A F F\", false)");
+                                // controllerPiano.runJavaScript(
+                                //     'resetTimingCallbacks()');
+                                getABCData();
+                              }
+                            })),
+                        Obx(() {
+                          return createButtonImageWithText(
+                              !isPlay.value ? 'Play' : 'Pause',
+                              !isPlay.value ? Icons.play_arrow : Icons.pause,
+                              () {
+                            print('Play');
+                            if (!isPlay.value) {
+                              // controllerPiano.runJavaScript("ABCtoEvents(\"L:1/4\\nM:4/4\\nK:D\\n\\\"D\\\" A F F\")");
+                              controllerPiano.runJavaScript("startPlay()");
+                            } else {
+                              controllerPiano.runJavaScript("pausePlay()");
+                            }
+                            // isPlay.value = !isPlay.value;
+                          });
                         }),
-                        SizedBox(
-                          width: 8,
-                        ),
-                        creatBottomBtn('Sounds Effect', () {
-                          print("Sounds Effect");
+                        createButtonImageWithText('Settings', Icons.settings,
+                            () {
+                          print('Settings');
+                          Get.to(FlutterBlueApp());
                         }),
-                        ProgressbarTime(playProgress, pianoAllTime),
-                        Obx(() => isGenerating.value
-                            ? CircularProgressIndicator(
-                                valueColor:
-                                    AlwaysStoppedAnimation<Color>(Colors.white),
-                              )
-                            : Container(
-                                child: null,
-                              )),
-                        Spacer(),
-                        Container(
-                          child: Row(
-                            children: [
-                              Obx(() => createButtonImageWithText(
-                                      !isGenerating.value ? 'Generate' : 'Stop',
-                                      !isGenerating.value
-                                          ? Icons.edit
-                                          : Icons.refresh, () {
-                                    print('Generate');
-                                    isGenerating.value = !isGenerating.value;
-                                    if (isGenerating.value) {
-                                      playProgress.value = 0.0;
-                                      pianoAllTime.value = 0.0;
-                                      // controllerPiano.runJavaScript(
-                                      //     "setAbcString(\"%%MIDI program 40\\nL:1/4\\nM:4/4\\nK:D\\n\\\"D\\\" A F F\", false)");
-                                      // controllerPiano.runJavaScript(
-                                      //     'resetTimingCallbacks()');
-                                      getABCData();
-                                    }
-                                  })),
-                              Obx(() {
-                                return createButtonImageWithText(
-                                    !isPlay.value ? 'Play' : 'Pause',
-                                    !isPlay.value
-                                        ? Icons.play_arrow
-                                        : Icons.pause, () {
-                                  print('Play');
-                                  if (!isPlay.value) {
-                                    // controllerPiano.runJavaScript("ABCtoEvents(\"L:1/4\\nM:4/4\\nK:D\\n\\\"D\\\" A F F\")");
-                                    controllerPiano
-                                        .runJavaScript("startPlay()");
-                                  } else {
-                                    controllerPiano
-                                        .runJavaScript("pausePlay()");
-                                  }
-                                  // isPlay.value = !isPlay.value;
-                                });
-                              }),
-                              createButtonImageWithText(
-                                  'Settings', Icons.settings, () {
-                                print('Settings');
-                                Get.to(FlutterBlueApp());
-                              }),
-                            ],
-                          ),
-                        ),
                       ],
                     ),
                   ),
-                )
-              ],
+                ],
+              ),
             ),
-          ))),
-    );
+          )
+        ],
+      ),
+    ));
   }
 
   void getABCData() async {
@@ -430,27 +426,6 @@ class _MyAppState extends State<MyApp> {
         .replaceAll("\t", "\\t");
   }
 
-  void showPromptDialog(BuildContext context) {
-    showMenu(
-      context: context,
-      position: RelativeRect.fromLTRB(100, 100, 0, 0),
-      items: [
-        PopupMenuItem(
-          value: 'Option 1',
-          child: Text('Option 1'),
-        ),
-        PopupMenuItem(
-          value: 'Option 2',
-          child: Text('Option 2'),
-        ),
-        PopupMenuItem(
-          value: 'Option 3',
-          child: Text('Option 3'),
-        ),
-      ],
-    );
-  }
-
   void segmengChange(int index) {
     if (index == 0) {
       //preset
@@ -469,12 +444,12 @@ class _MyAppState extends State<MyApp> {
     }
   }
 
-  void popupwindow11(BuildContext context) {
+  void showPromptDialog(BuildContext context, String titleStr) {
     showDialog(
       context: context,
       builder: (context) => OnPopupWindowWidget(
-          title: const Text("Please select your Language"),
-          footer: Text('close'),
+          title: Text(titleStr),
+          footer: Text('Close'),
           child: Container(
             color: Colors.red,
           )),
