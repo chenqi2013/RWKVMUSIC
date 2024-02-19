@@ -33,6 +33,22 @@ class ConfigStore extends GetxController {
     return StorageService.to.setBool(STORAGE_DEVICE_FIRST_OPEN_KEY, false);
   }
 
+  Future<bool> savePromptsSelect(int selelct){
+    return StorageService.to.setInt(STORAGE_PROMPTS_SELECT, selelct);
+  }
+
+  Future<bool> saveSoundsEffectSelect(int selelct){
+    return StorageService.to.setInt(STORAGE_SOUNDSEFFECT_SELECT, selelct);
+  }
+
+  int getPromptsSelect(){
+    return StorageService.to.getInt(STORAGE_PROMPTS_SELECT);
+  }
+
+  int getSoundsEffectSelect(){
+    return StorageService.to.getInt(STORAGE_SOUNDSEFFECT_SELECT);
+  }
+
   void onInitLocale() {
     var langCode = StorageService.to.getString(STORAGE_LANGUAGE_CODE);
     if (langCode.isEmpty) return;

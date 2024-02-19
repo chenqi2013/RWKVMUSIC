@@ -7,16 +7,21 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:rwkvmusic/mainwidget/ProgressbarTime.dart';
+import 'package:rwkvmusic/services/storage.dart';
+import 'package:rwkvmusic/store/config.dart';
 import 'package:rwkvmusic/test/bletest.dart';
 import 'package:rwkvmusic/values/constantdata.dart';
+import 'package:rwkvmusic/values/storage.dart';
 
 import 'mainwidget/BorderBtnWidget.dart';
 import 'mainwidget/BtnImageTextWidget.dart';
 import 'package:webview_flutter_plus/webview_flutter_plus.dart';
 import 'package:on_popup_window_widget/on_popup_window_widget.dart';
 
-void main(List<String> args) {
+void main(List<String> args) async{
   WidgetsFlutterBinding.ensureInitialized();
+   await Get.putAsync<StorageService>(() => StorageService().init());
+    Get.put<ConfigStore>(ConfigStore());
   // 强制横屏显示
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.landscapeLeft,
@@ -58,6 +63,7 @@ class _MyAppState extends State<MyApp> {
   int preTimestamp = 0;
   int preCount = 0;
   int listenCount = 0;
+  var radioSelectedValue = 0.obs;
   @override
   void initState() {
     super.initState();
@@ -229,14 +235,16 @@ class _MyAppState extends State<MyApp> {
                 children: [
                   creatBottomBtn('Prompts', () {
                     print("Promptss");
-                    showPromptDialog(context, 'Prompts');
+                    showPromptDialog(
+                        context, 'Prompts', prompts, STORAGE_PROMPTS_SELECT);
                   }),
                   SizedBox(
                     width: 8,
                   ),
                   creatBottomBtn('Sounds Effect', () {
                     print("Sounds Effect");
-                    showPromptDialog(context, 'Sounds Effect');
+                    showPromptDialog(context, 'Sounds Effect', soundEffect,
+                        STORAGE_SOUNDSEFFECT_SELECT);
                   }),
                   ProgressbarTime(playProgress, pianoAllTime),
                   Obx(() => isGenerating.value
@@ -444,25 +452,50 @@ class _MyAppState extends State<MyApp> {
     }
   }
 
-  void showPromptDialog(BuildContext context, String titleStr) {
+  void showPromptDialog(
+      BuildContext context, String titleStr, List list, String type) {
     showDialog(
       context: context,
-      builder: (context) => OnPopupWindowWidget(
+      builder: (context) => Container(
+        // width: 50,
+        // height: 50,
+        // color: Colors.red,
+        child: OnPopupWindowWidget(
           title: Text(titleStr),
           footer: Text('Close'),
-          child: Container(
-            color: Colors.red,
-          )),
+          child: SizedBox(
+            height: 100,
+            // width: 40,
+            child: ListView.builder(
+              itemCount: list.length,
+              itemBuilder: (BuildContext context, int index) {
+                // ListTile(title: Text(list[index]));
+                if (type == STORAGE_PROMPTS_SELECT) {
+                  radioSelectedValue.value = ConfigStore.to.getPromptsSelect();
+                } else if (type == STORAGE_SOUNDSEFFECT_SELECT) {
+                  radioSelectedValue.value =
+                      ConfigStore.to.getSoundsEffectSelect();
+                }
+                return Obx(() {
+                  return RadioListTile(
+                    title: Text(list[index]),
+                    value: index,
+                    groupValue: radioSelectedValue.value,
+                    onChanged: (value) {
+                      radioSelectedValue.value = value!;
+                      if (type == STORAGE_PROMPTS_SELECT) {
+                        ConfigStore.to.savePromptsSelect(value);
+                      } else if (type == STORAGE_SOUNDSEFFECT_SELECT) {
+                        ConfigStore.to.saveSoundsEffectSelect(value);
+                      }
+                    },
+                  );
+                });
+              },
+            ),
+          ),
+        ),
+      ),
     );
-  }
-
-  List<Widget> children(BuildContext context) {
-    List<Widget> res = prompts
-        .map(
-          (e) => Text(e),
-        )
-        .toList();
-
-    return res + res;
   }
 }

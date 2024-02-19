@@ -12,3 +12,9 @@ const String STORAGE_INDEX_NEWS_CACHE_KEY = 'cache_index_news';
 
 /// 多语言
 const String STORAGE_LANGUAGE_CODE = 'language_code';
+
+/// prompts
+const String STORAGE_PROMPTS_SELECT = 'prompts_select';
+
+/// soundseffect
+const String STORAGE_SOUNDSEFFECT_SELECT = 'soundseffect_select';
