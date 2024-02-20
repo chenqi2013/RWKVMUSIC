@@ -13,6 +13,8 @@ import 'package:rwkvmusic/services/storage.dart';
 import 'package:rwkvmusic/store/config.dart';
 import 'package:rwkvmusic/test/bletest.dart';
 import 'package:rwkvmusic/test/mididevicetest.dart';
+import 'package:rwkvmusic/utils/audioplayer.dart';
+import 'package:rwkvmusic/utils/midiconvertabc.dart';
 import 'package:rwkvmusic/values/constantdata.dart';
 import 'package:rwkvmusic/values/storage.dart';
 
@@ -143,13 +145,21 @@ class _MyAppState extends State<MyApp> {
           },
         ),
       )
-      ..loadFlutterAssetServer(filePath2);
-    // controllerKeyboard.addJavaScriptChannel("controller", onMessageReceived: (JavaScriptMessage jsMessage){
-    //       print('controllerKeyboard onMessageReceived='+jsMessage.message);
-    // });
-
-   
+      ..loadFlutterAssetServer(filePath2)
+      ..addJavaScriptChannel("flutteronNoteOff",
+          onMessageReceived: (JavaScriptMessage jsMessage) {
+        print('flutteronNoteOff onMessageReceived=' + jsMessage.message);
+      })
+      ..addJavaScriptChannel("flutteronNoteOn",
+          onMessageReceived: (JavaScriptMessage jsMessage) {
+        print('flutteronNoteOn onMessageReceived=' + jsMessage.message);
+        String path =
+            MidiToABCConverter().getNoteMp3Path(int.parse(jsMessage.message));
+        AudioPlayerManage()
+            .playAudio('player/soundfont/acoustic_grand_piano-mp3/$path');
+      });
   }
+
   void createTimer() {
     timer = Timer.periodic(Duration(milliseconds: 1000), (Timer timer) {
       if (playProgress.value >= 1) {

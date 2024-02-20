@@ -1,6 +1,5 @@
 import 'package:audioplayers/audioplayers.dart';
 import 'package:get/get.dart';
-import 'package:get/get_state_manager/src/simple/list_notifier.dart';
 
 class AudioPlayerManage {
   static AudioPlayerManage _instance = AudioPlayerManage._internal();

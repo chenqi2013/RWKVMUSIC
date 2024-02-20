@@ -206,11 +206,12 @@
         key.classList.add("pressed");
         console.log('mousedown midiKey: ', midiKey);
         // 由这里调用安卓程序
-        if (typeof controller !== "undefined") {
-          controller.onNoteOn(parseInt(midiKey));
-        } else {
-          alert("Running outside Android app down");
-        }
+        // if (typeof controller !== "undefined") {
+          // controller.onNoteOn(parseInt(midiKey));
+          flutteronNoteOn.postMessage(parseInt(midiKey));
+        // } else {
+        //   alert("Running outside Android app down");
+        // }
       }
 
       function handleMouseUp(e) {
@@ -224,11 +225,12 @@
         });
 
         // 由这里调用安卓程序
-        if (typeof controller !== "undefined") {
-          controller.onNoteOff(parseInt(midiKey));
-        } else {
-          alert("Running outside Android app up");
-        }
+        // if (typeof controller !== "undefined") {
+          // controller.onNoteOff(parseInt(midiKey));
+          flutteronNoteOff.postMessage(parseInt(midiKey));
+        // } else {
+        //   alert("Running outside Android app up");
+        // }
       }
     }
     setPiano(21, 108);
