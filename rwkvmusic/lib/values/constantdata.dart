@@ -31,10 +31,10 @@ List<String> prompts = [
   "Get away from it all",
 ];
 
-List<String> soundEffect = [
-  "Piano",
-  "Violin",
-  "Ocarina",
-  "Cello",
-  "Guitar",
-];
+Map<String,String> soundEffect = {
+  "Piano":'acoustic_grand_piano-mp3',
+  "Violin":'violin-mp3',
+  "Ocarina":'ocarina-mp3',
+  "Cello":'cello-mp3',
+  "Guitar":'acoustic_guitar_steel-mp3',
+};

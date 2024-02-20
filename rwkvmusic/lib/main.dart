@@ -69,6 +69,7 @@ class _MyAppState extends State<MyApp> {
   int preCount = 0;
   int listenCount = 0;
   var radioSelectedValue = 0.obs;
+  String? currentSoundEffect;
   @override
   void initState() {
     super.initState();
@@ -153,10 +154,16 @@ class _MyAppState extends State<MyApp> {
       ..addJavaScriptChannel("flutteronNoteOn",
           onMessageReceived: (JavaScriptMessage jsMessage) {
         print('flutteronNoteOn onMessageReceived=' + jsMessage.message);
-        String path =
+        String name =
             MidiToABCConverter().getNoteMp3Path(int.parse(jsMessage.message));
-        AudioPlayerManage()
-            .playAudio('player/soundfont/acoustic_grand_piano-mp3/$path');
+        if (currentSoundEffect != null) {
+          String? mp3Folder = soundEffect[currentSoundEffect];
+          print('mp3Folder==$mp3Folder');
+          AudioPlayerManage().playAudio('player/soundfont/$mp3Folder/$name');
+        } else {
+          AudioPlayerManage()
+              .playAudio('player/soundfont/acoustic_grand_piano-mp3/$name');
+        }
       });
   }
 
@@ -257,8 +264,8 @@ class _MyAppState extends State<MyApp> {
                   ),
                   creatBottomBtn('Sounds Effect', () {
                     print("Sounds Effect");
-                    showPromptDialog(context, 'Sounds Effect', soundEffect,
-                        STORAGE_SOUNDSEFFECT_SELECT);
+                    showPromptDialog(context, 'Sounds Effect',
+                        soundEffect.keys.toList(), STORAGE_SOUNDSEFFECT_SELECT);
                   }),
                   ProgressbarTime(playProgress, pianoAllTime),
                   Obx(() => isGenerating.value
@@ -477,7 +484,9 @@ class _MyAppState extends State<MyApp> {
         // color: Colors.red,
         child: OnPopupWindowWidget(
           title: Text(titleStr),
-          footer: Text('Close'),
+          footer: InkWell(child: Text('Close'),onTap:() {
+             Navigator.of(context).pop();
+          },),
           child: SizedBox(
             height: 100,
             // width: 40,
@@ -490,6 +499,11 @@ class _MyAppState extends State<MyApp> {
                 } else if (type == STORAGE_SOUNDSEFFECT_SELECT) {
                   radioSelectedValue.value =
                       ConfigStore.to.getSoundsEffectSelect();
+                  if (radioSelectedValue.value == -1) {
+                    currentSoundEffect = list[0];
+                  } else {
+                    currentSoundEffect = list[radioSelectedValue.value];
+                  }
                 }
                 return Obx(() {
                   return RadioListTile(
@@ -502,6 +516,7 @@ class _MyAppState extends State<MyApp> {
                         ConfigStore.to.savePromptsSelect(value);
                       } else if (type == STORAGE_SOUNDSEFFECT_SELECT) {
                         ConfigStore.to.saveSoundsEffectSelect(value);
+                        currentSoundEffect = list[radioSelectedValue.value];
                       }
                     },
                   );
