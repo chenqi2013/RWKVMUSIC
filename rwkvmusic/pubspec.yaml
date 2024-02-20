@@ -28,87 +28,45 @@ environment:
 # the latest version available on pub.dev. To see which dependencies have newer
 # versions available, run `flutter pub outdated`.
 dependencies:
-  flutter:
-    sdk: flutter
-  flutter_localizations:
-    sdk: flutter
-
-  # The following adds the Cupertino Icons font to your application.
-  # Use with the CupertinoIcons class for iOS style icons.
+  audioplayers: ^5.2.1
+  cached_network_image: ^3.3.1
+  cookie_jar: ^3.0.1
+  crypto: ^3.0.1
   cupertino_icons: ^1.0.2
-  webview_flutter: ^4.4.4
-  # webview_universal: ^0.0.5
-  webview_flutter_plus: ^0.4.4
-
-  # GetX
-  get: ^4.1.4
-
-  # 日期
-  intl: ^0.18.1
-
-  # 屏幕适配
-  flutter_screenutil: ^5.0.0+2
-
-  # 下拉刷新
-  pull_to_refresh: ^2.0.0
-
-  # toast
-  fluttertoast: ^8.2.4
-
-  # easyloading
-  flutter_easyloading: ^3.0.3
-
-  # # http
+  device_info: null
   dio: ^4.0.0
   dio_cookie_manager: ^2.0.0
-  cookie_jar: ^3.0.1
-
-  # # 缓存
-  shared_preferences: ^2.2.2 
-  cached_network_image: ^3.3.1
-  sqflite: ^2.3.2
-  sqflite_common:
-  flutter_cache_manager: 
-
-  # 加密安全 SHA
-  crypto: ^3.0.1
-
-  # # # webView
-  # # webview_flutter: ^2.0.4
-
-  # loading
-  loading_animations: ^2.2.0
-
-  # share
-  share: ^2.0.1
-
-  # 设备信息
-  device_info:
-
-  # 包信息
-  package_info: ^2.0.0
-
-  # 路径查询
-  path_provider: ^2.0.1
-
-  # permission 权限
-  permission_handler: ^7.1.0
-
-  # 错误收集
-  sentry: ^5.0.0
-
-  # 通过 scheme 打开APP 获取 参数
-  uni_links: ^0.5.1
-  flutter_inappwebview: ^6.0.0
+  flutter:
+    sdk: flutter
   flutter_blue: ^0.8.0
+  flutter_cache_manager: null
+  flutter_easyloading: ^3.0.3
+  flutter_inappwebview: ^6.0.0
+  flutter_localizations:
+    sdk: flutter
   flutter_midi_command: ^0.4.15
+  flutter_screenutil: ^5.0.0+2
+  fluttertoast: ^8.2.4
+  get: ^4.1.4
+  intl: ^0.18.1
+  kumi_popup_window: ^2.0.1
+  loading_animations: ^2.2.0
   on_popup_window_widget: ^0.0.6
   on_process_button_widget: ^2.0.2
-  kumi_popup_window: ^2.0.1
+  package_info: ^2.0.0
+  path_provider: ^2.0.1
+  permission_handler: ^7.1.0
+  pull_to_refresh: ^2.0.0
+  sentry: ^5.0.0
+  share: ^2.0.1
+  shared_preferences: ^2.2.2
+  sqflite: ^2.3.2
+  sqflite_common: null
+  uni_links: ^0.5.1
+  webview_flutter: ^4.4.4
+  webview_flutter_plus: ^0.4.4
 
 dev_dependencies:
-  flutter_test:
-    sdk: flutter
 
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is
@@ -116,10 +74,11 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^2.0.0
+  flutter_test:
+    sdk: flutter
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
-
 # The following section is specific to Flutter packages.
 flutter:
 
@@ -143,13 +102,10 @@ flutter:
     - assets/player/
     # - assets/player/dist/
     - assets/prompts/
-
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware
-
   # For details regarding adding assets from package dependencies, see
   # https://flutter.dev/assets-and-images/#from-packages
-
   # To add custom fonts to your application, add a fonts section here,
   # in this "flutter" section. Each entry in this list should have a
   # "family" key with the font family name, and a "fonts" key with a

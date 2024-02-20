@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:ffi';
 import 'dart:io';
+import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -19,10 +21,10 @@ import 'mainwidget/BtnImageTextWidget.dart';
 import 'package:webview_flutter_plus/webview_flutter_plus.dart';
 import 'package:on_popup_window_widget/on_popup_window_widget.dart';
 
-void main(List<String> args) async{
+void main(List<String> args) async {
   WidgetsFlutterBinding.ensureInitialized();
-   await Get.putAsync<StorageService>(() => StorageService().init());
-    Get.put<ConfigStore>(ConfigStore());
+  await Get.putAsync<StorageService>(() => StorageService().init());
+  Get.put<ConfigStore>(ConfigStore());
   // 强制横屏显示
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.landscapeLeft,
@@ -30,7 +32,7 @@ void main(List<String> args) async{
   ]);
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: []);
   runApp(ScreenUtilInit(
-    designSize: Size(375, 812),
+    // designSize: Size(375, 812),
     child: GetMaterialApp(
       debugShowCheckedModeBanner: false,
       home: MyApp(),
@@ -65,6 +67,8 @@ class _MyAppState extends State<MyApp> {
   int preCount = 0;
   int listenCount = 0;
   var radioSelectedValue = 0.obs;
+  late AudioPlayer audioPlayer;
+  var isMP3Playing = false.obs;
   @override
   void initState() {
     super.initState();
@@ -145,6 +149,22 @@ class _MyAppState extends State<MyApp> {
     // controllerKeyboard.addJavaScriptChannel("controller", onMessageReceived: (JavaScriptMessage jsMessage){
     //       print('controllerKeyboard onMessageReceived='+jsMessage.message);
     // });
+
+    audioPlayer = AudioPlayer();
+    audioPlayer.onPlayerStateChanged.listen((state) {
+      if (state == PlayerState.playing) {
+        isMP3Playing.value = true;
+      } else {
+        isMP3Playing.value = false;
+      }
+    });
+  }
+
+  Future<void> playAudio() async {
+    await audioPlayer
+        .play(AssetSource(
+            'player/soundfont/acoustic_grand_piano-mp3/D4.mp3'))
+        .then((value) => isMP3Playing.value = true);
   }
 
   void createTimer() {
@@ -166,6 +186,7 @@ class _MyAppState extends State<MyApp> {
   void dispose() {
     timer.cancel();
     httpClient.close();
+    audioPlayer.dispose();
     super.dispose();
   }
 
@@ -235,6 +256,7 @@ class _MyAppState extends State<MyApp> {
               child: Row(
                 children: [
                   creatBottomBtn('Prompts', () {
+                    playAudio();
                     print("Promptss");
                     showPromptDialog(
                         context, 'Prompts', prompts, STORAGE_PROMPTS_SELECT);

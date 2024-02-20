@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_midi_command/flutter_midi_command.dart';
+import 'package:rwkvmusic/utils/midiconvertabc.dart';
 import 'package:rwkvmusic/widgets/toast.dart';
 
 // import 'controller.dart';
@@ -26,6 +27,8 @@ class MyAppState extends State<MyApp11> {
   bool _iOSNetworkSessionEnabled = false;
 
   bool _didAskForBluetoothPermissions = false;
+
+  late MidiToABCConverter convertABC = MidiToABCConverter();
 
   @override
   void initState() {
@@ -276,6 +279,8 @@ class MyAppState extends State<MyApp11> {
                             _midiCommand.onMidiDataReceived?.listen((data) {
                               MidiPacket datatmp = data;
                               print('Received MIDI data: ${data.data}');
+                              var result = convertABC.midiToABC(datatmp.data, false);
+                              print('convertdata=$result');
                             });
                           }).catchError((err) {
                             ScaffoldMessenger.of(context).showSnackBar(SnackBar(
