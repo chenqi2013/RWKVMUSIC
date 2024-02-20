@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_midi_command/flutter_midi_command.dart';
+import 'package:rwkvmusic/widgets/toast.dart';
 
 // import 'controller.dart';
 
@@ -112,9 +113,7 @@ class MyAppState extends State<MyApp11> {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: Scaffold(
+    return Scaffold(
         appBar: AppBar(
           title: const Text('FlutterMidiCommand Example'),
           actions: <Widget>[
@@ -263,7 +262,7 @@ class MyAppState extends State<MyApp11> {
                       onTap: () {
                         if (device.connected) {
                           if (kDebugMode) {
-                            print("disconnect");
+                            toastInfo(msg:"disconnect");
                           }
                           _midiCommand.disconnectDevice(device);
                         } else {
@@ -272,8 +271,12 @@ class MyAppState extends State<MyApp11> {
                           }
                           _midiCommand.connectToDevice(device).then((_) {
                             if (kDebugMode) {
-                              print("device connected async");
+                              toastInfo(msg:"device connected async");
                             }
+                            _midiCommand.onMidiDataReceived?.listen((data) {
+                              MidiPacket datatmp = data;
+                              print('Received MIDI data: ${data.data}');
+                            });
                           }).catchError((err) {
                             ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                                 content: Text(
@@ -290,7 +293,6 @@ class MyAppState extends State<MyApp11> {
             },
           ),
         ),
-      ),
-    );
+      );
   }
 }

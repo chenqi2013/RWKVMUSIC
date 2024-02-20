@@ -70,7 +70,7 @@ class FlutterBlueApp extends StatelessWidget {
       for (ScanResult r in results) {
         String name = r.device.name;
         print('$name found! rssi: ${r.rssi}');
-        if (!name.isEmpty && !list.contains(r.device)) {
+        if (!name.isEmpty && name.startsWith('SMK25V2') && !list.contains(r.device)) {
           list.add(r.device);
         }
       }
@@ -117,7 +117,7 @@ class FlutterBlueApp extends StatelessWidget {
                       print('chenqi Device is connected.');
                       toastInfo(msg: 'Device is connected');
                       stopScanBLE();
-                      test();
+                      checkMidiDevice(currentDevice);
                       break;
                     case BluetoothDeviceState.connecting:
                       print('chenqi Device is connecting.');
@@ -143,7 +143,7 @@ class FlutterBlueApp extends StatelessWidget {
         ));
   }
 
-  Future<void> test() async {
+  Future<void> checkMidiDevice(BluetoothDevice device) async {
     List<BluetoothService> services = await currentDevice.discoverServices();
     services.forEach((service) async {
       // Reads all characteristics
@@ -156,6 +156,7 @@ class FlutterBlueApp extends StatelessWidget {
         //   List<int> value = await descriptor.read();
         //   print('chenqi descriptor.read()==$value');
         // }
+        print('characteristic.uuid=${characteristic.uuid.toString()}');
         characteristic.setNotifyValue(true);
         characteristic.value.listen((value) {
           print('chenqi characteristic.value.listen==$value');

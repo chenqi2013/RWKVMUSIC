@@ -10,6 +10,7 @@ import 'package:rwkvmusic/mainwidget/ProgressbarTime.dart';
 import 'package:rwkvmusic/services/storage.dart';
 import 'package:rwkvmusic/store/config.dart';
 import 'package:rwkvmusic/test/bletest.dart';
+import 'package:rwkvmusic/test/mididevicetest.dart';
 import 'package:rwkvmusic/values/constantdata.dart';
 import 'package:rwkvmusic/values/storage.dart';
 
@@ -294,7 +295,8 @@ class _MyAppState extends State<MyApp> {
                         createButtonImageWithText('Settings', Icons.settings,
                             () {
                           print('Settings');
-                          Get.to(FlutterBlueApp());
+                          // Get.to(FlutterBlueApp());
+                          Get.to(MyApp11());
                         }),
                       ],
                     ),
