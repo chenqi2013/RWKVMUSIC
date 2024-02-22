@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_blue/flutter_blue.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
+import 'package:get/get_rx/get_rx.dart';
 import 'package:rwkvmusic/widgets/toast.dart';
 
 void main() {
@@ -14,7 +15,7 @@ void main() {
 }
 
 class FlutterBlueApp extends StatelessWidget {
-  List<BluetoothDevice> list = <BluetoothDevice>[].obs;
+  RxList<BluetoothDevice> list = <BluetoothDevice>[].obs;
   FlutterBlue flutterBlue = FlutterBlue.instance;
   late BluetoothDevice currentDevice;
   @override
@@ -70,7 +71,9 @@ class FlutterBlueApp extends StatelessWidget {
       for (ScanResult r in results) {
         String name = r.device.name;
         print('$name found! rssi: ${r.rssi}');
-        if (!name.isEmpty && name.startsWith('SMK25V2') && !list.contains(r.device)) {
+        if (!name.isEmpty &&
+            name.startsWith('SMK25V2') &&
+            !list.contains(r.device)) {
           list.add(r.device);
         }
       }
@@ -80,7 +83,7 @@ class FlutterBlueApp extends StatelessWidget {
         print('chenqi Bluetooth is on');
         // Bluetooth is on, you can start scanning or do other tasks.
       } else {
-        toastInfo(msg:'请先打开你手机上的蓝牙');
+        toastInfo(msg: '请先打开你手机上的蓝牙');
         // Bluetooth is off, handle accordingly.
       }
     });

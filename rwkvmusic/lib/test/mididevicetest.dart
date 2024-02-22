@@ -4,8 +4,10 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_midi_command/flutter_midi_command.dart';
+import 'package:get/get.dart';
 import 'package:rwkvmusic/utils/audioplayer.dart';
 import 'package:rwkvmusic/utils/midiconvertabc.dart';
+import 'package:rwkvmusic/utils/mididevicemanage.dart';
 import 'package:rwkvmusic/widgets/toast.dart';
 
 // import 'controller.dart';
@@ -20,199 +22,44 @@ class MyApp11 extends StatefulWidget {
 }
 
 class MyAppState extends State<MyApp11> {
-  StreamSubscription<String>? _setupSubscription;
-  StreamSubscription<BluetoothState>? _bluetoothStateSubscription;
-  final MidiCommand _midiCommand = MidiCommand();
-
-  bool _virtualDeviceActivated = false;
-  bool _iOSNetworkSessionEnabled = false;
-
-  bool _didAskForBluetoothPermissions = false;
-
-  late MidiToABCConverter convertABC = MidiToABCConverter();
-
+  late MidiDeviceManage deviceManage;
+  var allDives = <MidiDevice>[].obs;
   @override
   void initState() {
     super.initState();
-
-    _setupSubscription = _midiCommand.onMidiSetupChanged?.listen((data) async {
-      if (kDebugMode) {
-        print("setup changed $data");
-      }
-      setState(() {});
-    });
-
-    _bluetoothStateSubscription =
-        _midiCommand.onBluetoothStateChanged.listen((data) {
-      if (kDebugMode) {
-        print("bluetooth state change $data");
-      }
-      setState(() {});
-    });
-
-    _updateNetworkSessionState();
+    deviceManage = MidiDeviceManage();
+    deviceManage.receiveCallback = (int data) {
+      print('receiveCallback=$data');
+    };
+    deviceManage.updateNetworkSessionState();
   }
 
   @override
   void dispose() {
-    _setupSubscription?.cancel();
-    _bluetoothStateSubscription?.cancel();
+    deviceManage.cancelMidi();
     super.dispose();
-  }
-
-  _updateNetworkSessionState() async {
-    var nse = await _midiCommand.isNetworkSessionEnabled;
-    if (nse != null) {
-      setState(() {
-        _iOSNetworkSessionEnabled = nse;
-      });
-    }
-  }
-
-  IconData _deviceIconForType(String type) {
-    switch (type) {
-      case "native":
-        return Icons.devices;
-      case "network":
-        return Icons.language;
-      case "BLE":
-        return Icons.bluetooth;
-      default:
-        return Icons.device_unknown;
-    }
-  }
-
-  Future<void> _informUserAboutBluetoothPermissions(
-      BuildContext context) async {
-    if (_didAskForBluetoothPermissions) {
-      return;
-    }
-
-    await showDialog<void>(
-      context: context,
-      barrierDismissible: false,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text(
-              'Please Grant Bluetooth Permissions to discover BLE MIDI Devices.'),
-          content: const Text(
-              'In the next dialog we might ask you for bluetooth permissions.\n'
-              'Please grant permissions to make bluetooth MIDI possible.'),
-          actions: <Widget>[
-            TextButton(
-              child: const Text('Ok. I got it!'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
-    );
-
-    _didAskForBluetoothPermissions = true;
-
-    return;
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('FlutterMidiCommand Example'),
+        title: const Text('MIDIDevice List'),
         actions: <Widget>[
-          Switch(
-              value: _iOSNetworkSessionEnabled,
-              onChanged: (newValue) {
-                _midiCommand.setNetworkSessionEnabled(newValue);
-                setState(() {
-                  _iOSNetworkSessionEnabled = newValue;
-                });
-              }),
-          Switch(
-              value: _virtualDeviceActivated,
-              onChanged: (newValue) {
-                setState(() {
-                  _virtualDeviceActivated = newValue;
-                });
-                if (newValue) {
-                  _midiCommand.addVirtualDevice(name: "Flutter MIDI Command");
-                } else {
-                  _midiCommand.removeVirtualDevice(
-                      name: "Flutter MIDI Command");
-                }
-              }),
+          // Switch(
+          //     value: deviceManage.iOSNetworkSessionEnabled.value,
+          //     onChanged: (newValue) {
+          //       deviceManage.networkSessionEnabled(newValue);
+          //     }),
+          // Switch(
+          //     value: deviceManage.virtualDeviceActivated.value,
+          //     onChanged: (newValue) {
+          //       deviceManage.addOrRemoveVirtualDevice(newValue);
+          //     }),
           Builder(builder: (context) {
             return IconButton(
                 onPressed: () async {
-                  // Ask for bluetooth permissions
-                  await _informUserAboutBluetoothPermissions(context);
-
-                  // Start bluetooth
-                  if (kDebugMode) {
-                    print("start ble central");
-                  }
-                  await _midiCommand.startBluetoothCentral().catchError((err) {
-                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                      content: Text(err),
-                    ));
-                  });
-
-                  if (kDebugMode) {
-                    print("wait for init");
-                  }
-                  await _midiCommand
-                      .waitUntilBluetoothIsInitialized()
-                      .timeout(const Duration(seconds: 5), onTimeout: () {
-                    if (kDebugMode) {
-                      print("Failed to initialize Bluetooth");
-                    }
-                  });
-
-                  // If bluetooth is powered on, start scanning
-                  if (_midiCommand.bluetoothState == BluetoothState.poweredOn) {
-                    _midiCommand
-                        .startScanningForBluetoothDevices()
-                        .catchError((err) {
-                      if (kDebugMode) {
-                        print("Error $err");
-                      }
-                    });
-                    if (context.mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                        content: Text('Scanning for bluetooth devices ...'),
-                      ));
-                    }
-                  } else {
-                    final messages = {
-                      BluetoothState.unsupported:
-                          'Bluetooth is not supported on this device.',
-                      BluetoothState.poweredOff:
-                          'Please switch on bluetooth and try again.',
-                      BluetoothState.poweredOn: 'Everything is fine.',
-                      BluetoothState.resetting:
-                          'Currently resetting. Try again later.',
-                      BluetoothState.unauthorized:
-                          'This app needs bluetooth permissions. Please open settings, find your app and assign bluetooth access rights and start your app again.',
-                      BluetoothState.unknown:
-                          'Bluetooth is not ready yet. Try again later.',
-                      BluetoothState.other:
-                          'This should never happen. Please inform the developer of your app.',
-                    };
-                    if (context.mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                        backgroundColor: Colors.red,
-                        content: Text(messages[_midiCommand.bluetoothState] ??
-                            'Unknown bluetooth state: ${_midiCommand.bluetoothState}'),
-                      ));
-                    }
-                  }
-
-                  if (kDebugMode) {
-                    print("done");
-                  }
-                  // If not show a message telling users what to do
-                  setState(() {});
+                  deviceManage.refreshMIDIDevice(context);
                 },
                 icon: const Icon(Icons.refresh));
           }),
@@ -227,74 +74,38 @@ class MyAppState extends State<MyApp11> {
       ),
       body: Center(
         child: FutureBuilder(
-          future: _midiCommand.devices,
+          future: deviceManage.midiCommand.devices,
           builder: (BuildContext context, AsyncSnapshot snapshot) {
             if (snapshot.hasData && snapshot.data != null) {
-              var devices = snapshot.data as List<MidiDevice>;
-              return ListView.builder(
-                itemCount: devices.length,
-                itemBuilder: (context, index) {
-                  MidiDevice device = devices[index];
-
-                  return ListTile(
-                    title: Text(
-                      device.name,
-                      style: Theme.of(context).textTheme.headlineSmall,
-                    ),
-                    subtitle: Text(
-                        "ins:${device.inputPorts.length} outs:${device.outputPorts.length}, ${device.id}, ${device.type}"),
-                    leading: Icon(device.connected
-                        ? Icons.radio_button_on
-                        : Icons.radio_button_off),
-                    trailing: Icon(_deviceIconForType(device.type)),
-                    onLongPress: () {
-                      _midiCommand.stopScanningForBluetoothDevices();
-                      // Navigator.of(context)
-                      //     .push(MaterialPageRoute<void>(
-                      //   builder: (_) => ControllerPage(device),
-                      // ))
-                      //     .then((value) {
-                      //   setState(() {});
-                      // });
-
-                      print('stopScanningForBluetoothDevices');
-                    },
-                    onTap: () {
-                      if (device.connected) {
-                        if (kDebugMode) {
-                          toastInfo(msg: "disconnect");
-                        }
-                        _midiCommand.disconnectDevice(device);
-                      } else {
-                        if (kDebugMode) {
-                          print("connect");
-                        }
-                        _midiCommand.connectToDevice(device).then((_) {
-                          if (kDebugMode) {
-                            toastInfo(msg: "device connected async");
-                          }
-                          _midiCommand.onMidiDataReceived?.listen((data) {
-                            MidiPacket datatmp = data;
-                            print('Received MIDI data: ${data.data}');
-                            var result =
-                                convertABC.midiToABC(datatmp.data, false);
-                            print('convertdata=$result');
-                            if ((result[0] as String).isNotEmpty) {
-                              String path =
-                                  convertABC.getNoteMp3Path(result[1]);
-                              AudioPlayerManage().playAudio('player/soundfont/acoustic_grand_piano-mp3/$path');
-                            }
-                          });
-                        }).catchError((err) {
-                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                              content: Text(
-                                  "Error: ${(err as PlatformException?)?.message}")));
-                        });
-                      }
-                    },
-                  );
-                },
-              );
+              allDives.addAll(snapshot.data as List<MidiDevice>);
+              return Obx(() {
+                return ListView.builder(
+                  itemCount: allDives.length,
+                  itemBuilder: (context, index) {
+                    var device = allDives[index];
+                    return ListTile(
+                      title: Text(
+                        device.name,
+                        style: Theme.of(context).textTheme.headlineSmall,
+                      ),
+                      subtitle: Text(
+                          "ins:${device.inputPorts.length} outs:${device.outputPorts.length}, ${device.id}, ${device.type}"),
+                      leading: Icon(device.connected
+                          ? Icons.radio_button_on
+                          : Icons.radio_button_off),
+                      trailing:
+                          Icon(deviceManage.deviceIconForType(device.type)),
+                      onLongPress: () {
+                        deviceManage.stopDevice();
+                        print('stopScanningForBluetoothDevices');
+                      },
+                      onTap: () {
+                        deviceManage.connectOrDisconnect(device, context);
+                      },
+                    );
+                  },
+                );
+              });
             } else {
               return const CircularProgressIndicator();
             }

@@ -16,6 +16,7 @@ import 'package:rwkvmusic/test/bletest.dart';
 import 'package:rwkvmusic/test/mididevicetest.dart';
 import 'package:rwkvmusic/utils/audioplayer.dart';
 import 'package:rwkvmusic/utils/midiconvertabc.dart';
+import 'package:rwkvmusic/utils/mididevicemanage.dart';
 import 'package:rwkvmusic/values/constantdata.dart';
 import 'package:rwkvmusic/values/storage.dart';
 
@@ -72,10 +73,15 @@ class _MyAppState extends State<MyApp> {
   var radioSelectedValue = 0.obs;
   String? currentSoundEffect;
   late StringBuffer sbNoteCreate = StringBuffer();
+  late MidiDeviceManage deviceManage;
   @override
   void initState() {
     super.initState();
     stringBuffer = StringBuffer();
+    deviceManage = MidiDeviceManage();
+    deviceManage.receiveCallback = (int data) {
+      print('receiveCallback main =$data');
+    };
     controllerPiano = WebViewControllerPlus()
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
       ..setNavigationDelegate(
@@ -174,7 +180,10 @@ class _MyAppState extends State<MyApp> {
         String noteName =
             MidiToABCConverter().getNoteName(int.parse(jsMessage.message));
         sbNoteCreate.write(noteName);
-        String sb = "setAbcString(\"%%MIDI program 0\\nL:1/4\\nM:4/4\\nK:C\\n|\\" + sbNoteCreate.toString() + "\",false)";
+        String sb =
+            "setAbcString(\"%%MIDI program 0\\nL:1/4\\nM:4/4\\nK:C\\n|\\" +
+                sbNoteCreate.toString() +
+                "\",false)";
         print('curr=$sb');
         controllerPiano.runJavaScript(sb);
       });
