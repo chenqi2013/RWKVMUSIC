@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:ffi';
 import 'dart:io';
+import 'dart:math';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/cupertino.dart';
@@ -70,6 +71,7 @@ class _MyAppState extends State<MyApp> {
   int listenCount = 0;
   var radioSelectedValue = 0.obs;
   String? currentSoundEffect;
+  late StringBuffer sbNoteCreate = StringBuffer();
   @override
   void initState() {
     super.initState();
@@ -164,6 +166,17 @@ class _MyAppState extends State<MyApp> {
           AudioPlayerManage()
               .playAudio('player/soundfont/acoustic_grand_piano-mp3/$name');
         }
+        //   String responseData = utf8.decode(chunk);
+        // String textstr = extractTextValue(responseData)!;
+        // // print('responseData=$textstr');
+        // stringBuffer.write(textstr);
+        // textstr = escapeString(stringBuffer.toString());
+        String noteName =
+            MidiToABCConverter().getNoteName(int.parse(jsMessage.message));
+        sbNoteCreate.write(noteName);
+        String sb = "setAbcString(\"%%MIDI program 0\\nL:1/4\\nM:4/4\\nK:C\\n|\\" + sbNoteCreate.toString() + "\",false)";
+        print('curr=$sb');
+        controllerPiano.runJavaScript(sb);
       });
   }
 
@@ -484,9 +497,12 @@ class _MyAppState extends State<MyApp> {
         // color: Colors.red,
         child: OnPopupWindowWidget(
           title: Text(titleStr),
-          footer: InkWell(child: Text('Close'),onTap:() {
-             Navigator.of(context).pop();
-          },),
+          footer: InkWell(
+            child: Text('Close'),
+            onTap: () {
+              Navigator.of(context).pop();
+            },
+          ),
           child: SizedBox(
             height: 100,
             // width: 40,
