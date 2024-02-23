@@ -138,6 +138,10 @@ class _MyAppState extends State<MyApp> {
           onMessageReceived: (JavaScriptMessage jsMessage) {
         print('flutteronPlayFinish onMessageReceived=' + jsMessage.message);
         isPlay.value = false;
+      })
+      ..addJavaScriptChannel("flutteronClickNote",
+          onMessageReceived: (JavaScriptMessage jsMessage) {
+        print('flutteronClickNote onMessageReceived=' + jsMessage.message);
       });
 
     controllerKeyboard = WebViewControllerPlus()

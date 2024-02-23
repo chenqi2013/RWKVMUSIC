@@ -23822,11 +23822,12 @@ function mouseUp(ev) {
     self.dragIndex = positioning.clickedOn;
     if (dataNote) {
       console.log("dataNote=" + dataNote + ", dragIndex=" + dragIndex);
-      if(typeof controller !== "undefined"){
-        controller.onClickNote(dataNote, self.dragIndex);
-      } else {
-        alert("Running outside Android app");
-      }
+      // if(typeof controller !== "undefined"){
+        // controller.onClickNote(dataNote, self.dragIndex);
+      flutteronClickNote.postMessage(dataNote+','+self.dragIndex);
+      // } else {
+      //   alert("Running outside Android app");
+      // }
     }
   }
   notifySelect.bind(this)(this.dragTarget, this.dragYStep, this.selectables.length, this.dragIndex, _ev);
