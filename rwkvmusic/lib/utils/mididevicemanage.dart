@@ -13,11 +13,11 @@ import 'package:rwkvmusic/widgets/toast.dart';
 typedef ReceiveCallback = void Function(int data);
 
 class MidiDeviceManage {
-  static MidiDeviceManage _instance = MidiDeviceManage._internal();
-  factory MidiDeviceManage() => _instance;
+  // static MidiDeviceManage _instance = MidiDeviceManage._internal();
+  // factory MidiDeviceManage() => _instance;
   StreamSubscription<String>? _setupSubscription;
   StreamSubscription<BluetoothState>? _bluetoothStateSubscription;
-  final MidiCommand midiCommand = MidiCommand();
+  MidiCommand? midiCommand;
 
   var virtualDeviceActivated = false.obs;
   var iOSNetworkSessionEnabled = false.obs;
@@ -25,21 +25,40 @@ class MidiDeviceManage {
 
   ReceiveCallback? receiveCallback;
 
-  late MidiToABCConverter convertABC = MidiToABCConverter();
-  MidiDeviceManage._internal() {
-    _setupSubscription = midiCommand.onMidiSetupChanged?.listen((data) async {
+  MidiToABCConverter? convertABC;
+
+  // 单例模式固定格式
+  // MidiDeviceManage._();
+
+  // 单例模式固定格式
+  static MidiDeviceManage? _instance;
+
+  // 单例模式固定格式
+  static MidiDeviceManage getInstance() {
+    if (_instance == null) {
+      _instance = MidiDeviceManage._();
+    }
+    return _instance!;
+  }
+
+  MidiDeviceManage._() {
+    // if (_instance == null) {
+    midiCommand = MidiCommand();
+    convertABC = MidiToABCConverter();
+    _setupSubscription = midiCommand?.onMidiSetupChanged?.listen((data) async {
       if (kDebugMode) {
         print("setup changed $data");
       }
     });
     _bluetoothStateSubscription =
-        midiCommand.onBluetoothStateChanged.listen((data) {
+        midiCommand?.onBluetoothStateChanged.listen((data) {
       if (kDebugMode) {
         print("bluetooth state change $data");
       }
     });
 
     updateNetworkSessionState();
+    // }
   }
 
   // void initdata() {
@@ -60,23 +79,23 @@ class MidiDeviceManage {
   // }
 
   updateNetworkSessionState() async {
-    var nse = await midiCommand.isNetworkSessionEnabled;
+    var nse = await midiCommand?.isNetworkSessionEnabled;
     if (nse != null) {
       iOSNetworkSessionEnabled.value = nse;
     }
   }
 
   void networkSessionEnabled(bool newValue) {
-    midiCommand.setNetworkSessionEnabled(newValue);
+    midiCommand?.setNetworkSessionEnabled(newValue);
     iOSNetworkSessionEnabled.value = newValue;
   }
 
   void addOrRemoveVirtualDevice(bool newValue) {
     virtualDeviceActivated.value = newValue;
     if (newValue) {
-      midiCommand.addVirtualDevice(name: "Flutter MIDI Command");
+      midiCommand?.addVirtualDevice(name: "Flutter MIDI Command");
     } else {
-      midiCommand.removeVirtualDevice(name: "Flutter MIDI Command");
+      midiCommand?.removeVirtualDevice(name: "Flutter MIDI Command");
     }
   }
 
@@ -133,7 +152,7 @@ class MidiDeviceManage {
     if (kDebugMode) {
       print("start ble central");
     }
-    await midiCommand.startBluetoothCentral().catchError((err) {
+    await midiCommand?.startBluetoothCentral().catchError((err) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text(err),
       ));
@@ -142,7 +161,7 @@ class MidiDeviceManage {
     if (kDebugMode) {
       print("wait for init");
     }
-    await midiCommand
+    await midiCommand!
         .waitUntilBluetoothIsInitialized()
         .timeout(const Duration(seconds: 5), onTimeout: () {
       if (kDebugMode) {
@@ -151,8 +170,8 @@ class MidiDeviceManage {
     });
 
     // If bluetooth is powered on, start scanning
-    if (midiCommand.bluetoothState == BluetoothState.poweredOn) {
-      midiCommand.startScanningForBluetoothDevices().catchError((err) {
+    if (midiCommand?.bluetoothState == BluetoothState.poweredOn) {
+      midiCommand?.startScanningForBluetoothDevices().catchError((err) {
         if (kDebugMode) {
           print("Error $err");
         }
@@ -178,8 +197,8 @@ class MidiDeviceManage {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           backgroundColor: Colors.red,
-          content: Text(messages[midiCommand.bluetoothState] ??
-              'Unknown bluetooth state: ${midiCommand.bluetoothState}'),
+          content: Text(messages[midiCommand?.bluetoothState] ??
+              'Unknown bluetooth state: ${midiCommand?.bluetoothState}'),
         ));
       }
     }
@@ -190,11 +209,11 @@ class MidiDeviceManage {
   }
 
   void stopDevice() {
-    midiCommand.stopScanningForBluetoothDevices();
+    midiCommand?.stopScanningForBluetoothDevices();
   }
 
   Future<List<MidiDevice>?> getDevice() {
-    return midiCommand.devices;
+    return midiCommand!.devices;
   }
 
   void connectOrDisconnect(MidiDevice device, BuildContext context) {
@@ -202,22 +221,22 @@ class MidiDeviceManage {
       if (kDebugMode) {
         toastInfo(msg: "disconnect");
       }
-      midiCommand.disconnectDevice(device);
+      midiCommand?.disconnectDevice(device);
     } else {
       if (kDebugMode) {
         print("connect");
       }
-      midiCommand.connectToDevice(device).then((_) {
+      midiCommand?.connectToDevice(device).then((_) {
         if (kDebugMode) {
           toastInfo(msg: "device connected async");
         }
-        midiCommand.onMidiDataReceived?.listen((data) {
+        midiCommand?.onMidiDataReceived?.listen((data) {
           MidiPacket datatmp = data;
           print('Received MIDI data: ${data.data}');
-          var result = convertABC.midiToABC(datatmp.data, false);
+          var result = convertABC!.midiToABC(datatmp.data, false);
           print('convertdata=$result');
           if ((result[0] as String).isNotEmpty) {
-            String path = convertABC.getNoteMp3Path(result[1]);
+            String path = convertABC!.getNoteMp3Path(result[1]);
             if (receiveCallback != null) {
               receiveCallback!(result[1]);
             }

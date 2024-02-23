@@ -78,9 +78,11 @@ class _MyAppState extends State<MyApp> {
   void initState() {
     super.initState();
     stringBuffer = StringBuffer();
-    deviceManage = MidiDeviceManage();
+    deviceManage = MidiDeviceManage.getInstance();
+    print('deviceManage22=$identityHashCode($deviceManage)');
     deviceManage.receiveCallback = (int data) {
       print('receiveCallback main =$data');
+      updatePianoNote(data);
     };
     controllerPiano = WebViewControllerPlus()
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
@@ -177,16 +179,18 @@ class _MyAppState extends State<MyApp> {
         // // print('responseData=$textstr');
         // stringBuffer.write(textstr);
         // textstr = escapeString(stringBuffer.toString());
-        String noteName =
-            MidiToABCConverter().getNoteName(int.parse(jsMessage.message));
-        sbNoteCreate.write(noteName);
-        String sb =
-            "setAbcString(\"%%MIDI program 0\\nL:1/4\\nM:4/4\\nK:C\\n|\\" +
-                sbNoteCreate.toString() +
-                "\",false)";
-        print('curr=$sb');
-        controllerPiano.runJavaScript(sb);
+        updatePianoNote(int.parse(jsMessage.message));
       });
+  }
+
+  void updatePianoNote(int node) {
+    String noteName = MidiToABCConverter().getNoteName(node);
+    sbNoteCreate.write(noteName);
+    String sb = "setAbcString(\"%%MIDI program 0\\nL:1/4\\nM:4/4\\nK:C\\n|\\" +
+        sbNoteCreate.toString() +
+        "\",false)";
+    print('curr=$sb');
+    controllerPiano.runJavaScript(sb);
   }
 
   void createTimer() {

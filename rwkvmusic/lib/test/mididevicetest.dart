@@ -27,16 +27,17 @@ class MyAppState extends State<MyApp11> {
   @override
   void initState() {
     super.initState();
-    deviceManage = MidiDeviceManage();
-    deviceManage.receiveCallback = (int data) {
-      print('receiveCallback=$data');
-    };
-    deviceManage.updateNetworkSessionState();
+    deviceManage = MidiDeviceManage.getInstance();
+    print('deviceManage11=$identityHashCode($deviceManage)');
+    // deviceManage.receiveCallback = (int data) {
+    //   print('receiveCallback=$data');
+    // };
+    // deviceManage.updateNetworkSessionState();
   }
 
   @override
   void dispose() {
-    deviceManage.cancelMidi();
+    // deviceManage.cancelMidi();
     super.dispose();
   }
 
@@ -74,7 +75,7 @@ class MyAppState extends State<MyApp11> {
       ),
       body: Center(
         child: FutureBuilder(
-          future: deviceManage.midiCommand.devices,
+          future: deviceManage.midiCommand!.devices,
           builder: (BuildContext context, AsyncSnapshot snapshot) {
             if (snapshot.hasData && snapshot.data != null) {
               allDives.addAll(snapshot.data as List<MidiDevice>);
