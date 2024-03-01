@@ -17,7 +17,7 @@ void main(List<String> args) {
   String filePath1 = 'assets/piano/index.html';
   String filePath2 = 'assets/piano/keyboard.html';
   String filePath3 = 'assets/player/player.html';
-  runApp(WebViewInAppScreen(url: filePath3));
+  runApp(WebViewInAppScreen(url: filePath1));
 }
 
 class WebViewInAppScreen extends StatefulWidget {
@@ -50,7 +50,7 @@ class _WebViewInAppScreenState extends State<WebViewInAppScreen> {
     // useShouldOverrideUrlLoading: true,
     // mediaPlaybackRequiresUserGesture: true,
     // applicationNameForUserAgent: "dface-yjxdh-webview",
-    // allowFileAccessFromFileURLs: true,
+    allowFileAccessFromFileURLs: true,
     allowUniversalAccessFromFileURLs: true,
     mixedContentMode: MixedContentMode.MIXED_CONTENT_ALWAYS_ALLOW,
     supportZoom: false,
@@ -137,7 +137,8 @@ class _WebViewInAppScreenState extends State<WebViewInAppScreen> {
                   // 加载完成
                   print('onLoadStop');
                   // widget.onLoadFinished!(url.toString());
-                  webViewController!.evaluateJavascript(source: 'setPiano(55, 76)');
+                  webViewController!
+                      .evaluateJavascript(source: 'setPiano(55, 76)');
                 },
                 onProgressChanged: (controller, progress) {
                   print('progress=$progress');

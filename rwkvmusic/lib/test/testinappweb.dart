@@ -80,7 +80,7 @@ class _WebViewInAppScreenState extends State<WebViewInAppScreen> {
           child: InAppWebView(
             key: webViewKey,
             initialUrlRequest:
-                URLRequest(url: Uri.parse("http://www.baidu.com")), //widget.url
+                URLRequest(url: WebUri("http://www.baidu.com")), //widget.url
             initialUserScripts: UnmodifiableListView<UserScript>([
               UserScript(
                   source:

@@ -28,14 +28,15 @@ environment:
 # the latest version available on pub.dev. To see which dependencies have newer
 # versions available, run `flutter pub outdated`.
 dependencies:
+  webview_windows: ^0.4.0
   audioplayers: ^5.2.1
   cached_network_image: ^3.3.1
-  cookie_jar: ^3.0.1
+  cookie_jar: ^4.0.8
   crypto: ^3.0.1
   cupertino_icons: ^1.0.2
-  device_info: null
-  dio: ^4.0.0
-  dio_cookie_manager: ^2.0.0
+  device_info: 
+  dio: ^5.4.1
+  dio_cookie_manager: ^3.1.1
   event_bus: ^2.0.0
   flutter_blue: ^0.8.0
   flutter_cache_manager: null
@@ -54,9 +55,9 @@ dependencies:
   on_process_button_widget: ^2.0.2
   package_info: ^2.0.0
   path_provider: ^2.0.1
-  permission_handler: ^7.1.0
+  permission_handler: ^11.3.0
   pull_to_refresh: ^2.0.0
-  sentry: ^5.0.0
+  sentry: ^7.16.1
   share: ^2.0.1
   shared_preferences: ^2.2.2
   sqflite: ^2.3.2
@@ -69,7 +70,7 @@ dependencies:
 
 
 dev_dependencies:
-  flutter_lints: ^2.0.0
+  flutter_lints: ^3.0.1
   flutter_test:
     sdk: flutter
 
