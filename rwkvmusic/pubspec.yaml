@@ -37,14 +37,12 @@ dependencies:
   dio: ^4.0.0
   dio_cookie_manager: ^2.0.0
   event_bus: ^2.0.0
-  flutter:
-    sdk: flutter
   flutter_blue: ^0.8.0
   flutter_cache_manager: null
   flutter_easyloading: ^3.0.3
   flutter_inappwebview: ^6.0.0
-  flutter_localizations:
-    sdk: flutter
+  webview_dart: ^1.0.1
+  flutter_localization: ^0.2.0
   flutter_midi_command: ^0.4.15
   flutter_screenutil: ^5.0.0+2
   fluttertoast: ^8.2.4
@@ -66,6 +64,9 @@ dependencies:
   uni_links: ^0.5.1
   webview_flutter: ^4.4.4
   webview_flutter_plus: ^0.4.4
+  webview_universal: ^0.0.5
+  desktop_webview_window: ^0.2.3
+
 
 dev_dependencies:
   flutter_lints: ^2.0.0

@@ -1,6 +1,6 @@
-
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="utf-8">
   <meta http-equiv="x-ua-compatible" content="ie=edge">
@@ -22,7 +22,7 @@
       console.log("window.onload");
       abcjsEditor = new ABCJS.Editor("abc", {
         canvas_id: "paper",
-		render_options: { },
+        render_options: {},
         warnings_id: "warnings",
         synth: {
           el: "#audio",
@@ -30,7 +30,7 @@
         },
         abcjsParams: {
           add_classes: true,
-	  afterParsing: afterParsing
+          afterParsing: afterParsing
         },
         selectionChangeCallback: selectionChangeCallback
       });
@@ -42,11 +42,11 @@
 
     };
 
-    function afterParsing(tune, tuneNumber, abcString){
+    function afterParsing(tune, tuneNumber, abcString) {
       if (self.isGenerateAbc != true) {
-         var a = countNotesInEditor(tune)
-         console.log("afterParsing:" + a)
-         countofnotes = a
+        var a = countNotesInEditor(tune)
+        console.log("afterParsing:" + a)
+        countofnotes = a
 
         //  if(typeof controller !== "undefined"){
         //       controller.onCountPromptNoteNumber(a);
@@ -54,7 +54,7 @@
         //       alert("Running outside Android app");
         //   }
         flutteronCountPromptNoteNumber.postMessage(a);
-       }
+      }
     }
 
     function setPromptNoteNumberCount(count) {
@@ -88,12 +88,12 @@
         for (var x of midi_events[i]) {
           detail = (i == 1) ? '' : '-chord'
           if (x.name == 'Note on') // output 125bpm, real 180bpm
-            events.push([Math.round(x.tick*125/180), "on"+detail, x.noteNumber-20])
+            events.push([Math.round(x.tick * 125 / 180), "on" + detail, x.noteNumber - 20])
           else if (x.name == 'Note off')
-            events.push([Math.round(x.tick*125/180), "off"+detail, x.noteNumber-20])
+            events.push([Math.round(x.tick * 125 / 180), "off" + detail, x.noteNumber - 20])
         }
       }
-      events.sort(function(a, b) {
+      events.sort(function (a, b) {
         if (a[0] != b[0])
           return a[0] - b[0]
         else
@@ -132,23 +132,23 @@
       return eventJson
     }
 
-    function setStyle(){
-      const start=0
-      const end=countofnotes - 1
-      if(countofnotes < 1){
+    function setStyle() {
+      const start = 0
+      const end = countofnotes - 1
+      if (countofnotes < 1) {
         return
       }
 
       var paper = document.querySelector("#paper");
 
       for (let i = start; i <= end; i++) {
-        var elems = paper.querySelectorAll('[data-index="'+i+'"]');
+        var elems = paper.querySelectorAll('[data-index="' + i + '"]');
         var index = 0, length = elems.length;
 
-        for ( ; index < length; index++) {
-            //elems[index].style.opacity = 0.5;
-            elems[index].setAttribute("fill","rgb(33,150,243)");
-            //elems[index].setAttribute("stroke","pink");
+        for (; index < length; index++) {
+          //elems[index].style.opacity = 0.5;
+          elems[index].setAttribute("fill", "rgb(33,150,243)");
+          //elems[index].setAttribute("stroke","pink");
 
         }
       }
@@ -162,35 +162,35 @@
 
     var synthForPlay;
     function playAbc(abcString) {
-      if(synthForPlay == null) {
+      if (synthForPlay == null) {
         synthForPlay = new ABCJS.synth.CreateSynth()
       } else {
         synthForPlay.stop()
       }
       var myContext = new AudioContext();
       var visualObj = ABCJS.renderAbc("paper", abcString, {
-			 })[0];
+      })[0];
       synthForPlay.init({
-          audioContext: myContext,
-          visualObj: visualObj,
+        audioContext: myContext,
+        visualObj: visualObj,
       }).then(function (results) {
 
-          synthForPlay.prime().then((response) => {
-                  console.log(response.status)
-                  synthForPlay.start();
-              });
+        synthForPlay.prime().then((response) => {
+          console.log(response.status)
+          synthForPlay.start();
+        });
       }).catch(function (reason) {
-          console.log(reason)
+        console.log(reason)
       });
     }
 
-    function countNotesInEditor(tunes){
+    function countNotesInEditor(tunes) {
       countofnotes = 0
       try {
         var elems = tunes.lines[0].staff[0].voices[0]
         var index = 0, length = elems.length;
-        for ( ; index < length; index++) {
-          if (elems[index].el_type == 'note'){
+        for (; index < length; index++) {
+          if (elems[index].el_type == 'note') {
             countofnotes = countofnotes + 1
           }
         }
@@ -199,7 +199,7 @@
       }
       return countofnotes
     }
-	  
+
     function setAbcString(output, isGenerateAbc) {
       // console.log("setAbcString:" + output + ", isGenerateAbc:" + isGenerateAbc)
       self.isGenerateAbc = isGenerateAbc;
@@ -229,7 +229,7 @@
     }
 
     function resetTimingCallbacks() {
-        self.timingCallbacks = null
+      self.timingCallbacks = null
     }
 
     function triggerButtonClick() {
@@ -259,181 +259,181 @@
     function CursorControl(rootSelector) {
       var self = this;
 
-  // This demonstrates two methods of indicating where the music is.
+      // This demonstrates two methods of indicating where the music is.
       // 1) An element is created that is moved along for each note.
       // 2) The currently being played note is given a class so that it can be transformed.
       self.cursor = null; // This is the svg element that will move with the music.
       self.rootSelector = rootSelector; // This is the same selector as the renderAbc call uses.
 
-      self.onStart = function() {
-          // This is called when the timer starts so we know the svg has been drawn by now.
-          // Create the cursor and add it to the sheet music's svg.
-          var svg = document.querySelector(self.rootSelector + " svg");
-          self.cursor = document.createElementNS("http://www.w3.org/2000/svg", "line");
-          self.cursor.setAttribute("class", "abcjs-cursor");
-          self.cursor.setAttributeNS(null, 'x1', 0);
-          self.cursor.setAttributeNS(null, 'y1', 0);
-          self.cursor.setAttributeNS(null, 'x2', 0);
-          self.cursor.setAttributeNS(null, 'y2', 0);
-          svg.appendChild(self.cursor);
+      self.onStart = function () {
+        // This is called when the timer starts so we know the svg has been drawn by now.
+        // Create the cursor and add it to the sheet music's svg.
+        var svg = document.querySelector(self.rootSelector + " svg");
+        self.cursor = document.createElementNS("http://www.w3.org/2000/svg", "line");
+        self.cursor.setAttribute("class", "abcjs-cursor");
+        self.cursor.setAttributeNS(null, 'x1', 0);
+        self.cursor.setAttributeNS(null, 'y1', 0);
+        self.cursor.setAttributeNS(null, 'x2', 0);
+        self.cursor.setAttributeNS(null, 'y2', 0);
+        svg.appendChild(self.cursor);
       };
 
-      self.removeSelection = function() {
-          // Unselect any previously selected notes.
-          var lastSelection = document.querySelectorAll(self.rootSelector + " .abcjs-highlight");
-          for (var k = 0; k < lastSelection.length; k++)
-              lastSelection[k].classList.remove("abcjs-highlight");
+      self.removeSelection = function () {
+        // Unselect any previously selected notes.
+        var lastSelection = document.querySelectorAll(self.rootSelector + " .abcjs-highlight");
+        for (var k = 0; k < lastSelection.length; k++)
+          lastSelection[k].classList.remove("abcjs-highlight");
       };
 
 
-      self.onEvent = function(ev) {
+      self.onEvent = function (ev) {
 
-          // This is called every time a note or a rest is reached and contains the coordinates of it.
-          if (ev.measureStart && ev.left === null)
-              return; // this was the second part of a tie across a measure line. Just ignore it.
+        // This is called every time a note or a rest is reached and contains the coordinates of it.
+        if (ev.measureStart && ev.left === null)
+          return; // this was the second part of a tie across a measure line. Just ignore it.
 
-          self.removeSelection();
+        self.removeSelection();
 
-          // Select the currently selected notes.
-          for (var i = 0; i < ev.elements.length; i++ ) {
-              var note = ev.elements[i];
-              for (var j = 0; j < note.length; j++) {
-                  note[j].classList.add("abcjs-highlight");
-              }
-              note[0].scrollIntoView()
-              note[note.length-1].scrollIntoView({ behavior: 'smooth'})
+        // Select the currently selected notes.
+        for (var i = 0; i < ev.elements.length; i++) {
+          var note = ev.elements[i];
+          for (var j = 0; j < note.length; j++) {
+            note[j].classList.add("abcjs-highlight");
           }
+          note[0].scrollIntoView()
+          note[note.length - 1].scrollIntoView({ behavior: 'smooth' })
+        }
 
-          // Move the cursor to the location of the current note.
-          if (self.cursor) {
-              self.cursor.setAttribute("x1", ev.left - 2);
-              self.cursor.setAttribute("x2", ev.left - 2);
-              self.cursor.setAttribute("y1", ev.top);
-              self.cursor.setAttribute("y2", ev.top + ev.height);
-          }
+        // Move the cursor to the location of the current note.
+        if (self.cursor) {
+          self.cursor.setAttribute("x1", ev.left - 2);
+          self.cursor.setAttribute("x2", ev.left - 2);
+          self.cursor.setAttribute("y1", ev.top);
+          self.cursor.setAttribute("y2", ev.top + ev.height);
+        }
 
-              if (ev.measureStart) {
-              var elements = document.querySelectorAll('.abcjs-mm' + ev.measureNumber);
-              for (var j = 0; j < elements.length; j++) {
-                  const element = elements[j];
-                  if (!element.classList.contains('abcjs-bar'))
-                      element.classList.add('hide-note');
-              }
-          }
-
-
-      };
-      self.onFinished = function() {
-              self.removeSelection();
-	      timingCallbacks = null;
-
-          if (self.cursor) {
-              self.cursor.setAttribute("x1", 0);
-              self.cursor.setAttribute("x2", 0);
-              self.cursor.setAttribute("y1", 0);
-              self.cursor.setAttribute("y2", 0);
-          }
-
-
-          var elements = document.querySelectorAll('.hide-note');
+        if (ev.measureStart) {
+          var elements = document.querySelectorAll('.abcjs-mm' + ev.measureNumber);
           for (var j = 0; j < elements.length; j++) {
-              const element = elements[j];
-                  element.classList.remove('hide-note');
+            const element = elements[j];
+            if (!element.classList.contains('abcjs-bar'))
+              element.classList.add('hide-note');
           }
+        }
 
-          // if(typeof controller !== "undefined"){
-          //     controller.onPlayFinish();
-          // } else {
-          //     alert("Running outside Android app");
-          // }
-          flutteronPlayFinish.postMessage(true);
+
       };
-  }
+      self.onFinished = function () {
+        self.removeSelection();
+        timingCallbacks = null;
 
-  var cursorControl = new CursorControl("#paper");
-
-
-  function onEvent(ev) {
-  if (ev)
-  cursorControl.onEvent(ev);
-  else
-  cursorControl.onFinished();
-  }
-
-function onStartPlay(isUserClick, duration) {
-  console.log("onStartPlay isUserClick=" + isUserClick + " duration=" + duration)
-  // if(typeof controller !== "undefined"){
-      // controller.onStartPlay(isUserClick, duration);
-  // } else {
-  //     alert("Running outside Android app");
-  // }
-  flutteronStartPlay.postMessage(isUserClick+','+duration);
-}
+        if (self.cursor) {
+          self.cursor.setAttribute("x1", 0);
+          self.cursor.setAttribute("x2", 0);
+          self.cursor.setAttribute("y1", 0);
+          self.cursor.setAttribute("y2", 0);
+        }
 
 
-function onPausePlay() {
-    // if(typeof controller !== "undefined"){
-    //     controller.onPausePlay();
-    // } else {
-        // alert("Running outside Android app");
-    // }
-    flutteronPausePlay.postMessage(true);
-}
+        var elements = document.querySelectorAll('.hide-note');
+        for (var j = 0; j < elements.length; j++) {
+          const element = elements[j];
+          element.classList.remove('hide-note');
+        }
 
-function onResumePlay() {
-    // if(typeof controller !== "undefined"){
-    //     controller.onResumePlay();
-    // } else {
-    //     alert("Running outside Android app");
-    // }
-    flutteronResumePlay.postMessage(true);
-}
-
-function startTimer(event) {
-  if (timingCallbacks == null){
-    cursorControl.onStart();
-    timingCallbacks = new ABCJS.TimingCallbacks(abcjsEditor.tunes[0], {
-    eventCallback: onEvent,
-    });
-    timingCallbacks.start();
-    onStartPlay(event.isTrusted, timingCallbacks.lastMoment);
-  }else {
-     if (timingCallbacks.isPaused == true) {
-      timingCallbacks.start();
-      console.log("resume play");
-      onResumePlay();
-    } else if (timingCallbacks.isRunning == true){
-      timingCallbacks.pause();
-      console.log("pausePlay");
-      onPausePlay();
-
-    }else {
-      timingCallbacks.start();
-      onStartPlay(event.isTrusted, timingCallbacks.lastMoment);
+        // if(typeof controller !== "undefined"){
+        //     controller.onPlayFinish();
+        // } else {
+        //     alert("Running outside Android app");
+        // }
+        flutteronPlayFinish.postMessage(true);
+      };
     }
-  }
-}
 
-function startPlay() {
-   console.log("startPlay");
-   var evt = document.createEvent('CustomEvent');
-   evt.isTrusted = true;
-   triggerButtonClick()
-}
+    var cursorControl = new CursorControl("#paper");
 
-function pausePlay() {
-    if (timingCallbacks != null && timingCallbacks.isRunning == true){
+
+    function onEvent(ev) {
+      if (ev)
+        cursorControl.onEvent(ev);
+      else
+        cursorControl.onFinished();
+    }
+
+    function onStartPlay(isUserClick, duration) {
+      console.log("onStartPlay isUserClick=" + isUserClick + " duration=" + duration)
+      // if(typeof controller !== "undefined"){
+      // controller.onStartPlay(isUserClick, duration);
+      // } else {
+      //     alert("Running outside Android app");
+      // }
+      flutteronStartPlay.postMessage(isUserClick + ',' + duration);
+    }
+
+
+    function onPausePlay() {
+      // if(typeof controller !== "undefined"){
+      //     controller.onPausePlay();
+      // } else {
+      // alert("Running outside Android app");
+      // }
+      flutteronPausePlay.postMessage(true);
+    }
+
+    function onResumePlay() {
+      // if(typeof controller !== "undefined"){
+      //     controller.onResumePlay();
+      // } else {
+      //     alert("Running outside Android app");
+      // }
+      flutteronResumePlay.postMessage(true);
+    }
+
+    function startTimer(event) {
+      if (timingCallbacks == null) {
+        cursorControl.onStart();
+        timingCallbacks = new ABCJS.TimingCallbacks(abcjsEditor.tunes[0], {
+          eventCallback: onEvent,
+        });
+        timingCallbacks.start();
+        onStartPlay(event.isTrusted, timingCallbacks.lastMoment);
+      } else {
+        if (timingCallbacks.isPaused == true) {
+          timingCallbacks.start();
+          console.log("resume play");
+          onResumePlay();
+        } else if (timingCallbacks.isRunning == true) {
+          timingCallbacks.pause();
+          console.log("pausePlay");
+          onPausePlay();
+
+        } else {
+          timingCallbacks.start();
+          onStartPlay(event.isTrusted, timingCallbacks.lastMoment);
+        }
+      }
+    }
+
+    function startPlay() {
+      console.log("startPlay");
+      var evt = document.createEvent('CustomEvent');
+      evt.isTrusted = true;
+      triggerButtonClick()
+    }
+
+    function pausePlay() {
+      if (timingCallbacks != null && timingCallbacks.isRunning == true) {
         console.log("pausePlay");
         triggerButtonClick();
+      }
     }
-}
 
 
-function exportMidiFile(abcString, fileName) {
-  var midi = ABCJS.synth.getMidiFile(abcString, { midiOutputType: 'binary', fileName: fileName });
-  console.log("saveMidiFile midi=" + midi)
-  return midi.toString();
-}
+    function exportMidiFile(abcString, fileName) {
+      var midi = ABCJS.synth.getMidiFile(abcString, { midiOutputType: 'binary', fileName: fileName });
+      console.log("saveMidiFile midi=" + midi)
+      return midi.toString();
+    }
 
     window.setAbcString = setAbcString
     window.triggerButtonClick = triggerButtonClick
@@ -449,13 +449,15 @@ function exportMidiFile(abcString, fileName) {
 
   </script>
 </head>
+
 <body>
-<div class="container">
-  <div id="audio"></div>
-  <div id="paper"></div>
-  <div id="warnings" style="display: none;"></div>
-  <textarea id="abc" style="display: none;" cols="80" rows="15" spellcheck="false">
+  <div class="container">
+    <div id="audio"></div>
+    <div id="paper"></div>
+    <div id="warnings" style="display: none;"></div>
+    <textarea id="abc" style="display: none;" cols="80" rows="15" spellcheck="false">
     </textarea>
-</div>
+  </div>
 </body>
+
 </html>

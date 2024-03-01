@@ -53,9 +53,9 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   late WebViewControllerPlus controllerPiano;
   late WebViewControllerPlus controllerKeyboard;
-  String filePath1 = 'assets/piano/index.html';
-  String filePath2 = 'assets/piano/keyboard.html';
-  String filePath3 = 'assets/player/player.html';
+  String filePathKeyboardAnimation = 'assets/piano/index.html';
+  String filePathKeyboard = 'assets/piano/keyboard.html';
+  String filePathPiano = 'assets/player/player.html';
   var selectstate = 0.obs;
   late StringBuffer stringBuffer;
   int addGap = 2; //间隔多少刷新
@@ -102,7 +102,7 @@ class _MyAppState extends State<MyApp> {
           },
         ),
       )
-      ..loadFlutterAssetServer(filePath3)
+      ..loadFlutterAssetServer(filePathPiano)
       ..addJavaScriptChannel("flutteronStartPlay",
           onMessageReceived: (JavaScriptMessage jsMessage) {
         String message = jsMessage.message;
@@ -127,8 +127,8 @@ class _MyAppState extends State<MyApp> {
       })
       ..addJavaScriptChannel("flutteronCountPromptNoteNumber",
           onMessageReceived: (JavaScriptMessage jsMessage) {
-        // print('flutteronCountPromptNoteNumber onMessageReceived=' +
-        //     jsMessage.message);
+        print('flutteronCountPromptNoteNumber onMessageReceived=' +
+            jsMessage.message);
       })
       ..addJavaScriptChannel("flutteronEvents",
           onMessageReceived: (JavaScriptMessage jsMessage) {
@@ -156,11 +156,14 @@ class _MyAppState extends State<MyApp> {
           onPageFinished: (url) {
             print("controllerKeyboard onPageFinished" + url);
             controllerKeyboard.runJavaScript('resetPlay()');
-            // controllerKeyboard.runJavaScript('setPiano(55, 76)');
+            controllerKeyboard.runJavaScript('setPiano(55, 76)');
+            if (selectstate.value == 1) {
+              controllerKeyboard.runJavaScript('setPiano(55, 76)');
+            }
           },
         ),
       )
-      ..loadFlutterAssetServer(filePath2)
+      ..loadFlutterAssetServer(filePathKeyboardAnimation)
       ..addJavaScriptChannel("flutteronNoteOff",
           onMessageReceived: (JavaScriptMessage jsMessage) {
         print('flutteronNoteOff onMessageReceived=' + jsMessage.message);
@@ -178,11 +181,6 @@ class _MyAppState extends State<MyApp> {
           AudioPlayerManage()
               .playAudio('player/soundfont/acoustic_grand_piano-mp3/$name');
         }
-        //   String responseData = utf8.decode(chunk);
-        // String textstr = extractTextValue(responseData)!;
-        // // print('responseData=$textstr');
-        // stringBuffer.write(textstr);
-        // textstr = escapeString(stringBuffer.toString());
         updatePianoNote(int.parse(jsMessage.message));
       });
   }
@@ -492,15 +490,17 @@ class _MyAppState extends State<MyApp> {
       controllerPiano.runJavaScript(
           "setAbcString(\"%%MIDI program 40\\nL:1/4\\nM:4/4\\nK:D\\n\\\"D\\\" A F F\", false)");
       controllerPiano.runJavaScript("setPromptNoteNumberCount(3)");
+      controllerKeyboard.loadFlutterAsset(filePathKeyboardAnimation);
       controllerKeyboard.runJavaScript('resetPlay()');
-      controllerKeyboard.runJavaScript('setPiano(55, 76)');
+      // controllerKeyboard.runJavaScript('setPiano(55, 76)');
     } else {
       //creative
       controllerPiano.runJavaScript(
           "setAbcString(\"%%MIDI program 0\\nL:1/4\\nM:4/4\\nK:C\\n|\", false)");
       controllerPiano.runJavaScript("setPromptNoteNumberCount(0)");
+      controllerPiano.runJavaScript("setStyle()");
+      controllerKeyboard.loadFlutterAssetServer(filePathKeyboard);
       controllerKeyboard.runJavaScript('resetPlay()');
-      controllerKeyboard.runJavaScript('setPiano(55, 76)');
     }
   }
 
