@@ -28,7 +28,7 @@ class ExampleBrowser extends StatefulWidget {
 }
 
 class _ExampleBrowser extends State<ExampleBrowser> {
-  final _controller = WebviewController();
+  final _webViewController = WebviewController();
   final _textController = TextEditingController();
   final List<StreamSubscription> _subscriptions = [];
   bool _isWebviewSuspended = false;
@@ -48,20 +48,21 @@ class _ExampleBrowser extends State<ExampleBrowser> {
     //    additionalArguments: '--show-fps-counter');
 
     try {
-      await _controller.initialize();
-      _subscriptions.add(_controller.url.listen((url) {
+      await _webViewController.initialize();
+      _subscriptions.add(_webViewController.url.listen((url) {
         _textController.text = url;
       }));
 
-      _subscriptions
-          .add(_controller.containsFullScreenElementChanged.listen((flag) {
+      _subscriptions.add(
+          _webViewController.containsFullScreenElementChanged.listen((flag) {
         debugPrint('Contains fullscreen element: $flag');
         // windowManager.setFullScreen(flag);
       }));
 
-      await _controller.setBackgroundColor(Colors.transparent);
-      await _controller.setPopupWindowPolicy(WebviewPopupWindowPolicy.deny);
-      await _controller.loadUrl('https://flutter.dev');
+      await _webViewController.setBackgroundColor(Colors.transparent);
+      await _webViewController
+          .setPopupWindowPolicy(WebviewPopupWindowPolicy.deny);
+      await _webViewController.loadUrl('https://www.baidu.com');
 
       if (!mounted) return;
       setState(() {});
@@ -93,7 +94,7 @@ class _ExampleBrowser extends State<ExampleBrowser> {
   }
 
   Widget compositeView() {
-    if (!_controller.value.isInitialized) {
+    if (!_webViewController.value.isInitialized) {
       return const Text(
         'Not Initialized',
         style: TextStyle(
@@ -118,7 +119,7 @@ class _ExampleBrowser extends State<ExampleBrowser> {
                     textAlignVertical: TextAlignVertical.center,
                     controller: _textController,
                     onSubmitted: (val) {
-                      _controller.loadUrl(val);
+                      _webViewController.loadUrl(val);
                     },
                   ),
                 ),
@@ -126,7 +127,7 @@ class _ExampleBrowser extends State<ExampleBrowser> {
                   icon: Icon(Icons.refresh),
                   splashRadius: 20,
                   onPressed: () {
-                    _controller.reload();
+                    _webViewController.reload();
                   },
                 ),
                 IconButton(
@@ -134,7 +135,7 @@ class _ExampleBrowser extends State<ExampleBrowser> {
                   tooltip: 'Open DevTools',
                   splashRadius: 20,
                   onPressed: () {
-                    _controller.openDevTools();
+                    _webViewController.openDevTools();
                   },
                 )
               ]),
@@ -147,11 +148,11 @@ class _ExampleBrowser extends State<ExampleBrowser> {
                     child: Stack(
                       children: [
                         Webview(
-                          _controller,
+                          _webViewController,
                           permissionRequested: _onPermissionRequested,
                         ),
                         StreamBuilder<LoadingState>(
-                            stream: _controller.loadingState,
+                            stream: _webViewController.loadingState,
                             builder: (context, snapshot) {
                               if (snapshot.hasData &&
                                   snapshot.data == LoadingState.loading) {
@@ -175,9 +176,9 @@ class _ExampleBrowser extends State<ExampleBrowser> {
         tooltip: _isWebviewSuspended ? 'Resume webview' : 'Suspend webview',
         onPressed: () async {
           if (_isWebviewSuspended) {
-            await _controller.resume();
+            await _webViewController.resume();
           } else {
-            await _controller.suspend();
+            await _webViewController.suspend();
           }
           setState(() {
             _isWebviewSuspended = !_isWebviewSuspended;
@@ -187,7 +188,7 @@ class _ExampleBrowser extends State<ExampleBrowser> {
       ),
       appBar: AppBar(
           title: StreamBuilder<String>(
-        stream: _controller.title,
+        stream: _webViewController.title,
         builder: (context, snapshot) {
           return Text(
               snapshot.hasData ? snapshot.data! : 'WebView (Windows) Example');
@@ -227,7 +228,7 @@ class _ExampleBrowser extends State<ExampleBrowser> {
   @override
   void dispose() {
     _subscriptions.forEach((s) => s.cancel());
-    _controller.dispose();
+    _webViewController.dispose();
     super.dispose();
   }
 }
