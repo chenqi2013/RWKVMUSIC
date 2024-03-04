@@ -4,19 +4,21 @@ import 'package:webview_flutter/webview_flutter.dart';
 
 void main() {
   WindowsWebViewPlatform.registerWith();
-  runApp(const MyApp());
+  runApp(const WindowsWebviewTest());
 }
 
-class MyApp extends StatefulWidget {
-  const MyApp({Key? key}) : super(key: key);
+class WindowsWebviewTest extends StatefulWidget {
+  const WindowsWebviewTest({Key? key}) : super(key: key);
 
   @override
-  State<MyApp> createState() => _MyAppState();
+  State<WindowsWebviewTest> createState() => _WindowsWebviewTestState();
 }
 
-class _MyAppState extends State<MyApp> {
+class _WindowsWebviewTestState extends State<WindowsWebviewTest> {
   final controller = WebViewController();
-
+  String filePathKeyboardAnimation = 'assets/piano/index.html';
+  String filePathKeyboard = 'assets/piano/keyboard.html';
+  String filePathPiano = 'assets/player/player.html';
   @override
   void initState() {
     super.initState();
@@ -24,7 +26,7 @@ class _MyAppState extends State<MyApp> {
     controller.setBackgroundColor(Colors.cyanAccent);
     controller.setNavigationDelegate(NavigationDelegate(
       onNavigationRequest: (request) {
-        if (request.url.startsWith("https://www.baidu.com")) {
+        if (request.url.startsWith(filePathKeyboard)) {
           return NavigationDecision.navigate;
         } else {
           print("prevent user navigate out of google website!");
@@ -36,7 +38,8 @@ class _MyAppState extends State<MyApp> {
       onWebResourceError: (error) =>
           print("onWebResourceError: ${error.description}"),
     ));
-    controller.loadRequest(Uri.parse("https://www.baidu.com/"));
+    // controller.loadRequest(Uri.parse("https://www.baidu.com/"))
+    controller.loadFile(filePathKeyboard);
   }
 
   @override

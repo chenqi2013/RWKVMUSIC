@@ -14,12 +14,13 @@ import 'package:rwkvmusic/services/storage.dart';
 import 'package:rwkvmusic/store/config.dart';
 import 'package:rwkvmusic/test/bletest.dart';
 import 'package:rwkvmusic/test/mididevicetest.dart';
-import 'package:rwkvmusic/test/testwebviewuniversal.dart';
+// import 'package:rwkvmusic/test/testwebviewuniversal.dart';
 import 'package:rwkvmusic/utils/audioplayer.dart';
 import 'package:rwkvmusic/utils/midiconvertabc.dart';
 import 'package:rwkvmusic/utils/mididevicemanage.dart';
 import 'package:rwkvmusic/values/constantdata.dart';
 import 'package:rwkvmusic/values/storage.dart';
+import 'package:webview_win_floating/webview_plugin.dart';
 
 import 'mainwidget/BorderBtnWidget.dart';
 import 'mainwidget/BtnImageTextWidget.dart';
@@ -28,6 +29,8 @@ import 'package:on_popup_window_widget/on_popup_window_widget.dart';
 
 void main(List<String> args) async {
   WidgetsFlutterBinding.ensureInitialized();
+  WindowsWebViewPlatform.registerWith();
+
   await Get.putAsync<StorageService>(() => StorageService().init());
   Get.put<ConfigStore>(ConfigStore());
   // 强制横屏显示
@@ -372,7 +375,7 @@ class _MyAppState extends State<MyApp> {
     };
     httpClient = HttpClient();
     HttpClientRequest request = await httpClient
-        .postUrl(Uri.parse('http://192.168.3.4:8000/completions'));
+        .postUrl(Uri.parse('http://192.168.3.19:8000/completions'));
     request.headers.contentType = ContentType
         .json; //这个要设置，否则报错{"error":{"message":"当前分组 reverse-times 下对于模型  计费模式 [按次计费] 无可用渠道 (request id: 20240122102439864867952mIY4Ma3k)","type":"shell_api_error"}}
     request.write(jsonEncode(dic));
