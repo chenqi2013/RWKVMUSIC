@@ -29,7 +29,9 @@ import 'package:on_popup_window_widget/on_popup_window_widget.dart';
 
 void main(List<String> args) async {
   WidgetsFlutterBinding.ensureInitialized();
-  WindowsWebViewPlatform.registerWith();
+  if (Platform.isWindows) {
+    WindowsWebViewPlatform.registerWith();
+  }
 
   await Get.putAsync<StorageService>(() => StorageService().init());
   Get.put<ConfigStore>(ConfigStore());
@@ -78,9 +80,12 @@ class _MyAppState extends State<MyApp> {
   String? currentSoundEffect;
   late StringBuffer sbNoteCreate = StringBuffer();
   late MidiDeviceManage deviceManage;
+  late String abcString;
+  late bool isWindows;
   @override
   void initState() {
     super.initState();
+    isWindows = Platform.isWindows;
     stringBuffer = StringBuffer();
     deviceManage = MidiDeviceManage.getInstance();
     print('deviceManage22=$identityHashCode($deviceManage)');
@@ -393,17 +398,24 @@ class _MyAppState extends State<MyApp> {
       listenCount++;
       String responseData = utf8.decode(chunk);
       String textstr = extractTextValue(responseData)!;
+      String tempStr = textstr;
       // print('responseData=$textstr');
       stringBuffer.write(textstr);
       textstr = escapeString(stringBuffer.toString());
-      String sb = "setAbcString(\"" + textstr + "\",false)";
+      abcString = "setAbcString(\"" + textstr + "\",false)";
+
       // 方案一
-      // int currentTimestamp = DateTime.now().millisecondsSinceEpoch;
-      // int gap = currentTimestamp - preTimestamp;
-      // if (gap > 200) {
-      //   preTimestamp = currentTimestamp;
-      //   controllerPiano.runJavaScript(sb.toString());
-      // }
+      if (isWindows) {
+        int currentTimestamp = DateTime.now().millisecondsSinceEpoch;
+        int gap = currentTimestamp - preTimestamp;
+        if (gap > 400) {
+          //&& tempStr.trim().isEmpty
+          // print('runJavaScript');
+          preTimestamp = currentTimestamp;
+          controllerPiano.runJavaScript(abcString.toString());
+        }
+        return;
+      }
 
       // // 方案二
       // int currentCount = sb.length;
@@ -416,7 +428,7 @@ class _MyAppState extends State<MyApp> {
 
       // 方案三
       if (listenCount % 3 == 0) {
-        controllerPiano.runJavaScript(sb.toString());
+        controllerPiano.runJavaScript(abcString.toString());
       }
     }, onDone: () {
       // 数据流接收完成
@@ -494,7 +506,7 @@ class _MyAppState extends State<MyApp> {
       controllerPiano.runJavaScript(
           "setAbcString(\"%%MIDI program 40\\nL:1/4\\nM:4/4\\nK:D\\n\\\"D\\\" A F F\", false)");
       controllerPiano.runJavaScript("setPromptNoteNumberCount(3)");
-      controllerKeyboard.loadFlutterAsset(filePathKeyboardAnimation);
+      controllerKeyboard.loadFlutterAssetServer(filePathKeyboardAnimation);
       controllerKeyboard.runJavaScript('resetPlay()');
       // controllerKeyboard.runJavaScript('setPiano(55, 76)');
     } else {
