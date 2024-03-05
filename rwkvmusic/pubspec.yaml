@@ -69,6 +69,8 @@ dependencies:
   # webview_universal: ^0.0.5
   # desktop_webview_window: ^0.2.3
   webview_all: ^0.1.3
+  window_manager: ^0.3.8
+
 
 dev_dependencies:
   flutter_lints: ^3.0.1

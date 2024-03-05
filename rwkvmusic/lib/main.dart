@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:ffi';
+import 'dart:ffi' hide Size;
+// import 'dart:html';
 import 'dart:io';
 import 'dart:math';
 import 'package:audioplayers/audioplayers.dart';
@@ -26,11 +27,25 @@ import 'mainwidget/BorderBtnWidget.dart';
 import 'mainwidget/BtnImageTextWidget.dart';
 import 'package:webview_flutter_plus/webview_flutter_plus.dart';
 import 'package:on_popup_window_widget/on_popup_window_widget.dart';
+import 'package:window_manager/window_manager.dart';
 
 void main(List<String> args) async {
   WidgetsFlutterBinding.ensureInitialized();
   if (Platform.isWindows) {
     WindowsWebViewPlatform.registerWith();
+    WindowOptions windowOptions = const WindowOptions(
+      size: Size(800, 600),
+      center: true,
+      backgroundColor: Colors.transparent,
+      // skipTaskbar: false,
+      // titleBarStyle: TitleBarStyle.hidden,
+      // windowButtonVisibility: false,
+    );
+    windowManager.waitUntilReadyToShow(windowOptions, () async {
+      await windowManager.show();
+      await windowManager.focus();
+    });
+    windowManager.setResizable(false);
   }
 
   await Get.putAsync<StorageService>(() => StorageService().init());
