@@ -8,6 +8,7 @@ import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_platform_alert/flutter_platform_alert.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:rwkvmusic/mainwidget/ProgressbarTime.dart';
@@ -46,18 +47,18 @@ void main(List<String> args) async {
       await windowManager.focus();
     });
     windowManager.setResizable(false);
+  } else {
+    // 强制横屏显示
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.landscapeLeft,
+      DeviceOrientation.landscapeRight,
+    ]);
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: []);
   }
-
   await Get.putAsync<StorageService>(() => StorageService().init());
   Get.put<ConfigStore>(ConfigStore());
-  // 强制横屏显示
-  SystemChrome.setPreferredOrientations([
-    DeviceOrientation.landscapeLeft,
-    DeviceOrientation.landscapeRight,
-  ]);
-  SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: []);
   runApp(ScreenUtilInit(
-    // designSize: Size(375, 812),
+    designSize: Size(375, 812),
     child: GetMaterialApp(
       debugShowCheckedModeBanner: false,
       home: MyApp(),
@@ -361,7 +362,9 @@ class _MyAppState extends State<MyApp> {
                             } else {
                               controllerPiano.runJavaScript("pausePlay()");
                             }
-                            // isPlay.value = !isPlay.value;
+                            if (isWindows) {
+                              isPlay.value = !isPlay.value;
+                            }
                           });
                         }),
                         createButtonImageWithText('Settings', Icons.settings,
@@ -537,59 +540,76 @@ class _MyAppState extends State<MyApp> {
 
   void showPromptDialog(
       BuildContext context, String titleStr, List list, String type) {
-    showDialog(
-      context: context,
-      builder: (context) => Container(
-        // width: 50,
-        // height: 50,
-        // color: Colors.red,
-        child: OnPopupWindowWidget(
-          title: Text(titleStr),
-          footer: InkWell(
-            child: Text('Close'),
-            onTap: () {
-              Navigator.of(context).pop();
-            },
+    if (isWindows) {
+      FlutterPlatformAlert.showCustomAlert(
+        windowTitle: 'This is title',
+        text: 'This is body',
+        positiveButtonTitle: "Positive",
+        negativeButtonTitle: "Negative",
+        neutralButtonTitle: "Neutral",
+        options: PlatformAlertOptions(
+          windows: WindowsAlertOptions(
+            additionalWindowTitle: 'Window title',
+            showAsLinks: true,
           ),
-          child: SizedBox(
-            height: 100,
-            // width: 40,
-            child: ListView.builder(
-              itemCount: list.length,
-              itemBuilder: (BuildContext context, int index) {
-                // ListTile(title: Text(list[index]));
-                if (type == STORAGE_PROMPTS_SELECT) {
-                  radioSelectedValue.value = ConfigStore.to.getPromptsSelect();
-                } else if (type == STORAGE_SOUNDSEFFECT_SELECT) {
-                  radioSelectedValue.value =
-                      ConfigStore.to.getSoundsEffectSelect();
-                  if (radioSelectedValue.value == -1) {
-                    currentSoundEffect = list[0];
-                  } else {
-                    currentSoundEffect = list[radioSelectedValue.value];
-                  }
-                }
-                return Obx(() {
-                  return RadioListTile(
-                    title: Text(list[index]),
-                    value: index,
-                    groupValue: radioSelectedValue.value,
-                    onChanged: (value) {
-                      radioSelectedValue.value = value!;
-                      if (type == STORAGE_PROMPTS_SELECT) {
-                        ConfigStore.to.savePromptsSelect(value);
-                      } else if (type == STORAGE_SOUNDSEFFECT_SELECT) {
-                        ConfigStore.to.saveSoundsEffectSelect(value);
-                        currentSoundEffect = list[radioSelectedValue.value];
-                      }
-                    },
-                  );
-                });
+        ),
+      );
+    } else {
+      showDialog(
+        context: context,
+        builder: (context) => Container(
+          // width: 50,
+          // height: 50,
+          // color: Colors.red,
+          child: OnPopupWindowWidget(
+            title: Text(titleStr),
+            footer: InkWell(
+              child: Text('Close'),
+              onTap: () {
+                Navigator.of(context).pop();
               },
+            ),
+            child: SizedBox(
+              height: 100,
+              // width: 40,
+              child: ListView.builder(
+                itemCount: list.length,
+                itemBuilder: (BuildContext context, int index) {
+                  // ListTile(title: Text(list[index]));
+                  if (type == STORAGE_PROMPTS_SELECT) {
+                    radioSelectedValue.value =
+                        ConfigStore.to.getPromptsSelect();
+                  } else if (type == STORAGE_SOUNDSEFFECT_SELECT) {
+                    radioSelectedValue.value =
+                        ConfigStore.to.getSoundsEffectSelect();
+                    if (radioSelectedValue.value == -1) {
+                      currentSoundEffect = list[0];
+                    } else {
+                      currentSoundEffect = list[radioSelectedValue.value];
+                    }
+                  }
+                  return Obx(() {
+                    return RadioListTile(
+                      title: Text(list[index]),
+                      value: index,
+                      groupValue: radioSelectedValue.value,
+                      onChanged: (value) {
+                        radioSelectedValue.value = value!;
+                        if (type == STORAGE_PROMPTS_SELECT) {
+                          ConfigStore.to.savePromptsSelect(value);
+                        } else if (type == STORAGE_SOUNDSEFFECT_SELECT) {
+                          ConfigStore.to.saveSoundsEffectSelect(value);
+                          currentSoundEffect = list[radioSelectedValue.value];
+                        }
+                      },
+                    );
+                  });
+                },
+              ),
             ),
           ),
         ),
-      ),
-    );
+      );
+    }
   }
 }
