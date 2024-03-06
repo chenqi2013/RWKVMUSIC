@@ -11,6 +11,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_platform_alert/flutter_platform_alert.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'package:rwkvmusic/gen/assets.gen.dart';
 import 'package:rwkvmusic/mainwidget/ProgressbarTime.dart';
 import 'package:rwkvmusic/services/storage.dart';
 import 'package:rwkvmusic/store/config.dart';
@@ -29,6 +30,7 @@ import 'mainwidget/BtnImageTextWidget.dart';
 import 'package:webview_flutter_plus/webview_flutter_plus.dart';
 import 'package:on_popup_window_widget/on_popup_window_widget.dart';
 import 'package:window_manager/window_manager.dart';
+import 'package:flutter_gen_runner/flutter_gen_runner.dart';
 
 void main(List<String> args) async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -537,6 +539,10 @@ class _MyAppState extends State<MyApp> {
       controllerKeyboard.runJavaScript('resetPlay()');
     }
   }
+
+  // Widget getLogoImage() {
+  //   return Assets.images.logo.image();
+  // }
 
   void showPromptDialog(
       BuildContext context, String titleStr, List list, String type) {
