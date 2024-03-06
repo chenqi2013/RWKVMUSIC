@@ -100,6 +100,7 @@ class _MyAppState extends State<MyApp> {
   late MidiDeviceManage deviceManage;
   late String abcString;
   late bool isWindows;
+  var isHideWebview = true.obs;
   @override
   void initState() {
     super.initState();
@@ -293,17 +294,34 @@ class _MyAppState extends State<MyApp> {
           ),
           Flexible(
             flex: 2,
-            child: WebViewWidget(
-              controller: controllerPiano,
-            ),
+            child: Visibility(
+                key: const ValueKey('ValueKey11'),
+                visible: isHideWebview.value,
+                // maintainSize: true, // 保持占位空间
+                // maintainAnimation: true, // 保持动画
+                // maintainState: true,
+                child: WebViewWidget(
+                  controller: controllerPiano,
+                )),
           ),
           Flexible(
-            flex: 1,
-            child: WebViewWidget(
-              controller: controllerKeyboard,
-            ),
-          ),
+              flex: 3,
+              child: Visibility(
+                visible: isHideWebview.value,
+                // maintainSize: true, // 保持占位空间
+                // maintainAnimation: true, // 保持动画
+                // maintainState: true,
+                key: const ValueKey('ValueKey22'),
+                child: WebViewWidget(
+                  controller: controllerKeyboard,
+                ),
+              )),
+          //   ],
+          // )),
           Expanded(
+              child: Visibility(
+            visible: isHideWebview.value,
+            key: const ValueKey('ValueKey33'),
             child: Container(
               padding: EdgeInsets.symmetric(horizontal: 25, vertical: 5),
               color: Color(0xff3a3a3a),
@@ -381,7 +399,7 @@ class _MyAppState extends State<MyApp> {
                 ],
               ),
             ),
-          )
+          ))
         ],
       ),
     ));
@@ -546,76 +564,81 @@ class _MyAppState extends State<MyApp> {
 
   void showPromptDialog(
       BuildContext context, String titleStr, List list, String type) {
-    if (isWindows) {
-      FlutterPlatformAlert.showCustomAlert(
-        windowTitle: 'This is title',
-        text: 'This is body',
-        positiveButtonTitle: "Positive",
-        negativeButtonTitle: "Negative",
-        neutralButtonTitle: "Neutral",
-        options: PlatformAlertOptions(
-          windows: WindowsAlertOptions(
-            additionalWindowTitle: 'Window title',
-            showAsLinks: true,
+    isHideWebview.value = !isHideWebview.value;
+    setState(() {});
+    // if (!isWindows) {
+    //   FlutterPlatformAlert.showAlert(
+    //     windowTitle: 'This is title',
+    //     text: 'This is body',
+    //     // positiveButtonTitle: "Positive",
+    //     // negativeButtonTitle: "Negative",
+    //     // neutralButtonTitle: "Neutral",
+    //     options: PlatformAlertOptions(
+    //       windows: WindowsAlertOptions(
+    //         additionalWindowTitle: 'Window title',
+    //         showAsLinks: true,
+    //       ),
+    //     ),
+    //   );
+    // } else {
+    showDialog(
+      context: context,
+      builder: (context) => Container(
+        // width: 50,
+        // height: 50,
+        // color: Colors.red,
+        child: OnPopupWindowWidget(
+          title: Text(titleStr),
+          footer: InkWell(
+            child: Text('Close'),
+            onTap: () {
+              isHideWebview.value = !isHideWebview.value;
+              setState(() {});
+              Navigator.of(context).pop();
+            },
           ),
-        ),
-      );
-    } else {
-      showDialog(
-        context: context,
-        builder: (context) => Container(
-          // width: 50,
-          // height: 50,
-          // color: Colors.red,
-          child: OnPopupWindowWidget(
-            title: Text(titleStr),
-            footer: InkWell(
-              child: Text('Close'),
-              onTap: () {
-                Navigator.of(context).pop();
+          child: SizedBox(
+            height: 100,
+            // width: 40,
+            child: ListView.builder(
+              itemCount: list.length,
+              itemBuilder: (BuildContext context, int index) {
+                // ListTile(title: Text(list[index]));
+                if (type == STORAGE_PROMPTS_SELECT) {
+                  radioSelectedValue.value = ConfigStore.to.getPromptsSelect();
+                } else if (type == STORAGE_SOUNDSEFFECT_SELECT) {
+                  radioSelectedValue.value =
+                      ConfigStore.to.getSoundsEffectSelect();
+                  if (radioSelectedValue.value == -1) {
+                    currentSoundEffect = list[0];
+                  } else {
+                    currentSoundEffect = list[radioSelectedValue.value];
+                  }
+                }
+                return Obx(() {
+                  return RadioListTile(
+                    title: Text(list[index]),
+                    value: index,
+                    groupValue: radioSelectedValue.value,
+                    onChanged: (value) {
+                      radioSelectedValue.value = value!;
+                      // isHideWebview.value = !isHideWebview.value;
+                      // setState(() {});
+                      if (type == STORAGE_PROMPTS_SELECT) {
+                        ConfigStore.to.savePromptsSelect(value);
+                      } else if (type == STORAGE_SOUNDSEFFECT_SELECT) {
+                        ConfigStore.to.saveSoundsEffectSelect(value);
+                        currentSoundEffect = list[radioSelectedValue.value];
+                      }
+                    },
+                  );
+                });
               },
             ),
-            child: SizedBox(
-              height: 100,
-              // width: 40,
-              child: ListView.builder(
-                itemCount: list.length,
-                itemBuilder: (BuildContext context, int index) {
-                  // ListTile(title: Text(list[index]));
-                  if (type == STORAGE_PROMPTS_SELECT) {
-                    radioSelectedValue.value =
-                        ConfigStore.to.getPromptsSelect();
-                  } else if (type == STORAGE_SOUNDSEFFECT_SELECT) {
-                    radioSelectedValue.value =
-                        ConfigStore.to.getSoundsEffectSelect();
-                    if (radioSelectedValue.value == -1) {
-                      currentSoundEffect = list[0];
-                    } else {
-                      currentSoundEffect = list[radioSelectedValue.value];
-                    }
-                  }
-                  return Obx(() {
-                    return RadioListTile(
-                      title: Text(list[index]),
-                      value: index,
-                      groupValue: radioSelectedValue.value,
-                      onChanged: (value) {
-                        radioSelectedValue.value = value!;
-                        if (type == STORAGE_PROMPTS_SELECT) {
-                          ConfigStore.to.savePromptsSelect(value);
-                        } else if (type == STORAGE_SOUNDSEFFECT_SELECT) {
-                          ConfigStore.to.saveSoundsEffectSelect(value);
-                          currentSoundEffect = list[radioSelectedValue.value];
-                        }
-                      },
-                    );
-                  });
-                },
-              ),
-            ),
           ),
         ),
-      );
-    }
+      ),
+    );
+    // }
   }
 }
