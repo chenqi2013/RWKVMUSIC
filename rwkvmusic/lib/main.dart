@@ -584,6 +584,7 @@ class _MyAppState extends State<MyApp> {
     //   );
     // } else {
     showDialog(
+      barrierDismissible: false,
       context: context,
       builder: (context) => Container(
         // width: 50,
