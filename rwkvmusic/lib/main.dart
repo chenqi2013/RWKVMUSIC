@@ -34,21 +34,23 @@ import 'package:flutter_gen_runner/flutter_gen_runner.dart';
 
 void main(List<String> args) async {
   WidgetsFlutterBinding.ensureInitialized();
-  if (Platform.isWindows) {
+  if (Platform.isWindows || Platform.isMacOS) {
     WindowsWebViewPlatform.registerWith();
-    WindowOptions windowOptions = const WindowOptions(
-      size: Size(800, 600),
-      center: true,
-      backgroundColor: Colors.transparent,
-      // skipTaskbar: false,
-      // titleBarStyle: TitleBarStyle.hidden,
-      // windowButtonVisibility: false,
-    );
-    windowManager.waitUntilReadyToShow(windowOptions, () async {
-      await windowManager.show();
-      await windowManager.focus();
-    });
-    windowManager.setResizable(false);
+    if (Platform.isWindows) {
+      WindowOptions windowOptions = const WindowOptions(
+        size: Size(800, 600),
+        center: true,
+        backgroundColor: Colors.transparent,
+        // skipTaskbar: false,
+        // titleBarStyle: TitleBarStyle.hidden,
+        // windowButtonVisibility: false,
+      );
+      windowManager.waitUntilReadyToShow(windowOptions, () async {
+        await windowManager.show();
+        await windowManager.focus();
+      });
+      windowManager.setResizable(false);
+    }
   } else {
     // 强制横屏显示
     SystemChrome.setPreferredOrientations([
@@ -99,12 +101,12 @@ class _MyAppState extends State<MyApp> {
   late StringBuffer sbNoteCreate = StringBuffer();
   late MidiDeviceManage deviceManage;
   late String abcString;
-  late bool isWindows;
+  late bool isWindowsOrMac;
   var isHideWebview = true.obs;
   @override
   void initState() {
     super.initState();
-    isWindows = Platform.isWindows;
+    isWindowsOrMac = Platform.isWindows || Platform.isMacOS;
     stringBuffer = StringBuffer();
     deviceManage = MidiDeviceManage.getInstance();
     print('deviceManage22=$identityHashCode($deviceManage)');
@@ -382,7 +384,7 @@ class _MyAppState extends State<MyApp> {
                             } else {
                               controllerPiano.runJavaScript("pausePlay()");
                             }
-                            if (isWindows) {
+                            if (isWindowsOrMac) {
                               isPlay.value = !isPlay.value;
                             }
                           });
@@ -443,7 +445,7 @@ class _MyAppState extends State<MyApp> {
       abcString = "setAbcString(\"" + textstr + "\",false)";
 
       // 方案一
-      if (isWindows) {
+      if (isWindowsOrMac) {
         int currentTimestamp = DateTime.now().millisecondsSinceEpoch;
         int gap = currentTimestamp - preTimestamp;
         if (gap > 400) {
