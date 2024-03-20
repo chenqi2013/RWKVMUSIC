@@ -11,11 +11,11 @@ class ConfigStore extends GetxController {
   bool isFirstOpen = false;
   PackageInfo? _platform;
   String get version => _platform?.version ?? '-';
-  bool get isRelease => bool.fromEnvironment("dart.vm.product");
-  Locale locale = Locale('en', 'US');
+  bool get isRelease => const bool.fromEnvironment("dart.vm.product");
+  Locale locale = const Locale('en', 'US');
   List<Locale> languages = [
-    Locale('en', 'US'),
-    Locale('zh', 'CN'),
+    const Locale('en', 'US'),
+    const Locale('zh', 'CN'),
   ];
 
   @override
@@ -33,20 +33,28 @@ class ConfigStore extends GetxController {
     return StorageService.to.setBool(STORAGE_DEVICE_FIRST_OPEN_KEY, false);
   }
 
-  Future<bool> savePromptsSelect(int selelct){
+  Future<bool> savePromptsSelect(int selelct) {
     return StorageService.to.setInt(STORAGE_PROMPTS_SELECT, selelct);
   }
 
-  Future<bool> saveSoundsEffectSelect(int selelct){
+  Future<bool> saveSoundsEffectSelect(int selelct) {
     return StorageService.to.setInt(STORAGE_SOUNDSEFFECT_SELECT, selelct);
   }
 
-  int getPromptsSelect(){
+  int getPromptsSelect() {
     return StorageService.to.getInt(STORAGE_PROMPTS_SELECT);
   }
 
-  int getSoundsEffectSelect(){
+  int getSoundsEffectSelect() {
     return StorageService.to.getInt(STORAGE_SOUNDSEFFECT_SELECT);
+  }
+
+  Future<bool> saveMidiProgramSelect(int midiProgram) {
+    return StorageService.to.setInt(STORAGE_MIDIPROGRAM_SELECT, midiProgram);
+  }
+
+  int getMidiProgramSelect() {
+    return StorageService.to.getInt(STORAGE_MIDIPROGRAM_SELECT);
   }
 
   void onInitLocale() {

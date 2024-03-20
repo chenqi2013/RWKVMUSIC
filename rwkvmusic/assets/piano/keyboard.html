@@ -195,6 +195,8 @@
         element.addEventListener("touchstart", handleMouseDown);
         element.addEventListener("touchend", handleMouseUp);
         element.addEventListener("touchcancel", handleMouseUp);
+        element.addEventListener("mousedown", handleMouseDown); // 添加mousedown事件
+        element.addEventListener("mouseup", handleMouseUp); // 如果需要mouseup事件，也可以添加
       });
 
       function handleMouseDown(event) {
@@ -207,8 +209,8 @@
         console.log('mousedown midiKey: ', midiKey);
         // 由这里调用安卓程序
         // if (typeof controller !== "undefined") {
-          // controller.onNoteOn(parseInt(midiKey));
-          flutteronNoteOn.postMessage(parseInt(midiKey));
+        // controller.onNoteOn(parseInt(midiKey));
+        flutteronNoteOn.postMessage(midiKey);
         // } else {
         //   alert("Running outside Android app down");
         // }
@@ -226,8 +228,8 @@
 
         // 由这里调用安卓程序
         // if (typeof controller !== "undefined") {
-          // controller.onNoteOff(parseInt(midiKey));
-          flutteronNoteOff.postMessage(parseInt(midiKey));
+        // controller.onNoteOff(parseInt(midiKey));
+        flutteronNoteOff.postMessage(midiKey);
         // } else {
         //   alert("Running outside Android app up");
         // }

@@ -18,3 +18,5 @@ const String STORAGE_PROMPTS_SELECT = 'prompts_select';
 
 /// soundseffect
 const String STORAGE_SOUNDSEFFECT_SELECT = 'soundseffect_select';
+
+const String STORAGE_MIDIPROGRAM_SELECT = 'midiprogram_select';

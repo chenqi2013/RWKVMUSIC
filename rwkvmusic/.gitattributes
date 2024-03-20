@@ -1,0 +1,2 @@
+*.bin filter=lfs diff=lfs merge=lfs -text
+rwkvmusic/assets/fastmodel/RWKV-5-ABC-82M-v1-20230901-ctx1024-ncnn.bin filter=lfs diff=lfs merge=lfs -text

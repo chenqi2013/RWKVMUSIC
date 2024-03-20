@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:ffi';
+import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -26,6 +27,8 @@ class MidiDeviceManage {
   ReceiveCallback? receiveCallback;
 
   MidiToABCConverter? convertABC;
+
+  late bool isAndroidorIos;
 
   // 单例模式固定格式
   // MidiDeviceManage._();
@@ -56,8 +59,11 @@ class MidiDeviceManage {
         print("bluetooth state change $data");
       }
     });
+    if (Platform.isIOS) {
+      updateNetworkSessionState();
+    }
 
-    updateNetworkSessionState();
+    isAndroidorIos = Platform.isIOS || Platform.isAndroid;
     // }
   }
 
@@ -219,20 +225,32 @@ class MidiDeviceManage {
   void connectOrDisconnect(MidiDevice device, BuildContext context) {
     if (device.connected) {
       if (kDebugMode) {
-        toastInfo(msg: "disconnect");
+        if (isAndroidorIos) {
+          toastInfo(msg: "disconnect");
+        }
+        print('disconnect');
       }
       midiCommand?.disconnectDevice(device);
     } else {
       if (kDebugMode) {
+        if (isAndroidorIos) {
+          toastInfo(msg: "connect");
+        }
         print("connect");
       }
       midiCommand?.connectToDevice(device).then((_) {
         if (kDebugMode) {
-          toastInfo(msg: "device connected async");
+          if (isAndroidorIos) {
+            toastInfo(msg: "device connected async");
+          }
+          print('device connected async');
         }
         midiCommand?.onMidiDataReceived?.listen((data) {
           MidiPacket datatmp = data;
           print('Received MIDI data: ${data.data}');
+          if (isAndroidorIos) {
+            toastInfo(msg: "Received MIDI data: ${data.data}");
+          }
           var result = convertABC!.midiToABC(datatmp.data, false);
           print('convertdata=$result');
           if ((result[0] as String).isNotEmpty) {
@@ -247,6 +265,7 @@ class MidiDeviceManage {
       }).catchError((err) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
             content: Text("Error: ${(err as PlatformException?)?.message}")));
+        print('Error: ${(err as PlatformException?)?.message}');
       });
     }
   }

@@ -2,16 +2,6 @@ B:9
 E:5
 B:9
 L:1/8
-M:4/4
-K:D
- FE | D2 FA dAFD | CDEF GECE | D2 FA dAFD | GEFD EAGE | D2 FA dAFD | GEFD EAGE | 
-  DdAF D2 :| FA | d2 fd adfa | gafg egBc | d
-
-
-L:1/4
-M:4/4
-K:D
-"D" A F F
-FE | D2 FA dAFD | CDEF GECE | D2 FA dAFD | GEFD EAGE | D2 FA dAFD | GEFD EAGE | 
- DdAF D2 :| FA | d2 fd adfa | gafg egBc | d
- 
+M:6/8
+K:G
+ B2 d d>cd | d>cd d>cd | c2 e e>de e>de e>de | B2 d d>cd | d>cd d>cd | A2 c BAG | A>cA G>ED

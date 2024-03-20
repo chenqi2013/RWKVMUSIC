@@ -1,14 +1,18 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:ffi' hide Size;
+import 'dart:isolate';
+import 'package:ffi/ffi.dart';
 // import 'dart:html';
 import 'dart:io';
 import 'dart:math';
 import 'package:audioplayers/audioplayers.dart';
+import 'package:filepicker_windows/filepicker_windows.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_platform_alert/flutter_platform_alert.dart';
+import 'package:flutter_cache_manager/flutter_cache_manager.dart';
+// import 'package:flutter_platform_alert/flutter_platform_alert.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:rwkvmusic/gen/assets.gen.dart';
@@ -16,21 +20,28 @@ import 'package:rwkvmusic/mainwidget/ProgressbarTime.dart';
 import 'package:rwkvmusic/services/storage.dart';
 import 'package:rwkvmusic/store/config.dart';
 import 'package:rwkvmusic/test/bletest.dart';
-import 'package:rwkvmusic/test/mididevicetest.dart';
+import 'package:rwkvmusic/test/midi_devicelist_page.dart';
+import 'package:rwkvmusic/utils/abchead.dart';
 // import 'package:rwkvmusic/test/testwebviewuniversal.dart';
 import 'package:rwkvmusic/utils/audioplayer.dart';
 import 'package:rwkvmusic/utils/midiconvertabc.dart';
 import 'package:rwkvmusic/utils/mididevicemanage.dart';
+import 'package:rwkvmusic/utils/commonutils.dart';
+import 'package:rwkvmusic/utils/midifileconvert.dart';
 import 'package:rwkvmusic/values/constantdata.dart';
 import 'package:rwkvmusic/values/storage.dart';
+import 'package:rwkvmusic/widgets/toast.dart';
+import 'package:universal_ble/universal_ble.dart';
 import 'package:webview_win_floating/webview_plugin.dart';
 
+import 'faster_rwkvd.dart';
 import 'mainwidget/BorderBtnWidget.dart';
 import 'mainwidget/BtnImageTextWidget.dart';
 import 'package:webview_flutter_plus/webview_flutter_plus.dart';
 import 'package:on_popup_window_widget/on_popup_window_widget.dart';
 import 'package:window_manager/window_manager.dart';
-import 'package:flutter_gen_runner/flutter_gen_runner.dart';
+// import 'package:flutter_gen_runner/flutter_gen_runner.dart';
+import 'package:event_bus/event_bus.dart';
 
 void main(List<String> args) async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -61,13 +72,163 @@ void main(List<String> args) async {
   }
   await Get.putAsync<StorageService>(() => StorageService().init());
   Get.put<ConfigStore>(ConfigStore());
-  runApp(ScreenUtilInit(
-    designSize: Size(375, 812),
+  runApp(const ScreenUtilInit(
+    designSize: Size(812, 375),
     child: GetMaterialApp(
       debugShowCheckedModeBanner: false,
       home: MyApp(),
     ),
   ));
+}
+
+RxBool isGenerating = false.obs;
+EventBus eventBus = EventBus();
+EventBus isolateEventBus = EventBus();
+late ReceivePort mainReceivePort;
+late SendPort isolateSendPort;
+bool isFinishABCEvent = false;
+late String finalabcStringPreset;
+late String finalabcStringCreate;
+late bool isNeedRestart; //曲谱及键盘动画需要重新开始
+late String currentPrompt;
+
+late OverlayEntry overlayEntry;
+
+RxList<BleScanResult> bleList = <BleScanResult>[].obs;
+List bleListName = [];
+late String deviceId;
+
+MidiToABCConverter convertABC = MidiToABCConverter();
+
+late int midiProgramValue;
+
+RxInt timeSignature = 2.obs;
+RxInt defaultNoteLenght = 0.obs;
+RxDouble randomness = 0.7.obs;
+RxInt seed = 22416.obs;
+RxDouble tempo = 180.0.obs;
+RxBool autoChord = true.obs;
+RxBool infiniteGeneration = false.obs;
+
+List midiNotes = [];
+bool isNeedConvertMidiNotes = false;
+
+List virtualNotes = []; //虚拟键盘按键音符
+
+void fetchABCDataByIsolate() async {
+  // 创建 ReceivePort，以接收来自子线程的消息
+  // 创建一个新的 Isolate
+  mainReceivePort = ReceivePort();
+  await Isolate.spawn(getABCDataByLocalModel, [
+    mainReceivePort.sendPort,
+    currentPrompt,
+    midiProgramValue,
+    seed.value,
+    randomness.value,
+  ]);
+  // 监听来自子线线程的数据
+  mainReceivePort.listen((data) {
+    // print('Received data: $data');
+    if (data is SendPort) {
+      isolateSendPort = data;
+    } else if (data is EventBus) {
+      isolateEventBus = data;
+    } else if (data == "finish") {
+      mainReceivePort.close(); // 操作完成后，关闭 ReceivePort
+      isGenerating.value = false;
+    } else {
+      finalabcStringPreset = data;
+      eventBus.fire(data);
+    }
+  });
+}
+
+void getABCDataByLocalModel(var array) async {
+  SendPort sendPort = array[0];
+  String currentPrompt = array[1];
+  int midiprogramvalue = array[2];
+  int seed = array[3];
+  double randomness = array[4];
+  int eosId = 3;
+  String dllPath = CommonUtils.getdllPath();
+  String binPath = CommonUtils.getBinPath();
+  String prompt = currentPrompt;
+  var isolateReceivePort = ReceivePort();
+  var isStopGenerating = false;
+  // isolateReceivePort.listen((data) {
+  //   print('isolateReceivePort==$data');
+  //   isStopGenerating = true;
+  // });
+
+  EventBus eventBus = EventBus();
+
+  eventBus.on().listen((event) {
+    print('isolateReceivePort==$event');
+    isStopGenerating = true;
+    sendPort.send('finish');
+  });
+  sendPort.send(isolateReceivePort.sendPort);
+  sendPort.send(eventBus);
+  Pointer<Char> promptChar = prompt.toNativeUtf8().cast<Char>();
+  faster_rwkvd fastrwkv = faster_rwkvd(DynamicLibrary.open(dllPath));
+  Pointer<Char> strategy = 'ncnn fp32'.toNativeUtf8().cast<Char>();
+  Pointer<Void> model =
+      fastrwkv.rwkv_model_create(binPath.toNativeUtf8().cast<Char>(), strategy);
+  Pointer<Void> abcTokenizer = fastrwkv.rwkv_ABCTokenizer_create();
+  Pointer<Void> sampler = fastrwkv.rwkv_sampler_create();
+  fastrwkv.rwkv_sampler_set_seed(sampler, seed);
+  StringBuffer stringBuffer = StringBuffer();
+  int preTimestamp = 0;
+  late String abcString;
+  // 默认的就按照pengbo的demo里面的temp=1.0 top_k=8, top_p=0.8?
+  int token = fastrwkv.rwkv_abcmodel_run_prompt(model, abcTokenizer, sampler,
+      promptChar, prompt.length, 1.0, 8, randomness);
+  isGenerating.value = true;
+  for (int i = 0; i < 200; i++) {
+    if (isStopGenerating) {
+      print('stop getABCDataByLocalModel');
+      break;
+    }
+    int result = fastrwkv.rwkv_abcmodel_run_with_tokenizer_and_sampler(
+        model, abcTokenizer, sampler, token, 1.0, 8, 0.8);
+    token = result;
+    String resultstr = String.fromCharCode(result);
+    // sb.write(resultstr);
+    // print('getABCDataByLocalModel=$resultstr');
+    // if (result == 10) {
+    //   continue;
+    // }
+    // print('responseData=$resultstr');
+    String textstr = resultstr.replaceAll('\n', '').replaceAll('\r', '');
+    stringBuffer.write(resultstr);
+    textstr = CommonUtils.escapeString(stringBuffer.toString());
+    abcString =
+        "setAbcString(\"${ABCHead.getABCWithInstrument(textstr, midiprogramvalue)}\",false)";
+    abcString = ABCHead.appendTempoParam(abcString, tempo.value.toInt());
+    // print('abcString==${escapeString(abcString)}}');
+    // 方案一
+    int currentTimestamp = DateTime.now().millisecondsSinceEpoch;
+    int gap = currentTimestamp - preTimestamp;
+    if (gap > 400) {
+      //&& resultstr.startsWith("|")
+      //&& tempStr.trim().isEmpty
+      // print('runJavaScript');
+      preTimestamp = currentTimestamp;
+      // if (i < 250) {
+      //   continue;
+      // }
+      sendPort.send(abcString);
+    }
+
+    if (eosId == token) {
+      print('getABCDataByLocalModel break');
+      break;
+    }
+  }
+  isGenerating.value = false;
+  sendPort.send(abcString.toString());
+  sendPort.send('finish');
+  print('getABCDataByLocalModel all data=${abcString.toString()}');
 }
 
 class MyApp extends StatefulWidget {
@@ -79,7 +240,8 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   late WebViewControllerPlus controllerPiano;
   late WebViewControllerPlus controllerKeyboard;
-  String filePathKeyboardAnimation = 'assets/piano/index.html';
+  String filePathKeyboardAnimation =
+      "http://leolin.wiki"; //assets/piano/index.html
   String filePathKeyboard = 'assets/piano/keyboard.html';
   String filePathPiano = 'assets/player/player.html';
   var selectstate = 0.obs;
@@ -91,21 +253,30 @@ class _MyAppState extends State<MyApp> {
   var pianoAllTime = 0.0.obs;
   late Timer timer;
   late StreamSubscription subscription;
-  var isGenerating = false.obs;
   late HttpClient httpClient;
   int preTimestamp = 0;
   int preCount = 0;
   int listenCount = 0;
   var radioSelectedValue = 0.obs;
   String? currentSoundEffect;
-  late StringBuffer sbNoteCreate = StringBuffer();
+  // late StringBuffer sbNoteCreate = StringBuffer();
   late MidiDeviceManage deviceManage;
   late String abcString;
   late bool isWindowsOrMac;
-  var isHideWebview = true.obs;
+  var isVisibleWebview = true.obs;
   @override
   void initState() {
     super.initState();
+    midiProgramValue = ConfigStore.to.getMidiProgramSelect();
+    if (midiProgramValue == -1) {
+      midiProgramValue = 0;
+      print('set midiprogramvalue = 0');
+    }
+    print('midiprogramvalue value= $midiProgramValue');
+    finalabcStringCreate =
+        "setAbcString(\"${ABCHead.getABCWithInstrument(r'L:1/4\nM:4/4\nK:C\n|', midiProgramValue)}\",false)";
+    finalabcStringCreate =
+        ABCHead.appendTempoParam(finalabcStringCreate, tempo.value.toInt());
     isWindowsOrMac = Platform.isWindows || Platform.isMacOS;
     stringBuffer = StringBuffer();
     deviceManage = MidiDeviceManage.getInstance();
@@ -124,9 +295,22 @@ class _MyAppState extends State<MyApp> {
             });
           },
           onPageFinished: (url) {
-            print("controllerPiano onPageFinished" + url);
-            controllerPiano.runJavaScript(
-                "setAbcString(\"%%MIDI program 40\\nL:1/4\\nM:4/4\\nK:D\\n\\\"D\\\" A F F\", false)");
+            print("controllerPiano onPageFinished$url");
+            int index = ConfigStore.to.getPromptsSelect();
+            if (index < 0) {
+              index = 0;
+            }
+            // if (index < 0) {
+            //   controllerPiano.runJavaScript(
+            //       "setAbcString(\"%%MIDI program 40\\nL:1/4\\nM:4/4\\nK:D\\n\\\"D\\\" A F F\", false)");
+            // } else {
+            currentPrompt = CommonUtils.escapeString(promptsAbc[index]);
+            finalabcStringPreset =
+                "setAbcString(\"${ABCHead.getABCWithInstrument(currentPrompt, midiProgramValue)}\", false)";
+            finalabcStringPreset = ABCHead.appendTempoParam(
+                finalabcStringPreset, tempo.value.toInt());
+            controllerPiano.runJavaScript(finalabcStringPreset);
+            // }
             controllerPiano.runJavaScript("setPromptNoteNumberCount(3)");
             controllerPiano.runJavaScript("setStyle()");
           },
@@ -136,42 +320,58 @@ class _MyAppState extends State<MyApp> {
       ..addJavaScriptChannel("flutteronStartPlay",
           onMessageReceived: (JavaScriptMessage jsMessage) {
         String message = jsMessage.message;
-        print('flutteronStartPlay onMessageReceived=' + message);
+        print('flutteronStartPlay onMessageReceived=$message');
         pianoAllTime.value = double.parse(message.split(',')[1]);
         print('pianoAllTime:${pianoAllTime.value}');
         playProgress.value = 0.0;
         createTimer();
         isPlay.value = true;
+        isNeedRestart = false;
       })
       ..addJavaScriptChannel("flutteronPausePlay",
           onMessageReceived: (JavaScriptMessage jsMessage) {
-        print('flutteronPausePlay onMessageReceived=' + jsMessage.message);
+        print('flutteronPausePlay onMessageReceived=${jsMessage.message}');
         timer.cancel();
         isPlay.value = false;
+        isNeedRestart = false;
       })
       ..addJavaScriptChannel("flutteronResumePlay",
           onMessageReceived: (JavaScriptMessage jsMessage) {
-        print('flutteronResumePlay onMessageReceived=' + jsMessage.message);
+        print('flutteronResumePlay onMessageReceived=${jsMessage.message}');
         createTimer();
         isPlay.value = true;
+        isNeedRestart = false;
       })
       ..addJavaScriptChannel("flutteronCountPromptNoteNumber",
           onMessageReceived: (JavaScriptMessage jsMessage) {
-        print('flutteronCountPromptNoteNumber onMessageReceived=' +
-            jsMessage.message);
+        print(
+            'flutteronCountPromptNoteNumber onMessageReceived=${jsMessage.message}');
       })
       ..addJavaScriptChannel("flutteronEvents",
           onMessageReceived: (JavaScriptMessage jsMessage) {
-        print('flutteronEvents onMessageReceived=' + jsMessage.message);
+        print('flutteronEvents onMessageReceived=${jsMessage.message}');
+        midiNotes = jsonDecode(jsMessage.message);
+        if (!isNeedConvertMidiNotes) {
+          // String jsstr =
+          //     r'startPlay("[[0,\"on\",49],[333,\"on\",46],[333,\"off\",49],[1000,\"off\",46]]")';
+          String jsstr =
+              r'startPlay("' + jsMessage.message.replaceAll('"', r'\"') + r'")';
+          controllerKeyboard.runJavaScript(jsstr);
+          isFinishABCEvent = true;
+          print('isFinishABCEvent == true');
+        } else {
+          isNeedConvertMidiNotes = false;
+        }
       })
       ..addJavaScriptChannel("flutteronPlayFinish",
           onMessageReceived: (JavaScriptMessage jsMessage) {
-        print('flutteronPlayFinish onMessageReceived=' + jsMessage.message);
+        print('flutteronPlayFinish onMessageReceived=${jsMessage.message}');
         isPlay.value = false;
+        isNeedRestart = true;
       })
       ..addJavaScriptChannel("flutteronClickNote",
           onMessageReceived: (JavaScriptMessage jsMessage) {
-        print('flutteronClickNote onMessageReceived=' + jsMessage.message);
+        print('flutteronClickNote onMessageReceived=${jsMessage.message}');
       });
 
     controllerKeyboard = WebViewControllerPlus()
@@ -184,7 +384,7 @@ class _MyAppState extends State<MyApp> {
             });
           },
           onPageFinished: (url) {
-            print("controllerKeyboard onPageFinished" + url);
+            print("controllerKeyboard onPageFinished$url");
             controllerKeyboard.runJavaScript('resetPlay()');
             controllerKeyboard.runJavaScript('setPiano(55, 76)');
             if (selectstate.value == 1) {
@@ -193,14 +393,13 @@ class _MyAppState extends State<MyApp> {
           },
         ),
       )
-      ..loadFlutterAssetServer(filePathKeyboardAnimation)
       ..addJavaScriptChannel("flutteronNoteOff",
           onMessageReceived: (JavaScriptMessage jsMessage) {
-        print('flutteronNoteOff onMessageReceived=' + jsMessage.message);
+        print('flutteronNoteOff onMessageReceived=${jsMessage.message}');
       })
       ..addJavaScriptChannel("flutteronNoteOn",
           onMessageReceived: (JavaScriptMessage jsMessage) {
-        print('flutteronNoteOn onMessageReceived=' + jsMessage.message);
+        print('flutteronNoteOn onMessageReceived=${jsMessage.message}');
         String name =
             MidiToABCConverter().getNoteMp3Path(int.parse(jsMessage.message));
         if (currentSoundEffect != null) {
@@ -213,20 +412,65 @@ class _MyAppState extends State<MyApp> {
         }
         updatePianoNote(int.parse(jsMessage.message));
       });
+    // controllerKeyboard.loadFlutterAssetServer(filePathKeyboardAnimation);
+    controllerKeyboard.loadRequest(Uri.parse(filePathKeyboardAnimation));
+
+    eventBus.on().listen((event) {
+      // print('event bus==$event');
+      controllerPiano.runJavaScript(event);
+    });
   }
 
   void updatePianoNote(int node) {
     String noteName = MidiToABCConverter().getNoteName(node);
-    sbNoteCreate.write(noteName);
-    String sb = "setAbcString(\"%%MIDI program 0\\nL:1/4\\nM:4/4\\nK:C\\n|\\" +
-        sbNoteCreate.toString() +
-        "\",false)";
+    // sbNoteCreate.write(noteName);
+    virtualNotes.add(noteName);
+    StringBuffer sbff = StringBuffer();
+    for (String note in virtualNotes) {
+      sbff.write(note);
+    }
+    String sb =
+        "setAbcString(\"%%MIDI program $midiProgramValue}\\nL:1/4\\nM:4/4\\nK:C\\n|\\${sbff.toString()}\",false)";
+    sb = ABCHead.appendTempoParam(sb, tempo.value.toInt());
     print('curr=$sb');
     controllerPiano.runJavaScript(sb);
   }
 
+  void resetLastNote() {
+    if (virtualNotes.isNotEmpty) {
+      virtualNotes.removeLast();
+      StringBuffer sbff = StringBuffer();
+      for (String note in virtualNotes) {
+        sbff.write(note);
+      }
+      String sb =
+          "setAbcString(\"%%MIDI program $midiProgramValue}\\nL:1/4\\nM:4/4\\nK:C\\n|\\${sbff.toString()}\",false)";
+      print('curr=$sb');
+      sb = ABCHead.appendTempoParam(sb, tempo.value.toInt());
+      controllerPiano.runJavaScript(sb);
+    }
+  }
+
+  void playPianoAnimation(String abcString, bool play) {
+    if (play) {
+      if (isFinishABCEvent && !isNeedRestart && !isNeedConvertMidiNotes) {
+        controllerKeyboard.runJavaScript('resumePlay()');
+        print('resumePlay()playPianoAnimation');
+        // createTimer();
+      } else {
+        abcString = abcString.replaceAll('setAbcString', 'ABCtoEvents');
+        // abcString = r'ABCtoEvents("L:1/4\nM:4/4\nK:D\n\"D\" A F F")';
+        print('playPianoAnimation ABCtoEvents==$abcString');
+        controllerPiano.runJavaScript(abcString);
+      }
+    } else {
+      controllerKeyboard.runJavaScript('pausePlay()');
+      // timer.cancel();
+    }
+  }
+
   void createTimer() {
-    timer = Timer.periodic(Duration(milliseconds: 1000), (Timer timer) {
+    timer = Timer.periodic(const Duration(milliseconds: 1000), (Timer timer) {
       if (playProgress.value >= 1) {
         playProgress.value = 1;
         timer.cancel();
@@ -251,33 +495,39 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     return Scaffold(
         body: Container(
-      color: Color(0xff3a3a3a),
+      color: const Color(0xff3a3a3a),
       child: Column(
         children: [
           Container(
-            padding: EdgeInsets.symmetric(horizontal: 25, vertical: 15),
+            padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 15),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                Text(
+                const Text(
                   'RWKV AI Music Composer',
                   style: TextStyle(
                       color: Colors.white, fontWeight: FontWeight.bold),
                 ),
-                Spacer(),
+                const Spacer(),
                 Container(child: Obx(() {
                   return CupertinoSegmentedControl(
                     children: const {
-                      0: Text(
-                        'Preset Mode',
-                        style: TextStyle(
-                            color: Colors.white, fontWeight: FontWeight.bold),
-                      ),
-                      1: Text(
-                        'Creative Mode',
-                        style: TextStyle(
-                            color: Colors.white, fontWeight: FontWeight.bold),
-                      ),
+                      0: Padding(
+                          padding: EdgeInsets.all(10),
+                          child: Text(
+                            'Preset Mode',
+                            style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold),
+                          )),
+                      1: Padding(
+                          padding: EdgeInsets.all(10),
+                          child: Text(
+                            'Creative Mode',
+                            style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold),
+                          )),
                     },
                     onValueChanged: (int newValue) {
                       // 当选择改变时执行的操作
@@ -286,9 +536,9 @@ class _MyAppState extends State<MyApp> {
                       segmengChange(newValue);
                     },
                     groupValue: selectstate.value, // 当前选中的选项值
-                    selectedColor: Color(0xff44be1c),
+                    selectedColor: const Color(0xff44be1c),
                     unselectedColor: Colors.transparent,
-                    borderColor: Color(0xff6d6d6d),
+                    borderColor: const Color(0xff6d6d6d),
                   );
                 })),
               ],
@@ -298,7 +548,7 @@ class _MyAppState extends State<MyApp> {
             flex: 2,
             child: Visibility(
                 key: const ValueKey('ValueKey11'),
-                visible: isHideWebview.value,
+                visible: isVisibleWebview.value,
                 // maintainSize: true, // 保持占位空间
                 // maintainAnimation: true, // 保持动画
                 // maintainState: true,
@@ -309,7 +559,7 @@ class _MyAppState extends State<MyApp> {
           Flexible(
               flex: 3,
               child: Visibility(
-                visible: isHideWebview.value,
+                visible: isVisibleWebview.value,
                 // maintainSize: true, // 保持占位空间
                 // maintainAnimation: true, // 保持动画
                 // maintainState: true,
@@ -322,11 +572,11 @@ class _MyAppState extends State<MyApp> {
           // )),
           Expanded(
               child: Visibility(
-            visible: isHideWebview.value,
+            visible: isVisibleWebview.value,
             key: const ValueKey('ValueKey33'),
             child: Container(
-              padding: EdgeInsets.symmetric(horizontal: 25, vertical: 5),
-              color: Color(0xff3a3a3a),
+              padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 5),
+              color: const Color(0xff3a3a3a),
               child: Row(
                 children: [
                   creatBottomBtn('Prompts', () {
@@ -334,7 +584,7 @@ class _MyAppState extends State<MyApp> {
                     showPromptDialog(
                         context, 'Prompts', prompts, STORAGE_PROMPTS_SELECT);
                   }),
-                  SizedBox(
+                  const SizedBox(
                     width: 8,
                   ),
                   creatBottomBtn('Sounds Effect', () {
@@ -344,14 +594,14 @@ class _MyAppState extends State<MyApp> {
                   }),
                   ProgressbarTime(playProgress, pianoAllTime),
                   Obx(() => isGenerating.value
-                      ? CircularProgressIndicator(
+                      ? const CircularProgressIndicator(
                           valueColor:
                               AlwaysStoppedAnimation<Color>(Colors.white),
                         )
                       : Container(
                           child: null,
                         )),
-                  Spacer(),
+                  const Spacer(),
                   Container(
                     child: Row(
                       children: [
@@ -369,9 +619,31 @@ class _MyAppState extends State<MyApp> {
                                 //     "setAbcString(\"%%MIDI program 40\\nL:1/4\\nM:4/4\\nK:D\\n\\\"D\\\" A F F\", false)");
                                 // controllerPiano.runJavaScript(
                                 //     'resetTimingCallbacks()');
-                                getABCData();
+                                if (isWindowsOrMac) {
+                                  fetchABCDataByIsolate();
+                                } else {
+                                  getABCDataByAPI();
+                                }
+                                controllerKeyboard.runJavaScript('resetPlay()');
+                                isFinishABCEvent = false;
+                              } else {
+                                // isolateSendPort.send('stop Generating');
+                                isolateEventBus.fire("stop Generating");
                               }
                             })),
+                        const SizedBox(
+                          width: 10,
+                        ),
+                        Obx(() => Visibility(
+                            visible: selectstate.value == 1,
+                            child: createButtonImageWithText('Undo', Icons.undo,
+                                () {
+                              print('Undo');
+                              resetLastNote();
+                            }))),
+                        const SizedBox(
+                          width: 10,
+                        ),
                         Obx(() {
                           return createButtonImageWithText(
                               !isPlay.value ? 'Play' : 'Pause',
@@ -379,22 +651,38 @@ class _MyAppState extends State<MyApp> {
                               () {
                             print('Play');
                             if (!isPlay.value) {
-                              // controllerPiano.runJavaScript("ABCtoEvents(\"L:1/4\\nM:4/4\\nK:D\\n\\\"D\\\" A F F\")");
                               controllerPiano.runJavaScript("startPlay()");
                             } else {
                               controllerPiano.runJavaScript("pausePlay()");
                             }
-                            if (isWindowsOrMac) {
-                              isPlay.value = !isPlay.value;
-                            }
+                            playPianoAnimation(
+                                finalabcStringPreset, !isPlay.value);
+                            // if (isWindowsOrMac) {
+                            //   isPlay.value = !isPlay.value;
+                            // }
                           });
                         }),
+                        const SizedBox(
+                          width: 10,
+                        ),
                         createButtonImageWithText('Settings', Icons.settings,
                             () {
                           print('Settings');
+                          if (isWindowsOrMac) {
+                            isVisibleWebview.value = !isVisibleWebview.value;
+                            setState(() {});
+                          }
                           // Get.to(FlutterBlueApp());
-                          Get.to(MyApp11());
+                          // Get.to(const MIDIDeviceListPage());
+                          if (selectstate.value == 0) {
+                            showSettingDialog(context);
+                          } else {
+                            showCreateModelSettingDialog(context);
+                          }
                         }),
+                        const SizedBox(
+                          width: 10,
+                        ),
                       ],
                     ),
                   ),
@@ -407,7 +695,7 @@ class _MyAppState extends State<MyApp> {
     ));
   }
 
-  void getABCData() async {
+  void getABCDataByAPI() async {
     var dic = {
       "frequency_penalty": 0.4,
       "max_tokens": 1000,
@@ -420,7 +708,7 @@ class _MyAppState extends State<MyApp> {
     };
     httpClient = HttpClient();
     HttpClientRequest request = await httpClient
-        .postUrl(Uri.parse('http://192.168.3.19:8000/completions'));
+        .postUrl(Uri.parse('http://192.168.0.106:8000/completions'));
     request.headers.contentType = ContentType
         .json; //这个要设置，否则报错{"error":{"message":"当前分组 reverse-times 下对于模型  计费模式 [按次计费] 无可用渠道 (request id: 20240122102439864867952mIY4Ma3k)","type":"shell_api_error"}}
     request.write(jsonEncode(dic));
@@ -437,13 +725,15 @@ class _MyAppState extends State<MyApp> {
       } // 处理数据流的每个块
       listenCount++;
       String responseData = utf8.decode(chunk);
-      String textstr = extractTextValue(responseData)!;
+      String textstr = CommonUtils.extractTextValue(responseData)!;
       String tempStr = textstr;
-      // print('responseData=$textstr');
+      print('responseData=$textstr');
       stringBuffer.write(textstr);
-      textstr = escapeString(stringBuffer.toString());
-      abcString = "setAbcString(\"" + textstr + "\",false)";
-
+      textstr = CommonUtils.escapeString(stringBuffer.toString());
+      abcString =
+          "setAbcString(\"${ABCHead.getABCWithInstrument(textstr, midiProgramValue)}\",false)";
+      abcString = ABCHead.appendTempoParam(abcString, tempo.value.toInt());
+      print('abcstring result=$abcString');
       // 方案一
       if (isWindowsOrMac) {
         int currentTimestamp = DateTime.now().millisecondsSinceEpoch;
@@ -475,6 +765,7 @@ class _MyAppState extends State<MyApp> {
       print('请求完成');
       httpClient.close();
       isGenerating.value = false;
+      finalabcStringPreset = abcString.toString();
     }, onError: (error) {
       // 处理错误
       print('请求发生错误: $error');
@@ -482,77 +773,24 @@ class _MyAppState extends State<MyApp> {
     });
   }
 
-  void establishSSEConnection() async {
-    var dic = {
-      'temperature': 0.5,
-      'presence_penalty': 0,
-      'top_p': 1,
-      'max_tokens': 10,
-      'model': 'gpt-4-gizmo-g-qdhTcI4hP',
-      'stream': true,
-      'messages': [
-        {'role': 'user', 'content': 'hello', 'raw': false}
-      ]
-    };
-    HttpClient httpClient = HttpClient();
-    HttpClientRequest request = await httpClient
-        .postUrl(Uri.parse('http://13.113.191.60/openapi/v1/chat/completions'));
-    request.headers.contentType = ContentType
-        .json; //这个要设置，否则报错{"error":{"message":"当前分组 reverse-times 下对于模型  计费模式 [按次计费] 无可用渠道 (request id: 20240122102439864867952mIY4Ma3k)","type":"shell_api_error"}}
-    request.write(jsonEncode(dic));
-    // request.headers.add('Accept', 'text/event-stream');
-    HttpClientResponse response = await request.close();
-    response.listen((List<int> chunk) {
-      // 处理数据流的每个块
-      String responseData = utf8.decode(chunk);
-      print(responseData);
-    }, onDone: () {
-      // 数据流接收完成
-      print('请求完成');
-      httpClient.close();
-    }, onError: (error) {
-      // 处理错误
-      print('请求发生错误: $error');
-    });
-  }
-
-  String? extractTextValue(String jsonData) {
-    // 正则表达式匹配 "text" 字段的值
-    RegExp regExp = RegExp(r'"text":\s*"(.*?)"');
-
-    // 查找匹配项
-    RegExpMatch? match = regExp.firstMatch(jsonData);
-
-    // 返回匹配的值（如果存在）
-    return match!.group(1);
-  }
-
-  String escapeString(String input) {
-    input = input.replaceAll("\r\n", "\n");
-    input = input.replaceAll("\\|\\s+", "|");
-    input = input.replaceAll("\\|\n", "|");
-    return input
-        .replaceAll("\\", "\\\\")
-        .replaceAll("\"", "\\\"")
-        .replaceAll("\'", "\\\'")
-        .replaceAll("\n", "\\n")
-        .replaceAll("\r", "\\r")
-        .replaceAll("\t", "\\t");
-  }
-
   void segmengChange(int index) {
     if (index == 0) {
       //preset
-      controllerPiano.runJavaScript(
-          "setAbcString(\"%%MIDI program 40\\nL:1/4\\nM:4/4\\nK:D\\n\\\"D\\\" A F F\", false)");
+      // controllerPiano.runJavaScript(
+      //     "setAbcString(\"%%MIDI program $midiProgramValue\\nL:1/4\\nM:4/4\\nK:D\\n\\\"D\\\" A F F\", false)");
+      controllerPiano.runJavaScript(finalabcStringPreset);
       controllerPiano.runJavaScript("setPromptNoteNumberCount(3)");
-      controllerKeyboard.loadFlutterAssetServer(filePathKeyboardAnimation);
+      // controllerKeyboard.loadFlutterAssetServer(filePathKeyboardAnimation);
+      controllerKeyboard.loadRequest(Uri.parse(filePathKeyboardAnimation));
       controllerKeyboard.runJavaScript('resetPlay()');
       // controllerKeyboard.runJavaScript('setPiano(55, 76)');
     } else {
       //creative
-      controllerPiano.runJavaScript(
-          "setAbcString(\"%%MIDI program 0\\nL:1/4\\nM:4/4\\nK:C\\n|\", false)");
+      String str1 =
+          "setAbcString(\"%%MIDI program $midiProgramValue\\nL:1/4\\nM:4/4\\nK:C\\n|\", false)";
+      print('str111==$str1');
+      print('str112==$finalabcStringCreate');
+      controllerPiano.runJavaScript(finalabcStringCreate);
       controllerPiano.runJavaScript("setPromptNoteNumberCount(0)");
       controllerPiano.runJavaScript("setStyle()");
       controllerKeyboard.loadFlutterAssetServer(filePathKeyboard);
@@ -564,10 +802,533 @@ class _MyAppState extends State<MyApp> {
   //   return Assets.images.logo.image();
   // }
 
+  void showSettingDialog(BuildContext context) {
+    TextEditingController controller = TextEditingController(
+        text: ''); // ${DateTime.now().microsecondsSinceEpoch}
+    showDialog(
+      barrierDismissible: isWindowsOrMac ? false : true,
+      context: context,
+      builder: (BuildContext context) {
+        // 返回一个Dialog
+        return Dialog(
+          child: Container(
+            width: 400.w,
+            height: isWindowsOrMac ? 190.h : 330.h,
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text(
+                      'Settings',
+                      style: TextStyle(
+                          fontSize: 18,
+                          color: Colors.black,
+                          fontWeight: FontWeight.bold),
+                    ),
+                    isWindowsOrMac
+                        ? InkWell(
+                            child: const Icon(Icons.close),
+                            onTap: () {
+                              // if (isWindowsOrMac) {
+                              //   isVisibleWebview.value = !isVisibleWebview.value;
+                              //   setState(() {});
+                              // }
+                              // Navigator.of(context).pop();
+                              closeDialog();
+                            },
+                          )
+                        : const SizedBox(),
+                  ],
+                ),
+                const SizedBox(
+                  height: 10,
+                ),
+                Obx(() => Row(children: [
+                      Text('Randomness: ${(randomness.value * 100).toInt()}%'),
+                      const SizedBox(
+                        width: 10,
+                      ),
+                      Slider(
+                        value: randomness.value,
+                        onChanged: (newValue) {
+                          randomness.value = newValue;
+                        },
+                      ),
+                    ])),
+                const SizedBox(
+                  height: 10,
+                ),
+                Obx(() => Row(children: [
+                      Text('Seed: ${seed.value}'),
+                      const SizedBox(
+                        width: 20,
+                      ),
+                      SizedBox(
+                          width: 200,
+                          child: TextField(
+                            controller: controller,
+                            keyboardType: TextInputType.number,
+                            inputFormatters: <TextInputFormatter>[
+                              FilteringTextInputFormatter.allow(
+                                  RegExp(r'[0-9]')), // 只允许输入数字
+                            ],
+                            decoration: const InputDecoration(
+                                labelText: 'Please input seed value',
+                                hintText: 'Enter a number',
+                                border: OutlineInputBorder()),
+                            onChanged: (text) {
+                              // 当文本字段内容变化时调用
+                              seed.value = int.parse(text);
+                              print('Current text: ');
+                            },
+                          )),
+                    ])),
+                const SizedBox(
+                  height: 10,
+                ),
+                Center(
+                    child: Row(children: [
+                  const Text('Auto Chord'),
+                  const SizedBox(
+                    width: 5,
+                  ),
+                  Obx(() => Switch(
+                        value: autoChord.value,
+                        onChanged: (newValue) {
+                          autoChord.value = newValue;
+                        },
+                      )),
+                  const SizedBox(
+                    width: 20,
+                  ),
+                  const Text('Infinite Generation'),
+                  const SizedBox(
+                    width: 5,
+                  ),
+                  Obx(() => Switch(
+                        value: infiniteGeneration.value,
+                        onChanged: (newValue) {
+                          infiniteGeneration.value = newValue;
+                        },
+                      )),
+                ])),
+                const SizedBox(
+                  height: 10,
+                ),
+                Center(
+                    child: Row(children: [
+                  Expanded(
+                      flex: 2,
+                      child: TextButton(
+                        onPressed: () {
+                          if (midiNotes.isEmpty) {
+                            // String oriabcString = finalabcStringPreset
+                            //     .replaceAll('setAbcString', 'ABCtoEvents');
+                            // // abcString = r'ABCtoEvents("L:1/4\nM:4/4\nK:D\n\"D\" A F F")';
+                            // print(
+                            //     'playPianoAnimation ABCtoEvents==$oriabcString');
+                            isNeedConvertMidiNotes = true;
+                            // controllerPiano.runJavaScript(oriabcString);
+
+                            playPianoAnimation(finalabcStringPreset, true);
+                            Future.delayed(const Duration(seconds: 2), () {
+                              print('Delayed action after 3 seconds');
+                              isNeedConvertMidiNotes = false;
+                              final file = DirectoryPicker()
+                                ..title = 'Select a directory';
+                              final result = file.getDirectory();
+                              if (result != null) {
+                                print('Select a directory=${result.path}');
+                              }
+                              MidifileConvert.saveMidiFile(
+                                  midiNotes, result!.path);
+                              Get.snackbar('提示', '文件保存成功',
+                                  colorText: Colors.black);
+                              // toastInfo(msg: '文件保存成功');
+                            });
+                          } else {
+                            final file = DirectoryPicker()
+                              ..title = 'Select a directory';
+                            final result = file.getDirectory();
+                            if (result != null) {
+                              print('Select a directory=${result.path}');
+                            }
+                            MidifileConvert.saveMidiFile(
+                                midiNotes, result!.path);
+                            Get.snackbar('提示', '文件保存成功',
+                                colorText: Colors.black);
+                            // toastInfo(msg: '文件保存成功');
+                          }
+                        },
+                        style: TextButton.styleFrom(
+                          backgroundColor: Colors.black,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          fixedSize: const Size.fromHeight(45),
+                        ),
+                        child: const Text(
+                          'Export Midi File',
+                          style: TextStyle(color: Colors.white),
+                        ),
+                      )),
+                  const SizedBox(
+                    width: 10,
+                  ),
+                  Expanded(
+                    flex: 3,
+                    child: TextButton(
+                      onPressed: () {
+                        showBleDeviceOverlay(context);
+                      },
+                      style: TextButton.styleFrom(
+                        backgroundColor: Colors.black,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        fixedSize: const Size.fromHeight(45),
+                      ),
+                      child: const Text('Scan BlueTooth Device',
+                          style: TextStyle(color: Colors.white)),
+                    ),
+                  ),
+                ])),
+                const SizedBox(
+                  height: 20,
+                ),
+                const Center(child: Text('Version: 1.1.0')),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  void showCreateModelSettingDialog(BuildContext context) {
+    TextEditingController controller = TextEditingController(
+        text: ''); // ${DateTime.now().microsecondsSinceEpoch}
+    showDialog(
+      barrierDismissible: isWindowsOrMac ? false : true,
+      context: context,
+      builder: (BuildContext context) {
+        // 返回一个Dialog
+        return Dialog(
+          child: SingleChildScrollView(
+            child: Padding(
+                padding: const EdgeInsets.all(20),
+                child: SizedBox(
+                    width: 500.w,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            const Text(
+                              'Settings',
+                              style: TextStyle(
+                                  fontSize: 18,
+                                  color: Colors.black,
+                                  fontWeight: FontWeight.bold),
+                            ),
+                            isWindowsOrMac
+                                ? InkWell(
+                                    child: const Icon(Icons.close),
+                                    onTap: () {
+                                      // if (isWindowsOrMac) {
+                                      //   isVisibleWebview.value = !isVisibleWebview.value;
+                                      //   setState(() {});
+                                      // }
+                                      // Navigator.of(context).pop();
+                                      closeDialog();
+                                    },
+                                  )
+                                : const SizedBox(),
+                          ],
+                        ),
+                        const SizedBox(
+                          height: 10,
+                        ),
+                        Obx(() => Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Text('Time signature'),
+                                Expanded(
+                                    child: RadioListTile<int>(
+                                  title: const Text('2/4'),
+                                  value: 0,
+                                  groupValue: timeSignature.value,
+                                  onChanged: (value) {
+                                    timeSignature.value = value!;
+                                  },
+                                )),
+                                Expanded(
+                                    child: RadioListTile<int>(
+                                  title: const Text('3/4'),
+                                  value: 1,
+                                  groupValue: timeSignature.value,
+                                  onChanged: (value) {
+                                    timeSignature.value = value!;
+                                  },
+                                )),
+                                Expanded(
+                                    child: RadioListTile<int>(
+                                  title: const Text('4/4'),
+                                  value: 2,
+                                  groupValue: timeSignature.value,
+                                  onChanged: (value) {
+                                    timeSignature.value = value!;
+                                  },
+                                )),
+                                Expanded(
+                                    child: RadioListTile<int>(
+                                  title: const Text('3/8'),
+                                  value: 3,
+                                  groupValue: timeSignature.value,
+                                  onChanged: (value) {
+                                    timeSignature.value = value!;
+                                  },
+                                )),
+                                Expanded(
+                                    child: RadioListTile<int>(
+                                  title: const Text('6/8'),
+                                  value: 4,
+                                  groupValue: timeSignature.value,
+                                  onChanged: (value) {
+                                    timeSignature.value = value!;
+                                  },
+                                )),
+                                const Spacer(),
+                              ],
+                            )),
+                        Obx(() => Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Text('Default note length'),
+                                Expanded(
+                                    child: RadioListTile<int>(
+                                  title: const Text('1/4'),
+                                  value: 0,
+                                  groupValue: defaultNoteLenght.value,
+                                  onChanged: (value) {
+                                    defaultNoteLenght.value = value!;
+                                  },
+                                )),
+                                Expanded(
+                                    child: RadioListTile<int>(
+                                  title: const Text('1/8'),
+                                  value: 1,
+                                  groupValue: defaultNoteLenght.value,
+                                  onChanged: (value) {
+                                    defaultNoteLenght.value = value!;
+                                  },
+                                )),
+                                Expanded(
+                                    child: RadioListTile<int>(
+                                  title: const Text('1/16'),
+                                  value: 2,
+                                  groupValue: defaultNoteLenght.value,
+                                  onChanged: (value) {
+                                    defaultNoteLenght.value = value!;
+                                  },
+                                )),
+                              ],
+                            )),
+                        Obx(() => Row(children: [
+                              Text(
+                                  'Randomness: ${(randomness.value * 100).toInt()}%'),
+                              const SizedBox(
+                                width: 10,
+                              ),
+                              Slider(
+                                value: randomness.value,
+                                onChanged: (newValue) {
+                                  randomness.value = newValue;
+                                },
+                              ),
+                            ])),
+                        const SizedBox(
+                          height: 10,
+                        ),
+                        Obx(() => Row(children: [
+                              Text('Seed: ${seed.value}'),
+                              const SizedBox(
+                                width: 20,
+                              ),
+                              SizedBox(
+                                  width: 200,
+                                  child: TextField(
+                                    controller: controller,
+                                    keyboardType: TextInputType.number,
+                                    inputFormatters: <TextInputFormatter>[
+                                      FilteringTextInputFormatter.allow(
+                                          RegExp(r'[0-9]')), // 只允许输入数字
+                                    ],
+                                    decoration: const InputDecoration(
+                                        labelText: 'Please input seed value',
+                                        hintText: 'Enter a number',
+                                        border: OutlineInputBorder()),
+                                    onChanged: (text) {
+                                      // 当文本字段内容变化时调用
+                                      seed.value = int.parse(text);
+                                      print('Current text: ');
+                                    },
+                                  )),
+                            ])),
+                        Obx(() => Row(children: [
+                              Text('Tempo: ${tempo.value.toInt()}'),
+                              const SizedBox(
+                                width: 10,
+                              ),
+                              Slider(
+                                min: 40,
+                                max: 208,
+                                value: tempo.value,
+                                onChanged: (newValue) {
+                                  tempo.value = newValue;
+                                },
+                              ),
+                            ])),
+                        const SizedBox(
+                          height: 10,
+                        ),
+                        Center(
+                            child: Row(children: [
+                          const Text('Auto Chord'),
+                          const SizedBox(
+                            width: 5,
+                          ),
+                          Obx(() => Switch(
+                                value: autoChord.value,
+                                onChanged: (newValue) {
+                                  autoChord.value = newValue;
+                                },
+                              )),
+                          const SizedBox(
+                            width: 20,
+                          ),
+                          const Text('Infinite Generation'),
+                          const SizedBox(
+                            width: 5,
+                          ),
+                          Obx(() => Switch(
+                                value: infiniteGeneration.value,
+                                onChanged: (newValue) {
+                                  infiniteGeneration.value = newValue;
+                                },
+                              )),
+                        ])),
+                        const SizedBox(
+                          height: 10,
+                        ),
+                        Center(
+                            child: Row(children: [
+                          Expanded(
+                              flex: 2,
+                              child: TextButton(
+                                onPressed: () {
+                                  if (midiNotes.isEmpty) {
+                                    // String oriabcString = finalabcStringPreset
+                                    //     .replaceAll('setAbcString', 'ABCtoEvents');
+                                    // // abcString = r'ABCtoEvents("L:1/4\nM:4/4\nK:D\n\"D\" A F F")';
+                                    // print(
+                                    //     'playPianoAnimation ABCtoEvents==$oriabcString');
+                                    isNeedConvertMidiNotes = true;
+                                    // controllerPiano.runJavaScript(oriabcString);
+
+                                    playPianoAnimation(
+                                        finalabcStringPreset, true);
+                                    Future.delayed(const Duration(seconds: 2),
+                                        () {
+                                      print('Delayed action after 3 seconds');
+                                      isNeedConvertMidiNotes = false;
+                                      final file = DirectoryPicker()
+                                        ..title = 'Select a directory';
+                                      final result = file.getDirectory();
+                                      if (result != null) {
+                                        print(
+                                            'Select a directory=${result.path}');
+                                      }
+                                      MidifileConvert.saveMidiFile(
+                                          midiNotes, result!.path);
+                                      Get.snackbar('提示', '文件保存成功',
+                                          colorText: Colors.black);
+                                      // toastInfo(msg: '文件保存成功');
+                                    });
+                                  } else {
+                                    final file = DirectoryPicker()
+                                      ..title = 'Select a directory';
+                                    final result = file.getDirectory();
+                                    if (result != null) {
+                                      print(
+                                          'Select a directory=${result.path}');
+                                    }
+                                    MidifileConvert.saveMidiFile(
+                                        midiNotes, result!.path);
+                                    Get.snackbar('提示', '文件保存成功',
+                                        colorText: Colors.black);
+                                    // toastInfo(msg: '文件保存成功');
+                                  }
+                                },
+                                style: TextButton.styleFrom(
+                                  backgroundColor: Colors.black,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  fixedSize: const Size.fromHeight(45),
+                                ),
+                                child: const Text(
+                                  'Export Midi File',
+                                  style: TextStyle(color: Colors.white),
+                                ),
+                              )),
+                          const SizedBox(
+                            width: 10,
+                          ),
+                          Expanded(
+                              flex: 3,
+                              child: TextButton(
+                                onPressed: () {
+                                  showBleDeviceOverlay(context);
+                                },
+                                style: TextButton.styleFrom(
+                                  backgroundColor: Colors.black,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  fixedSize: const Size.fromHeight(45),
+                                ),
+                                child: const Text('Scan BlueTooth Device',
+                                    style: TextStyle(color: Colors.white)),
+                              )),
+                        ])),
+                        const SizedBox(
+                          height: 20,
+                        ),
+                        const Center(child: Text('Version: 1.1.0')),
+                        const SizedBox(
+                          height: 10,
+                        ),
+                      ],
+                    ))),
+          ),
+        );
+      },
+    );
+  }
+
   void showPromptDialog(
       BuildContext context, String titleStr, List list, String type) {
-    isHideWebview.value = !isHideWebview.value;
-    setState(() {});
+    if (isWindowsOrMac) {
+      isVisibleWebview.value = !isVisibleWebview.value;
+      setState(() {});
+    }
     // if (!isWindows) {
     //   FlutterPlatformAlert.showAlert(
     //     windowTitle: 'This is title',
@@ -591,17 +1352,25 @@ class _MyAppState extends State<MyApp> {
         // height: 50,
         // color: Colors.red,
         child: OnPopupWindowWidget(
-          title: Text(titleStr),
-          footer: InkWell(
-            child: Text('Close'),
-            onTap: () {
-              isHideWebview.value = !isHideWebview.value;
-              setState(() {});
-              Navigator.of(context).pop();
-            },
+          title: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(titleStr),
+              InkWell(
+                child: const Icon(Icons.close),
+                onTap: () {
+                  // if (isWindowsOrMac) {
+                  //   isVisibleWebview.value = !isVisibleWebview.value;
+                  //   setState(() {});
+                  // }
+                  // Navigator.of(context).pop();
+                  closeDialog();
+                },
+              )
+            ],
           ),
           child: SizedBox(
-            height: 100,
+            height: isWindowsOrMac ? 200.h : 100.h,
             // width: 40,
             child: ListView.builder(
               itemCount: list.length,
@@ -629,10 +1398,21 @@ class _MyAppState extends State<MyApp> {
                       // setState(() {});
                       if (type == STORAGE_PROMPTS_SELECT) {
                         ConfigStore.to.savePromptsSelect(value);
+                        currentPrompt =
+                            CommonUtils.escapeString(promptsAbc[value]);
                       } else if (type == STORAGE_SOUNDSEFFECT_SELECT) {
                         ConfigStore.to.saveSoundsEffectSelect(value);
+                        midiProgramValue = soundEffectInt[list[index]]!;
+                        ConfigStore.to.saveMidiProgramSelect(midiProgramValue);
                         currentSoundEffect = list[radioSelectedValue.value];
                       }
+                      String abcstr = ABCHead.getABCWithInstrument(
+                          currentPrompt, midiProgramValue);
+                      abcstr =
+                          ABCHead.appendTempoParam(abcstr, tempo.value.toInt());
+                      controllerPiano
+                          .runJavaScript("setAbcString(\"$abcstr\", false)");
+                      print(abcstr);
                     },
                   );
                 });
@@ -643,5 +1423,136 @@ class _MyAppState extends State<MyApp> {
       ),
     );
     // }
+  }
+
+  void closeDialog() {
+    UniversalBle.stopScan();
+    if (isWindowsOrMac) {
+      setState(() {
+        isVisibleWebview.value = true;
+      });
+    }
+    Navigator.of(context).pop();
+    overlayEntry.remove();
+  }
+
+  void showBleDeviceOverlay(BuildContext context) async {
+    String? tips;
+    AvailabilityState state = await UniversalBle
+        .getBluetoothAvailabilityState(); // e.g. poweredOff or poweredOn,
+    if (state == AvailabilityState.unknown) {
+      tips = "系统蓝牙不可用";
+    } else if (state == AvailabilityState.unsupported) {
+      tips = "不支持蓝牙";
+    } else if (state == AvailabilityState.unauthorized) {
+      tips = "蓝牙没有授权，请先授权";
+    } else if (state == AvailabilityState.poweredOff) {
+      tips = "请先打开系统蓝牙";
+    }
+    if (tips != null) {
+      Get.snackbar('提示', tips, colorText: Colors.black);
+      return;
+    }
+
+    print('showBleDeviceOverlay');
+    startScan();
+    overlayEntry = OverlayEntry(
+      builder: (context) => Positioned(
+        bottom: 0.0,
+        right: 50.0,
+        left: 50.0,
+        child: Material(
+          color: Colors.transparent,
+          child: SizedBox(
+              height: 100.h,
+              width: 300.w,
+              child: Container(
+                padding: const EdgeInsets.all(10),
+                color: Colors.white,
+                child: Obx(() => ListView.builder(
+                      itemCount: bleList.length,
+                      itemBuilder: (context, index) {
+                        return ListTile(
+                          title: Text(bleList[index].name!),
+                          subtitle: Text(bleList[index].deviceId),
+                          onTap: () {
+                            UniversalBle.stopScan();
+                            conectDevice(bleList[index]);
+                            overlayEntry.remove();
+                          },
+                        );
+                      },
+                    )),
+              )),
+        ),
+      ),
+    );
+
+    // 插入Overlay
+    Overlay.of(context).insert(overlayEntry);
+
+    // // 假设我们想在3秒后自动移除浮层
+    // Future.delayed(const Duration(seconds: 3)).then((value) {
+    //   overlayEntry.remove();
+    // });
+  }
+
+  void startScan() {
+    UniversalBle.onScanResult = (scanResult) {
+      if (scanResult.name != null) {
+        //&& scanResult.name!.startsWith('SMK25V2')
+        if (!bleListName.contains(scanResult.name)) {
+          print('scanResult==${scanResult.name}');
+          bleList.add(scanResult);
+          bleListName.add(scanResult.name);
+        }
+      }
+    };
+    UniversalBle.startScan();
+  }
+
+  void conectDevice(BleScanResult device) {
+    deviceId = device.deviceId;
+    UniversalBle.connect(deviceId);
+    UniversalBle.onConnectionChanged =
+        (String deviceId, BleConnectionState state) async {
+      print('OnConnectionChanged $deviceId, $state');
+      if (state == BleConnectionState.connected) {
+        toastInfo(msg: 'device connected');
+        Get.snackbar(device.name!, '连接成功', colorText: Colors.black);
+        // Discover services of a specific device
+        List<BleService> bleServices =
+            await UniversalBle.discoverServices(deviceId);
+        for (BleService service in bleServices) {
+          print('ble serviceid==${service.uuid}');
+          print('ble BleCharacteristic==${service.characteristics}');
+          for (BleCharacteristic characteristic in service.characteristics) {
+            // Subscribe to a characteristic
+            UniversalBle.setNotifiable(deviceId, service.uuid,
+                characteristic.uuid, BleInputProperty.notification);
+            // Get characteristic updates in `onValueChanged`
+            UniversalBle.onValueChanged =
+                (String deviceId, String characteristicId, Uint8List value) {
+              Uint8List sublist = value.sublist(2);
+              print('onValueChanged $deviceId, $characteristicId, $sublist');
+              var result = convertABC.midiToABC(sublist, false);
+              print('convertdata=$result');
+              if ((result[0] as String).isNotEmpty) {
+                String path = convertABC.getNoteMp3Path(result[1]);
+                updatePianoNote(result[1]);
+                AudioPlayerManage().playAudio(
+                    'player/soundfont/acoustic_grand_piano-mp3/$path');
+              }
+            };
+          }
+        }
+        Future.delayed(const Duration(seconds: 3)).then((value) {
+          closeDialog();
+        });
+      } else if (state == BleConnectionState.disconnected) {
+        toastInfo(msg: 'device disconnected');
+        Get.snackbar(device.name!, '连接失败', colorText: Colors.red);
+      }
+    };
   }
 }
