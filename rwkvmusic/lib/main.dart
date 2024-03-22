@@ -90,8 +90,8 @@ bool isFinishABCEvent = false;
 late String finalabcStringPreset;
 late String finalabcStringCreate;
 late bool isNeedRestart; //曲谱及键盘动画需要重新开始
-late String currentPrompt;
-
+late String presentPrompt;
+late String createPrompt;
 late OverlayEntry overlayEntry;
 
 RxList<BleScanResult> bleList = <BleScanResult>[].obs;
@@ -114,6 +114,7 @@ List midiNotes = [];
 bool isNeedConvertMidiNotes = false;
 
 List virtualNotes = []; //虚拟键盘按键音符
+var selectstate = 0.obs;
 
 void fetchABCDataByIsolate() async {
   // 创建 ReceivePort，以接收来自子线程的消息
@@ -121,7 +122,7 @@ void fetchABCDataByIsolate() async {
   mainReceivePort = ReceivePort();
   await Isolate.spawn(getABCDataByLocalModel, [
     mainReceivePort.sendPort,
-    currentPrompt,
+    selectstate.value == 0 ? presentPrompt : createPrompt,
     midiProgramValue,
     seed.value,
     randomness.value,
@@ -153,6 +154,7 @@ void getABCDataByLocalModel(var array) async {
   String dllPath = CommonUtils.getdllPath();
   String binPath = CommonUtils.getBinPath();
   String prompt = currentPrompt;
+  debugPrint('promptprompt==$prompt');
   var isolateReceivePort = ReceivePort();
   var isStopGenerating = false;
   // isolateReceivePort.listen((data) {
@@ -198,7 +200,8 @@ void getABCDataByLocalModel(var array) async {
     token = result;
     String resultstr = String.fromCharCode(result);
     // result :10=换行;47=/;41=);40=(;94=^;34=";32=空格
-    if (result == 10 || result == 32 || result == 0 || result == 34) {
+    if (result == 10 || result == 0 || result == 34) {
+      //|| result == 32
       // ||
       //   // result == 40 ||
       //   // result == 94 ||
@@ -258,7 +261,6 @@ class _MyAppState extends State<MyApp> {
       "http://leolin.wiki"; //assets/piano/index.html
   String filePathKeyboard = 'assets/piano/keyboard.html';
   String filePathPiano = 'assets/player/player.html';
-  var selectstate = 0.obs;
   late StringBuffer stringBuffer;
   int addGap = 2; //间隔多少刷新
   int addCount = 0; //刷新次数
@@ -318,9 +320,9 @@ class _MyAppState extends State<MyApp> {
             //   controllerPiano.runJavaScript(
             //       "setAbcString(\"%%MIDI program 40\\nL:1/4\\nM:4/4\\nK:D\\n\\\"D\\\" A F F\", false)");
             // } else {
-            currentPrompt = CommonUtils.escapeString(promptsAbc[index]);
+            presentPrompt = CommonUtils.escapeString(promptsAbc[index]);
             finalabcStringPreset =
-                "setAbcString(\"${ABCHead.getABCWithInstrument(currentPrompt, midiProgramValue)}\", false)";
+                "setAbcString(\"${ABCHead.getABCWithInstrument(presentPrompt, midiProgramValue)}\", false)";
             finalabcStringPreset = ABCHead.appendTempoParam(
                 finalabcStringPreset, tempo.value.toInt());
             // String testabc =
@@ -453,6 +455,7 @@ class _MyAppState extends State<MyApp> {
     sb = ABCHead.appendTempoParam(sb, tempo.value.toInt());
     debugPrint('curr=$sb');
     controllerPiano.runJavaScript(sb);
+    createPrompt = finalabcStringCreate;
   }
 
   void resetLastNote() {
@@ -465,6 +468,7 @@ class _MyAppState extends State<MyApp> {
             ABCHead.appendTempoParam(finalabcStringCreate, tempo.value.toInt());
         debugPrint('str112==$finalabcStringCreate');
         controllerPiano.runJavaScript(finalabcStringCreate);
+        createPrompt = '';
       } else {
         StringBuffer sbff = StringBuffer();
         for (String note in virtualNotes) {
@@ -475,6 +479,7 @@ class _MyAppState extends State<MyApp> {
         debugPrint('curr=$sb');
         sb = ABCHead.appendTempoParam(sb, tempo.value.toInt());
         controllerPiano.runJavaScript(sb);
+        createPrompt = sbff.toString();
       }
     }
   }
@@ -828,6 +833,7 @@ class _MyAppState extends State<MyApp> {
       controllerPiano.runJavaScript("setStyle()");
       controllerKeyboard.loadFlutterAssetServer(filePathKeyboard);
       controllerKeyboard.runJavaScript('resetPlay()');
+      createPrompt = '';
     }
   }
 
@@ -1432,7 +1438,7 @@ class _MyAppState extends State<MyApp> {
                       // setState(() {});
                       if (type == STORAGE_PROMPTS_SELECT) {
                         ConfigStore.to.savePromptsSelect(value);
-                        currentPrompt =
+                        presentPrompt =
                             CommonUtils.escapeString(promptsAbc[value]);
                       } else if (type == STORAGE_SOUNDSEFFECT_SELECT) {
                         ConfigStore.to.saveSoundsEffectSelect(value);
@@ -1441,7 +1447,7 @@ class _MyAppState extends State<MyApp> {
                         currentSoundEffect = list[radioSelectedValue.value];
                       }
                       String abcstr = ABCHead.getABCWithInstrument(
-                          currentPrompt, midiProgramValue);
+                          presentPrompt, midiProgramValue);
                       abcstr =
                           ABCHead.appendTempoParam(abcstr, tempo.value.toInt());
                       controllerPiano
