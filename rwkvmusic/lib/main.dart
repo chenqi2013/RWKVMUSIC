@@ -197,15 +197,14 @@ void getABCDataByLocalModel(var array) async {
     }
     token = result;
     String resultstr = String.fromCharCode(result);
-    // result :10:
-    if (result == 10 ||
-        result == 32 ||
-        result == 0 ||
-        result == 34 ||
-        result == 40 ||
-        result == 94 ||
-        result == 47 ||
-        result == 41) {
+    // result :10=换行;47=/;41=);40=(;94=^;34=";32=空格
+    if (result == 10 || result == 32 || result == 0 || result == 34) {
+      // ||
+      //   // result == 40 ||
+      //   // result == 94 ||
+      //   // result == 47 ||
+      //   // result == 41
+      print('continue responseData=$resultstr,resultint=$result');
       continue;
     }
     // sb.write(resultstr);
