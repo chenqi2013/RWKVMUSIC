@@ -16,7 +16,8 @@ class ABCHead {
     if (abc.contains("Q:")) {
       return abc.replaceAll(RegExp(r"Q:\d+"), tempoConfig);
     } else {
-      return "$tempoConfig\n$abc";
+      return abc;
+      // return "$tempoConfig\n$abc";
     }
   }
 }

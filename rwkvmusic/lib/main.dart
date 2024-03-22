@@ -184,28 +184,43 @@ void getABCDataByLocalModel(var array) async {
   int token = fastrwkv.rwkv_abcmodel_run_prompt(model, abcTokenizer, sampler,
       promptChar, prompt.length, 1.0, 8, randomness);
   isGenerating.value = true;
-  for (int i = 0; i < 200; i++) {
+  for (int i = 0; i < 1024; i++) {
     if (isStopGenerating) {
       print('stop getABCDataByLocalModel');
       break;
     }
     int result = fastrwkv.rwkv_abcmodel_run_with_tokenizer_and_sampler(
-        model, abcTokenizer, sampler, token, 1.0, 8, 0.8);
+        model, abcTokenizer, sampler, token, 1.0, 8, randomness);
+    if (token == result && result == 124) {
+      //双||abc展示出错
+      continue;
+    }
     token = result;
     String resultstr = String.fromCharCode(result);
+    // result :10:
+    if (result == 10 ||
+        result == 32 ||
+        result == 0 ||
+        result == 34 ||
+        result == 40 ||
+        result == 94 ||
+        result == 47 ||
+        result == 41) {
+      continue;
+    }
     // sb.write(resultstr);
     // print('getABCDataByLocalModel=$resultstr');
     // if (result == 10) {
     //   continue;
     // }
-    // print('responseData=$resultstr');
+    // print('responseData=$resultstr,resultint=$result');
     String textstr = resultstr.replaceAll('\n', '').replaceAll('\r', '');
     stringBuffer.write(resultstr);
     textstr = CommonUtils.escapeString(stringBuffer.toString());
     abcString =
         "setAbcString(\"${ABCHead.getABCWithInstrument(textstr, midiprogramvalue)}\",false)";
     abcString = ABCHead.appendTempoParam(abcString, tempo.value.toInt());
-    // print('abcString==${escapeString(abcString)}}');
+    // print('abcString==$abcString');
     // 方案一
     int currentTimestamp = DateTime.now().millisecondsSinceEpoch;
     int gap = currentTimestamp - preTimestamp;
@@ -309,6 +324,8 @@ class _MyAppState extends State<MyApp> {
                 "setAbcString(\"${ABCHead.getABCWithInstrument(currentPrompt, midiProgramValue)}\", false)";
             finalabcStringPreset = ABCHead.appendTempoParam(
                 finalabcStringPreset, tempo.value.toInt());
+            // String testabc =
+            //     'setAbcString("%%MIDI program 42\\n|AGAB|eBAG|AFED|EFGE|AGFE|DEFD|GFED|E2E2|EFGE|AGFE|DEFD|GFED|EFGE|AGFE|DEFD|GFED|E2E2|z2z2|z2z2|z2z2|z2z2|z2z2|z2z2|z2z2|z2z2|z2z2|z2z2|z2z2|z2z2|z2z2|z2z2|z2z2|z2z2|EditedByCGPdded|fdgf|edcd|edcG|dded|fdgf|eagf|edc2|3gag3fgfed|cdec|3gag3fgfed|ecAc|3gag3fgfed|cdec|fedc|dBAG|EGEG|EGAG|cGAG|EGAG|EGEG|EGAG|cGAG|EGAG|AcAc|AcdcBA|GBGB|GBcBAG|AcAc|AcdcBA|GBGB|GBcBAG|cefedc|gcac|gcac|gcBAG|AcBcdB|cedefd|efgGB|c3c|AcAc|fcAF|BdBd|gdBG|egeg|cgec|defGB|c3c|AFABc|f2f2|BGBcd|g2g2|afabc|dbca|BgGe|f3f|d",false)';
             controllerPiano.runJavaScript(finalabcStringPreset);
             // }
             controllerPiano.runJavaScript("setPromptNoteNumberCount(3)");
