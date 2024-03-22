@@ -128,7 +128,7 @@ void fetchABCDataByIsolate() async {
   ]);
   // 监听来自子线线程的数据
   mainReceivePort.listen((data) {
-    // print('Received data: $data');
+    // debugPrint('Received data: $data');
     if (data is SendPort) {
       isolateSendPort = data;
     } else if (data is EventBus) {
@@ -156,14 +156,14 @@ void getABCDataByLocalModel(var array) async {
   var isolateReceivePort = ReceivePort();
   var isStopGenerating = false;
   // isolateReceivePort.listen((data) {
-  //   print('isolateReceivePort==$data');
+  //   debugPrint('isolateReceivePort==$data');
   //   isStopGenerating = true;
   // });
 
   EventBus eventBus = EventBus();
 
   eventBus.on().listen((event) {
-    print('isolateReceivePort==$event');
+    debugPrint('isolateReceivePort==$event');
     isStopGenerating = true;
     sendPort.send('finish');
   });
@@ -186,7 +186,7 @@ void getABCDataByLocalModel(var array) async {
   isGenerating.value = true;
   for (int i = 0; i < 1024; i++) {
     if (isStopGenerating) {
-      print('stop getABCDataByLocalModel');
+      debugPrint('stop getABCDataByLocalModel');
       break;
     }
     int result = fastrwkv.rwkv_abcmodel_run_with_tokenizer_and_sampler(
@@ -204,29 +204,29 @@ void getABCDataByLocalModel(var array) async {
       //   // result == 94 ||
       //   // result == 47 ||
       //   // result == 41
-      print('continue responseData=$resultstr,resultint=$result');
+      debugPrint('continue responseData=$resultstr,resultint=$result');
       continue;
     }
     // sb.write(resultstr);
-    // print('getABCDataByLocalModel=$resultstr');
+    // debugPrint('getABCDataByLocalModel=$resultstr');
     // if (result == 10) {
     //   continue;
     // }
-    // print('responseData=$resultstr,resultint=$result');
+    // debugPrint('responseData=$resultstr,resultint=$result');
     String textstr = resultstr.replaceAll('\n', '').replaceAll('\r', '');
     stringBuffer.write(resultstr);
     textstr = CommonUtils.escapeString(stringBuffer.toString());
     abcString =
         "setAbcString(\"${ABCHead.getABCWithInstrument(textstr, midiprogramvalue)}\",false)";
     abcString = ABCHead.appendTempoParam(abcString, tempo.value.toInt());
-    // print('abcString==$abcString');
+    // debugPrint('abcString==$abcString');
     // 方案一
     int currentTimestamp = DateTime.now().millisecondsSinceEpoch;
     int gap = currentTimestamp - preTimestamp;
     if (gap > 400) {
       //&& resultstr.startsWith("|")
       //&& tempStr.trim().isEmpty
-      // print('runJavaScript');
+      // debugPrint('runJavaScript');
       preTimestamp = currentTimestamp;
       // if (i < 250) {
       //   continue;
@@ -235,14 +235,14 @@ void getABCDataByLocalModel(var array) async {
     }
 
     if (eosId == token) {
-      print('getABCDataByLocalModel break');
+      debugPrint('getABCDataByLocalModel break');
       break;
     }
   }
   isGenerating.value = false;
   sendPort.send(abcString.toString());
   sendPort.send('finish');
-  print('getABCDataByLocalModel all data=${abcString.toString()}');
+  debugPrint('getABCDataByLocalModel all data=${abcString.toString()}');
 }
 
 class MyApp extends StatefulWidget {
@@ -284,9 +284,9 @@ class _MyAppState extends State<MyApp> {
     midiProgramValue = ConfigStore.to.getMidiProgramSelect();
     if (midiProgramValue == -1) {
       midiProgramValue = 0;
-      print('set midiprogramvalue = 0');
+      debugPrint('set midiprogramvalue = 0');
     }
-    print('midiprogramvalue value= $midiProgramValue');
+    debugPrint('midiprogramvalue value= $midiProgramValue');
     finalabcStringCreate =
         "setAbcString(\"${ABCHead.getABCWithInstrument(r'L:1/4\nM:4/4\nK:C\n|', midiProgramValue)}\",false)";
     finalabcStringCreate =
@@ -294,9 +294,9 @@ class _MyAppState extends State<MyApp> {
     isWindowsOrMac = Platform.isWindows || Platform.isMacOS;
     stringBuffer = StringBuffer();
     deviceManage = MidiDeviceManage.getInstance();
-    print('deviceManage22=$identityHashCode($deviceManage)');
+    debugPrint('deviceManage22=$identityHashCode($deviceManage)');
     deviceManage.receiveCallback = (int data) {
-      print('receiveCallback main =$data');
+      debugPrint('receiveCallback main =$data');
       updatePianoNote(data);
     };
     controllerPiano = WebViewControllerPlus()
@@ -309,7 +309,7 @@ class _MyAppState extends State<MyApp> {
             });
           },
           onPageFinished: (url) {
-            print("controllerPiano onPageFinished$url");
+            debugPrint("controllerPiano onPageFinished$url");
             int index = ConfigStore.to.getPromptsSelect();
             if (index < 0) {
               index = 0;
@@ -336,9 +336,9 @@ class _MyAppState extends State<MyApp> {
       ..addJavaScriptChannel("flutteronStartPlay",
           onMessageReceived: (JavaScriptMessage jsMessage) {
         String message = jsMessage.message;
-        print('flutteronStartPlay onMessageReceived=$message');
+        debugPrint('flutteronStartPlay onMessageReceived=$message');
         pianoAllTime.value = double.parse(message.split(',')[1]);
-        print('pianoAllTime:${pianoAllTime.value}');
+        debugPrint('pianoAllTime:${pianoAllTime.value}');
         playProgress.value = 0.0;
         createTimer();
         isPlay.value = true;
@@ -346,26 +346,27 @@ class _MyAppState extends State<MyApp> {
       })
       ..addJavaScriptChannel("flutteronPausePlay",
           onMessageReceived: (JavaScriptMessage jsMessage) {
-        print('flutteronPausePlay onMessageReceived=${jsMessage.message}');
+        debugPrint('flutteronPausePlay onMessageReceived=${jsMessage.message}');
         timer.cancel();
         isPlay.value = false;
         isNeedRestart = false;
       })
       ..addJavaScriptChannel("flutteronResumePlay",
           onMessageReceived: (JavaScriptMessage jsMessage) {
-        print('flutteronResumePlay onMessageReceived=${jsMessage.message}');
+        debugPrint(
+            'flutteronResumePlay onMessageReceived=${jsMessage.message}');
         createTimer();
         isPlay.value = true;
         isNeedRestart = false;
       })
       ..addJavaScriptChannel("flutteronCountPromptNoteNumber",
           onMessageReceived: (JavaScriptMessage jsMessage) {
-        print(
+        debugPrint(
             'flutteronCountPromptNoteNumber onMessageReceived=${jsMessage.message}');
       })
       ..addJavaScriptChannel("flutteronEvents",
           onMessageReceived: (JavaScriptMessage jsMessage) {
-        print('flutteronEvents onMessageReceived=${jsMessage.message}');
+        debugPrint('flutteronEvents onMessageReceived=${jsMessage.message}');
         midiNotes = jsonDecode(jsMessage.message);
         if (!isNeedConvertMidiNotes) {
           // String jsstr =
@@ -374,20 +375,21 @@ class _MyAppState extends State<MyApp> {
               r'startPlay("' + jsMessage.message.replaceAll('"', r'\"') + r'")';
           controllerKeyboard.runJavaScript(jsstr);
           isFinishABCEvent = true;
-          print('isFinishABCEvent == true');
+          debugPrint('isFinishABCEvent == true');
         } else {
           isNeedConvertMidiNotes = false;
         }
       })
       ..addJavaScriptChannel("flutteronPlayFinish",
           onMessageReceived: (JavaScriptMessage jsMessage) {
-        print('flutteronPlayFinish onMessageReceived=${jsMessage.message}');
+        debugPrint(
+            'flutteronPlayFinish onMessageReceived=${jsMessage.message}');
         isPlay.value = false;
         isNeedRestart = true;
       })
       ..addJavaScriptChannel("flutteronClickNote",
           onMessageReceived: (JavaScriptMessage jsMessage) {
-        print('flutteronClickNote onMessageReceived=${jsMessage.message}');
+        debugPrint('flutteronClickNote onMessageReceived=${jsMessage.message}');
       });
 
     controllerKeyboard = WebViewControllerPlus()
@@ -400,7 +402,7 @@ class _MyAppState extends State<MyApp> {
             });
           },
           onPageFinished: (url) {
-            print("controllerKeyboard onPageFinished$url");
+            debugPrint("controllerKeyboard onPageFinished$url");
             controllerKeyboard.runJavaScript('resetPlay()');
             controllerKeyboard.runJavaScript('setPiano(55, 76)');
             if (selectstate.value == 1) {
@@ -411,16 +413,16 @@ class _MyAppState extends State<MyApp> {
       )
       ..addJavaScriptChannel("flutteronNoteOff",
           onMessageReceived: (JavaScriptMessage jsMessage) {
-        print('flutteronNoteOff onMessageReceived=${jsMessage.message}');
+        debugPrint('flutteronNoteOff onMessageReceived=${jsMessage.message}');
       })
       ..addJavaScriptChannel("flutteronNoteOn",
           onMessageReceived: (JavaScriptMessage jsMessage) {
-        print('flutteronNoteOn onMessageReceived=${jsMessage.message}');
+        debugPrint('flutteronNoteOn onMessageReceived=${jsMessage.message}');
         String name =
             MidiToABCConverter().getNoteMp3Path(int.parse(jsMessage.message));
         if (currentSoundEffect != null) {
           String? mp3Folder = soundEffect[currentSoundEffect];
-          print('mp3Folder==$mp3Folder');
+          debugPrint('mp3Folder==$mp3Folder');
           AudioPlayerManage().playAudio('player/soundfont/$mp3Folder/$name');
         } else {
           AudioPlayerManage()
@@ -432,7 +434,7 @@ class _MyAppState extends State<MyApp> {
     controllerKeyboard.loadRequest(Uri.parse(filePathKeyboardAnimation));
 
     eventBus.on().listen((event) {
-      // print('event bus==$event');
+      // debugPrint('event bus==$event');
       controllerPiano.runJavaScript(event);
     });
   }
@@ -445,25 +447,35 @@ class _MyAppState extends State<MyApp> {
     for (String note in virtualNotes) {
       sbff.write(note);
     }
+    finalabcStringCreate = sbff.toString();
     String sb =
-        "setAbcString(\"%%MIDI program $midiProgramValue}\\nL:1/4\\nM:4/4\\nK:C\\n|\\${sbff.toString()}\",false)";
+        "setAbcString(\"%%MIDI program $midiProgramValue}\\nL:1/4\\nM:4/4\\nK:C\\n|\\$finalabcStringCreate\",false)";
     sb = ABCHead.appendTempoParam(sb, tempo.value.toInt());
-    print('curr=$sb');
+    debugPrint('curr=$sb');
     controllerPiano.runJavaScript(sb);
   }
 
   void resetLastNote() {
     if (virtualNotes.isNotEmpty) {
       virtualNotes.removeLast();
-      StringBuffer sbff = StringBuffer();
-      for (String note in virtualNotes) {
-        sbff.write(note);
+      if (virtualNotes.isEmpty) {
+        finalabcStringCreate =
+            "setAbcString(\"${ABCHead.getABCWithInstrument(r'L:1/4\nM:4/4\nK:C\n|', midiProgramValue)}\",false)";
+        finalabcStringCreate =
+            ABCHead.appendTempoParam(finalabcStringCreate, tempo.value.toInt());
+        debugPrint('str112==$finalabcStringCreate');
+        controllerPiano.runJavaScript(finalabcStringCreate);
+      } else {
+        StringBuffer sbff = StringBuffer();
+        for (String note in virtualNotes) {
+          sbff.write(note);
+        }
+        String sb =
+            "setAbcString(\"%%MIDI program $midiProgramValue}\\nL:1/4\\nM:4/4\\nK:C\\n|\\${sbff.toString()}\",false)";
+        debugPrint('curr=$sb');
+        sb = ABCHead.appendTempoParam(sb, tempo.value.toInt());
+        controllerPiano.runJavaScript(sb);
       }
-      String sb =
-          "setAbcString(\"%%MIDI program $midiProgramValue}\\nL:1/4\\nM:4/4\\nK:C\\n|\\${sbff.toString()}\",false)";
-      print('curr=$sb');
-      sb = ABCHead.appendTempoParam(sb, tempo.value.toInt());
-      controllerPiano.runJavaScript(sb);
     }
   }
 
@@ -471,12 +483,12 @@ class _MyAppState extends State<MyApp> {
     if (play) {
       if (isFinishABCEvent && !isNeedRestart && !isNeedConvertMidiNotes) {
         controllerKeyboard.runJavaScript('resumePlay()');
-        print('resumePlay()playPianoAnimation');
+        debugPrint('resumePlay()playPianoAnimation');
         // createTimer();
       } else {
         abcString = abcString.replaceAll('setAbcString', 'ABCtoEvents');
         // abcString = r'ABCtoEvents("L:1/4\nM:4/4\nK:D\n\"D\" A F F")';
-        print('playPianoAnimation ABCtoEvents==$abcString');
+        debugPrint('playPianoAnimation ABCtoEvents==$abcString');
         controllerPiano.runJavaScript(abcString);
       }
     } else {
@@ -547,7 +559,7 @@ class _MyAppState extends State<MyApp> {
                     },
                     onValueChanged: (int newValue) {
                       // 当选择改变时执行的操作
-                      print('选择了选项 $newValue');
+                      debugPrint('选择了选项 $newValue');
                       selectstate.value = newValue;
                       segmengChange(newValue);
                     },
@@ -596,7 +608,7 @@ class _MyAppState extends State<MyApp> {
               child: Row(
                 children: [
                   creatBottomBtn('Prompts', () {
-                    print("Promptss");
+                    debugPrint("Promptss");
                     showPromptDialog(
                         context, 'Prompts', prompts, STORAGE_PROMPTS_SELECT);
                   }),
@@ -604,7 +616,7 @@ class _MyAppState extends State<MyApp> {
                     width: 8,
                   ),
                   creatBottomBtn('Sounds Effect', () {
-                    print("Sounds Effect");
+                    debugPrint("Sounds Effect");
                     showPromptDialog(context, 'Sounds Effect',
                         soundEffect.keys.toList(), STORAGE_SOUNDSEFFECT_SELECT);
                   }),
@@ -626,7 +638,7 @@ class _MyAppState extends State<MyApp> {
                                 !isGenerating.value
                                     ? Icons.edit
                                     : Icons.refresh, () {
-                              print('Generate');
+                              debugPrint('Generate');
                               isGenerating.value = !isGenerating.value;
                               if (isGenerating.value) {
                                 playProgress.value = 0.0;
@@ -654,7 +666,7 @@ class _MyAppState extends State<MyApp> {
                             visible: selectstate.value == 1,
                             child: createButtonImageWithText('Undo', Icons.undo,
                                 () {
-                              print('Undo');
+                              debugPrint('Undo');
                               resetLastNote();
                             }))),
                         const SizedBox(
@@ -665,7 +677,7 @@ class _MyAppState extends State<MyApp> {
                               !isPlay.value ? 'Play' : 'Pause',
                               !isPlay.value ? Icons.play_arrow : Icons.pause,
                               () {
-                            print('Play');
+                            debugPrint('Play');
                             if (!isPlay.value) {
                               controllerPiano.runJavaScript("startPlay()");
                             } else {
@@ -683,7 +695,7 @@ class _MyAppState extends State<MyApp> {
                         ),
                         createButtonImageWithText('Settings', Icons.settings,
                             () {
-                          print('Settings');
+                          debugPrint('Settings');
                           if (isWindowsOrMac) {
                             isVisibleWebview.value = !isVisibleWebview.value;
                             setState(() {});
@@ -743,20 +755,20 @@ class _MyAppState extends State<MyApp> {
       String responseData = utf8.decode(chunk);
       String textstr = CommonUtils.extractTextValue(responseData)!;
       String tempStr = textstr;
-      print('responseData=$textstr');
+      debugPrint('responseData=$textstr');
       stringBuffer.write(textstr);
       textstr = CommonUtils.escapeString(stringBuffer.toString());
       abcString =
           "setAbcString(\"${ABCHead.getABCWithInstrument(textstr, midiProgramValue)}\",false)";
       abcString = ABCHead.appendTempoParam(abcString, tempo.value.toInt());
-      print('abcstring result=$abcString');
+      debugPrint('abcstring result=$abcString');
       // 方案一
       if (isWindowsOrMac) {
         int currentTimestamp = DateTime.now().millisecondsSinceEpoch;
         int gap = currentTimestamp - preTimestamp;
         if (gap > 400) {
           //&& tempStr.trim().isEmpty
-          // print('runJavaScript');
+          // debugPrint('runJavaScript');
           preTimestamp = currentTimestamp;
           controllerPiano.runJavaScript(abcString.toString());
         }
@@ -766,7 +778,7 @@ class _MyAppState extends State<MyApp> {
       // // 方案二
       // int currentCount = sb.length;
       // int gap = currentCount - preCount;
-      // // debugPrint('gap==$gap');
+      // // debugdebugPrint('gap==$gap');
       // if (gap >= 5) {
       //   preCount = currentCount;
       //   controllerPiano.runJavaScript(sb.toString());
@@ -778,13 +790,13 @@ class _MyAppState extends State<MyApp> {
       }
     }, onDone: () {
       // 数据流接收完成
-      print('请求完成');
+      debugPrint('请求完成');
       httpClient.close();
       isGenerating.value = false;
       finalabcStringPreset = abcString.toString();
     }, onError: (error) {
       // 处理错误
-      print('请求发生错误: $error');
+      debugPrint('请求发生错误: $error');
       isGenerating.value = false;
     });
   }
@@ -801,11 +813,16 @@ class _MyAppState extends State<MyApp> {
       controllerKeyboard.runJavaScript('resetPlay()');
       // controllerKeyboard.runJavaScript('setPiano(55, 76)');
     } else {
+      virtualNotes.clear();
       //creative
-      String str1 =
-          "setAbcString(\"%%MIDI program $midiProgramValue\\nL:1/4\\nM:4/4\\nK:C\\n|\", false)";
-      print('str111==$str1');
-      print('str112==$finalabcStringCreate');
+      // String str1 =
+      //     "setAbcString(\"%%MIDI program $midiProgramValue\\nL:1/4\\nM:4/4\\nK:C\\n|\", false)";
+      // debugPrint('str111==$str1');
+      finalabcStringCreate =
+          "setAbcString(\"${ABCHead.getABCWithInstrument(r'L:1/4\nM:4/4\nK:C\n|', midiProgramValue)}\",false)";
+      finalabcStringCreate =
+          ABCHead.appendTempoParam(finalabcStringCreate, tempo.value.toInt());
+      debugPrint('str112==$finalabcStringCreate');
       controllerPiano.runJavaScript(finalabcStringCreate);
       controllerPiano.runJavaScript("setPromptNoteNumberCount(0)");
       controllerPiano.runJavaScript("setStyle()");
@@ -899,7 +916,7 @@ class _MyAppState extends State<MyApp> {
                             onChanged: (text) {
                               // 当文本字段内容变化时调用
                               seed.value = int.parse(text);
-                              print('Current text: ');
+                              debugPrint('Current text: ');
                             },
                           )),
                     ])),
@@ -945,20 +962,20 @@ class _MyAppState extends State<MyApp> {
                             // String oriabcString = finalabcStringPreset
                             //     .replaceAll('setAbcString', 'ABCtoEvents');
                             // // abcString = r'ABCtoEvents("L:1/4\nM:4/4\nK:D\n\"D\" A F F")';
-                            // print(
+                            // debugPrint(
                             //     'playPianoAnimation ABCtoEvents==$oriabcString');
                             isNeedConvertMidiNotes = true;
                             // controllerPiano.runJavaScript(oriabcString);
 
                             playPianoAnimation(finalabcStringPreset, true);
                             Future.delayed(const Duration(seconds: 2), () {
-                              print('Delayed action after 3 seconds');
+                              debugPrint('Delayed action after 3 seconds');
                               isNeedConvertMidiNotes = false;
                               final file = DirectoryPicker()
                                 ..title = 'Select a directory';
                               final result = file.getDirectory();
                               if (result != null) {
-                                print('Select a directory=${result.path}');
+                                debugPrint('Select a directory=${result.path}');
                               }
                               MidifileConvert.saveMidiFile(
                                   midiNotes, result!.path);
@@ -971,7 +988,7 @@ class _MyAppState extends State<MyApp> {
                               ..title = 'Select a directory';
                             final result = file.getDirectory();
                             if (result != null) {
-                              print('Select a directory=${result.path}');
+                              debugPrint('Select a directory=${result.path}');
                             }
                             MidifileConvert.saveMidiFile(
                                 midiNotes, result!.path);
@@ -1193,7 +1210,7 @@ class _MyAppState extends State<MyApp> {
                                     onChanged: (text) {
                                       // 当文本字段内容变化时调用
                                       seed.value = int.parse(text);
-                                      print('Current text: ');
+                                      debugPrint('Current text: ');
                                     },
                                   )),
                             ])),
@@ -1253,7 +1270,7 @@ class _MyAppState extends State<MyApp> {
                                     // String oriabcString = finalabcStringPreset
                                     //     .replaceAll('setAbcString', 'ABCtoEvents');
                                     // // abcString = r'ABCtoEvents("L:1/4\nM:4/4\nK:D\n\"D\" A F F")';
-                                    // print(
+                                    // debugPrint(
                                     //     'playPianoAnimation ABCtoEvents==$oriabcString');
                                     isNeedConvertMidiNotes = true;
                                     // controllerPiano.runJavaScript(oriabcString);
@@ -1262,13 +1279,14 @@ class _MyAppState extends State<MyApp> {
                                         finalabcStringPreset, true);
                                     Future.delayed(const Duration(seconds: 2),
                                         () {
-                                      print('Delayed action after 3 seconds');
+                                      debugPrint(
+                                          'Delayed action after 3 seconds');
                                       isNeedConvertMidiNotes = false;
                                       final file = DirectoryPicker()
                                         ..title = 'Select a directory';
                                       final result = file.getDirectory();
                                       if (result != null) {
-                                        print(
+                                        debugPrint(
                                             'Select a directory=${result.path}');
                                       }
                                       MidifileConvert.saveMidiFile(
@@ -1282,7 +1300,7 @@ class _MyAppState extends State<MyApp> {
                                       ..title = 'Select a directory';
                                     final result = file.getDirectory();
                                     if (result != null) {
-                                      print(
+                                      debugPrint(
                                           'Select a directory=${result.path}');
                                     }
                                     MidifileConvert.saveMidiFile(
@@ -1428,7 +1446,7 @@ class _MyAppState extends State<MyApp> {
                           ABCHead.appendTempoParam(abcstr, tempo.value.toInt());
                       controllerPiano
                           .runJavaScript("setAbcString(\"$abcstr\", false)");
-                      print(abcstr);
+                      debugPrint(abcstr);
                     },
                   );
                 });
@@ -1470,7 +1488,7 @@ class _MyAppState extends State<MyApp> {
       return;
     }
 
-    print('showBleDeviceOverlay');
+    debugPrint('showBleDeviceOverlay');
     startScan();
     overlayEntry = OverlayEntry(
       builder: (context) => Positioned(
@@ -1518,7 +1536,7 @@ class _MyAppState extends State<MyApp> {
       if (scanResult.name != null) {
         //&& scanResult.name!.startsWith('SMK25V2')
         if (!bleListName.contains(scanResult.name)) {
-          print('scanResult==${scanResult.name}');
+          debugPrint('scanResult==${scanResult.name}');
           bleList.add(scanResult);
           bleListName.add(scanResult.name);
         }
@@ -1532,7 +1550,7 @@ class _MyAppState extends State<MyApp> {
     UniversalBle.connect(deviceId);
     UniversalBle.onConnectionChanged =
         (String deviceId, BleConnectionState state) async {
-      print('OnConnectionChanged $deviceId, $state');
+      debugPrint('OnConnectionChanged $deviceId, $state');
       if (state == BleConnectionState.connected) {
         toastInfo(msg: 'device connected');
         Get.snackbar(device.name!, '连接成功', colorText: Colors.black);
@@ -1540,8 +1558,8 @@ class _MyAppState extends State<MyApp> {
         List<BleService> bleServices =
             await UniversalBle.discoverServices(deviceId);
         for (BleService service in bleServices) {
-          print('ble serviceid==${service.uuid}');
-          print('ble BleCharacteristic==${service.characteristics}');
+          debugPrint('ble serviceid==${service.uuid}');
+          debugPrint('ble BleCharacteristic==${service.characteristics}');
           for (BleCharacteristic characteristic in service.characteristics) {
             // Subscribe to a characteristic
             UniversalBle.setNotifiable(deviceId, service.uuid,
@@ -1550,9 +1568,10 @@ class _MyAppState extends State<MyApp> {
             UniversalBle.onValueChanged =
                 (String deviceId, String characteristicId, Uint8List value) {
               Uint8List sublist = value.sublist(2);
-              print('onValueChanged $deviceId, $characteristicId, $sublist');
+              debugPrint(
+                  'onValueChanged $deviceId, $characteristicId, $sublist');
               var result = convertABC.midiToABC(sublist, false);
-              print('convertdata=$result');
+              debugPrint('convertdata=$result');
               if ((result[0] as String).isNotEmpty) {
                 String path = convertABC.getNoteMp3Path(result[1]);
                 updatePianoNote(result[1]);
