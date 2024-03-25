@@ -117,6 +117,9 @@ List virtualNotes = []; //虚拟键盘按键音符
 var selectstate = 0.obs;
 
 void fetchABCDataByIsolate() async {
+  String dllPath = await CommonUtils.getdllPath();
+  String binPath = await CommonUtils.getBinPath();
+
   // 创建 ReceivePort，以接收来自子线程的消息
   // 创建一个新的 Isolate
   mainReceivePort = ReceivePort();
@@ -126,6 +129,8 @@ void fetchABCDataByIsolate() async {
     midiProgramValue,
     seed.value,
     randomness.value,
+    dllPath,
+    binPath,
   ]);
   // 监听来自子线线程的数据
   mainReceivePort.listen((data) {
@@ -150,9 +155,9 @@ void getABCDataByLocalModel(var array) async {
   int midiprogramvalue = array[2];
   int seed = array[3];
   double randomness = array[4];
+  String dllPath = array[5];
+  String binPath = array[6];
   int eosId = 3;
-  String dllPath = CommonUtils.getdllPath();
-  String binPath = CommonUtils.getBinPath();
   String prompt = currentPrompt;
   debugPrint('promptprompt==$prompt');
   var isolateReceivePort = ReceivePort();
@@ -527,205 +532,214 @@ class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+        resizeToAvoidBottomInset: false,
         body: Container(
-      color: const Color(0xff3a3a3a),
-      child: Column(
-        children: [
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 15),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                const Text(
-                  'RWKV AI Music Composer',
-                  style: TextStyle(
-                      color: Colors.white, fontWeight: FontWeight.bold),
-                ),
-                const Spacer(),
-                Container(child: Obx(() {
-                  return CupertinoSegmentedControl(
-                    children: const {
-                      0: Padding(
-                          padding: EdgeInsets.all(10),
-                          child: Text(
-                            'Preset Mode',
-                            style: TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold),
-                          )),
-                      1: Padding(
-                          padding: EdgeInsets.all(10),
-                          child: Text(
-                            'Creative Mode',
-                            style: TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold),
-                          )),
-                    },
-                    onValueChanged: (int newValue) {
-                      // 当选择改变时执行的操作
-                      debugPrint('选择了选项 $newValue');
-                      selectstate.value = newValue;
-                      segmengChange(newValue);
-                    },
-                    groupValue: selectstate.value, // 当前选中的选项值
-                    selectedColor: const Color(0xff44be1c),
-                    unselectedColor: Colors.transparent,
-                    borderColor: const Color(0xff6d6d6d),
-                  );
-                })),
-              ],
-            ),
-          ),
-          Flexible(
-            flex: 2,
-            child: Visibility(
-                key: const ValueKey('ValueKey11'),
-                visible: isVisibleWebview.value,
-                // maintainSize: true, // 保持占位空间
-                // maintainAnimation: true, // 保持动画
-                // maintainState: true,
-                child: WebViewWidget(
-                  controller: controllerPiano,
-                )),
-          ),
-          Flexible(
-              flex: 3,
-              child: Visibility(
-                visible: isVisibleWebview.value,
-                // maintainSize: true, // 保持占位空间
-                // maintainAnimation: true, // 保持动画
-                // maintainState: true,
-                key: const ValueKey('ValueKey22'),
-                child: WebViewWidget(
-                  controller: controllerKeyboard,
-                ),
-              )),
-          //   ],
-          // )),
-          Expanded(
-              child: Visibility(
-            visible: isVisibleWebview.value,
-            key: const ValueKey('ValueKey33'),
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 5),
-              color: const Color(0xff3a3a3a),
-              child: Row(
-                children: [
-                  creatBottomBtn('Prompts', () {
-                    debugPrint("Promptss");
-                    showPromptDialog(
-                        context, 'Prompts', prompts, STORAGE_PROMPTS_SELECT);
-                  }),
-                  const SizedBox(
-                    width: 8,
-                  ),
-                  creatBottomBtn('Sounds Effect', () {
-                    debugPrint("Sounds Effect");
-                    showPromptDialog(context, 'Sounds Effect',
-                        soundEffect.keys.toList(), STORAGE_SOUNDSEFFECT_SELECT);
-                  }),
-                  ProgressbarTime(playProgress, pianoAllTime),
-                  Obx(() => isGenerating.value
-                      ? const CircularProgressIndicator(
-                          valueColor:
-                              AlwaysStoppedAnimation<Color>(Colors.white),
-                        )
-                      : Container(
-                          child: null,
-                        )),
-                  const Spacer(),
-                  Container(
-                    child: Row(
-                      children: [
-                        Obx(() => createButtonImageWithText(
-                                !isGenerating.value ? 'Generate' : 'Stop',
-                                !isGenerating.value
-                                    ? Icons.edit
-                                    : Icons.refresh, () {
-                              debugPrint('Generate');
-                              isGenerating.value = !isGenerating.value;
-                              if (isGenerating.value) {
-                                playProgress.value = 0.0;
-                                pianoAllTime.value = 0.0;
-                                // controllerPiano.runJavaScript(
-                                //     "setAbcString(\"%%MIDI program 40\\nL:1/4\\nM:4/4\\nK:D\\n\\\"D\\\" A F F\", false)");
-                                // controllerPiano.runJavaScript(
-                                //     'resetTimingCallbacks()');
-                                if (isWindowsOrMac) {
-                                  fetchABCDataByIsolate();
-                                } else {
-                                  getABCDataByAPI();
-                                }
-                                controllerKeyboard.runJavaScript('resetPlay()');
-                                isFinishABCEvent = false;
-                              } else {
-                                // isolateSendPort.send('stop Generating');
-                                isolateEventBus.fire("stop Generating");
-                              }
-                            })),
-                        const SizedBox(
-                          width: 10,
-                        ),
-                        Obx(() => Visibility(
-                            visible: selectstate.value == 1,
-                            child: createButtonImageWithText('Undo', Icons.undo,
-                                () {
-                              debugPrint('Undo');
-                              resetLastNote();
-                            }))),
-                        const SizedBox(
-                          width: 10,
-                        ),
-                        Obx(() {
-                          return createButtonImageWithText(
-                              !isPlay.value ? 'Play' : 'Pause',
-                              !isPlay.value ? Icons.play_arrow : Icons.pause,
-                              () {
-                            debugPrint('Play');
-                            if (!isPlay.value) {
-                              controllerPiano.runJavaScript("startPlay()");
-                            } else {
-                              controllerPiano.runJavaScript("pausePlay()");
-                            }
-                            playPianoAnimation(
-                                finalabcStringPreset, !isPlay.value);
-                            // if (isWindowsOrMac) {
-                            //   isPlay.value = !isPlay.value;
-                            // }
-                          });
-                        }),
-                        const SizedBox(
-                          width: 10,
-                        ),
-                        createButtonImageWithText('Settings', Icons.settings,
-                            () {
-                          debugPrint('Settings');
-                          if (isWindowsOrMac) {
-                            isVisibleWebview.value = !isVisibleWebview.value;
-                            setState(() {});
-                          }
-                          // Get.to(FlutterBlueApp());
-                          // Get.to(const MIDIDeviceListPage());
-                          if (selectstate.value == 0) {
-                            showSettingDialog(context);
-                          } else {
-                            showCreateModelSettingDialog(context);
-                          }
-                        }),
-                        const SizedBox(
-                          width: 10,
-                        ),
-                      ],
+          color: const Color(0xff3a3a3a),
+          child: Column(
+            children: [
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 25, vertical: 15),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    const Text(
+                      'RWKV AI Music Composer',
+                      style: TextStyle(
+                          color: Colors.white, fontWeight: FontWeight.bold),
                     ),
-                  ),
-                ],
+                    const Spacer(),
+                    Container(child: Obx(() {
+                      return CupertinoSegmentedControl(
+                        children: const {
+                          0: Padding(
+                              padding: EdgeInsets.all(10),
+                              child: Text(
+                                'Preset Mode',
+                                style: TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold),
+                              )),
+                          1: Padding(
+                              padding: EdgeInsets.all(10),
+                              child: Text(
+                                'Creative Mode',
+                                style: TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold),
+                              )),
+                        },
+                        onValueChanged: (int newValue) {
+                          // 当选择改变时执行的操作
+                          debugPrint('选择了选项 $newValue');
+                          selectstate.value = newValue;
+                          segmengChange(newValue);
+                        },
+                        groupValue: selectstate.value, // 当前选中的选项值
+                        selectedColor: const Color(0xff44be1c),
+                        unselectedColor: Colors.transparent,
+                        borderColor: const Color(0xff6d6d6d),
+                      );
+                    })),
+                  ],
+                ),
               ),
-            ),
-          ))
-        ],
-      ),
-    ));
+              Flexible(
+                flex: 2,
+                child: Visibility(
+                    key: const ValueKey('ValueKey11'),
+                    visible: isVisibleWebview.value,
+                    // maintainSize: true, // 保持占位空间
+                    // maintainAnimation: true, // 保持动画
+                    // maintainState: true,
+                    child: WebViewWidget(
+                      controller: controllerPiano,
+                    )),
+              ),
+              Flexible(
+                  flex: 3,
+                  child: Visibility(
+                    visible: isVisibleWebview.value,
+                    // maintainSize: true, // 保持占位空间
+                    // maintainAnimation: true, // 保持动画
+                    // maintainState: true,
+                    key: const ValueKey('ValueKey22'),
+                    child: WebViewWidget(
+                      controller: controllerKeyboard,
+                    ),
+                  )),
+              //   ],
+              // )),
+              Expanded(
+                  child: Visibility(
+                visible: isVisibleWebview.value,
+                key: const ValueKey('ValueKey33'),
+                child: Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 25, vertical: 5),
+                  color: const Color(0xff3a3a3a),
+                  child: Row(
+                    children: [
+                      creatBottomBtn('Prompts', () {
+                        debugPrint("Promptss");
+                        showPromptDialog(context, 'Prompts', prompts,
+                            STORAGE_PROMPTS_SELECT);
+                      }),
+                      const SizedBox(
+                        width: 8,
+                      ),
+                      creatBottomBtn('Sounds Effect', () {
+                        debugPrint("Sounds Effect");
+                        showPromptDialog(
+                            context,
+                            'Sounds Effect',
+                            soundEffect.keys.toList(),
+                            STORAGE_SOUNDSEFFECT_SELECT);
+                      }),
+                      ProgressbarTime(playProgress, pianoAllTime),
+                      Obx(() => isGenerating.value
+                          ? const CircularProgressIndicator(
+                              valueColor:
+                                  AlwaysStoppedAnimation<Color>(Colors.white),
+                            )
+                          : Container(
+                              child: null,
+                            )),
+                      const Spacer(),
+                      Container(
+                        child: Row(
+                          children: [
+                            Obx(() => createButtonImageWithText(
+                                    !isGenerating.value ? 'Generate' : 'Stop',
+                                    !isGenerating.value
+                                        ? Icons.edit
+                                        : Icons.refresh, () {
+                                  debugPrint('Generate');
+                                  isGenerating.value = !isGenerating.value;
+                                  if (isGenerating.value) {
+                                    playProgress.value = 0.0;
+                                    pianoAllTime.value = 0.0;
+                                    // controllerPiano.runJavaScript(
+                                    //     "setAbcString(\"%%MIDI program 40\\nL:1/4\\nM:4/4\\nK:D\\n\\\"D\\\" A F F\", false)");
+                                    // controllerPiano.runJavaScript(
+                                    //     'resetTimingCallbacks()');
+                                    // if (isWindowsOrMac) {
+                                    fetchABCDataByIsolate();
+                                    // } else {
+                                    //   getABCDataByAPI();
+                                    // }
+                                    controllerKeyboard
+                                        .runJavaScript('resetPlay()');
+                                    isFinishABCEvent = false;
+                                  } else {
+                                    // isolateSendPort.send('stop Generating');
+                                    isolateEventBus.fire("stop Generating");
+                                  }
+                                })),
+                            const SizedBox(
+                              width: 10,
+                            ),
+                            Obx(() => Visibility(
+                                visible: selectstate.value == 1,
+                                child: createButtonImageWithText(
+                                    'Undo', Icons.undo, () {
+                                  debugPrint('Undo');
+                                  resetLastNote();
+                                }))),
+                            const SizedBox(
+                              width: 10,
+                            ),
+                            Obx(() {
+                              return createButtonImageWithText(
+                                  !isPlay.value ? 'Play' : 'Pause',
+                                  !isPlay.value
+                                      ? Icons.play_arrow
+                                      : Icons.pause, () {
+                                debugPrint('Play');
+                                if (!isPlay.value) {
+                                  controllerPiano.runJavaScript("startPlay()");
+                                } else {
+                                  controllerPiano.runJavaScript("pausePlay()");
+                                }
+                                playPianoAnimation(
+                                    finalabcStringPreset, !isPlay.value);
+                                // if (isWindowsOrMac) {
+                                //   isPlay.value = !isPlay.value;
+                                // }
+                              });
+                            }),
+                            const SizedBox(
+                              width: 10,
+                            ),
+                            createButtonImageWithText(
+                                'Settings', Icons.settings, () {
+                              debugPrint('Settings');
+                              if (isWindowsOrMac) {
+                                isVisibleWebview.value =
+                                    !isVisibleWebview.value;
+                                setState(() {});
+                              }
+                              // Get.to(FlutterBlueApp());
+                              // Get.to(const MIDIDeviceListPage());
+                              if (selectstate.value == 0) {
+                                showSettingDialog(context);
+                              } else {
+                                showCreateModelSettingDialog(context);
+                              }
+                            }),
+                            const SizedBox(
+                              width: 10,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ))
+            ],
+          ),
+        ));
   }
 
   void getABCDataByAPI() async {
@@ -868,19 +882,17 @@ class _MyAppState extends State<MyApp> {
                           color: Colors.black,
                           fontWeight: FontWeight.bold),
                     ),
-                    isWindowsOrMac
-                        ? InkWell(
-                            child: const Icon(Icons.close),
-                            onTap: () {
-                              // if (isWindowsOrMac) {
-                              //   isVisibleWebview.value = !isVisibleWebview.value;
-                              //   setState(() {});
-                              // }
-                              // Navigator.of(context).pop();
-                              closeDialog();
-                            },
-                          )
-                        : const SizedBox(),
+                    InkWell(
+                      child: const Icon(Icons.close),
+                      onTap: () {
+                        // if (isWindowsOrMac) {
+                        //   isVisibleWebview.value = !isVisibleWebview.value;
+                        //   setState(() {});
+                        // }
+                        // Navigator.of(context).pop();
+                        closeDialog();
+                      },
+                    )
                   ],
                 ),
                 const SizedBox(
@@ -1076,19 +1088,17 @@ class _MyAppState extends State<MyApp> {
                                   color: Colors.black,
                                   fontWeight: FontWeight.bold),
                             ),
-                            isWindowsOrMac
-                                ? InkWell(
-                                    child: const Icon(Icons.close),
-                                    onTap: () {
-                                      // if (isWindowsOrMac) {
-                                      //   isVisibleWebview.value = !isVisibleWebview.value;
-                                      //   setState(() {});
-                                      // }
-                                      // Navigator.of(context).pop();
-                                      closeDialog();
-                                    },
-                                  )
-                                : const SizedBox(),
+                            InkWell(
+                              child: const Icon(Icons.close),
+                              onTap: () {
+                                // if (isWindowsOrMac) {
+                                //   isVisibleWebview.value = !isVisibleWebview.value;
+                                //   setState(() {});
+                                // }
+                                // Navigator.of(context).pop();
+                                closeDialog();
+                              },
+                            )
                           ],
                         ),
                         const SizedBox(

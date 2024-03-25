@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:path/path.dart' as p;
+import 'package:flutter/services.dart' show rootBundle;
 
 class CommonUtils {
   static String? extractTextValue(String jsonData) {
@@ -30,25 +31,31 @@ class CommonUtils {
     // .replaceAll("| \n ", ""); //| \n
   }
 
-  static String getdllPath() {
-    final currentPath = Directory.current.absolute.path;
-    // "C:\Users\bay13\RWKVMUSIC\rwkvmusic\assets\fastmodel\faster_rwkvd.dll"
-    var path = p.join(currentPath, 'lib/fastmodel/');
+  static Future<String> getdllPath() async {
+    var currentPath = Directory.current.absolute
+        .path; // "C:\Users\bay13\RWKVMUSIC\rwkvmusic\assets\fastmodel\faster_rwkvd.dll"
+    String path = p.join(currentPath, 'lib/fastmodel/');
     if (Platform.isMacOS) {
       path = p.join(path, 'faster_rwkvd.dylib');
     } else if (Platform.isWindows) {
       path = p.join(path, 'faster_rwkvd.dll');
-    } else {
-      path = p.join(path, 'faster_rwkvd.so');
+    } else if (Platform.isAndroid) {
+      path = await rootBundle.loadString('lib/fastmodel/libfaster_rwkvd.so');
     }
     print('path===$path');
     return path;
   }
 
-  static String getBinPath() {
-    final currentPath = Directory.current.absolute.path;
-    var path = p.join(currentPath,
-        'lib/fastmodel/RWKV-5-ABC-82M-v1-20230901-ctx1024-ncnn.bin');
+  static Future<String> getBinPath() async {
+    String path;
+    if (Platform.isAndroid || Platform.isIOS) {
+      path = await rootBundle.loadString(
+          'lib/fastmodel/RWKV-5-ABC-82M-v1-20230901-ctx1024-ncnn.bin');
+    } else {
+      String currentPath = Directory.current.absolute.path;
+      path = p.join(currentPath,
+          'lib/fastmodel/RWKV-5-ABC-82M-v1-20230901-ctx1024-ncnn.bin');
+    }
     print('getBinPath===$path');
     return path;
   }
