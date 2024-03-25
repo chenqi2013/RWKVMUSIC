@@ -867,7 +867,7 @@ class _MyAppState extends State<MyApp> {
         return Dialog(
           child: SingleChildScrollView(
               child: Container(
-            width: 400.w,
+            width: isWindowsOrMac ? 360.w : 510.w,
             height: isWindowsOrMac ? 190.h : 370.h,
             padding: const EdgeInsets.all(20),
             child: Column(
@@ -1074,7 +1074,7 @@ class _MyAppState extends State<MyApp> {
             child: Padding(
                 padding: const EdgeInsets.all(20),
                 child: SizedBox(
-                    width: isWindowsOrMac ? 500.w : 520.w,
+                    width: isWindowsOrMac ? 360.w : 510.w,
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.start,
                       crossAxisAlignment: CrossAxisAlignment.start,
