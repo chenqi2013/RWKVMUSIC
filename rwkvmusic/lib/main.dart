@@ -15,6 +15,7 @@ import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 // import 'package:flutter_platform_alert/flutter_platform_alert.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'package:group_radio_button/group_radio_button.dart';
 import 'package:rwkvmusic/gen/assets.gen.dart';
 import 'package:rwkvmusic/mainwidget/ProgressbarTime.dart';
 import 'package:rwkvmusic/services/storage.dart';
@@ -92,7 +93,7 @@ late String finalabcStringCreate;
 late bool isNeedRestart; //曲谱及键盘动画需要重新开始
 late String presentPrompt;
 late String createPrompt;
-late OverlayEntry overlayEntry;
+late OverlayEntry? overlayEntry;
 
 RxList<BleScanResult> bleList = <BleScanResult>[].obs;
 List bleListName = [];
@@ -864,9 +865,10 @@ class _MyAppState extends State<MyApp> {
       builder: (BuildContext context) {
         // 返回一个Dialog
         return Dialog(
-          child: Container(
+          child: SingleChildScrollView(
+              child: Container(
             width: 400.w,
-            height: isWindowsOrMac ? 190.h : 330.h,
+            height: isWindowsOrMac ? 190.h : 370.h,
             padding: const EdgeInsets.all(20),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.start,
@@ -981,10 +983,9 @@ class _MyAppState extends State<MyApp> {
                             //     .replaceAll('setAbcString', 'ABCtoEvents');
                             // // abcString = r'ABCtoEvents("L:1/4\nM:4/4\nK:D\n\"D\" A F F")';
                             // debugPrint(
-                            //     'playPianoAnimation ABCtoEvents==$oriabcString');
+                            //     'playPianoAnimation ABCtoEvents==');
                             isNeedConvertMidiNotes = true;
                             // controllerPiano.runJavaScript(oriabcString);
-
                             playPianoAnimation(finalabcStringPreset, true);
                             Future.delayed(const Duration(seconds: 2), () {
                               debugPrint('Delayed action after 3 seconds');
@@ -1054,7 +1055,7 @@ class _MyAppState extends State<MyApp> {
                 const Center(child: Text('Version: 1.1.0')),
               ],
             ),
-          ),
+          )),
         );
       },
     );
@@ -1073,7 +1074,7 @@ class _MyAppState extends State<MyApp> {
             child: Padding(
                 padding: const EdgeInsets.all(20),
                 child: SizedBox(
-                    width: 500.w,
+                    width: isWindowsOrMac ? 500.w : 520.w,
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.start,
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -1105,88 +1106,108 @@ class _MyAppState extends State<MyApp> {
                           height: 10,
                         ),
                         Obx(() => Row(
-                              mainAxisSize: MainAxisSize.min,
+                              crossAxisAlignment: CrossAxisAlignment.baseline,
+                              textBaseline:
+                                  TextBaseline.alphabetic, // 指定基线对齐的基线
                               children: [
                                 const Text('Time signature'),
-                                Expanded(
-                                    child: RadioListTile<int>(
-                                  title: const Text('2/4'),
-                                  value: 0,
-                                  groupValue: timeSignature.value,
-                                  onChanged: (value) {
-                                    timeSignature.value = value!;
-                                  },
-                                )),
-                                Expanded(
-                                    child: RadioListTile<int>(
-                                  title: const Text('3/4'),
-                                  value: 1,
-                                  groupValue: timeSignature.value,
-                                  onChanged: (value) {
-                                    timeSignature.value = value!;
-                                  },
-                                )),
-                                Expanded(
-                                    child: RadioListTile<int>(
-                                  title: const Text('4/4'),
-                                  value: 2,
-                                  groupValue: timeSignature.value,
-                                  onChanged: (value) {
-                                    timeSignature.value = value!;
-                                  },
-                                )),
-                                Expanded(
-                                    child: RadioListTile<int>(
-                                  title: const Text('3/8'),
-                                  value: 3,
-                                  groupValue: timeSignature.value,
-                                  onChanged: (value) {
-                                    timeSignature.value = value!;
-                                  },
-                                )),
-                                Expanded(
-                                    child: RadioListTile<int>(
-                                  title: const Text('6/8'),
-                                  value: 4,
-                                  groupValue: timeSignature.value,
-                                  onChanged: (value) {
-                                    timeSignature.value = value!;
-                                  },
-                                )),
+                                SizedBox(
+                                    width: 80, // 设置RadioListTile的宽度
+                                    height: 30,
+                                    child: RadioButton(
+                                      description: "2/4",
+                                      value: 0,
+                                      groupValue: timeSignature.value,
+                                      onChanged: (value) {
+                                        timeSignature.value = value!;
+                                      },
+                                    )),
+                                SizedBox(
+                                    width: 80, // 设置RadioListTile的宽度
+                                    height: 30,
+                                    child: RadioButton(
+                                      description: "3/4",
+                                      value: 1,
+                                      groupValue: timeSignature.value,
+                                      onChanged: (value) {
+                                        timeSignature.value = value!;
+                                      },
+                                    )),
+                                SizedBox(
+                                    width: 80, // 设置RadioListTile的宽度
+                                    height: 30,
+                                    child: RadioButton(
+                                      description: "4/4",
+                                      value: 2,
+                                      groupValue: timeSignature.value,
+                                      onChanged: (value) {
+                                        timeSignature.value = value!;
+                                      },
+                                    )),
+                                SizedBox(
+                                    width: 80, // 设置RadioListTile的宽度
+                                    height: 30,
+                                    child: RadioButton(
+                                      description: "3/8",
+                                      value: 3,
+                                      groupValue: timeSignature.value,
+                                      onChanged: (value) {
+                                        timeSignature.value = value!;
+                                      },
+                                    )),
+                                SizedBox(
+                                    width: 80, // 设置RadioListTile的宽度
+                                    height: 30,
+                                    child: RadioButton(
+                                      description: "6/8",
+                                      value: 4,
+                                      groupValue: timeSignature.value,
+                                      onChanged: (value) {
+                                        timeSignature.value = value!;
+                                      },
+                                    )),
                                 const Spacer(),
                               ],
                             )),
                         Obx(() => Row(
-                              mainAxisSize: MainAxisSize.min,
+                              crossAxisAlignment: CrossAxisAlignment.baseline,
+                              textBaseline:
+                                  TextBaseline.alphabetic, // 指定基线对齐的基线
                               children: [
                                 const Text('Default note length'),
-                                Expanded(
-                                    child: RadioListTile<int>(
-                                  title: const Text('1/4'),
-                                  value: 0,
-                                  groupValue: defaultNoteLenght.value,
-                                  onChanged: (value) {
-                                    defaultNoteLenght.value = value!;
-                                  },
-                                )),
-                                Expanded(
-                                    child: RadioListTile<int>(
-                                  title: const Text('1/8'),
-                                  value: 1,
-                                  groupValue: defaultNoteLenght.value,
-                                  onChanged: (value) {
-                                    defaultNoteLenght.value = value!;
-                                  },
-                                )),
-                                Expanded(
-                                    child: RadioListTile<int>(
-                                  title: const Text('1/16'),
-                                  value: 2,
-                                  groupValue: defaultNoteLenght.value,
-                                  onChanged: (value) {
-                                    defaultNoteLenght.value = value!;
-                                  },
-                                )),
+                                SizedBox(
+                                    width: 80,
+                                    height: 30,
+                                    child: RadioButton(
+                                      description: "1/4",
+                                      value: 0,
+                                      groupValue: defaultNoteLenght.value,
+                                      onChanged: (value) {
+                                        defaultNoteLenght.value = value!;
+                                      },
+                                    )),
+                                SizedBox(
+                                    width: 80,
+                                    height: 30,
+                                    child: RadioButton(
+                                      description: "1/8",
+                                      value: 1,
+                                      groupValue: defaultNoteLenght.value,
+                                      onChanged: (value) {
+                                        defaultNoteLenght.value = value!;
+                                      },
+                                    )),
+                                SizedBox(
+                                    width: 80,
+                                    height: 30,
+                                    child: RadioButton(
+                                      description: "1/16",
+                                      value: 2,
+                                      groupValue: defaultNoteLenght.value,
+                                      onChanged: (value) {
+                                        defaultNoteLenght.value = value!;
+                                      },
+                                    )),
                               ],
                             )),
                         Obx(() => Row(children: [
@@ -1420,7 +1441,7 @@ class _MyAppState extends State<MyApp> {
             ],
           ),
           child: SizedBox(
-            height: isWindowsOrMac ? 200.h : 100.h,
+            height: isWindowsOrMac ? 200.h : 220.h,
             // width: 40,
             child: ListView.builder(
               itemCount: list.length,
@@ -1484,7 +1505,9 @@ class _MyAppState extends State<MyApp> {
       });
     }
     Navigator.of(context).pop();
-    overlayEntry.remove();
+    if (overlayEntry != null) {
+      overlayEntry!.remove();
+    }
   }
 
   void showBleDeviceOverlay(BuildContext context) async {
@@ -1529,7 +1552,7 @@ class _MyAppState extends State<MyApp> {
                           onTap: () {
                             UniversalBle.stopScan();
                             conectDevice(bleList[index]);
-                            overlayEntry.remove();
+                            overlayEntry!.remove();
                           },
                         );
                       },
@@ -1540,7 +1563,7 @@ class _MyAppState extends State<MyApp> {
     );
 
     // 插入Overlay
-    Overlay.of(context).insert(overlayEntry);
+    Overlay.of(context).insert(overlayEntry!);
 
     // // 假设我们想在3秒后自动移除浮层
     // Future.delayed(const Duration(seconds: 3)).then((value) {

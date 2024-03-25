@@ -26,3 +26,4 @@ doc/api/
 .flutter-plugins
 .flutter-plugins-dependencies
 rwkvmusic/lib/fastmodel/RWKV-5-ABC-82M-v1-20230901-ctx1024-ncnn.bin
+rwkvmusic/windows/.vs/
