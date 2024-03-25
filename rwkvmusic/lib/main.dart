@@ -586,7 +586,7 @@ class _MyAppState extends State<MyApp> {
                 ),
               ),
               Flexible(
-                flex: 2,
+                flex: isWindowsOrMac ? 2 : 4,
                 child: Visibility(
                     key: const ValueKey('ValueKey11'),
                     visible: isVisibleWebview.value,
@@ -598,7 +598,7 @@ class _MyAppState extends State<MyApp> {
                     )),
               ),
               Flexible(
-                  flex: 3,
+                  flex: isWindowsOrMac ? 3 : 6,
                   child: Visibility(
                     visible: isVisibleWebview.value,
                     // maintainSize: true, // 保持占位空间
@@ -612,132 +612,137 @@ class _MyAppState extends State<MyApp> {
               //   ],
               // )),
               Expanded(
+                  flex: isWindowsOrMac ? 1 : 3,
                   child: Visibility(
-                visible: isVisibleWebview.value,
-                key: const ValueKey('ValueKey33'),
-                child: Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 25, vertical: 5),
-                  color: const Color(0xff3a3a3a),
-                  child: Row(
-                    children: [
-                      creatBottomBtn('Prompts', () {
-                        debugPrint("Promptss");
-                        showPromptDialog(context, 'Prompts', prompts,
-                            STORAGE_PROMPTS_SELECT);
-                      }),
-                      const SizedBox(
-                        width: 8,
-                      ),
-                      creatBottomBtn('Sounds Effect', () {
-                        debugPrint("Sounds Effect");
-                        showPromptDialog(
-                            context,
-                            'Sounds Effect',
-                            soundEffect.keys.toList(),
-                            STORAGE_SOUNDSEFFECT_SELECT);
-                      }),
-                      ProgressbarTime(playProgress, pianoAllTime),
-                      Obx(() => isGenerating.value
-                          ? const CircularProgressIndicator(
-                              valueColor:
-                                  AlwaysStoppedAnimation<Color>(Colors.white),
-                            )
-                          : Container(
-                              child: null,
-                            )),
-                      const Spacer(),
-                      Container(
-                        child: Row(
-                          children: [
-                            Obx(() => createButtonImageWithText(
-                                    !isGenerating.value ? 'Generate' : 'Stop',
-                                    !isGenerating.value
-                                        ? Icons.edit
-                                        : Icons.refresh, () {
-                                  debugPrint('Generate');
-                                  isGenerating.value = !isGenerating.value;
-                                  if (isGenerating.value) {
-                                    playProgress.value = 0.0;
-                                    pianoAllTime.value = 0.0;
-                                    // controllerPiano.runJavaScript(
-                                    //     "setAbcString(\"%%MIDI program 40\\nL:1/4\\nM:4/4\\nK:D\\n\\\"D\\\" A F F\", false)");
-                                    // controllerPiano.runJavaScript(
-                                    //     'resetTimingCallbacks()');
+                    visible: isVisibleWebview.value,
+                    key: const ValueKey('ValueKey33'),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 25, vertical: 5),
+                      color: const Color(0xff3a3a3a),
+                      child: Row(
+                        children: [
+                          creatBottomBtn('Prompts', () {
+                            debugPrint("Promptss");
+                            showPromptDialog(context, 'Prompts', prompts,
+                                STORAGE_PROMPTS_SELECT);
+                          }),
+                          const SizedBox(
+                            width: 8,
+                          ),
+                          creatBottomBtn('Sounds Effect', () {
+                            debugPrint("Sounds Effect");
+                            showPromptDialog(
+                                context,
+                                'Sounds Effect',
+                                soundEffect.keys.toList(),
+                                STORAGE_SOUNDSEFFECT_SELECT);
+                          }),
+                          ProgressbarTime(playProgress, pianoAllTime),
+                          Obx(() => isGenerating.value
+                              ? const CircularProgressIndicator(
+                                  valueColor: AlwaysStoppedAnimation<Color>(
+                                      Colors.white),
+                                )
+                              : Container(
+                                  child: null,
+                                )),
+                          const Spacer(),
+                          Container(
+                            child: Row(
+                              children: [
+                                Obx(() => createButtonImageWithText(
+                                        !isGenerating.value
+                                            ? 'Generate'
+                                            : 'Stop',
+                                        !isGenerating.value
+                                            ? Icons.edit
+                                            : Icons.refresh, () {
+                                      debugPrint('Generate');
+                                      isGenerating.value = !isGenerating.value;
+                                      if (isGenerating.value) {
+                                        playProgress.value = 0.0;
+                                        pianoAllTime.value = 0.0;
+                                        // controllerPiano.runJavaScript(
+                                        //     "setAbcString(\"%%MIDI program 40\\nL:1/4\\nM:4/4\\nK:D\\n\\\"D\\\" A F F\", false)");
+                                        // controllerPiano.runJavaScript(
+                                        //     'resetTimingCallbacks()');
+                                        // if (isWindowsOrMac) {
+                                        fetchABCDataByIsolate();
+                                        // } else {
+                                        //   getABCDataByAPI();
+                                        // }
+                                        controllerKeyboard
+                                            .runJavaScript('resetPlay()');
+                                        isFinishABCEvent = false;
+                                      } else {
+                                        // isolateSendPort.send('stop Generating');
+                                        isolateEventBus.fire("stop Generating");
+                                      }
+                                    })),
+                                const SizedBox(
+                                  width: 10,
+                                ),
+                                Obx(() => Visibility(
+                                    visible: selectstate.value == 1,
+                                    child: createButtonImageWithText(
+                                        'Undo', Icons.undo, () {
+                                      debugPrint('Undo');
+                                      resetLastNote();
+                                    }))),
+                                const SizedBox(
+                                  width: 10,
+                                ),
+                                Obx(() {
+                                  return createButtonImageWithText(
+                                      !isPlay.value ? 'Play' : 'Pause',
+                                      !isPlay.value
+                                          ? Icons.play_arrow
+                                          : Icons.pause, () {
+                                    debugPrint('Play');
+                                    if (!isPlay.value) {
+                                      controllerPiano
+                                          .runJavaScript("startPlay()");
+                                    } else {
+                                      controllerPiano
+                                          .runJavaScript("pausePlay()");
+                                    }
+                                    playPianoAnimation(
+                                        finalabcStringPreset, !isPlay.value);
                                     // if (isWindowsOrMac) {
-                                    fetchABCDataByIsolate();
-                                    // } else {
-                                    //   getABCDataByAPI();
+                                    //   isPlay.value = !isPlay.value;
                                     // }
-                                    controllerKeyboard
-                                        .runJavaScript('resetPlay()');
-                                    isFinishABCEvent = false;
-                                  } else {
-                                    // isolateSendPort.send('stop Generating');
-                                    isolateEventBus.fire("stop Generating");
+                                  });
+                                }),
+                                const SizedBox(
+                                  width: 10,
+                                ),
+                                createButtonImageWithText(
+                                    'Settings', Icons.settings, () {
+                                  debugPrint('Settings');
+                                  if (isWindowsOrMac) {
+                                    isVisibleWebview.value =
+                                        !isVisibleWebview.value;
+                                    setState(() {});
                                   }
-                                })),
-                            const SizedBox(
-                              width: 10,
+                                  // Get.to(FlutterBlueApp());
+                                  // Get.to(const MIDIDeviceListPage());
+                                  if (selectstate.value == 0) {
+                                    showSettingDialog(context);
+                                  } else {
+                                    showCreateModelSettingDialog(context);
+                                  }
+                                }),
+                                const SizedBox(
+                                  width: 10,
+                                ),
+                              ],
                             ),
-                            Obx(() => Visibility(
-                                visible: selectstate.value == 1,
-                                child: createButtonImageWithText(
-                                    'Undo', Icons.undo, () {
-                                  debugPrint('Undo');
-                                  resetLastNote();
-                                }))),
-                            const SizedBox(
-                              width: 10,
-                            ),
-                            Obx(() {
-                              return createButtonImageWithText(
-                                  !isPlay.value ? 'Play' : 'Pause',
-                                  !isPlay.value
-                                      ? Icons.play_arrow
-                                      : Icons.pause, () {
-                                debugPrint('Play');
-                                if (!isPlay.value) {
-                                  controllerPiano.runJavaScript("startPlay()");
-                                } else {
-                                  controllerPiano.runJavaScript("pausePlay()");
-                                }
-                                playPianoAnimation(
-                                    finalabcStringPreset, !isPlay.value);
-                                // if (isWindowsOrMac) {
-                                //   isPlay.value = !isPlay.value;
-                                // }
-                              });
-                            }),
-                            const SizedBox(
-                              width: 10,
-                            ),
-                            createButtonImageWithText(
-                                'Settings', Icons.settings, () {
-                              debugPrint('Settings');
-                              if (isWindowsOrMac) {
-                                isVisibleWebview.value =
-                                    !isVisibleWebview.value;
-                                setState(() {});
-                              }
-                              // Get.to(FlutterBlueApp());
-                              // Get.to(const MIDIDeviceListPage());
-                              if (selectstate.value == 0) {
-                                showSettingDialog(context);
-                              } else {
-                                showCreateModelSettingDialog(context);
-                              }
-                            }),
-                            const SizedBox(
-                              width: 10,
-                            ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
-                ),
-              ))
+                    ),
+                  ))
             ],
           ),
         ));
@@ -922,6 +927,7 @@ class _MyAppState extends State<MyApp> {
                       ),
                       SizedBox(
                           width: 200,
+                          height: 40,
                           child: TextField(
                             controller: controller,
                             keyboardType: TextInputType.number,
@@ -1232,6 +1238,7 @@ class _MyAppState extends State<MyApp> {
                                 width: 20,
                               ),
                               SizedBox(
+                                  height: 40,
                                   width: 200,
                                   child: TextField(
                                     controller: controller,
