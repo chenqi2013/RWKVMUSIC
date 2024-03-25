@@ -1452,6 +1452,7 @@ class _MyAppState extends State<MyApp> {
                           ABCHead.appendTempoParam(abcstr, tempo.value.toInt());
                       controllerPiano
                           .runJavaScript("setAbcString(\"$abcstr\", false)");
+                      controllerKeyboard.runJavaScript('resetPlay()');
                       debugPrint(abcstr);
                     },
                   );
