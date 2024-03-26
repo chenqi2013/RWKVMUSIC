@@ -32,8 +32,7 @@ class CommonUtils {
   }
 
   static Future<String> getdllPath() async {
-    var currentPath = Directory.current.absolute
-        .path; // "C:\Users\bay13\RWKVMUSIC\rwkvmusic\assets\fastmodel\faster_rwkvd.dll"
+    var currentPath = Directory.current.absolute.path;
     String path = p.join(currentPath, 'lib/fastmodel/');
     if (Platform.isMacOS) {
       path = p.join(path, 'faster_rwkvd.dylib');

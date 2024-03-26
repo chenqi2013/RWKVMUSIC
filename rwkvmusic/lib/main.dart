@@ -680,8 +680,8 @@ class _MyAppState extends State<MyApp> {
                                         isolateEventBus.fire("stop Generating");
                                       }
                                     })),
-                                const SizedBox(
-                                  width: 10,
+                                SizedBox(
+                                  width: isWindowsOrMac ? 10 : 4,
                                 ),
                                 Obx(() => Visibility(
                                     visible: selectstate.value == 1,
@@ -690,8 +690,8 @@ class _MyAppState extends State<MyApp> {
                                       debugPrint('Undo');
                                       resetLastNote();
                                     }))),
-                                const SizedBox(
-                                  width: 10,
+                                SizedBox(
+                                  width: isWindowsOrMac ? 10 : 4,
                                 ),
                                 Obx(() {
                                   return createButtonImageWithText(
@@ -714,8 +714,8 @@ class _MyAppState extends State<MyApp> {
                                     // }
                                   });
                                 }),
-                                const SizedBox(
-                                  width: 10,
+                                SizedBox(
+                                  width: isWindowsOrMac ? 10 : 4,
                                 ),
                                 createButtonImageWithText(
                                     'Settings', Icons.settings, () {
@@ -733,8 +733,8 @@ class _MyAppState extends State<MyApp> {
                                     showCreateModelSettingDialog(context);
                                   }
                                 }),
-                                const SizedBox(
-                                  width: 10,
+                                SizedBox(
+                                  width: isWindowsOrMac ? 10 : 4,
                                 ),
                               ],
                             ),
