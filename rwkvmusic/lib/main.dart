@@ -843,7 +843,6 @@ class _MyAppState extends State<MyApp> {
   }
 
   void segmengChange(int index) {
-    readFilePath();
     if (index == 0) {
       //preset
       // controllerPiano.runJavaScript(
@@ -1653,17 +1652,5 @@ class _MyAppState extends State<MyApp> {
         Get.snackbar(device.name!, '连接失败', colorText: Colors.red);
       }
     };
-  }
-
-  void readFilePath() async {
-    // 获取当前应用程序的根目录
-    String mainDartContent = await rootBundle.loadString(
-        'assets/fastmodel/RWKV-5-ABC-82M-v1-20230901-ctx1024-ncnn.config');
-    debugPrint("mainDartPath==$mainDartContent");
-
-    File file =
-        File('assets/fastmodel/RWKV-5-ABC-82M-v1-20230901-ctx1024-ncnn.config');
-    String resultstr = await file.readAsString();
-    debugPrint("resultstr==$resultstr");
   }
 }

@@ -76,7 +76,7 @@ dependencies:
   # desktop_webview_window: ^0.2.3
   webview_all: ^0.1.3
   window_manager: ^0.3.8
-  # flutter_platform_alert: ^0.5.1
+  flutter_platform_alert: ^0.5.1
   # flutter_gen_runner: ^5.4.0
   # flutter_dialogs: ^3.0.0
   # adaptive_dialog: ^2.1.0
