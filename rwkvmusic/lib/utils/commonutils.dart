@@ -1,7 +1,10 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 import 'package:path/path.dart' as p;
 import 'package:flutter/services.dart' show rootBundle;
+import 'package:flutter/material.dart';
+import 'package:path_provider/path_provider.dart';
 
 class CommonUtils {
   static String? extractTextValue(String jsonData) {
@@ -38,25 +41,47 @@ class CommonUtils {
       path = p.join(path, 'faster_rwkvd.dylib');
     } else if (Platform.isWindows) {
       path = p.join(path, 'faster_rwkvd.dll');
-    } else if (Platform.isAndroid) {
-      path = await rootBundle.loadString('lib/fastmodel/libfaster_rwkvd.so');
+    } else if (Platform.isAndroid || Platform.isIOS) {
+      path = 'assets/fastmodel/libfaster_rwkvd.so';
     }
-    print('path===$path');
+    debugPrint('path===$path');
     return path;
   }
 
   static Future<String> getBinPath() async {
     String path;
     if (Platform.isAndroid || Platform.isIOS) {
-      path = await rootBundle.loadString(
-          'lib/fastmodel/RWKV-5-ABC-82M-v1-20230901-ctx1024-ncnn.bin');
+      path = 'assets/fastmodel/RWKV-5-ABC-82M-v1-20230901-ctx1024-ncnn.bin';
     } else {
       String currentPath = Directory.current.absolute.path;
       path = p.join(currentPath,
           'lib/fastmodel/RWKV-5-ABC-82M-v1-20230901-ctx1024-ncnn.bin');
     }
-    print('getBinPath===$path');
+    debugPrint('getBinPath===$path');
     return path;
+  }
+
+  static Future<String> loadDllFromAssets(String dllFileName) async {
+    try {
+      Directory tempDir = await getApplicationCacheDirectory();
+      String tempDirPath = tempDir.path;
+      // 构建DLL文件的路径
+      String dllFilePath = '$tempDirPath/$dllFileName';
+      // 将DLL文件写入临时目录
+      File dllFile = File(dllFilePath);
+      if (await dllFile.exists()) {
+      } else {
+        // 加载assets下DLL文件的内容
+        ByteData data = await rootBundle.load('assets/fastmodel/$dllFileName');
+        await dllFile.writeAsBytes(data.buffer.asUint8List(), flush: true);
+      }
+      // 加载DLL文件
+      // DynamicLibrary dll = DynamicLibrary.open(dllFilePath);
+      return dllFilePath;
+    } catch (e) {
+      print('Error loading DLL file: $e');
+      return ''; // 返回空值或者其他默认值
+    }
   }
 
   static void establishSSEConnection() async {
@@ -82,14 +107,14 @@ class CommonUtils {
     response.listen((List<int> chunk) {
       // 处理数据流的每个块
       String responseData = utf8.decode(chunk);
-      print(responseData);
+      debugPrint(responseData);
     }, onDone: () {
       // 数据流接收完成
-      print('请求完成');
+      debugPrint('请求完成');
       httpClient.close();
     }, onError: (error) {
       // 处理错误
-      print('请求发生错误: $error');
+      debugPrint('请求发生错误: $error');
     });
   }
 }

@@ -44,6 +44,11 @@ import 'package:window_manager/window_manager.dart';
 // import 'package:flutter_gen_runner/flutter_gen_runner.dart';
 import 'package:event_bus/event_bus.dart';
 
+import 'package:flutter/services.dart' show rootBundle;
+import 'package:path_provider/path_provider.dart' as path_provider;
+import 'package:path/path.dart' as p;
+import 'dart:io';
+
 void main(List<String> args) async {
   WidgetsFlutterBinding.ensureInitialized();
   if (Platform.isWindows || Platform.isMacOS) {
@@ -116,10 +121,22 @@ bool isNeedConvertMidiNotes = false;
 
 List virtualNotes = []; //虚拟键盘按键音符
 var selectstate = 0.obs;
+late bool isWindowsOrMac;
 
 void fetchABCDataByIsolate() async {
   String dllPath = await CommonUtils.getdllPath();
   String binPath = await CommonUtils.getBinPath();
+  String? configPath;
+  String? paramPath;
+  if (!isWindowsOrMac) {
+    dllPath = await CommonUtils.loadDllFromAssets('libfaster_rwkvd.so');
+    binPath = await CommonUtils.loadDllFromAssets(
+        'RWKV-5-ABC-82M-v1-20230901-ctx1024-ncnn.bin');
+    configPath = await CommonUtils.loadDllFromAssets(
+        'RWKV-5-ABC-82M-v1-20230901-ctx1024-ncnn.config');
+    paramPath = await CommonUtils.loadDllFromAssets(
+        'RWKV-5-ABC-82M-v1-20230901-ctx1024-ncnn.param');
+  }
 
   // 创建 ReceivePort，以接收来自子线程的消息
   // 创建一个新的 Isolate
@@ -284,7 +301,6 @@ class _MyAppState extends State<MyApp> {
   // late StringBuffer sbNoteCreate = StringBuffer();
   late MidiDeviceManage deviceManage;
   late String abcString;
-  late bool isWindowsOrMac;
   var isVisibleWebview = true.obs;
   @override
   void initState() {
@@ -827,6 +843,7 @@ class _MyAppState extends State<MyApp> {
   }
 
   void segmengChange(int index) {
+    readFilePath();
     if (index == 0) {
       //preset
       // controllerPiano.runJavaScript(
@@ -1636,5 +1653,17 @@ class _MyAppState extends State<MyApp> {
         Get.snackbar(device.name!, '连接失败', colorText: Colors.red);
       }
     };
+  }
+
+  void readFilePath() async {
+    // 获取当前应用程序的根目录
+    String mainDartContent = await rootBundle.loadString(
+        'assets/fastmodel/RWKV-5-ABC-82M-v1-20230901-ctx1024-ncnn.config');
+    debugPrint("mainDartPath==$mainDartContent");
+
+    File file =
+        File('assets/fastmodel/RWKV-5-ABC-82M-v1-20230901-ctx1024-ncnn.config');
+    String resultstr = await file.readAsString();
+    debugPrint("resultstr==$resultstr");
   }
 }
