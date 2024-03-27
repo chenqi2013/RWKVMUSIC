@@ -48,6 +48,7 @@ import 'package:flutter/services.dart' show rootBundle;
 import 'package:path_provider/path_provider.dart' as path_provider;
 import 'package:path/path.dart' as p;
 import 'dart:io';
+import 'package:permission_handler/permission_handler.dart';
 
 void main(List<String> args) async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -1604,17 +1605,43 @@ class _MyAppState extends State<MyApp> {
     // });
   }
 
-  void startScan() {
-    UniversalBle.onScanResult = (scanResult) {
+  void startScan() async {
+    if (!isWindowsOrMac) {
+      // if (Platform.isAndroid) {
+      var status = await Permission.location.request();
+      if (status != PermissionStatus.granted) {
+        Get.snackbar('提示', '需要开启定位权限', colorText: Colors.red);
+        return;
+      }
+      // }
+      status = await Permission.bluetoothScan.request();
+      if (status != PermissionStatus.granted) {
+        Get.snackbar('提示', '需要开启蓝牙扫描权限', colorText: Colors.red);
+        return;
+      }
+
+      status = await Permission.bluetoothConnect.request();
+      if (status != PermissionStatus.granted) {
+        Get.snackbar('提示', '需要开启蓝牙连接权限', colorText: Colors.red);
+        return;
+      }
+    }
+    UniversalBle.onScanResult = (BleScanResult scanResult) {
       if (scanResult.name != null) {
         //&& scanResult.name!.startsWith('SMK25V2')
         if (!bleListName.contains(scanResult.name)) {
+          // for (String service in scanResult.services) {
+          // if (service.contains('midi')) {
           debugPrint('scanResult==${scanResult.name}');
           bleList.add(scanResult);
           bleListName.add(scanResult.name);
+          // break;
+          // }
+          // }
         }
       }
     };
+
     UniversalBle.startScan();
   }
 
