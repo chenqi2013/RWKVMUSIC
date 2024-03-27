@@ -124,11 +124,19 @@ var selectstate = 0.obs;
 late bool isWindowsOrMac;
 
 void fetchABCDataByIsolate() async {
-  String dllPath = await CommonUtils.getdllPath();
-  String binPath = await CommonUtils.getBinPath();
+  String? dllPath;
+  String? binPath;
   String? configPath;
   String? paramPath;
-  if (!isWindowsOrMac) {
+  if (Platform.isIOS || Platform.isMacOS) {
+    dllPath = await CommonUtils.loadDllFromAssets('libfaster_rwkvd.dylib');
+    binPath = await CommonUtils.loadDllFromAssets(
+        'RWKV-5-ABC-82M-v1-20230901-ctx1024-ncnn.bin');
+    configPath = await CommonUtils.loadDllFromAssets(
+        'RWKV-5-ABC-82M-v1-20230901-ctx1024-ncnn.config');
+    paramPath = await CommonUtils.loadDllFromAssets(
+        'RWKV-5-ABC-82M-v1-20230901-ctx1024-ncnn.param');
+  } else if (Platform.isAndroid) {
     dllPath = await CommonUtils.loadDllFromAssets('libfaster_rwkvd.so');
     binPath = await CommonUtils.loadDllFromAssets(
         'RWKV-5-ABC-82M-v1-20230901-ctx1024-ncnn.bin');
@@ -136,8 +144,10 @@ void fetchABCDataByIsolate() async {
         'RWKV-5-ABC-82M-v1-20230901-ctx1024-ncnn.config');
     paramPath = await CommonUtils.loadDllFromAssets(
         'RWKV-5-ABC-82M-v1-20230901-ctx1024-ncnn.param');
+  } else if (Platform.isWindows) {
+    dllPath = await CommonUtils.getdllPath();
+    binPath = await CommonUtils.getBinPath();
   }
-
   // 创建 ReceivePort，以接收来自子线程的消息
   // 创建一个新的 Isolate
   mainReceivePort = ReceivePort();
