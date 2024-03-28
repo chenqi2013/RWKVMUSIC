@@ -1102,7 +1102,12 @@ class _MyAppState extends State<MyApp> {
           )),
         );
       },
-    );
+    ).then((value) {
+      UniversalBle.stopScan();
+      if (overlayEntry != null) {
+        overlayEntry!.remove();
+      }
+    });
   }
 
   void showCreateModelSettingDialog(BuildContext context) {
@@ -1436,7 +1441,12 @@ class _MyAppState extends State<MyApp> {
           ),
         );
       },
-    );
+    ).then((value) {
+      UniversalBle.stopScan();
+      if (overlayEntry != null) {
+        overlayEntry!.remove();
+      }
+    });
   }
 
   void showPromptDialog(
