@@ -140,16 +140,6 @@ void fetchABCDataByIsolate() async {
         'RWKV-5-ABC-82M-v1-20230901-ctx1024-ncnn.param');
   }
   if (Platform.isIOS) {
-    // dllPath = await CommonUtils.loadDllFromAssets(
-    //     'libfaster-rwkv-static-fb9bafb-ios.zip');
-    // String frameworkpath = await CommonUtils.frameworkpath();
-    // if (!(await File(frameworkpath).exists())) {
-    //   CommonUtils.unzipfile(dllPath);
-    //   dllPath = frameworkpath;
-    //   debugPrint('frameworkpath is not exists');
-    // } else {
-    //   debugPrint('frameworkpath is exists');
-    // }
     dllPath = await CommonUtils.loadDllFromAssets('libfaster_rwkv_static.a');
     binPath = await CommonUtils.loadDllFromAssets(
         'RWKV-5-ABC-82M-v1-20230901-ctx1024-ncnn.bin');
