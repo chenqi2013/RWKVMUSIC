@@ -181,6 +181,7 @@ void fetchABCDataByIsolate() async {
     } else if (data == "finish") {
       mainReceivePort.close(); // 操作完成后，关闭 ReceivePort
       isGenerating.value = false;
+      eventBus.fire('finish');
     } else {
       finalabcStringPreset = data;
       eventBus.fire(data);
@@ -481,7 +482,11 @@ class _MyAppState extends State<MyApp> {
 
     eventBus.on().listen((event) {
       // debugPrint('event bus==$event');
-      controllerPiano.runJavaScript(event);
+      if (event == 'finish') {
+        playOrPausePiano();
+      } else {
+        controllerPiano.runJavaScript(event);
+      }
     });
   }
 
@@ -737,19 +742,7 @@ class _MyAppState extends State<MyApp> {
                                       !isPlay.value
                                           ? Icons.play_arrow
                                           : Icons.pause, () {
-                                    debugPrint('Play');
-                                    if (!isPlay.value) {
-                                      controllerPiano
-                                          .runJavaScript("startPlay()");
-                                    } else {
-                                      controllerPiano
-                                          .runJavaScript("pausePlay()");
-                                    }
-                                    playPianoAnimation(
-                                        finalabcStringPreset, !isPlay.value);
-                                    // if (isWindowsOrMac) {
-                                    //   isPlay.value = !isPlay.value;
-                                    // }
+                                    playOrPausePiano();
                                   });
                                 }),
                                 SizedBox(
@@ -784,6 +777,19 @@ class _MyAppState extends State<MyApp> {
             ],
           ),
         ));
+  }
+
+  void playOrPausePiano() {
+    debugPrint('playOrPausePiano');
+    if (!isPlay.value) {
+      controllerPiano.runJavaScript("startPlay()");
+    } else {
+      controllerPiano.runJavaScript("pausePlay()");
+    }
+    playPianoAnimation(finalabcStringPreset, !isPlay.value);
+    // if (isWindowsOrMac) {
+    //   isPlay.value = !isPlay.value;
+    // }
   }
 
   void getABCDataByAPI() async {
