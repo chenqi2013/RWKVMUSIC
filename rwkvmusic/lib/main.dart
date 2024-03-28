@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:ffi' hide Size;
 import 'dart:isolate';
+import 'package:archive/archive_io.dart';
 import 'package:ffi/ffi.dart';
 // import 'dart:html';
 import 'dart:io';
@@ -129,8 +130,27 @@ void fetchABCDataByIsolate() async {
   String? binPath;
   String? configPath;
   String? paramPath;
-  if (Platform.isIOS || Platform.isMacOS) {
+  if (Platform.isMacOS) {
     dllPath = await CommonUtils.loadDllFromAssets('libfaster_rwkvd.dylib');
+    binPath = await CommonUtils.loadDllFromAssets(
+        'RWKV-5-ABC-82M-v1-20230901-ctx1024-ncnn.bin');
+    configPath = await CommonUtils.loadDllFromAssets(
+        'RWKV-5-ABC-82M-v1-20230901-ctx1024-ncnn.config');
+    paramPath = await CommonUtils.loadDllFromAssets(
+        'RWKV-5-ABC-82M-v1-20230901-ctx1024-ncnn.param');
+  }
+  if (Platform.isIOS) {
+    // dllPath = await CommonUtils.loadDllFromAssets(
+    //     'libfaster-rwkv-static-fb9bafb-ios.zip');
+    // String frameworkpath = await CommonUtils.frameworkpath();
+    // if (!(await File(frameworkpath).exists())) {
+    //   CommonUtils.unzipfile(dllPath);
+    //   dllPath = frameworkpath;
+    //   debugPrint('frameworkpath is not exists');
+    // } else {
+    //   debugPrint('frameworkpath is exists');
+    // }
+    dllPath = await CommonUtils.loadDllFromAssets('libfaster_rwkv_static.a');
     binPath = await CommonUtils.loadDllFromAssets(
         'RWKV-5-ABC-82M-v1-20230901-ctx1024-ncnn.bin');
     configPath = await CommonUtils.loadDllFromAssets(
@@ -206,7 +226,8 @@ void getABCDataByLocalModel(var array) async {
   sendPort.send(isolateReceivePort.sendPort);
   sendPort.send(eventBus);
   Pointer<Char> promptChar = prompt.toNativeUtf8().cast<Char>();
-  faster_rwkvd fastrwkv = faster_rwkvd(DynamicLibrary.open(dllPath));
+  faster_rwkvd fastrwkv = faster_rwkvd(
+      Platform.isIOS ? DynamicLibrary.process() : DynamicLibrary.open(dllPath));
   Pointer<Char> strategy = 'ncnn fp32'.toNativeUtf8().cast<Char>();
   Pointer<Void> model =
       fastrwkv.rwkv_model_create(binPath.toNativeUtf8().cast<Char>(), strategy);

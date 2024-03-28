@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
+import 'package:archive/archive.dart';
 import 'package:path/path.dart' as p;
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter/material.dart';
@@ -81,6 +82,34 @@ class CommonUtils {
     } catch (e) {
       print('Error loading DLL file: $e');
       return ''; // 返回空值或者其他默认值
+    }
+  }
+
+  static Future<String> frameworkpath() async {
+    Directory tempDir = await getApplicationCacheDirectory();
+    String tempDirPath = tempDir.path;
+    return '$tempDirPath/libfaster-rwkv-static-fb9bafb-ios/faster-rwkv.framework/faster-rwkv';
+  }
+
+  static Future<void> unzipfile(String path) async {
+    // Read the Zip file from disk.
+    Directory tempDir = await getApplicationCacheDirectory();
+    String tempDirPath = tempDir.path;
+    final bytes = File(path).readAsBytesSync();
+
+    // Decode the Zip file
+    final archive = ZipDecoder().decodeBytes(bytes);
+    // Extract the contents of the Zip archive to disk.
+    for (final file in archive) {
+      final filename = file.name;
+      if (file.isFile) {
+        final data = file.content as List<int>;
+        File('$tempDirPath/$filename')
+          ..createSync(recursive: true)
+          ..writeAsBytesSync(data);
+      } else {
+        Directory('$tempDirPath/$filename').create(recursive: true);
+      }
     }
   }
 
