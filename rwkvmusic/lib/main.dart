@@ -483,7 +483,7 @@ class _MyAppState extends State<MyApp> {
     eventBus.on().listen((event) {
       // debugPrint('event bus==$event');
       if (event == 'finish') {
-        playOrPausePiano();
+        // playOrPausePiano();
       } else {
         controllerPiano.runJavaScript(event);
       }
