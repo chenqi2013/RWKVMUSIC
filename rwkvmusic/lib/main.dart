@@ -15,6 +15,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 // import 'package:flutter_platform_alert/flutter_platform_alert.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_share/flutter_share.dart';
 import 'package:get/get.dart';
 import 'package:group_radio_button/group_radio_button.dart';
 import 'package:rwkvmusic/gen/assets.gen.dart';
@@ -1040,6 +1041,26 @@ class _MyAppState extends State<MyApp> {
                             Future.delayed(const Duration(seconds: 2), () {
                               debugPrint('Delayed action after 3 seconds');
                               isNeedConvertMidiNotes = false;
+                              if (isWindowsOrMac) {
+                                final file = DirectoryPicker()
+                                  ..title = 'Select a directory';
+                                final result = file.getDirectory();
+                                if (result != null) {
+                                  debugPrint(
+                                      'Select a directory=${result.path}');
+                                }
+                                MidifileConvert.saveMidiFile(
+                                    midiNotes, result!.path);
+                                Get.snackbar('提示', '文件保存成功',
+                                    colorText: Colors.black);
+                                // toastInfo(msg: '文件保存成功');
+                              } else {
+                                //phone save file
+                                shareFile('filepath');
+                              }
+                            });
+                          } else {
+                            if (isWindowsOrMac) {
                               final file = DirectoryPicker()
                                 ..title = 'Select a directory';
                               final result = file.getDirectory();
@@ -1051,19 +1072,10 @@ class _MyAppState extends State<MyApp> {
                               Get.snackbar('提示', '文件保存成功',
                                   colorText: Colors.black);
                               // toastInfo(msg: '文件保存成功');
-                            });
-                          } else {
-                            final file = DirectoryPicker()
-                              ..title = 'Select a directory';
-                            final result = file.getDirectory();
-                            if (result != null) {
-                              debugPrint('Select a directory=${result.path}');
+                            } else {
+                              // phone save file
+                              shareFile('filepath');
                             }
-                            MidifileConvert.saveMidiFile(
-                                midiNotes, result!.path);
-                            Get.snackbar('提示', '文件保存成功',
-                                colorText: Colors.black);
-                            // toastInfo(msg: '文件保存成功');
                           }
                         },
                         style: TextButton.styleFrom(
@@ -1716,5 +1728,13 @@ class _MyAppState extends State<MyApp> {
         Get.snackbar(device.name!, '连接失败', colorText: Colors.red);
       }
     };
+  }
+
+  Future<void> shareFile(String filepath) async {
+    await FlutterShare.shareFile(
+      title: 'Example share',
+      text: 'Example share text',
+      filePath: filepath,
+    );
   }
 }

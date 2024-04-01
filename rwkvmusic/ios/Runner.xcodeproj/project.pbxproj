@@ -15,9 +15,10 @@
 		97C146FC1CF9000F007C117D /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FA1CF9000F007C117D /* Main.storyboard */; };
 		97C146FE1CF9000F007C117D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FD1CF9000F007C117D /* Assets.xcassets */; };
 		97C147011CF9000F007C117D /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FF1CF9000F007C117D /* LaunchScreen.storyboard */; };
-		C088CF722BB5570B008285AB /* ncnn.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C088CF702BB5570B008285AB /* ncnn.framework */; };
-		C088CF732BB5570B008285AB /* openmp.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C088CF712BB5570B008285AB /* openmp.framework */; };
-		C0B12F692BB51D7400667A21 /* libfaster_rwkv_static.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C0B12F662BB51D4D00667A21 /* libfaster_rwkv_static.a */; };
+		C0C189702BBA89510084551C /* ncnn.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C0C1896D2BBA89510084551C /* ncnn.framework */; };
+		C0C189712BBA89510084551C /* openmp.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C0C1896E2BBA89510084551C /* openmp.framework */; };
+		C0C189722BBA8A220084551C /* libfaster_rwkv_static.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C0C69F232BB432C40035E139 /* libfaster_rwkv_static.a */; };
+		C0C1897B2BBA98A30084551C /* libfaster_rwkv_static.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C0C1897A2BBA98A30084551C /* libfaster_rwkv_static.a */; };
 		EFD9304CD13B4290CD0BBD35 /* Pods_RunnerTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F9A3A5F1143C844F85020BAD /* Pods_RunnerTests.framework */; };
 /* End PBXBuildFile section */
 
@@ -65,9 +66,9 @@
 		97C147001CF9000F007C117D /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		97C147021CF9000F007C117D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		9B7F914845200D99297E90E0 /* Pods-RunnerTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RunnerTests.debug.xcconfig"; path = "Target Support Files/Pods-RunnerTests/Pods-RunnerTests.debug.xcconfig"; sourceTree = "<group>"; };
-		C088CF702BB5570B008285AB /* ncnn.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = ncnn.framework; sourceTree = "<group>"; };
-		C088CF712BB5570B008285AB /* openmp.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = openmp.framework; sourceTree = "<group>"; };
-		C0B12F662BB51D4D00667A21 /* libfaster_rwkv_static.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libfaster_rwkv_static.a; sourceTree = "<group>"; };
+		C0C1896D2BBA89510084551C /* ncnn.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = ncnn.framework; sourceTree = "<group>"; };
+		C0C1896E2BBA89510084551C /* openmp.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = openmp.framework; sourceTree = "<group>"; };
+		C0C1897A2BBA98A30084551C /* libfaster_rwkv_static.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libfaster_rwkv_static.a; path = "../../../../Downloads/flutter demo/flutter_testlib/ios/libfaster_rwkv_static.a"; sourceTree = "<group>"; };
 		C0C69F232BB432C40035E139 /* libfaster_rwkv_static.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libfaster_rwkv_static.a; path = Classes/libfaster_rwkv_static.a; sourceTree = "<group>"; };
 		D9A5ABD5CCE341D72B36CA39 /* Pods-Runner.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Runner.debug.xcconfig"; path = "Target Support Files/Pods-Runner/Pods-Runner.debug.xcconfig"; sourceTree = "<group>"; };
 		F9A3A5F1143C844F85020BAD /* Pods_RunnerTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_RunnerTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -87,10 +88,11 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				C088CF722BB5570B008285AB /* ncnn.framework in Frameworks */,
-				C0B12F692BB51D7400667A21 /* libfaster_rwkv_static.a in Frameworks */,
+				C0C189722BBA8A220084551C /* libfaster_rwkv_static.a in Frameworks */,
+				C0C189702BBA89510084551C /* ncnn.framework in Frameworks */,
+				C0C1897B2BBA98A30084551C /* libfaster_rwkv_static.a in Frameworks */,
 				0346A20172FD7FCD06B646AD /* Pods_Runner.framework in Frameworks */,
-				C088CF732BB5570B008285AB /* openmp.framework in Frameworks */,
+				C0C189712BBA89510084551C /* openmp.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -179,9 +181,9 @@
 		C0B12F672BB51D4D00667A21 /* Classes */ = {
 			isa = PBXGroup;
 			children = (
-				C088CF702BB5570B008285AB /* ncnn.framework */,
-				C088CF712BB5570B008285AB /* openmp.framework */,
-				C0B12F662BB51D4D00667A21 /* libfaster_rwkv_static.a */,
+				C0C1897A2BBA98A30084551C /* libfaster_rwkv_static.a */,
+				C0C1896D2BBA89510084551C /* ncnn.framework */,
+				C0C1896E2BBA89510084551C /* openmp.framework */,
 			);
 			path = Classes;
 			sourceTree = "<group>";
@@ -510,8 +512,8 @@
 				CURRENT_PROJECT_VERSION = 2;
 				DEVELOPMENT_TEAM = P864855UBS;
 				ENABLE_BITCODE = NO;
-				"EXCLUDED_ARCHS[sdk=iphoneos*]" = "armv7 arm64";
-				"EXCLUDED_ARCHS[sdk=iphonesimulator*]" = "i386 arm64";
+				"EXCLUDED_ARCHS[sdk=iphoneos*]" = armv7;
+				"EXCLUDED_ARCHS[sdk=iphonesimulator*]" = i386;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)/Classes",
@@ -526,6 +528,7 @@
 					"$(inherited)",
 					"$(PROJECT_DIR)/Classes",
 				);
+				ONLY_ACTIVE_ARCH = NO;
 				OTHER_LDFLAGS = "-all_load";
 				PRODUCT_BUNDLE_IDENTIFIER = com.example.rwkvmusic11;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -717,8 +720,8 @@
 					"$(inherited)",
 					"$(PROJECT_DIR)/Classes",
 				);
+				OTHER_CFLAGS = "";
 				OTHER_LDFLAGS = "-all_load";
-				"OTHER_LDFLAGS[arch=*]" = "-all_load";
 				PRODUCT_BUNDLE_IDENTIFIER = com.example.rwkvmusic11;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_OBJC_BRIDGING_HEADER = "Runner/Runner-Bridging-Header.h";
@@ -738,7 +741,6 @@
 				DEVELOPMENT_TEAM = P864855UBS;
 				ENABLE_BITCODE = NO;
 				"EXCLUDED_ARCHS[sdk=iphoneos*]" = armv7;
-				"EXCLUDED_ARCHS[sdk=iphonesimulator*]" = i386;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)/Classes",
@@ -753,6 +755,7 @@
 					"$(inherited)",
 					"$(PROJECT_DIR)/Classes",
 				);
+				ONLY_ACTIVE_ARCH = NO;
 				OTHER_LDFLAGS = "-all_load";
 				PRODUCT_BUNDLE_IDENTIFIER = com.example.rwkvmusic11;
 				PRODUCT_NAME = "$(TARGET_NAME)";

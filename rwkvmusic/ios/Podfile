@@ -40,5 +40,15 @@ end
 post_install do |installer|
   installer.pods_project.targets.each do |target|
     flutter_additional_ios_build_settings(target)
+    # 添加以下两行禁用优化
+    target.build_configurations.each do |config|
+     config.build_settings['OTHER_CFLAGS'] = '-O0'
+     target.build_configurations.each do |config|
+      config.build_settings['OTHER_LDFLAGS'] ||= ['$(inherited)', '-ObjC', '-all_load'].join(' ')
+     target.build_configurations.each do |config|
+      config.build_settings['OTHER_LDFLAGS'] ||= ['$(inherited)', '-force_load', '/Users/bo/RWKVMUSIC/rwkvmusic/ios/Classes/libfaster_rwkv_static.a'].join(' ')
+    end
+    end
+    end
   end
 end
