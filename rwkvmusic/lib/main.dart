@@ -18,6 +18,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_share/flutter_share.dart';
 import 'package:get/get.dart';
 import 'package:group_radio_button/group_radio_button.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:rwkvmusic/gen/assets.gen.dart';
 import 'package:rwkvmusic/mainwidget/ProgressbarTime.dart';
 import 'package:rwkvmusic/services/storage.dart';
@@ -141,7 +142,15 @@ void fetchABCDataByIsolate() async {
         'RWKV-5-ABC-82M-v1-20230901-ctx1024-ncnn.param');
   }
   if (Platform.isIOS) {
-    dllPath = await CommonUtils.loadDllFromAssets('libfaster_rwkv_static.a');
+    String frameworkpath = await CommonUtils.frameworkpath();
+    if (!(await File(frameworkpath).exists())) {
+      dllPath = await CommonUtils.loadDllFromAssets('libfaster_rwkvd.zip');
+      CommonUtils.unzipfile(dllPath);
+      debugPrint('frameworkpath is not exists');
+    } else {
+      debugPrint('frameworkpath is exists');
+    }
+    dllPath = frameworkpath;
     binPath = await CommonUtils.loadDllFromAssets(
         'RWKV-5-ABC-82M-v1-20230901-ctx1024-ncnn.bin');
     configPath = await CommonUtils.loadDllFromAssets(
@@ -218,8 +227,9 @@ void getABCDataByLocalModel(var array) async {
   sendPort.send(isolateReceivePort.sendPort);
   sendPort.send(eventBus);
   Pointer<Char> promptChar = prompt.toNativeUtf8().cast<Char>();
-  faster_rwkvd fastrwkv = faster_rwkvd(
-      Platform.isIOS ? DynamicLibrary.process() : DynamicLibrary.open(dllPath));
+  faster_rwkvd fastrwkv = faster_rwkvd(Platform.isIOS
+      ? DynamicLibrary.open(dllPath)
+      : DynamicLibrary.open(dllPath));
   Pointer<Char> strategy = 'ncnn fp32'.toNativeUtf8().cast<Char>();
   Pointer<Void> model =
       fastrwkv.rwkv_model_create(binPath.toNativeUtf8().cast<Char>(), strategy);
@@ -1028,7 +1038,7 @@ class _MyAppState extends State<MyApp> {
                   Expanded(
                       flex: 2,
                       child: TextButton(
-                        onPressed: () {
+                        onPressed: () async {
                           if (midiNotes.isEmpty) {
                             // String oriabcString = finalabcStringPreset
                             //     .replaceAll('setAbcString', 'ABCtoEvents');
@@ -1038,7 +1048,8 @@ class _MyAppState extends State<MyApp> {
                             isNeedConvertMidiNotes = true;
                             // controllerPiano.runJavaScript(oriabcString);
                             playPianoAnimation(finalabcStringPreset, true);
-                            Future.delayed(const Duration(seconds: 2), () {
+                            Future.delayed(const Duration(seconds: 2),
+                                () async {
                               debugPrint('Delayed action after 3 seconds');
                               isNeedConvertMidiNotes = false;
                               if (isWindowsOrMac) {
@@ -1056,7 +1067,11 @@ class _MyAppState extends State<MyApp> {
                                 // toastInfo(msg: '文件保存成功');
                               } else {
                                 //phone save file
-                                shareFile('filepath');
+                                Directory tempDir =
+                                    await getApplicationCacheDirectory();
+                                MidifileConvert.saveMidiFile(
+                                    midiNotes, tempDir.path);
+                                shareFile(tempDir.path);
                               }
                             });
                           } else {
@@ -1074,7 +1089,11 @@ class _MyAppState extends State<MyApp> {
                               // toastInfo(msg: '文件保存成功');
                             } else {
                               // phone save file
-                              shareFile('filepath');
+                              Directory tempDir =
+                                  await getApplicationCacheDirectory();
+                              MidifileConvert.saveMidiFile(
+                                  midiNotes, tempDir.path);
+                              shareFile(tempDir.path);
                             }
                           }
                         },
@@ -1732,8 +1751,8 @@ class _MyAppState extends State<MyApp> {
 
   Future<void> shareFile(String filepath) async {
     await FlutterShare.shareFile(
-      title: 'Example share',
-      text: 'Example share text',
+      title: '分享',
+      text: 'midi文件分享',
       filePath: filepath,
     );
   }

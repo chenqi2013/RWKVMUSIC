@@ -88,7 +88,7 @@ class CommonUtils {
   static Future<String> frameworkpath() async {
     Directory tempDir = await getApplicationCacheDirectory();
     String tempDirPath = tempDir.path;
-    return '$tempDirPath/libfaster-rwkv-static-fb9bafb-ios/faster-rwkv.framework/faster-rwkv';
+    return '$tempDirPath/libfaster_rwkvd.dylib';
   }
 
   static Future<void> unzipfile(String path) async {
