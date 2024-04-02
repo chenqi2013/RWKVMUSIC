@@ -144,7 +144,7 @@ void fetchABCDataByIsolate() async {
   if (Platform.isIOS) {
     String frameworkpath = await CommonUtils.frameworkpath();
     if (!(await File(frameworkpath).exists())) {
-      dllPath = await CommonUtils.loadDllFromAssets('libfaster_rwkvd.zip');
+      dllPath = await CommonUtils.loadDllFromAssets('libfaster_rwkvddebug.zip');
       CommonUtils.unzipfile(dllPath);
       debugPrint('frameworkpath is not exists');
     } else {
