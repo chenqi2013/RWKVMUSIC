@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		0346A20172FD7FCD06B646AD /* Pods_Runner.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FAC9B17EB1E57FF6960ABCD0 /* Pods_Runner.framework */; };
 		1498D2341E8E89220040F4C2 /* GeneratedPluginRegistrant.m in Sources */ = {isa = PBXBuildFile; fileRef = 1498D2331E8E89220040F4C2 /* GeneratedPluginRegistrant.m */; };
 		331C808B294A63AB00263BE5 /* RunnerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 331C807B294A618700263BE5 /* RunnerTests.swift */; };
 		3B3967161E833CAA004F5970 /* AppFrameworkInfo.plist in Resources */ = {isa = PBXBuildFile; fileRef = 3B3967151E833CAA004F5970 /* AppFrameworkInfo.plist */; };
@@ -15,11 +14,8 @@
 		97C146FC1CF9000F007C117D /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FA1CF9000F007C117D /* Main.storyboard */; };
 		97C146FE1CF9000F007C117D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FD1CF9000F007C117D /* Assets.xcassets */; };
 		97C147011CF9000F007C117D /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FF1CF9000F007C117D /* LaunchScreen.storyboard */; };
-		C0C189702BBA89510084551C /* ncnn.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C0C1896D2BBA89510084551C /* ncnn.framework */; };
-		C0C189712BBA89510084551C /* openmp.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C0C1896E2BBA89510084551C /* openmp.framework */; };
-		C0C189722BBA8A220084551C /* libfaster_rwkv_static.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C0C69F232BB432C40035E139 /* libfaster_rwkv_static.a */; };
-		C0C1897B2BBA98A30084551C /* libfaster_rwkv_static.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C0C1897A2BBA98A30084551C /* libfaster_rwkv_static.a */; };
-		EFD9304CD13B4290CD0BBD35 /* Pods_RunnerTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F9A3A5F1143C844F85020BAD /* Pods_RunnerTests.framework */; };
+		B55416E3C181E52188467B4A /* Pods_Runner.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 057D19C4975126998613D15B /* Pods_Runner.framework */; };
+		F7B6A8A12FD2DA6B2F6152D7 /* Pods_RunnerTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 47BFB220397F3609555367E5 /* Pods_RunnerTests.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -46,6 +42,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		057D19C4975126998613D15B /* Pods_Runner.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Runner.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		1498D2321E8E86230040F4C2 /* GeneratedPluginRegistrant.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = GeneratedPluginRegistrant.h; sourceTree = "<group>"; };
 		1498D2331E8E89220040F4C2 /* GeneratedPluginRegistrant.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GeneratedPluginRegistrant.m; sourceTree = "<group>"; };
 		260391B8AEED3277C2A49F38 /* Pods-RunnerTests.profile.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RunnerTests.profile.xcconfig"; path = "Target Support Files/Pods-RunnerTests/Pods-RunnerTests.profile.xcconfig"; sourceTree = "<group>"; };
@@ -53,6 +50,7 @@
 		331C8081294A63A400263BE5 /* RunnerTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RunnerTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		3B3967151E833CAA004F5970 /* AppFrameworkInfo.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = AppFrameworkInfo.plist; path = Flutter/AppFrameworkInfo.plist; sourceTree = "<group>"; };
 		4378F05870BEEF1FDC5CC867 /* Pods-Runner.profile.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Runner.profile.xcconfig"; path = "Target Support Files/Pods-Runner/Pods-Runner.profile.xcconfig"; sourceTree = "<group>"; };
+		47BFB220397F3609555367E5 /* Pods_RunnerTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_RunnerTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		5F012362DB7D3CEF770AA2A5 /* Pods-RunnerTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RunnerTests.release.xcconfig"; path = "Target Support Files/Pods-RunnerTests/Pods-RunnerTests.release.xcconfig"; sourceTree = "<group>"; };
 		6F0BDB077F72F0F312A4CF04 /* Pods-Runner.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Runner.release.xcconfig"; path = "Target Support Files/Pods-Runner/Pods-Runner.release.xcconfig"; sourceTree = "<group>"; };
 		74858FAD1ED2DC5600515810 /* Runner-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Runner-Bridging-Header.h"; sourceTree = "<group>"; };
@@ -66,13 +64,8 @@
 		97C147001CF9000F007C117D /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		97C147021CF9000F007C117D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		9B7F914845200D99297E90E0 /* Pods-RunnerTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RunnerTests.debug.xcconfig"; path = "Target Support Files/Pods-RunnerTests/Pods-RunnerTests.debug.xcconfig"; sourceTree = "<group>"; };
-		C0C1896D2BBA89510084551C /* ncnn.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = ncnn.framework; sourceTree = "<group>"; };
-		C0C1896E2BBA89510084551C /* openmp.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = openmp.framework; sourceTree = "<group>"; };
 		C0C1897A2BBA98A30084551C /* libfaster_rwkv_static.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libfaster_rwkv_static.a; path = "../../../../Downloads/flutter demo/flutter_testlib/ios/libfaster_rwkv_static.a"; sourceTree = "<group>"; };
-		C0C69F232BB432C40035E139 /* libfaster_rwkv_static.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libfaster_rwkv_static.a; path = Classes/libfaster_rwkv_static.a; sourceTree = "<group>"; };
 		D9A5ABD5CCE341D72B36CA39 /* Pods-Runner.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Runner.debug.xcconfig"; path = "Target Support Files/Pods-Runner/Pods-Runner.debug.xcconfig"; sourceTree = "<group>"; };
-		F9A3A5F1143C844F85020BAD /* Pods_RunnerTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_RunnerTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		FAC9B17EB1E57FF6960ABCD0 /* Pods_Runner.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Runner.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -80,7 +73,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				EFD9304CD13B4290CD0BBD35 /* Pods_RunnerTests.framework in Frameworks */,
+				F7B6A8A12FD2DA6B2F6152D7 /* Pods_RunnerTests.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -88,11 +81,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				C0C189722BBA8A220084551C /* libfaster_rwkv_static.a in Frameworks */,
-				C0C189702BBA89510084551C /* ncnn.framework in Frameworks */,
-				C0C1897B2BBA98A30084551C /* libfaster_rwkv_static.a in Frameworks */,
-				0346A20172FD7FCD06B646AD /* Pods_Runner.framework in Frameworks */,
-				C0C189712BBA89510084551C /* openmp.framework in Frameworks */,
+				B55416E3C181E52188467B4A /* Pods_Runner.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -120,16 +109,6 @@
 			path = RunnerTests;
 			sourceTree = "<group>";
 		};
-		63113B51BD11BC04BB5C81C6 /* Frameworks */ = {
-			isa = PBXGroup;
-			children = (
-				C0C69F232BB432C40035E139 /* libfaster_rwkv_static.a */,
-				FAC9B17EB1E57FF6960ABCD0 /* Pods_Runner.framework */,
-				F9A3A5F1143C844F85020BAD /* Pods_RunnerTests.framework */,
-			);
-			name = Frameworks;
-			sourceTree = "<group>";
-		};
 		9740EEB11CF90186004384FC /* Flutter */ = {
 			isa = PBXGroup;
 			children = (
@@ -144,13 +123,13 @@
 		97C146E51CF9000F007C117D = {
 			isa = PBXGroup;
 			children = (
+				C0F032522BBCF73F00B50E7D /* Frameworks */,
 				C0B12F672BB51D4D00667A21 /* Classes */,
 				9740EEB11CF90186004384FC /* Flutter */,
 				97C146F01CF9000F007C117D /* Runner */,
 				97C146EF1CF9000F007C117D /* Products */,
 				331C8082294A63A400263BE5 /* RunnerTests */,
 				1EE70118C0CC300F66471FE9 /* Pods */,
-				63113B51BD11BC04BB5C81C6 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -182,10 +161,17 @@
 			isa = PBXGroup;
 			children = (
 				C0C1897A2BBA98A30084551C /* libfaster_rwkv_static.a */,
-				C0C1896D2BBA89510084551C /* ncnn.framework */,
-				C0C1896E2BBA89510084551C /* openmp.framework */,
 			);
 			path = Classes;
+			sourceTree = "<group>";
+		};
+		C0F032522BBCF73F00B50E7D /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				057D19C4975126998613D15B /* Pods_Runner.framework */,
+				47BFB220397F3609555367E5 /* Pods_RunnerTests.framework */,
+			);
+			path = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -517,6 +503,7 @@
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)/Classes",
+					"$(PROJECT_DIR)/Frameworks",
 				);
 				GCC_OPTIMIZATION_LEVEL = 0;
 				INFOPLIST_FILE = Runner/Info.plist;
@@ -713,6 +700,7 @@
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)/Classes",
+					"$(PROJECT_DIR)/Frameworks",
 				);
 				INFOPLIST_FILE = Runner/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "RWKV作曲家";
@@ -751,6 +739,7 @@
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)/Classes",
+					"$(PROJECT_DIR)/Frameworks",
 				);
 				GCC_OPTIMIZATION_LEVEL = 0;
 				INFOPLIST_FILE = Runner/Info.plist;

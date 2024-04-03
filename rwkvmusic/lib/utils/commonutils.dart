@@ -1,11 +1,13 @@
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
-import 'package:archive/archive.dart';
+// import 'package:archive/archive.dart';
+import 'package:archive/archive_io.dart';
 import 'package:path/path.dart' as p;
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:flutter_archive/flutter_archive.dart';
 
 class CommonUtils {
   static String? extractTextValue(String jsonData) {
@@ -85,32 +87,57 @@ class CommonUtils {
     }
   }
 
-  static Future<String> frameworkpath() async {
+  static Future<String> dylibPath() async {
     Directory tempDir = await getApplicationCacheDirectory();
     String tempDirPath = tempDir.path;
     return '$tempDirPath/libfaster_rwkvd.dylib';
+  }
+
+  static Future<String> frameworkPath() async {
+    Directory tempDir = await getApplicationCacheDirectory();
+    String tempDirPath = tempDir.path;
+    return '$tempDirPath/faster/faster-rwkv.framework/faster-rwkv';
+  }
+
+  static Future<String> frameworkPath11() async {
+    Directory tempDir = await getApplicationCacheDirectory();
+    String tempDirPath = tempDir.path;
+    return '$tempDirPath/faster/faster-rwkv.framework';
   }
 
   static Future<void> unzipfile(String path) async {
     // Read the Zip file from disk.
     Directory tempDir = await getApplicationCacheDirectory();
     String tempDirPath = tempDir.path;
-    final bytes = File(path).readAsBytesSync();
+    // final bytes = File(path).readAsBytesSync();
 
-    // Decode the Zip file
-    final archive = ZipDecoder().decodeBytes(bytes);
-    // Extract the contents of the Zip archive to disk.
-    for (final file in archive) {
-      final filename = file.name;
-      if (file.isFile) {
-        final data = file.content as List<int>;
-        File('$tempDirPath/$filename')
-          ..createSync(recursive: true)
-          ..writeAsBytesSync(data);
-      } else {
-        Directory('$tempDirPath/$filename').create(recursive: true);
-      }
-    }
+    // // Decode the Zip file
+    // final archive = ZipDecoder().decodeBytes(bytes);
+    // // Extract the contents of the Zip archive to disk.
+    // for (final file in archive) {
+    //   final filename = file.name;
+    //   if (file.isFile) {
+    //     final data = file.content as List<int>;
+    //     File('$tempDirPath/$filename')
+    //       ..createSync(recursive: true)
+    //       ..writeAsBytesSync(data);
+    //   } else {
+    //     Directory('$tempDirPath/$filename').create(recursive: true);
+    //   }
+    // }
+
+    // final zipFile = File(path);
+    // final destinationDir = Directory('unfast');
+    // try {
+    //   debugPrint('path==$path');
+    //   ZipFile.extractToDirectory(
+    //       zipFile: zipFile, destinationDir: destinationDir);
+    //   debugPrint('unpress success');
+    // } catch (e) {
+    //   print(e);
+    // }
+
+    extractFileToDisk(path, tempDirPath);
   }
 
   static void establishSSEConnection() async {

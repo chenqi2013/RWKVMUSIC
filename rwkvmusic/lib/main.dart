@@ -82,6 +82,10 @@ void main(List<String> args) async {
   }
   await Get.putAsync<StorageService>(() => StorageService().init());
   Get.put<ConfigStore>(ConfigStore());
+
+  // testloadlib();
+  testloadframework();
+
   runApp(const ScreenUtilInit(
     designSize: Size(812, 375),
     child: GetMaterialApp(
@@ -89,6 +93,41 @@ void main(List<String> args) async {
       home: MyApp(),
     ),
   ));
+}
+
+void testloadframework() async {
+  String dllPath = '';
+  String frameworkpath = await CommonUtils.frameworkPath();
+  if (!(await File(frameworkpath).exists())) {
+    dllPath = await CommonUtils.loadDllFromAssets('faster.zip');
+    CommonUtils.unzipfile(dllPath);
+    debugPrint('frameworkpath is not exists');
+  } else {
+    debugPrint('frameworkpath is exists');
+  }
+  dllPath = frameworkpath;
+
+  testloadlib();
+}
+
+Future<void> testloadlib() async {
+  // 获取 .framework 文件的路径
+  String frameworkPath = await CommonUtils.frameworkPath();
+
+  // String frameworkPath = 'ios/Frameworks/faster-rwkv.framework/faster-rwkv';
+
+  // 使用 DynamicLibrary.open 加载 .framework 文件
+  DynamicLibrary framework = DynamicLibrary.open(frameworkPath);
+
+  // 使用 framework 调用其中的方法
+  // framework.lookupFunction 用于查找 .framework 文件中的函数
+  // 示例：假设您的 .framework 文件中有一个名为 'hello' 的函数
+  // final helloFunction =
+  //     framework.lookupFunction<Void Function(), void Function()>(
+  //         'rwkv_ABCTokenizer_create');
+
+  // // 调用函数
+  // helloFunction();
 }
 
 RxBool isGenerating = false.obs;
@@ -142,15 +181,16 @@ void fetchABCDataByIsolate() async {
         'RWKV-5-ABC-82M-v1-20230901-ctx1024-ncnn.param');
   }
   if (Platform.isIOS) {
-    String frameworkpath = await CommonUtils.frameworkpath();
-    if (!(await File(frameworkpath).exists())) {
-      dllPath = await CommonUtils.loadDllFromAssets('libfaster_rwkvddebug.zip');
-      CommonUtils.unzipfile(dllPath);
-      debugPrint('frameworkpath is not exists');
-    } else {
-      debugPrint('frameworkpath is exists');
-    }
-    dllPath = frameworkpath;
+    // String frameworkpath = await CommonUtils.dylibPath();
+    // if (!(await File(frameworkpath).exists())) {
+    //   dllPath = await CommonUtils.loadDllFromAssets('libfaster_rwkvddebug.zip');
+    //   CommonUtils.unzipfile(dllPath);
+    //   debugPrint('frameworkpath is not exists');
+    // } else {
+    //   debugPrint('frameworkpath is exists');
+    // }
+    // dllPath = frameworkpath;
+    dllPath = await CommonUtils.frameworkPath();
     binPath = await CommonUtils.loadDllFromAssets(
         'RWKV-5-ABC-82M-v1-20230901-ctx1024-ncnn.bin');
     configPath = await CommonUtils.loadDllFromAssets(
@@ -882,6 +922,8 @@ class _MyAppState extends State<MyApp> {
   }
 
   void segmengChange(int index) {
+    // testloadframework();
+    // return;
     if (index == 0) {
       //preset
       // controllerPiano.runJavaScript(
