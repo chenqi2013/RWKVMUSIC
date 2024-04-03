@@ -126,6 +126,7 @@ bool isNeedConvertMidiNotes = false;
 List virtualNotes = []; //虚拟键盘按键音符
 var selectstate = 0.obs;
 late bool isWindowsOrMac;
+late WebViewControllerPlus controllerPiano;
 
 void fetchABCDataByIsolate() async {
   String? dllPath;
@@ -169,9 +170,21 @@ void fetchABCDataByIsolate() async {
     dllPath = await CommonUtils.getdllPath();
     binPath = await CommonUtils.getBinPath();
   }
-  // 创建 ReceivePort，以接收来自子线程的消息
-  // 创建一个新的 Isolate
   mainReceivePort = ReceivePort();
+  // if (Platform.isIOS) {
+  //   var arr = [
+  //     mainReceivePort.sendPort,
+  //     selectstate.value == 0 ? presentPrompt : createPrompt,
+  //     midiProgramValue,
+  //     seed.value,
+  //     randomness.value,
+  //     dllPath,
+  //     binPath,
+  //   ];
+  //   getABCDataByLocalModel(arr);
+  // } else {
+// 创建 ReceivePort，以接收来自子线程的消息
+  // 创建一个新的 Isolate
   await Isolate.spawn(getABCDataByLocalModel, [
     mainReceivePort.sendPort,
     selectstate.value == 0 ? presentPrompt : createPrompt,
@@ -197,6 +210,7 @@ void fetchABCDataByIsolate() async {
       eventBus.fire(data);
     }
   });
+  // }
 }
 
 void getABCDataByLocalModel(var array) async {
@@ -212,6 +226,7 @@ void getABCDataByLocalModel(var array) async {
   debugPrint('promptprompt==$prompt');
   var isolateReceivePort = ReceivePort();
   var isStopGenerating = false;
+  bool isIOS = Platform.isIOS;
   // isolateReceivePort.listen((data) {
   //   debugPrint('isolateReceivePort==$data');
   //   isStopGenerating = true;
@@ -290,7 +305,11 @@ void getABCDataByLocalModel(var array) async {
       // if (i < 250) {
       //   continue;
       // }
+      // if (isIOS) {
+      //   controllerPiano.runJavaScript(abcString);
+      // } else {
       sendPort.send(abcString);
+      // }
     }
 
     if (eosId == token) {
@@ -299,7 +318,11 @@ void getABCDataByLocalModel(var array) async {
     }
   }
   isGenerating.value = false;
+  // if (isIOS) {
+  //   controllerPiano.runJavaScript(abcString.toString());
+  // } else {
   sendPort.send(abcString.toString());
+  // }
   sendPort.send('finish');
   debugPrint('getABCDataByLocalModel all data=${abcString.toString()}');
 }
@@ -311,7 +334,6 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  late WebViewControllerPlus controllerPiano;
   late WebViewControllerPlus controllerKeyboard;
   String filePathKeyboardAnimation =
       "http://leolin.wiki"; //assets/piano/index.html
