@@ -227,9 +227,8 @@ void getABCDataByLocalModel(var array) async {
   sendPort.send(isolateReceivePort.sendPort);
   sendPort.send(eventBus);
   Pointer<Char> promptChar = prompt.toNativeUtf8().cast<Char>();
-  faster_rwkvd fastrwkv = faster_rwkvd(Platform.isIOS
-      ? DynamicLibrary.open(dllPath)
-      : DynamicLibrary.open(dllPath));
+  faster_rwkvd fastrwkv = faster_rwkvd(
+      Platform.isIOS ? DynamicLibrary.process() : DynamicLibrary.open(dllPath));
   Pointer<Char> strategy = 'ncnn fp32'.toNativeUtf8().cast<Char>();
   Pointer<Void> model =
       fastrwkv.rwkv_model_create(binPath.toNativeUtf8().cast<Char>(), strategy);
