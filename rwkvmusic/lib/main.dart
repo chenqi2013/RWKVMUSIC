@@ -15,7 +15,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 // import 'package:flutter_platform_alert/flutter_platform_alert.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flutter_share/flutter_share.dart';
+// import 'package:flutter_share/flutter_share.dart';
 import 'package:get/get.dart';
 import 'package:group_radio_button/group_radio_button.dart';
 import 'package:path_provider/path_provider.dart';
@@ -35,6 +35,7 @@ import 'package:rwkvmusic/utils/midifileconvert.dart';
 import 'package:rwkvmusic/values/constantdata.dart';
 import 'package:rwkvmusic/values/storage.dart';
 import 'package:rwkvmusic/widgets/toast.dart';
+// import 'package:share_plus/share_plus.dart';
 import 'package:universal_ble/universal_ble.dart';
 import 'package:webview_win_floating/webview_plugin.dart';
 
@@ -52,6 +53,9 @@ import 'package:path_provider/path_provider.dart' as path_provider;
 import 'package:path/path.dart' as p;
 import 'dart:io';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:share_extend/share_extend.dart';
+
+// import 'package:share_plus/share_plus.dart';
 
 void main(List<String> args) async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -1090,9 +1094,9 @@ class _MyAppState extends State<MyApp> {
                                 //phone save file
                                 Directory tempDir =
                                     await getApplicationCacheDirectory();
-                                MidifileConvert.saveMidiFile(
+                                String path = MidifileConvert.saveMidiFile(
                                     midiNotes, tempDir.path);
-                                shareFile(tempDir.path);
+                                shareFile(path);
                               }
                             });
                           } else {
@@ -1112,9 +1116,9 @@ class _MyAppState extends State<MyApp> {
                               // phone save file
                               Directory tempDir =
                                   await getApplicationCacheDirectory();
-                              MidifileConvert.saveMidiFile(
+                              String path = MidifileConvert.saveMidiFile(
                                   midiNotes, tempDir.path);
-                              shareFile(tempDir.path);
+                              shareFile(path);
                             }
                           }
                         },
@@ -1771,10 +1775,18 @@ class _MyAppState extends State<MyApp> {
   }
 
   Future<void> shareFile(String filepath) async {
-    await FlutterShare.shareFile(
-      title: '分享',
-      text: 'midi文件分享',
-      filePath: filepath,
-    );
+    print('shareFile path=$filepath');
+    ShareExtend.share(filepath, "file");
+
+    // ShareExtend.share("share text", "text",
+    //     sharePanelTitle: "share text title", subject: "share text subject");
+
+    // Share.share('check out my website https://example.com');
+    // return;
+    // await FlutterShare.shareFile(
+    //   title: '分享',
+    //   text: 'midi文件分享',
+    //   filePath: filepath,
+    // );
   }
 }

@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:midi_util/midi_util.dart';
 
 class MidifileConvert {
-  static void saveMidiFile(List notesList, String path) {
+  static String saveMidiFile(List notesList, String path) {
     // [
     //   [0, "on", 51],
     //   [333, "on", 49]
@@ -48,10 +48,11 @@ class MidifileConvert {
           duration: duration,
           volume: volume);
     });
-
-    var outputFile = File('$path/${DateTime.now().millisecondsSinceEpoch}.mid');
+    String filePath = '$path/${DateTime.now().millisecondsSinceEpoch}.mid';
+    var outputFile = File(filePath);
     dynamic dy = myMIDI.writeFile(outputFile);
     print('writeFile result==$dy');
+    return filePath;
   }
 
   static void saveMidiFile2(List notesList, String path) {
