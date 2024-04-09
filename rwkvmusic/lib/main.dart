@@ -519,7 +519,9 @@ class _MyAppState extends State<MyApp> {
     eventBus.on().listen((event) {
       // debugPrint('event bus==$event');
       if (event == 'finish') {
-        // playOrPausePiano();
+        Future.delayed(const Duration(seconds: 1), () {
+          playOrPausePiano();
+        });
       } else {
         controllerPiano.runJavaScript(event);
       }
@@ -665,7 +667,7 @@ class _MyAppState extends State<MyApp> {
                 ),
               ),
               Flexible(
-                flex: isWindowsOrMac ? 2 : 4,
+                flex: isWindowsOrMac ? 2 : 5,
                 child: Visibility(
                     key: const ValueKey('ValueKey11'),
                     visible: isVisibleWebview.value,
@@ -677,7 +679,7 @@ class _MyAppState extends State<MyApp> {
                     )),
               ),
               Flexible(
-                  flex: isWindowsOrMac ? 3 : 6,
+                  flex: isWindowsOrMac ? 3 : 5,
                   child: Visibility(
                     visible: isVisibleWebview.value,
                     // maintainSize: true, // 保持占位空间
@@ -1602,6 +1604,9 @@ class _MyAppState extends State<MyApp> {
                           .runJavaScript("setAbcString(\"$abcstr\", false)");
                       controllerKeyboard.runJavaScript('resetPlay()');
                       debugPrint(abcstr);
+                      Future.delayed(const Duration(seconds: 1), () {
+                        playOrPausePiano();
+                      });
                     },
                   );
                 });
