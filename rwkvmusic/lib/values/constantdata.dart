@@ -1,3 +1,7 @@
+List<String> keyboardOptions = [
+  'Simulate keyboard',
+  'Midi keyboard',
+];
 List<String> prompts = [
   "Lost time is never found again",
   "Soft Spring Rain",

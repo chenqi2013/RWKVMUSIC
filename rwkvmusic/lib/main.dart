@@ -131,6 +131,8 @@ List virtualNotes = []; //虚拟键盘按键音符
 var selectstate = 0.obs;
 late bool isWindowsOrMac;
 late WebViewControllerPlus controllerPiano;
+var isRemember = false.obs;
+var isAutoSwitch = false.obs;
 
 void fetchABCDataByIsolate() async {
   String? dllPath;
@@ -695,123 +697,140 @@ class _MyAppState extends State<MyApp> {
               Expanded(
                   flex: isWindowsOrMac ? 1 : 3,
                   child: Visibility(
-                    visible: isVisibleWebview.value,
-                    key: const ValueKey('ValueKey33'),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 25, vertical: 5),
-                      color: const Color(0xff3a3a3a),
-                      child: Row(
-                        children: [
-                          creatBottomBtn('Prompts', () {
-                            debugPrint("Promptss");
-                            showPromptDialog(context, 'Prompts', prompts,
-                                STORAGE_PROMPTS_SELECT);
-                          }),
-                          const SizedBox(
-                            width: 8,
-                          ),
-                          creatBottomBtn('Sounds Effect', () {
-                            debugPrint("Sounds Effect");
-                            showPromptDialog(
-                                context,
-                                'Sounds Effect',
-                                soundEffect.keys.toList(),
-                                STORAGE_SOUNDSEFFECT_SELECT);
-                          }),
-                          ProgressbarTime(playProgress, pianoAllTime),
-                          Obx(() => isGenerating.value
-                              ? const CircularProgressIndicator(
-                                  valueColor: AlwaysStoppedAnimation<Color>(
-                                      Colors.white),
-                                )
-                              : Container(
-                                  child: null,
-                                )),
-                          const Spacer(),
-                          Container(
-                            child: Row(
-                              children: [
-                                Obx(() => createButtonImageWithText(
-                                        !isGenerating.value
-                                            ? 'Generate'
-                                            : 'Stop',
-                                        !isGenerating.value
-                                            ? Icons.edit
-                                            : Icons.refresh, () {
-                                      debugPrint('Generate');
-                                      isGenerating.value = !isGenerating.value;
-                                      if (isGenerating.value) {
-                                        playProgress.value = 0.0;
-                                        pianoAllTime.value = 0.0;
-                                        // controllerPiano.runJavaScript(
-                                        //     "setAbcString(\"%%MIDI program 40\\nL:1/4\\nM:4/4\\nK:D\\n\\\"D\\\" A F F\", false)");
-                                        // controllerPiano.runJavaScript(
-                                        //     'resetTimingCallbacks()');
-                                        // if (isWindowsOrMac) {
-                                        fetchABCDataByIsolate();
-                                        // } else {
-                                        //   getABCDataByAPI();
-                                        // }
-                                        controllerKeyboard
-                                            .runJavaScript('resetPlay()');
-                                        isFinishABCEvent = false;
-                                      } else {
-                                        // isolateSendPort.send('stop Generating');
-                                        isolateEventBus.fire("stop Generating");
+                      visible: isVisibleWebview.value,
+                      key: const ValueKey('ValueKey33'),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 25, vertical: 5),
+                        color: const Color(0xff3a3a3a),
+                        child: Obx(
+                          () => Row(
+                            children: [
+                              if (selectstate.value == 0)
+                                Row(
+                                  children: [
+                                    creatBottomBtn('Prompts', () {
+                                      debugPrint("Promptss");
+                                      showPromptDialog(context, 'Prompts',
+                                          prompts, STORAGE_PROMPTS_SELECT);
+                                    }),
+                                    const SizedBox(
+                                      width: 8,
+                                    ),
+                                    creatBottomBtn('Sounds Effect', () {
+                                      debugPrint("Sounds Effect");
+                                      showPromptDialog(
+                                          context,
+                                          'Sounds Effect',
+                                          soundEffect.keys.toList(),
+                                          STORAGE_SOUNDSEFFECT_SELECT);
+                                    })
+                                  ],
+                                ),
+                              if (selectstate.value == 1)
+                                creatBottomBtn('Simulate keyboard', () {
+                                  debugPrint("Simulate keyboard");
+                                  showPromptDialog(context, 'Keyboard Options',
+                                      keyboardOptions, STORAGE_KEYBOARD_SELECT);
+                                }),
+                              const SizedBox(
+                                width: 15,
+                              ),
+                              Obx(() => isGenerating.value
+                                  ? const CircularProgressIndicator(
+                                      valueColor: AlwaysStoppedAnimation<Color>(
+                                          Colors.white),
+                                    )
+                                  : Container(
+                                      child: null,
+                                    )),
+                              ProgressbarTime(playProgress, pianoAllTime),
+                              const Spacer(),
+                              Container(
+                                child: Row(
+                                  children: [
+                                    Obx(() => createButtonImageWithText(
+                                            !isGenerating.value
+                                                ? 'Generate'
+                                                : 'Stop',
+                                            !isGenerating.value
+                                                ? Icons.edit
+                                                : Icons.refresh, () {
+                                          debugPrint('Generate');
+                                          isGenerating.value =
+                                              !isGenerating.value;
+                                          if (isGenerating.value) {
+                                            playProgress.value = 0.0;
+                                            pianoAllTime.value = 0.0;
+                                            // controllerPiano.runJavaScript(
+                                            //     "setAbcString(\"%%MIDI program 40\\nL:1/4\\nM:4/4\\nK:D\\n\\\"D\\\" A F F\", false)");
+                                            // controllerPiano.runJavaScript(
+                                            //     'resetTimingCallbacks()');
+                                            // if (isWindowsOrMac) {
+                                            fetchABCDataByIsolate();
+                                            // } else {
+                                            //   getABCDataByAPI();
+                                            // }
+                                            controllerKeyboard
+                                                .runJavaScript('resetPlay()');
+                                            isFinishABCEvent = false;
+                                          } else {
+                                            // isolateSendPort.send('stop Generating');
+                                            isolateEventBus
+                                                .fire("stop Generating");
+                                          }
+                                        })),
+                                    SizedBox(
+                                      width: isWindowsOrMac ? 10 : 4,
+                                    ),
+                                    Obx(() => Visibility(
+                                        visible: selectstate.value == 1,
+                                        child: createButtonImageWithText(
+                                            'Undo', Icons.undo, () {
+                                          debugPrint('Undo');
+                                          resetLastNote();
+                                        }))),
+                                    SizedBox(
+                                      width: isWindowsOrMac ? 10 : 4,
+                                    ),
+                                    Obx(() {
+                                      return createButtonImageWithText(
+                                          !isPlay.value ? 'Play' : 'Pause',
+                                          !isPlay.value
+                                              ? Icons.play_arrow
+                                              : Icons.pause, () {
+                                        playOrPausePiano();
+                                      });
+                                    }),
+                                    SizedBox(
+                                      width: isWindowsOrMac ? 10 : 4,
+                                    ),
+                                    createButtonImageWithText(
+                                        'Settings', Icons.settings, () {
+                                      debugPrint('Settings');
+                                      if (isWindowsOrMac) {
+                                        isVisibleWebview.value =
+                                            !isVisibleWebview.value;
+                                        setState(() {});
                                       }
-                                    })),
-                                SizedBox(
-                                  width: isWindowsOrMac ? 10 : 4,
+                                      // Get.to(FlutterBlueApp());
+                                      // Get.to(const MIDIDeviceListPage());
+                                      if (selectstate.value == 0) {
+                                        showSettingDialog(context);
+                                      } else {
+                                        showCreateModelSettingDialog(context);
+                                      }
+                                    }),
+                                    SizedBox(
+                                      width: isWindowsOrMac ? 10 : 4,
+                                    ),
+                                  ],
                                 ),
-                                Obx(() => Visibility(
-                                    visible: selectstate.value == 1,
-                                    child: createButtonImageWithText(
-                                        'Undo', Icons.undo, () {
-                                      debugPrint('Undo');
-                                      resetLastNote();
-                                    }))),
-                                SizedBox(
-                                  width: isWindowsOrMac ? 10 : 4,
-                                ),
-                                Obx(() {
-                                  return createButtonImageWithText(
-                                      !isPlay.value ? 'Play' : 'Pause',
-                                      !isPlay.value
-                                          ? Icons.play_arrow
-                                          : Icons.pause, () {
-                                    playOrPausePiano();
-                                  });
-                                }),
-                                SizedBox(
-                                  width: isWindowsOrMac ? 10 : 4,
-                                ),
-                                createButtonImageWithText(
-                                    'Settings', Icons.settings, () {
-                                  debugPrint('Settings');
-                                  if (isWindowsOrMac) {
-                                    isVisibleWebview.value =
-                                        !isVisibleWebview.value;
-                                    setState(() {});
-                                  }
-                                  // Get.to(FlutterBlueApp());
-                                  // Get.to(const MIDIDeviceListPage());
-                                  if (selectstate.value == 0) {
-                                    showSettingDialog(context);
-                                  } else {
-                                    showCreateModelSettingDialog(context);
-                                  }
-                                }),
-                                SizedBox(
-                                  width: isWindowsOrMac ? 10 : 4,
-                                ),
-                              ],
-                            ),
+                              ),
+                            ],
                           ),
-                        ],
-                      ),
-                    ),
-                  ))
+                        ),
+                      )))
             ],
           ),
         ));
@@ -1513,6 +1532,37 @@ class _MyAppState extends State<MyApp> {
     });
   }
 
+  showConnectDialog() {
+    String title = 'Connect Midi Keyboard';
+    String msg =
+        'Please connect your midi keyboard first. Wireless connection is recommended.';
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(title),
+          content: Text(msg),
+          actions: [
+            TextButton(
+              onPressed: () {
+                // 处理取消按钮点击事件
+                Navigator.of(context).pop();
+              },
+              child: const Text("OK"),
+            ),
+            TextButton(
+              onPressed: () {
+                // 处理确定按钮点击事件
+                Navigator.of(context).pop();
+              },
+              child: const Text("Bluetooth Connect"),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   void showPromptDialog(
       BuildContext context, String titleStr, List list, String type) {
     if (isWindowsOrMac) {
@@ -1559,59 +1609,111 @@ class _MyAppState extends State<MyApp> {
               )
             ],
           ),
-          child: SizedBox(
-            height: isWindowsOrMac ? 200.h : 220.h,
-            // width: 40,
-            child: ListView.builder(
-              itemCount: list.length,
-              itemBuilder: (BuildContext context, int index) {
-                // ListTile(title: Text(list[index]));
-                if (type == STORAGE_PROMPTS_SELECT) {
-                  radioSelectedValue.value = ConfigStore.to.getPromptsSelect();
-                } else if (type == STORAGE_SOUNDSEFFECT_SELECT) {
-                  radioSelectedValue.value =
-                      ConfigStore.to.getSoundsEffectSelect();
-                  if (radioSelectedValue.value == -1) {
-                    currentSoundEffect = list[0];
-                  } else {
-                    currentSoundEffect = list[radioSelectedValue.value];
-                  }
-                }
-                return Obx(() {
-                  return RadioListTile(
-                    title: Text(list[index]),
-                    value: index,
-                    groupValue: radioSelectedValue.value,
-                    onChanged: (value) {
-                      radioSelectedValue.value = value!;
-                      // isHideWebview.value = !isHideWebview.value;
-                      // setState(() {});
-                      if (type == STORAGE_PROMPTS_SELECT) {
-                        ConfigStore.to.savePromptsSelect(value);
-                        presentPrompt =
-                            CommonUtils.escapeString(promptsAbc[value]);
-                      } else if (type == STORAGE_SOUNDSEFFECT_SELECT) {
-                        ConfigStore.to.saveSoundsEffectSelect(value);
-                        midiProgramValue = soundEffectInt[list[index]]!;
-                        ConfigStore.to.saveMidiProgramSelect(midiProgramValue);
+          child: Column(
+            children: [
+              SizedBox(
+                height: isWindowsOrMac ? 200.h : 150.h,
+                // width: 40,
+                child: ListView.builder(
+                  itemCount: list.length,
+                  itemBuilder: (BuildContext context, int index) {
+                    // ListTile(title: Text(list[index]));
+                    if (type == STORAGE_PROMPTS_SELECT) {
+                      radioSelectedValue.value =
+                          ConfigStore.to.getPromptsSelect();
+                    } else if (type == STORAGE_SOUNDSEFFECT_SELECT) {
+                      radioSelectedValue.value =
+                          ConfigStore.to.getSoundsEffectSelect();
+                      if (radioSelectedValue.value == -1) {
+                        currentSoundEffect = list[0];
+                      } else {
                         currentSoundEffect = list[radioSelectedValue.value];
                       }
-                      String abcstr = ABCHead.getABCWithInstrument(
-                          presentPrompt, midiProgramValue);
-                      abcstr =
-                          ABCHead.appendTempoParam(abcstr, tempo.value.toInt());
-                      controllerPiano
-                          .runJavaScript("setAbcString(\"$abcstr\", false)");
-                      controllerKeyboard.runJavaScript('resetPlay()');
-                      debugPrint(abcstr);
-                      Future.delayed(const Duration(seconds: 1), () {
-                        playOrPausePiano();
-                      });
-                    },
-                  );
-                });
-              },
-            ),
+                    }
+                    return Obx(() {
+                      return RadioListTile(
+                        title: Text(list[index]),
+                        value: index,
+                        groupValue: radioSelectedValue.value,
+                        onChanged: (value) {
+                          radioSelectedValue.value = value!;
+                          // isHideWebview.value = !isHideWebview.value;
+                          // setState(() {});
+                          if (type == STORAGE_PROMPTS_SELECT) {
+                            ConfigStore.to.savePromptsSelect(value);
+                            presentPrompt =
+                                CommonUtils.escapeString(promptsAbc[value]);
+                          } else if (type == STORAGE_SOUNDSEFFECT_SELECT) {
+                            ConfigStore.to.saveSoundsEffectSelect(value);
+                            midiProgramValue = soundEffectInt[list[index]]!;
+                            ConfigStore.to
+                                .saveMidiProgramSelect(midiProgramValue);
+                            currentSoundEffect = list[radioSelectedValue.value];
+                          } else if (type == STORAGE_KEYBOARD_SELECT) {
+                            if (index == 0) {
+                            } else if (index == 1) {
+                              showConnectDialog();
+
+                              toastInfo(msg: 'Midi device connected');
+                            }
+                          }
+
+                          if (selectstate.value == 0) {
+                            String abcstr = ABCHead.getABCWithInstrument(
+                                presentPrompt, midiProgramValue);
+                            abcstr = ABCHead.appendTempoParam(
+                                abcstr, tempo.value.toInt());
+                            controllerPiano.runJavaScript(
+                                "setAbcString(\"$abcstr\", false)");
+                            controllerKeyboard.runJavaScript('resetPlay()');
+                            debugPrint(abcstr);
+                            Future.delayed(const Duration(seconds: 1), () {
+                              playOrPausePiano();
+                            });
+                          }
+                        },
+                      );
+                    });
+                  },
+                ),
+              ),
+              if (selectstate.value == 0)
+                const Divider(
+                  height: 1,
+                ),
+              if (selectstate.value == 0)
+                Obx(
+                  () => ListTile(
+                    leading: Checkbox(
+                      value: isRemember.value,
+                      onChanged: (bool? value) {
+                        isRemember.value = value!;
+                      },
+                    ),
+                    title: Transform.translate(
+                      offset: const Offset(-20, 0), // 向左移动文本以减少间距
+                      child: const Text('Remember Last Option'),
+                    ),
+                    onTap: () {},
+                  ),
+                ),
+              if (type == STORAGE_PROMPTS_SELECT)
+                Obx(
+                  () => ListTile(
+                    leading: Checkbox(
+                      value: isAutoSwitch.value,
+                      onChanged: (bool? value) {
+                        isAutoSwitch.value = value!;
+                      },
+                    ),
+                    title: Transform.translate(
+                      offset: const Offset(-20, 0), // 向左移动文本以减少间距
+                      child: const Text('Auto Switch Next Prompt'),
+                    ),
+                    onTap: () {},
+                  ),
+                ),
+            ],
           ),
         ),
       ),
@@ -1646,7 +1748,11 @@ class _MyAppState extends State<MyApp> {
       tips = "请先打开系统蓝牙";
     }
     if (tips != null) {
-      Get.snackbar('提示', tips, colorText: Colors.black);
+      if (isWindowsOrMac) {
+        Get.snackbar('提示', tips, colorText: Colors.red);
+      } else {
+        toastInfo(msg: tips);
+      }
       return;
     }
 
@@ -1694,24 +1800,34 @@ class _MyAppState extends State<MyApp> {
   }
 
   void startScan() async {
+    // bool isGranted = await Permission.bluetooth.isGranted;
+    // debugPrint('isGranted=$isGranted');
     if (!isWindowsOrMac) {
-      // if (Platform.isAndroid) {
-      var status = await Permission.location.request();
-      if (status != PermissionStatus.granted) {
-        Get.snackbar('提示', '需要开启定位权限', colorText: Colors.red);
-        return;
-      }
-      // }
-      status = await Permission.bluetoothScan.request();
-      if (status != PermissionStatus.granted) {
-        Get.snackbar('提示', '需要开启蓝牙扫描权限', colorText: Colors.red);
-        return;
-      }
+      PermissionStatus status = PermissionStatus.denied;
+      if (Platform.isAndroid) {
+        status = await Permission.location.request();
+        debugPrint('11Permission==$status');
+        if (status != PermissionStatus.granted) {
+          toastInfo(msg: '需要开启定位权限');
+          // Get.snackbar('提示', '需要开启定位权限', colorText: Colors.red);
+          return;
+        }
 
-      status = await Permission.bluetoothConnect.request();
-      if (status != PermissionStatus.granted) {
-        Get.snackbar('提示', '需要开启蓝牙连接权限', colorText: Colors.red);
-        return;
+        status = await Permission.bluetoothScan.request();
+        debugPrint('22Permission==$status');
+        if (status != PermissionStatus.granted) {
+          toastInfo(msg: '需要开启蓝牙扫描权限');
+          // Get.snackbar('提示', '需要开启蓝牙扫描权限', colorText: Colors.red);
+          return;
+        }
+
+        status = await Permission.bluetoothConnect.request();
+        debugPrint('33Permission==$status');
+        if (status != PermissionStatus.granted) {
+          toastInfo(msg: '需要开启蓝牙连接权限');
+          // Get.snackbar('提示', '需要开启蓝牙连接权限', colorText: Colors.red);
+          return;
+        }
       }
     }
     UniversalBle.onScanResult = (BleScanResult scanResult) {
@@ -1740,8 +1856,11 @@ class _MyAppState extends State<MyApp> {
         (String deviceId, BleConnectionState state) async {
       debugPrint('OnConnectionChanged $deviceId, $state');
       if (state == BleConnectionState.connected) {
-        toastInfo(msg: 'device connected');
-        Get.snackbar(device.name!, '连接成功', colorText: Colors.black);
+        if (isWindowsOrMac) {
+          Get.snackbar(device.name!, '连接成功', colorText: Colors.black);
+        } else {
+          toastInfo(msg: 'device connected');
+        }
         // Discover services of a specific device
         List<BleService> bleServices =
             await UniversalBle.discoverServices(deviceId);
@@ -1773,8 +1892,11 @@ class _MyAppState extends State<MyApp> {
           closeDialog();
         });
       } else if (state == BleConnectionState.disconnected) {
-        toastInfo(msg: 'device disconnected');
-        Get.snackbar(device.name!, '连接失败', colorText: Colors.red);
+        if (isWindowsOrMac) {
+          Get.snackbar(device.name!, '连接失败', colorText: Colors.red);
+        } else {
+          toastInfo(msg: 'device disconnected');
+        }
       }
     };
   }
