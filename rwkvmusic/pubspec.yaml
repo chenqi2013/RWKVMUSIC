@@ -113,19 +113,19 @@ dev_dependencies:
 # following page: https://dart.dev/tools/pub/pubspec
 # The following section is specific to Flutter packages.
 flutter:
-  # plugin:
-  #     platforms:
-  # #       android:
-  # #         package: com.invisiblewrench.fluttermidicommand
-  # #         pluginClass: FlutterMidiCommandPlugin
-  # #       ios:
-  # #         pluginClass: FlutterMidiCommandPlugin
-  # #       macos:
-  # #         pluginClass: SwiftFlutterMidiCommandPlugin
-  # #       # linux:
-  # #       #   default_package: flutter_midi_command_linux
-  #       windows:
-  #         default_package: flutter_midi_command_windows
+  plugin:
+      platforms:
+  #       android:
+  #         package: com.invisiblewrench.fluttermidicommand
+  #         pluginClass: FlutterMidiCommandPlugin
+  #       ios:
+  #         pluginClass: FlutterMidiCommandPlugin
+  #       macos:
+  #         pluginClass: SwiftFlutterMidiCommandPlugin
+  #       # linux:
+  #       #   default_package: flutter_midi_command_linux
+        windows:
+          default_package: flutter_midi_command_windows
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
   # the material Icons class.
