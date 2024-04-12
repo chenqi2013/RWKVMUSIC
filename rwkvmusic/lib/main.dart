@@ -483,10 +483,35 @@ class _MyAppState extends State<MyApp> {
             'flutteronPlayFinish onMessageReceived=${jsMessage.message}');
         isPlay.value = false;
         isNeedRestart = true;
+        if (isAutoSwitch.value) {
+          //自动切换下一个prompt
+          promptSelectedIndex.value += 1;
+          // isHideWebview.value = !isHideWebview.value;
+          if (isRememberPrompt.value) {
+            ConfigStore.to.savePromptsSelect(promptSelectedIndex.value);
+          }
+          presentPrompt =
+              CommonUtils.escapeString(promptsAbc[promptSelectedIndex.value]);
+          if (selectstate.value == 0) {
+            String abcstr =
+                ABCHead.getABCWithInstrument(presentPrompt, midiProgramValue);
+            abcstr = ABCHead.appendTempoParam(abcstr, tempo.value.toInt());
+            controllerPiano.runJavaScript("setAbcString(\"$abcstr\", false)");
+            controllerKeyboard.runJavaScript('resetPlay()');
+            debugPrint(abcstr);
+            // Future.delayed(const Duration(microseconds: 300), () {
+            //   playOrPausePiano();
+            // });
+          }
+        }
       })
       ..addJavaScriptChannel("flutteronClickNote",
           onMessageReceived: (JavaScriptMessage jsMessage) {
         debugPrint('flutteronClickNote onMessageReceived=${jsMessage.message}');
+        if (selectstate.value == 1 && isPlay.value == false) {
+          showPromptDialog(context, 'Change B note length',
+              ['1/4', '1/8', '1/16'], 'STORAGE_note_SELECT');
+        }
       });
 
     controllerKeyboard = WebViewControllerPlus()
@@ -522,6 +547,7 @@ class _MyAppState extends State<MyApp> {
           debugPrint('mp3Folder==$mp3Folder');
           AudioPlayerManage().playAudio('player/soundfont/$mp3Folder/$name');
         } else {
+          debugPrint('mp3Folder==null');
           AudioPlayerManage()
               .playAudio('player/soundfont/acoustic_grand_piano-mp3/$name');
         }
