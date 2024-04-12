@@ -2,7 +2,7 @@ import 'package:audioplayers/audioplayers.dart';
 import 'package:get/get.dart';
 
 class AudioPlayerManage {
-  static AudioPlayerManage _instance = AudioPlayerManage._internal();
+  static final AudioPlayerManage _instance = AudioPlayerManage._internal();
   factory AudioPlayerManage() => _instance;
   late AudioPlayer audioPlayer;
   var isMP3Playing = false.obs;
@@ -18,8 +18,14 @@ class AudioPlayerManage {
   }
 
   Future<void> playAudio(String path) async {
-    await audioPlayer
+    audioPlayer.resume();
+    audioPlayer
         .play(AssetSource(path))
         .then((value) => isMP3Playing.value = true);
+  }
+
+  Future<void> stopAudio() async {
+    print('pause audio');
+    audioPlayer.pause();
   }
 }

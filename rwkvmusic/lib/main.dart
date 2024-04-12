@@ -536,6 +536,9 @@ class _MyAppState extends State<MyApp> {
       ..addJavaScriptChannel("flutteronNoteOff",
           onMessageReceived: (JavaScriptMessage jsMessage) {
         debugPrint('flutteronNoteOff onMessageReceived=${jsMessage.message}');
+        Future.delayed(const Duration(microseconds: 500), () {
+          AudioPlayerManage().stopAudio();
+        });
       })
       ..addJavaScriptChannel("flutteronNoteOn",
           onMessageReceived: (JavaScriptMessage jsMessage) {
@@ -546,6 +549,7 @@ class _MyAppState extends State<MyApp> {
           String? mp3Folder = soundEffect[currentSoundEffect];
           debugPrint('mp3Folder==$mp3Folder');
           AudioPlayerManage().playAudio('player/soundfont/$mp3Folder/$name');
+          debugPrint('player/soundfont/$mp3Folder/$name');
         } else {
           debugPrint('mp3Folder==null');
           AudioPlayerManage()
@@ -1623,6 +1627,12 @@ class _MyAppState extends State<MyApp> {
     //     ),
     //   );
     // } else {
+    if (!isRememberEffect.value) {
+      effectSelectedIndex.value = 0;
+    }
+    if (!isRememberPrompt.value) {
+      promptSelectedIndex.value = 0;
+    }
     showDialog(
       barrierDismissible: false,
       context: context,
