@@ -37,12 +37,36 @@ class ConfigStore extends GetxController {
     return StorageService.to.setInt(STORAGE_PROMPTS_SELECT, selelct);
   }
 
+  Future<bool> saveRemberPromptSelect(bool isremember) {
+    return StorageService.to.setBool(STORAGE_RememberPrompt_SELECT, isremember);
+  }
+
+  Future<bool> saveRemberEffectSelect(bool isremember) {
+    return StorageService.to.setBool(STORAGE_RememberEffect_SELECT, isremember);
+  }
+
+  Future<bool> saveAutoNext(bool isremember) {
+    return StorageService.to.setBool(STORAGE_AutoNext_SELECT, isremember);
+  }
+
   Future<bool> saveSoundsEffectSelect(int selelct) {
     return StorageService.to.setInt(STORAGE_SOUNDSEFFECT_SELECT, selelct);
   }
 
   int getPromptsSelect() {
     return StorageService.to.getInt(STORAGE_PROMPTS_SELECT);
+  }
+
+  bool getRemberPromptSelect() {
+    return StorageService.to.getBool(STORAGE_RememberPrompt_SELECT);
+  }
+
+  bool getRemberEffectSelect() {
+    return StorageService.to.getBool(STORAGE_RememberEffect_SELECT);
+  }
+
+  bool getAutoNextSelect() {
+    return StorageService.to.getBool(STORAGE_AutoNext_SELECT);
   }
 
   int getSoundsEffectSelect() {

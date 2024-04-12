@@ -22,3 +22,9 @@ const String STORAGE_SOUNDSEFFECT_SELECT = 'soundseffect_select';
 const String STORAGE_MIDIPROGRAM_SELECT = 'midiprogram_select';
 
 const String STORAGE_KEYBOARD_SELECT = 'STORAGE_KEYBOARD_SELECT';
+
+const String STORAGE_RememberPrompt_SELECT = 'STORAGE_RememberPrompt_SELECT';
+
+const String STORAGE_RememberEffect_SELECT = 'STORAGE_RememberEffect_SELECT';
+
+const String STORAGE_AutoNext_SELECT = 'STORAGE_AutoNext_SELECT';

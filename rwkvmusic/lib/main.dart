@@ -131,7 +131,8 @@ List virtualNotes = []; //虚拟键盘按键音符
 var selectstate = 0.obs;
 late bool isWindowsOrMac;
 late WebViewControllerPlus controllerPiano;
-var isRemember = false.obs;
+var isRememberPrompt = false.obs;
+var isRememberEffect = false.obs;
 var isAutoSwitch = false.obs;
 
 void fetchABCDataByIsolate() async {
@@ -357,7 +358,8 @@ class _MyAppState extends State<MyApp> {
   int preTimestamp = 0;
   int preCount = 0;
   int listenCount = 0;
-  var radioSelectedValue = 0.obs;
+  var promptSelectedIndex = 0.obs;
+  var effectSelectedIndex = 0.obs;
   String? currentSoundEffect;
   // late StringBuffer sbNoteCreate = StringBuffer();
   late MidiDeviceManage deviceManage;
@@ -367,6 +369,16 @@ class _MyAppState extends State<MyApp> {
   void initState() {
     super.initState();
     midiProgramValue = ConfigStore.to.getMidiProgramSelect();
+    isRememberPrompt.value = ConfigStore.to.getRemberPromptSelect();
+    if (isRememberPrompt.value == false) {
+      //prompt 默认选择的一个
+    }
+    isRememberEffect.value = ConfigStore.to.getRemberEffectSelect();
+    if (isRememberEffect.value == false) {
+      //effect 默认选择的一个
+    }
+    isAutoSwitch.value = ConfigStore.to.getAutoNextSelect();
+
     if (midiProgramValue == -1) {
       midiProgramValue = 0;
       debugPrint('set midiprogramvalue = 0');
@@ -623,7 +635,7 @@ class _MyAppState extends State<MyApp> {
             children: [
               Container(
                 padding:
-                    const EdgeInsets.symmetric(horizontal: 25, vertical: 15),
+                    const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
@@ -701,7 +713,7 @@ class _MyAppState extends State<MyApp> {
                       key: const ValueKey('ValueKey33'),
                       child: Container(
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 25, vertical: 5),
+                            horizontal: 15, vertical: 5),
                         color: const Color(0xff3a3a3a),
                         child: Obx(
                           () => Row(
@@ -1554,6 +1566,7 @@ class _MyAppState extends State<MyApp> {
               onPressed: () {
                 // 处理确定按钮点击事件
                 Navigator.of(context).pop();
+                showBleDeviceOverlay(context);
               },
               child: const Text("Bluetooth Connect"),
             ),
@@ -1618,43 +1631,65 @@ class _MyAppState extends State<MyApp> {
                   itemCount: list.length,
                   itemBuilder: (BuildContext context, int index) {
                     // ListTile(title: Text(list[index]));
-                    if (type == STORAGE_PROMPTS_SELECT) {
-                      radioSelectedValue.value =
+                    if (type == STORAGE_PROMPTS_SELECT &&
+                        isRememberPrompt.value) {
+                      promptSelectedIndex.value =
                           ConfigStore.to.getPromptsSelect();
-                    } else if (type == STORAGE_SOUNDSEFFECT_SELECT) {
-                      radioSelectedValue.value =
+                    } else if (type == STORAGE_SOUNDSEFFECT_SELECT &&
+                        isRememberEffect.value) {
+                      effectSelectedIndex.value =
                           ConfigStore.to.getSoundsEffectSelect();
-                      if (radioSelectedValue.value == -1) {
+                      if (effectSelectedIndex.value == -1) {
                         currentSoundEffect = list[0];
                       } else {
-                        currentSoundEffect = list[radioSelectedValue.value];
+                        currentSoundEffect = list[effectSelectedIndex.value];
                       }
                     }
                     return Obx(() {
                       return RadioListTile(
                         title: Text(list[index]),
                         value: index,
-                        groupValue: radioSelectedValue.value,
+                        groupValue: type == STORAGE_PROMPTS_SELECT
+                            ? promptSelectedIndex.value
+                            : effectSelectedIndex.value,
                         onChanged: (value) {
-                          radioSelectedValue.value = value!;
+                          if (type == STORAGE_PROMPTS_SELECT) {
+                            promptSelectedIndex.value = value!;
+                          } else {
+                            effectSelectedIndex.value = value!;
+                          }
                           // isHideWebview.value = !isHideWebview.value;
                           // setState(() {});
                           if (type == STORAGE_PROMPTS_SELECT) {
-                            ConfigStore.to.savePromptsSelect(value);
+                            if (isRememberPrompt.value) {
+                              ConfigStore.to.savePromptsSelect(value);
+                            }
                             presentPrompt =
                                 CommonUtils.escapeString(promptsAbc[value]);
                           } else if (type == STORAGE_SOUNDSEFFECT_SELECT) {
-                            ConfigStore.to.saveSoundsEffectSelect(value);
                             midiProgramValue = soundEffectInt[list[index]]!;
-                            ConfigStore.to
-                                .saveMidiProgramSelect(midiProgramValue);
-                            currentSoundEffect = list[radioSelectedValue.value];
+                            if (isRememberEffect.value) {
+                              ConfigStore.to.saveSoundsEffectSelect(value);
+                              ConfigStore.to
+                                  .saveMidiProgramSelect(midiProgramValue);
+                            }
+                            currentSoundEffect =
+                                list[effectSelectedIndex.value];
                           } else if (type == STORAGE_KEYBOARD_SELECT) {
                             if (index == 0) {
+                              //切换虚拟键盘
                             } else if (index == 1) {
-                              showConnectDialog();
-
-                              toastInfo(msg: 'Midi device connected');
+                              //切换midi键盘，先判断有没有连接上
+                              UniversalBle.connect(deviceId);
+                              UniversalBle.onConnectionChanged =
+                                  (String deviceId, BleConnectionState state) {
+                                print('OnConnectionChanged $deviceId, $state');
+                                if (state == BleConnectionState.connected) {
+                                } else {
+                                  showConnectDialog();
+                                }
+                              };
+                              // toastInfo(msg: 'Midi device connected');
                             }
                           }
 
@@ -1667,7 +1702,8 @@ class _MyAppState extends State<MyApp> {
                                 "setAbcString(\"$abcstr\", false)");
                             controllerKeyboard.runJavaScript('resetPlay()');
                             debugPrint(abcstr);
-                            Future.delayed(const Duration(seconds: 1), () {
+                            Future.delayed(const Duration(microseconds: 300),
+                                () {
                               playOrPausePiano();
                             });
                           }
@@ -1685,9 +1721,17 @@ class _MyAppState extends State<MyApp> {
                 Obx(
                   () => ListTile(
                     leading: Checkbox(
-                      value: isRemember.value,
+                      value: type == STORAGE_PROMPTS_SELECT
+                          ? isRememberPrompt.value
+                          : isRememberEffect.value,
                       onChanged: (bool? value) {
-                        isRemember.value = value!;
+                        if (type == STORAGE_PROMPTS_SELECT) {
+                          isRememberPrompt.value = value!;
+                          ConfigStore.to.saveRemberPromptSelect(value);
+                        } else {
+                          isRememberEffect.value = value!;
+                          ConfigStore.to.saveRemberEffectSelect(value);
+                        }
                       },
                     ),
                     title: Transform.translate(
@@ -1704,6 +1748,7 @@ class _MyAppState extends State<MyApp> {
                       value: isAutoSwitch.value,
                       onChanged: (bool? value) {
                         isAutoSwitch.value = value!;
+                        ConfigStore.to.saveAutoNext(value);
                       },
                     ),
                     title: Transform.translate(
