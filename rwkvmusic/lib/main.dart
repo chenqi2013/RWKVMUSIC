@@ -1018,7 +1018,7 @@ class _MyAppState extends State<MyApp> {
           child: SingleChildScrollView(
               child: Container(
             width: isWindowsOrMac ? 360.w : 510.w,
-            height: isWindowsOrMac ? 190.h : 370.h,
+            height: isWindowsOrMac ? 190.h : 390.h,
             padding: const EdgeInsets.all(20),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.start,
@@ -1120,6 +1120,20 @@ class _MyAppState extends State<MyApp> {
                         },
                       )),
                 ])),
+                const SizedBox(
+                  height: 10,
+                ),
+                Row(children: [
+                  Obx(() => Checkbox(
+                        visualDensity: VisualDensity.compact, // 去除空白间距
+                        value: isAutoSwitch.value,
+                        onChanged: (bool? value) {
+                          isAutoSwitch.value = value!;
+                          ConfigStore.to.saveAutoNext(value);
+                        },
+                      )),
+                  const Text('Auto Switch Next Prompt'),
+                ]),
                 const SizedBox(
                   height: 10,
                 ),
@@ -1474,6 +1488,20 @@ class _MyAppState extends State<MyApp> {
                         const SizedBox(
                           height: 10,
                         ),
+                        Row(children: [
+                          Obx(() => Checkbox(
+                                visualDensity: VisualDensity.compact, // 去除空白间距
+                                value: isAutoSwitch.value,
+                                onChanged: (bool? value) {
+                                  isAutoSwitch.value = value!;
+                                  ConfigStore.to.saveAutoNext(value);
+                                },
+                              )),
+                          const Text('Auto Switch Next Prompt'),
+                        ]),
+                        const SizedBox(
+                          height: 10,
+                        ),
                         Center(
                             child: Row(children: [
                           Expanded(
@@ -1790,23 +1818,23 @@ class _MyAppState extends State<MyApp> {
                     onTap: () {},
                   ),
                 ),
-              if (type == STORAGE_PROMPTS_SELECT)
-                Obx(
-                  () => ListTile(
-                    leading: Checkbox(
-                      value: isAutoSwitch.value,
-                      onChanged: (bool? value) {
-                        isAutoSwitch.value = value!;
-                        ConfigStore.to.saveAutoNext(value);
-                      },
-                    ),
-                    title: Transform.translate(
-                      offset: const Offset(-20, 0), // 向左移动文本以减少间距
-                      child: const Text('Auto Switch Next Prompt'),
-                    ),
-                    onTap: () {},
-                  ),
-                ),
+              // if (type == STORAGE_PROMPTS_SELECT)
+              //   Obx(
+              //     () => ListTile(
+              //       leading: Checkbox(
+              //         value: isAutoSwitch.value,
+              //         onChanged: (bool? value) {
+              //           isAutoSwitch.value = value!;
+              //           ConfigStore.to.saveAutoNext(value);
+              //         },
+              //       ),
+              //       title: Transform.translate(
+              //         offset: const Offset(-20, 0), // 向左移动文本以减少间距
+              //         child: const Text('Auto Switch Next Prompt'),
+              //       ),
+              //       onTap: () {},
+              //     ),
+              //   ),
             ],
           ),
         ),
