@@ -135,6 +135,8 @@ var isRememberPrompt = false.obs;
 var isRememberEffect = false.obs;
 var isAutoSwitch = false.obs;
 
+ScrollController _controller = ScrollController();
+
 void fetchABCDataByIsolate() async {
   String? dllPath;
   String? binPath;
@@ -1606,6 +1608,12 @@ class _MyAppState extends State<MyApp> {
     );
   }
 
+  void _scrollToRow(int rowIndex) {
+    const double rowHeight = 40.0; // Assuming the height of each row is 56.0
+    _controller.animateTo(rowIndex * rowHeight,
+        duration: const Duration(milliseconds: 100), curve: Curves.easeInOut);
+  }
+
   void showPromptDialog(
       BuildContext context, String titleStr, List list, String type) {
     if (isWindowsOrMac) {
@@ -1664,6 +1672,7 @@ class _MyAppState extends State<MyApp> {
                 height: isWindowsOrMac ? 200.h : 150.h,
                 // width: 40,
                 child: ListView.builder(
+                  controller: _controller,
                   itemCount: list.length,
                   itemBuilder: (BuildContext context, int index) {
                     // ListTile(title: Text(list[index]));
@@ -1682,68 +1691,72 @@ class _MyAppState extends State<MyApp> {
                       }
                     }
                     return Obx(() {
-                      return RadioListTile(
-                        title: Text(list[index]),
-                        value: index,
-                        groupValue: type == STORAGE_PROMPTS_SELECT
-                            ? promptSelectedIndex.value
-                            : effectSelectedIndex.value,
-                        onChanged: (value) {
-                          if (type == STORAGE_PROMPTS_SELECT) {
-                            promptSelectedIndex.value = value!;
-                          } else {
-                            effectSelectedIndex.value = value!;
-                          }
-                          // isHideWebview.value = !isHideWebview.value;
-                          // setState(() {});
-                          if (type == STORAGE_PROMPTS_SELECT) {
-                            if (isRememberPrompt.value) {
-                              ConfigStore.to.savePromptsSelect(value);
+                      return SizedBox(
+                        height: 40,
+                        child: RadioListTile(
+                          title: Text(list[index]),
+                          value: index,
+                          groupValue: type == STORAGE_PROMPTS_SELECT
+                              ? promptSelectedIndex.value
+                              : effectSelectedIndex.value,
+                          onChanged: (value) {
+                            if (type == STORAGE_PROMPTS_SELECT) {
+                              promptSelectedIndex.value = value!;
+                            } else {
+                              effectSelectedIndex.value = value!;
                             }
-                            presentPrompt =
-                                CommonUtils.escapeString(promptsAbc[value]);
-                          } else if (type == STORAGE_SOUNDSEFFECT_SELECT) {
-                            midiProgramValue = soundEffectInt[list[index]]!;
-                            if (isRememberEffect.value) {
-                              ConfigStore.to.saveSoundsEffectSelect(value);
-                              ConfigStore.to
-                                  .saveMidiProgramSelect(midiProgramValue);
+                            // isHideWebview.value = !isHideWebview.value;
+                            // setState(() {});
+                            if (type == STORAGE_PROMPTS_SELECT) {
+                              if (isRememberPrompt.value) {
+                                ConfigStore.to.savePromptsSelect(value);
+                              }
+                              presentPrompt =
+                                  CommonUtils.escapeString(promptsAbc[value]);
+                            } else if (type == STORAGE_SOUNDSEFFECT_SELECT) {
+                              midiProgramValue = soundEffectInt[list[index]]!;
+                              if (isRememberEffect.value) {
+                                ConfigStore.to.saveSoundsEffectSelect(value);
+                                ConfigStore.to
+                                    .saveMidiProgramSelect(midiProgramValue);
+                              }
+                              currentSoundEffect =
+                                  list[effectSelectedIndex.value];
+                            } else if (type == STORAGE_KEYBOARD_SELECT) {
+                              if (index == 0) {
+                                //切换虚拟键盘
+                              } else if (index == 1) {
+                                //切换midi键盘，先判断有没有连接上
+                                UniversalBle.connect(deviceId);
+                                UniversalBle.onConnectionChanged =
+                                    (String deviceId,
+                                        BleConnectionState state) {
+                                  print(
+                                      'OnConnectionChanged $deviceId, $state');
+                                  if (state == BleConnectionState.connected) {
+                                  } else {
+                                    showConnectDialog();
+                                  }
+                                };
+                                // toastInfo(msg: 'Midi device connected');
+                              }
                             }
-                            currentSoundEffect =
-                                list[effectSelectedIndex.value];
-                          } else if (type == STORAGE_KEYBOARD_SELECT) {
-                            if (index == 0) {
-                              //切换虚拟键盘
-                            } else if (index == 1) {
-                              //切换midi键盘，先判断有没有连接上
-                              UniversalBle.connect(deviceId);
-                              UniversalBle.onConnectionChanged =
-                                  (String deviceId, BleConnectionState state) {
-                                print('OnConnectionChanged $deviceId, $state');
-                                if (state == BleConnectionState.connected) {
-                                } else {
-                                  showConnectDialog();
-                                }
-                              };
-                              // toastInfo(msg: 'Midi device connected');
+                            if (selectstate.value == 0) {
+                              String abcstr = ABCHead.getABCWithInstrument(
+                                  presentPrompt, midiProgramValue);
+                              abcstr = ABCHead.appendTempoParam(
+                                  abcstr, tempo.value.toInt());
+                              controllerPiano.runJavaScript(
+                                  "setAbcString(\"$abcstr\", false)");
+                              controllerKeyboard.runJavaScript('resetPlay()');
+                              debugPrint(abcstr);
+                              Future.delayed(const Duration(microseconds: 300),
+                                  () {
+                                playOrPausePiano();
+                              });
                             }
-                          }
-
-                          if (selectstate.value == 0) {
-                            String abcstr = ABCHead.getABCWithInstrument(
-                                presentPrompt, midiProgramValue);
-                            abcstr = ABCHead.appendTempoParam(
-                                abcstr, tempo.value.toInt());
-                            controllerPiano.runJavaScript(
-                                "setAbcString(\"$abcstr\", false)");
-                            controllerKeyboard.runJavaScript('resetPlay()');
-                            debugPrint(abcstr);
-                            Future.delayed(const Duration(microseconds: 300),
-                                () {
-                              playOrPausePiano();
-                            });
-                          }
-                        },
+                          },
+                        ),
                       );
                     });
                   },
@@ -1799,7 +1812,13 @@ class _MyAppState extends State<MyApp> {
         ),
       ),
     );
-    // }
+    Future.delayed(const Duration(milliseconds: 100)).then((value) {
+      if (type == STORAGE_PROMPTS_SELECT) {
+        _scrollToRow(promptSelectedIndex.value);
+      } else {
+        _scrollToRow(effectSelectedIndex.value);
+      }
+    });
   }
 
   void closeDialog() {
