@@ -1132,7 +1132,7 @@ class _MyAppState extends State<MyApp> {
                           ConfigStore.to.saveAutoNext(value);
                         },
                       )),
-                  const Text('Auto Switch Next Prompt'),
+                  const Text('Demo Mode'),
                 ]),
                 const SizedBox(
                   height: 10,
@@ -1497,7 +1497,7 @@ class _MyAppState extends State<MyApp> {
                                   ConfigStore.to.saveAutoNext(value);
                                 },
                               )),
-                          const Text('Auto Switch Next Prompt'),
+                          const Text('Demo Mode'),
                         ]),
                         const SizedBox(
                           height: 10,
