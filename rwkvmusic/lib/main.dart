@@ -13,6 +13,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
+import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 // import 'package:flutter_platform_alert/flutter_platform_alert.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 // import 'package:flutter_share/flutter_share.dart';
@@ -266,13 +267,23 @@ void getABCDataByLocalModel(var array) async {
   int token = fastrwkv.rwkv_abcmodel_run_prompt(model, abcTokenizer, sampler,
       promptChar, prompt.length, 1.0, 8, randomness);
   isGenerating.value = true;
+  int duration = 0;
   for (int i = 0; i < 1024; i++) {
     if (isStopGenerating) {
       debugPrint('stop getABCDataByLocalModel');
       break;
     }
+    DateTime now = DateTime.now();
+    int millisecondsSinceEpoch1 = now.millisecondsSinceEpoch;
+    // print(millisecondsSinceEpoch1);
     int result = fastrwkv.rwkv_abcmodel_run_with_tokenizer_and_sampler(
         model, abcTokenizer, sampler, token, 1.0, 8, randomness);
+    now = DateTime.now();
+    int millisecondsSinceEpoch2 = now.millisecondsSinceEpoch;
+    duration = duration + millisecondsSinceEpoch2 - millisecondsSinceEpoch1;
+    var counts = 1000 * i;
+    double tokens = counts / duration;
+    debugPrint('tokens==$tokens');
     if (token == result && result == 124) {
       //双||abc展示出错
       continue;
