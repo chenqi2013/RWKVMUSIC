@@ -1639,7 +1639,7 @@ class _MyAppState extends State<MyApp> {
   void _scrollToRow(int rowIndex) {
     const double rowHeight = 40.0; // Assuming the height of each row is 56.0
     _controller.animateTo(rowIndex * rowHeight,
-        duration: const Duration(milliseconds: 100), curve: Curves.easeInOut);
+        duration: const Duration(milliseconds: 0), curve: Curves.easeInOut);
   }
 
   void showPromptDialog(
