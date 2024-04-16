@@ -137,6 +137,7 @@ var isRememberEffect = false.obs;
 var isAutoSwitch = false.obs;
 
 ScrollController _controller = ScrollController();
+var tokens = ''.obs;
 
 void fetchABCDataByIsolate() async {
   String? dllPath;
@@ -215,6 +216,8 @@ void fetchABCDataByIsolate() async {
       mainReceivePort.close(); // 操作完成后，关闭 ReceivePort
       isGenerating.value = false;
       eventBus.fire('finish');
+    } else if (data.toString().startsWith('tokens')) {
+      eventBus.fire(data);
     } else {
       finalabcStringPreset = data;
       eventBus.fire(data);
@@ -283,7 +286,8 @@ void getABCDataByLocalModel(var array) async {
     duration = duration + millisecondsSinceEpoch2 - millisecondsSinceEpoch1;
     var counts = 1000 * i;
     double tokens = counts / duration;
-    debugPrint('tokens==$tokens');
+    // debugPrint('tokens==$tokens');
+    sendPort.send('tokens==$tokens');
     if (token == result && result == 124) {
       //双||abc展示出错
       continue;
@@ -575,7 +579,10 @@ class _MyAppState extends State<MyApp> {
 
     eventBus.on().listen((event) {
       // debugPrint('event bus==$event');
-      if (event == 'finish') {
+      if (event.toString().startsWith('tokens')) {
+        // debugPrint('chenqi $event');
+        tokens.value = event.toString();
+      } else if (event == 'finish') {
         Future.delayed(const Duration(seconds: 1), () {
           playOrPausePiano();
         });
@@ -1143,7 +1150,7 @@ class _MyAppState extends State<MyApp> {
                           ConfigStore.to.saveAutoNext(value);
                         },
                       )),
-                  const Text('Demo Mode'),
+                  Obx(() => Text('Demo Mode--$tokens')),
                 ]),
                 const SizedBox(
                   height: 10,
