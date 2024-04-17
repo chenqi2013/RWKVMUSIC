@@ -107,11 +107,11 @@ late String finalabcStringCreate;
 late bool isNeedRestart; //曲谱及键盘动画需要重新开始
 late String presentPrompt;
 late String createPrompt;
-late OverlayEntry? overlayEntry;
+OverlayEntry? overlayEntry;
 
 RxList<BleScanResult> bleList = <BleScanResult>[].obs;
 List bleListName = [];
-late String deviceId;
+String? deviceId;
 
 MidiToABCConverter convertABC = MidiToABCConverter();
 
@@ -553,9 +553,6 @@ class _MyAppState extends State<MyApp> {
       ..addJavaScriptChannel("flutteronNoteOff",
           onMessageReceived: (JavaScriptMessage jsMessage) {
         debugPrint('flutteronNoteOff onMessageReceived=${jsMessage.message}');
-        Future.delayed(const Duration(microseconds: 500), () {
-          AudioPlayerManage().stopAudio();
-        });
       })
       ..addJavaScriptChannel("flutteronNoteOn",
           onMessageReceived: (JavaScriptMessage jsMessage) {
@@ -1771,19 +1768,28 @@ class _MyAppState extends State<MyApp> {
                             } else if (type == STORAGE_KEYBOARD_SELECT) {
                               if (index == 0) {
                                 //切换虚拟键盘
+                                closeDialog();
                               } else if (index == 1) {
                                 //切换midi键盘，先判断有没有连接上
-                                UniversalBle.connect(deviceId);
-                                UniversalBle.onConnectionChanged =
-                                    (String deviceId,
-                                        BleConnectionState state) {
-                                  print(
-                                      'OnConnectionChanged $deviceId, $state');
-                                  if (state == BleConnectionState.connected) {
-                                  } else {
-                                    showConnectDialog();
-                                  }
-                                };
+                                debugPrint('deviceId==$deviceId');
+                                if (deviceId == null) {
+                                  closeDialog();
+                                  showConnectDialog();
+                                } else {
+                                  UniversalBle.connect(deviceId!);
+                                  UniversalBle.onConnectionChanged =
+                                      (String deviceId,
+                                          BleConnectionState state) {
+                                    print(
+                                        'OnConnectionChanged $deviceId, $state');
+                                    closeDialog();
+                                    if (state == BleConnectionState.connected) {
+                                      toastInfo(msg: 'midi键盘已连接');
+                                    } else {
+                                      showConnectDialog();
+                                    }
+                                  };
+                                }
                                 // toastInfo(msg: 'Midi device connected');
                               }
                             }
@@ -1996,12 +2002,12 @@ class _MyAppState extends State<MyApp> {
   }
 
   void conectDevice(BleScanResult device) {
-    deviceId = device.deviceId;
-    UniversalBle.connect(deviceId);
+    UniversalBle.connect(device.deviceId);
     UniversalBle.onConnectionChanged =
         (String deviceId, BleConnectionState state) async {
       debugPrint('OnConnectionChanged $deviceId, $state');
       if (state == BleConnectionState.connected) {
+        deviceId = device.deviceId;
         if (isWindowsOrMac) {
           Get.snackbar(device.name!, '连接成功', colorText: Colors.black);
         } else {
