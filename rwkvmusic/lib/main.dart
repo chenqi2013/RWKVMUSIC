@@ -107,6 +107,7 @@ late String finalabcStringCreate;
 late bool isNeedRestart; //曲谱及键盘动画需要重新开始
 late String presentPrompt;
 late String createPrompt;
+String timeSingnatureStr = '4/4';
 OverlayEntry? overlayEntry;
 
 RxList<BleScanResult> bleList = <BleScanResult>[].obs;
@@ -403,7 +404,7 @@ class _MyAppState extends State<MyApp> {
     }
     debugPrint('midiprogramvalue value= $midiProgramValue');
     finalabcStringCreate =
-        "setAbcString(\"${ABCHead.getABCWithInstrument(r'L:1/4\nM:4/4\nK:C\n|', midiProgramValue)}\",false)";
+        "setAbcString(\"${ABCHead.getABCWithInstrument('L:1/4\nM:$timeSingnatureStr\nK:C\n|', midiProgramValue)}\",false)";
     finalabcStringCreate =
         ABCHead.appendTempoParam(finalabcStringCreate, tempo.value.toInt());
     isWindowsOrMac = Platform.isWindows || Platform.isMacOS;
@@ -603,11 +604,19 @@ class _MyAppState extends State<MyApp> {
     }
     finalabcStringCreate = sbff.toString();
     String sb =
-        "setAbcString(\"%%MIDI program $midiProgramValue}\\nL:1/4\\nM:4/4\\nK:C\\n|\\$finalabcStringCreate\",false)";
+        "setAbcString(\"%%MIDI program $midiProgramValue}\\nL:1/4\\nM:$timeSingnatureStr\\nK:C\\n|\\$finalabcStringCreate\",false)";
     sb = ABCHead.appendTempoParam(sb, tempo.value.toInt());
     debugPrint('curr=$sb');
     controllerPiano.runJavaScript(sb);
     createPrompt = finalabcStringCreate;
+  }
+
+  void updateTimeSignature() {
+    String sb =
+        "setAbcString(\"%%MIDI program $midiProgramValue}\\nL:1/4\\nM:$timeSingnatureStr\\nK:C\\n|\\$finalabcStringCreate\",false)";
+    sb = ABCHead.appendTempoParam(sb, tempo.value.toInt());
+    debugPrint('curr=$sb');
+    controllerPiano.runJavaScript(sb);
   }
 
   void resetLastNote() {
@@ -615,7 +624,7 @@ class _MyAppState extends State<MyApp> {
       virtualNotes.removeLast();
       if (virtualNotes.isEmpty) {
         finalabcStringCreate =
-            "setAbcString(\"${ABCHead.getABCWithInstrument(r'L:1/4\nM:4/4\nK:C\n|', midiProgramValue)}\",false)";
+            "setAbcString(\"${ABCHead.getABCWithInstrument('L:1/4\nM:$timeSingnatureStr\nK:C\n|', midiProgramValue)}\",false)";
         finalabcStringCreate =
             ABCHead.appendTempoParam(finalabcStringCreate, tempo.value.toInt());
         debugPrint('str112==$finalabcStringCreate');
@@ -627,7 +636,7 @@ class _MyAppState extends State<MyApp> {
           sbff.write(note);
         }
         String sb =
-            "setAbcString(\"%%MIDI program $midiProgramValue}\\nL:1/4\\nM:4/4\\nK:C\\n|\\${sbff.toString()}\",false)";
+            "setAbcString(\"%%MIDI program $midiProgramValue}\\nL:1/4\\nM:$timeSingnatureStr\\nK:C\\n|\\${sbff.toString()}\",false)";
         debugPrint('curr=$sb');
         sb = ABCHead.appendTempoParam(sb, tempo.value.toInt());
         controllerPiano.runJavaScript(sb);
@@ -1329,6 +1338,8 @@ class _MyAppState extends State<MyApp> {
                                       groupValue: timeSignature.value,
                                       onChanged: (value) {
                                         timeSignature.value = value!;
+                                        timeSingnatureStr = '2/4';
+                                        updateTimeSignature();
                                       },
                                     )),
                                 SizedBox(
@@ -1340,6 +1351,8 @@ class _MyAppState extends State<MyApp> {
                                       groupValue: timeSignature.value,
                                       onChanged: (value) {
                                         timeSignature.value = value!;
+                                        timeSingnatureStr = '3/4';
+                                        updateTimeSignature();
                                       },
                                     )),
                                 SizedBox(
@@ -1351,6 +1364,8 @@ class _MyAppState extends State<MyApp> {
                                       groupValue: timeSignature.value,
                                       onChanged: (value) {
                                         timeSignature.value = value!;
+                                        timeSingnatureStr = '4/4';
+                                        updateTimeSignature();
                                       },
                                     )),
                                 SizedBox(
@@ -1362,6 +1377,8 @@ class _MyAppState extends State<MyApp> {
                                       groupValue: timeSignature.value,
                                       onChanged: (value) {
                                         timeSignature.value = value!;
+                                        timeSingnatureStr = '3/8';
+                                        updateTimeSignature();
                                       },
                                     )),
                                 SizedBox(
@@ -1373,6 +1390,8 @@ class _MyAppState extends State<MyApp> {
                                       groupValue: timeSignature.value,
                                       onChanged: (value) {
                                         timeSignature.value = value!;
+                                        timeSingnatureStr = '6/8';
+                                        updateTimeSignature();
                                       },
                                     )),
                                 const Spacer(),
