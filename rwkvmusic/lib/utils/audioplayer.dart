@@ -33,7 +33,7 @@ class AudioPlayerManage {
 
     await audioPlayer.setClip(
         start: const Duration(seconds: 0),
-        end: const Duration(milliseconds: 300));
+        end: const Duration(milliseconds: 500));
     await audioPlayer.play();
     print('playAudio');
   }

@@ -111,7 +111,7 @@ OverlayEntry? overlayEntry;
 
 RxList<BleScanResult> bleList = <BleScanResult>[].obs;
 List bleListName = [];
-String? deviceId;
+String? connectDeviceId;
 
 MidiToABCConverter convertABC = MidiToABCConverter();
 
@@ -377,6 +377,7 @@ class _MyAppState extends State<MyApp> {
   int listenCount = 0;
   var promptSelectedIndex = 0.obs;
   var effectSelectedIndex = 0.obs;
+  var keyboardSelectedIndex = 0.obs;
   String? currentSoundEffect;
   // late StringBuffer sbNoteCreate = StringBuffer();
   late MidiDeviceManage deviceManage;
@@ -525,9 +526,12 @@ class _MyAppState extends State<MyApp> {
       ..addJavaScriptChannel("flutteronClickNote",
           onMessageReceived: (JavaScriptMessage jsMessage) {
         debugPrint('flutteronClickNote onMessageReceived=${jsMessage.message}');
-        if (selectstate.value == 1 && isPlay.value == false) {
-          showPromptDialog(context, 'Change B note length',
-              ['1/4', '1/8', '1/16'], 'STORAGE_note_SELECT');
+        List list = jsMessage.message.split(',');
+        if (int.parse(list[list.length - 1]) > 0) {
+          if (selectstate.value == 1 && isPlay.value == false) {
+            showPromptDialog(context, 'Change B note length',
+                ['1/4', '1/8', '1/16'], 'STORAGE_note_SELECT');
+          }
         }
       });
 
@@ -1619,13 +1623,13 @@ class _MyAppState extends State<MyApp> {
     });
   }
 
-  showConnectDialog() {
+  showConnectDialog(context) {
     String title = 'Connect Midi Keyboard';
     String msg =
         'Please connect your midi keyboard first. Wireless connection is recommended.';
     showDialog(
       context: context,
-      builder: (BuildContext context) {
+      builder: (BuildContext buildcontext) {
         return AlertDialog(
           title: Text(title),
           content: Text(msg),
@@ -1633,15 +1637,15 @@ class _MyAppState extends State<MyApp> {
             TextButton(
               onPressed: () {
                 // 处理取消按钮点击事件
-                Navigator.of(context).pop();
+                Navigator.of(buildcontext).pop();
               },
               child: const Text("OK"),
             ),
             TextButton(
               onPressed: () {
                 // 处理确定按钮点击事件
-                Navigator.of(context).pop();
-                showBleDeviceOverlay(context);
+                Navigator.of(buildcontext).pop();
+                showBleDeviceOverlay(buildcontext);
               },
               child: const Text("Bluetooth Connect"),
             ),
@@ -1739,27 +1743,29 @@ class _MyAppState extends State<MyApp> {
                         child: RadioListTile(
                           title: Text(list[index]),
                           value: index,
-                          groupValue: type == STORAGE_PROMPTS_SELECT
-                              ? promptSelectedIndex.value
-                              : effectSelectedIndex.value,
+                          groupValue: type == STORAGE_KEYBOARD_SELECT
+                              ? keyboardSelectedIndex.value
+                              : (type == STORAGE_PROMPTS_SELECT
+                                  ? promptSelectedIndex.value
+                                  : effectSelectedIndex.value),
                           onChanged: (value) {
                             if (type == STORAGE_PROMPTS_SELECT) {
                               promptSelectedIndex.value = value!;
-                            } else {
+                            } else if (type == STORAGE_SOUNDSEFFECT_SELECT) {
                               effectSelectedIndex.value = value!;
                             }
                             // isHideWebview.value = !isHideWebview.value;
                             // setState(() {});
                             if (type == STORAGE_PROMPTS_SELECT) {
                               if (isRememberPrompt.value) {
-                                ConfigStore.to.savePromptsSelect(value);
+                                ConfigStore.to.savePromptsSelect(value!);
                               }
                               presentPrompt =
-                                  CommonUtils.escapeString(promptsAbc[value]);
+                                  CommonUtils.escapeString(promptsAbc[value!]);
                             } else if (type == STORAGE_SOUNDSEFFECT_SELECT) {
                               midiProgramValue = soundEffectInt[list[index]]!;
                               if (isRememberEffect.value) {
-                                ConfigStore.to.saveSoundsEffectSelect(value);
+                                ConfigStore.to.saveSoundsEffectSelect(value!);
                                 ConfigStore.to
                                     .saveMidiProgramSelect(midiProgramValue);
                               }
@@ -1771,22 +1777,22 @@ class _MyAppState extends State<MyApp> {
                                 closeDialog();
                               } else if (index == 1) {
                                 //切换midi键盘，先判断有没有连接上
-                                debugPrint('deviceId==$deviceId');
-                                if (deviceId == null) {
-                                  closeDialog();
-                                  showConnectDialog();
+                                debugPrint('deviceId==$connectDeviceId');
+                                Navigator.of(context).pop();
+                                if (connectDeviceId == null) {
+                                  showConnectDialog(context);
                                 } else {
-                                  UniversalBle.connect(deviceId!);
+                                  debugPrint('onConnectionChanged');
+                                  UniversalBle.connect(connectDeviceId!);
                                   UniversalBle.onConnectionChanged =
                                       (String deviceId,
                                           BleConnectionState state) {
                                     print(
                                         'OnConnectionChanged $deviceId, $state');
-                                    closeDialog();
                                     if (state == BleConnectionState.connected) {
                                       toastInfo(msg: 'midi键盘已连接');
                                     } else {
-                                      showConnectDialog();
+                                      showConnectDialog(context);
                                     }
                                   };
                                 }
@@ -2007,7 +2013,7 @@ class _MyAppState extends State<MyApp> {
         (String deviceId, BleConnectionState state) async {
       debugPrint('OnConnectionChanged $deviceId, $state');
       if (state == BleConnectionState.connected) {
-        deviceId = device.deviceId;
+        connectDeviceId = device.deviceId;
         if (isWindowsOrMac) {
           Get.snackbar(device.name!, '连接成功', colorText: Colors.black);
         } else {
@@ -2040,9 +2046,9 @@ class _MyAppState extends State<MyApp> {
             };
           }
         }
-        Future.delayed(const Duration(seconds: 3)).then((value) {
-          closeDialog();
-        });
+        // Future.delayed(const Duration(seconds: 3)).then((value) {
+        //   closeDialog();
+        // });
       } else if (state == BleConnectionState.disconnected) {
         if (isWindowsOrMac) {
           Get.snackbar(device.name!, '连接失败', colorText: Colors.red);
