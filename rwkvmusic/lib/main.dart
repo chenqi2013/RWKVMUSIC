@@ -124,6 +124,7 @@ RxInt defaultNoteLenght = 0.obs;
 RxDouble randomness = 0.7.obs;
 RxInt seed = 22416.obs;
 RxDouble tempo = 180.0.obs;
+bool isChangeTempo = false;
 RxBool autoChord = true.obs;
 RxBool infiniteGeneration = false.obs;
 
@@ -637,8 +638,14 @@ class _MyAppState extends State<MyApp> {
       sbff.write(note);
     }
     finalabcStringCreate = sbff.toString();
-    String sb =
-        "setAbcString(\"%%MIDI program $midiProgramValue}\\nL:1/4\\nM:$timeSingnatureStr\\nK:C\\n|\\$finalabcStringCreate\",false)";
+    String sb;
+    if (isChangeTempo) {
+      sb =
+          "setAbcString(\"Q:${tempo.value.toInt()}\\nL:1/4\\nM:$timeSingnatureStr\\nK:C\\n|\\$finalabcStringCreate\",false)";
+    } else {
+      sb =
+          "setAbcString(\"%%MIDI program $midiProgramValue}\\nL:1/4\\nM:$timeSingnatureStr\\nK:C\\n|\\$finalabcStringCreate\",false)";
+    }
     sb = ABCHead.appendTempoParam(sb, tempo.value.toInt());
     debugPrint('curr=$sb');
     controllerPiano.runJavaScript(sb);
@@ -1525,6 +1532,7 @@ class _MyAppState extends State<MyApp> {
                                 value: tempo.value,
                                 onChanged: (newValue) {
                                   tempo.value = newValue;
+                                  isChangeTempo = true;
                                 },
                               ),
                             ])),

@@ -120,4 +120,15 @@ class NoteCaculate {
         "calculateNewNoteByLength: note=$note, defaultNoteLength=$defaultNoteLength, newNoteLength=$newNoteLength, newNote=$newNote");
     return newNote;
   }
+
+  String appendTempoParam(String abc, int tempo) {
+    String tempoConfig = "Q:$tempo";
+    String newAbc;
+    if (abc.contains("Q:")) {
+      newAbc = abc.replaceAll(RegExp("Q:\\d+"), tempoConfig);
+    } else {
+      newAbc = "$tempoConfig\n$abc";
+    }
+    return newAbc;
+  }
 }

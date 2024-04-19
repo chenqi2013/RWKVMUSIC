@@ -12,12 +12,12 @@ class ABCHead {
   }
 
   static String appendTempoParam(String abc, int tempo) {
-    String tempoConfig = "Q:$tempo";
-    if (abc.contains("Q:")) {
-      return abc.replaceAll(RegExp(r"Q:\d+"), tempoConfig);
-    } else {
-      return abc;
-      // return "$tempoConfig\n$abc";
-    }
+    // String tempoConfig = "Q:$tempo";
+    // if (abc.contains("Q:")) {
+    //   return abc.replaceAll(RegExp(r"Q:\d+"), tempoConfig);
+    // } else {
+    return abc;
+    // return "$tempoConfig\n$abc";
+    // }
   }
 }
