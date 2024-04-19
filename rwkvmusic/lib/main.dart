@@ -624,6 +624,12 @@ class _MyAppState extends State<MyApp> {
 
   void updatePianoNote(int node) {
     String noteName = MidiToABCConverter().getNoteName(node);
+    if (defaultNoteLenght.value == 0) {
+    } else if (defaultNoteLenght.value == 1) {
+      noteName = "$noteName/2";
+    } else if (defaultNoteLenght.value == 2) {
+      noteName = "$noteName/4";
+    }
     // sbNoteCreate.write(noteName);
     virtualNotes.add(noteName);
     StringBuffer sbff = StringBuffer();
