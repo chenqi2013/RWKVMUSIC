@@ -33,6 +33,7 @@ import 'package:rwkvmusic/utils/midiconvertabc.dart';
 import 'package:rwkvmusic/utils/mididevicemanage.dart';
 import 'package:rwkvmusic/utils/commonutils.dart';
 import 'package:rwkvmusic/utils/midifileconvert.dart';
+import 'package:rwkvmusic/utils/notecaculate.dart';
 import 'package:rwkvmusic/values/constantdata.dart';
 import 'package:rwkvmusic/values/storage.dart';
 import 'package:rwkvmusic/widgets/toast.dart';
@@ -139,6 +140,9 @@ var isAutoSwitch = false.obs;
 
 ScrollController _controller = ScrollController();
 var tokens = ''.obs;
+var currentClickNoteInfo = [];
+
+var noteLengthList = ['1/4', '1/8', '1/16'];
 
 void fetchABCDataByIsolate() async {
   String? dllPath;
@@ -379,6 +383,7 @@ class _MyAppState extends State<MyApp> {
   var promptSelectedIndex = 0.obs;
   var effectSelectedIndex = 0.obs;
   var keyboardSelectedIndex = 0.obs;
+  var noteLengthSelectedIndex = 0.obs;
   String? currentSoundEffect;
   // late StringBuffer sbNoteCreate = StringBuffer();
   late MidiDeviceManage deviceManage;
@@ -528,10 +533,14 @@ class _MyAppState extends State<MyApp> {
           onMessageReceived: (JavaScriptMessage jsMessage) {
         debugPrint('flutteronClickNote onMessageReceived=${jsMessage.message}');
         List list = jsMessage.message.split(',');
-        if (int.parse(list[list.length - 1]) > 0) {
+        if (int.parse(list[list.length - 1]) >= 0) {
           if (selectstate.value == 1 && isPlay.value == false) {
-            showPromptDialog(context, 'Change B note length',
-                ['1/4', '1/8', '1/16'], 'STORAGE_note_SELECT');
+            currentClickNoteInfo = [list[0], list[list.length - 1]];
+            debugPrint('list===$currentClickNoteInfo');
+            noteLengthSelectedIndex.value = NoteCaculate()
+                .getNoteLengthIndex(list[0], int.parse(list[list.length - 1]));
+            showPromptDialog(context, 'Change note length', noteLengthList,
+                'STORAGE_note_SELECT');
           }
         }
       });
@@ -583,7 +592,7 @@ class _MyAppState extends State<MyApp> {
       // debugPrint('event bus==$event');
       if (event.toString().startsWith('tokens')) {
         // debugPrint('chenqi $event');
-        tokens.value = event.toString();
+        tokens.value = ' -- ${event.toString()}';
       } else if (event == 'finish') {
         Future.delayed(const Duration(seconds: 1), () {
           playOrPausePiano();
@@ -592,6 +601,25 @@ class _MyAppState extends State<MyApp> {
         controllerPiano.runJavaScript(event);
       }
     });
+  }
+
+  void updateNote(int index, int noteLengthIndex, String note) {
+    debugPrint('updateNote index=$index,note=$note');
+    String newnote = NoteCaculate()
+        .calculateNewNoteByLength(note, noteLengthList[noteLengthIndex]);
+    NoteCaculate().noteMap[index] = newnote;
+    virtualNotes[index] = newnote;
+    StringBuffer sbff = StringBuffer();
+    for (String note in virtualNotes) {
+      sbff.write(note);
+    }
+    finalabcStringCreate = sbff.toString();
+    String sb =
+        "setAbcString(\"%%MIDI program $midiProgramValue}\\nL:1/4\\nM:$timeSingnatureStr\\nK:C\\n|\\$finalabcStringCreate\",false)";
+    sb = ABCHead.appendTempoParam(sb, tempo.value.toInt());
+    debugPrint('curr=$sb');
+    controllerPiano.runJavaScript(sb);
+    createPrompt = finalabcStringCreate;
   }
 
   void updatePianoNote(int node) {
@@ -1160,7 +1188,7 @@ class _MyAppState extends State<MyApp> {
                           ConfigStore.to.saveAutoNext(value);
                         },
                       )),
-                  Obx(() => Text('Demo Mode--$tokens')),
+                  Obx(() => Text('Demo Mode$tokens')),
                 ]),
                 const SizedBox(
                   height: 10,
@@ -1766,12 +1794,16 @@ class _MyAppState extends State<MyApp> {
                               ? keyboardSelectedIndex.value
                               : (type == STORAGE_PROMPTS_SELECT
                                   ? promptSelectedIndex.value
-                                  : effectSelectedIndex.value),
+                                  : type == STORAGE_SOUNDSEFFECT_SELECT
+                                      ? effectSelectedIndex.value
+                                      : noteLengthSelectedIndex.value),
                           onChanged: (value) {
                             if (type == STORAGE_PROMPTS_SELECT) {
                               promptSelectedIndex.value = value!;
                             } else if (type == STORAGE_SOUNDSEFFECT_SELECT) {
                               effectSelectedIndex.value = value!;
+                            } else if (type == 'STORAGE_note_SELECT') {
+                              noteLengthSelectedIndex.value = value!;
                             }
                             // isHideWebview.value = !isHideWebview.value;
                             // setState(() {});
@@ -1817,6 +1849,10 @@ class _MyAppState extends State<MyApp> {
                                 }
                                 // toastInfo(msg: 'Midi device connected');
                               }
+                            } else if (type == 'STORAGE_note_SELECT') {
+                              print('STORAGE_note_SELECT');
+                              updateNote(int.parse(currentClickNoteInfo[1]),
+                                  index, currentClickNoteInfo[0].toString());
                             }
                             if (selectstate.value == 0) {
                               String abcstr = ABCHead.getABCWithInstrument(
