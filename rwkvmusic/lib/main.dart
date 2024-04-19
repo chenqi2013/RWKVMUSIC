@@ -33,7 +33,9 @@ import 'package:rwkvmusic/utils/midiconvertabc.dart';
 import 'package:rwkvmusic/utils/mididevicemanage.dart';
 import 'package:rwkvmusic/utils/commonutils.dart';
 import 'package:rwkvmusic/utils/midifileconvert.dart';
+import 'package:rwkvmusic/utils/note.dart';
 import 'package:rwkvmusic/utils/notecaculate.dart';
+import 'package:rwkvmusic/utils/notes_database.dart';
 import 'package:rwkvmusic/values/constantdata.dart';
 import 'package:rwkvmusic/values/storage.dart';
 import 'package:rwkvmusic/widgets/toast.dart';
@@ -144,6 +146,7 @@ var tokens = ''.obs;
 var currentClickNoteInfo = [];
 
 var noteLengthList = ['1/4', '1/8', '1/16'];
+List<Note> notes = [];
 
 void fetchABCDataByIsolate() async {
   String? dllPath;
@@ -726,6 +729,18 @@ class _MyAppState extends State<MyApp> {
     super.dispose();
   }
 
+  Future addNote() async {
+    final note = Note(
+      // id: id ?? this.id,
+      isUserCreate: true,
+      orderNumber: 1122,
+      title: 'title11',
+      content: 'description11',
+      createdTime: DateTime.now(),
+    );
+    await NotesDatabase.instance.create(note);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -921,6 +936,10 @@ class _MyAppState extends State<MyApp> {
                                     createButtonImageWithText(
                                         'Settings', Icons.settings, () {
                                       debugPrint('Settings');
+                                      // addNote();
+                                      // notes = await NotesDatabase.instance
+                                      //     .readAllNotes();
+                                      // debugPrint('notes==${notes.length}');
                                       if (isWindowsOrMac) {
                                         isVisibleWebview.value =
                                             !isVisibleWebview.value;
