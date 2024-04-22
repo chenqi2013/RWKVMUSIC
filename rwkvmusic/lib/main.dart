@@ -729,14 +729,14 @@ class _MyAppState extends State<MyApp> {
     super.dispose();
   }
 
-  Future addNote() async {
+  Future addNote(isUserCreate, orderNumber, title, content, createdTime) async {
     final note = Note(
       // id: id ?? this.id,
-      isUserCreate: true,
-      orderNumber: 1122,
-      title: 'title11',
-      content: 'description11',
-      createdTime: DateTime.now(),
+      isUserCreate: isUserCreate,
+      orderNumber: orderNumber,
+      title: title,
+      content: content,
+      createdTime: createdTime,
     );
     await NotesDatabase.instance.create(note);
   }
@@ -755,10 +755,15 @@ class _MyAppState extends State<MyApp> {
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    const Text(
-                      'RWKV AI Music Composer',
-                      style: TextStyle(
-                          color: Colors.white, fontWeight: FontWeight.bold),
+                    InkWell(
+                      onTap: () {
+                        showEditPromptDialog(context);
+                      },
+                      child: const Text(
+                        'RWKV AI Music Composer',
+                        style: TextStyle(
+                            color: Colors.white, fontWeight: FontWeight.bold),
+                      ),
                     ),
                     const Spacer(),
                     Container(child: Obx(() {
@@ -934,12 +939,8 @@ class _MyAppState extends State<MyApp> {
                                       width: isWindowsOrMac ? 10 : 4,
                                     ),
                                     createButtonImageWithText(
-                                        'Settings', Icons.settings, () {
+                                        'Settings', Icons.settings, () async {
                                       debugPrint('Settings');
-                                      // addNote();
-                                      // notes = await NotesDatabase.instance
-                                      //     .readAllNotes();
-                                      // debugPrint('notes==${notes.length}');
                                       if (isWindowsOrMac) {
                                         isVisibleWebview.value =
                                             !isVisibleWebview.value;
@@ -1741,8 +1742,161 @@ class _MyAppState extends State<MyApp> {
         duration: const Duration(milliseconds: 0), curve: Curves.easeInOut);
   }
 
+  void showTipDialog(String title, String content, String cancel, String ok) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          contentPadding: EdgeInsets.zero, // 移除AlertDialog的内边距
+          content: Container(
+            padding: const EdgeInsets.all(15),
+            width: 500,
+            height: 200,
+            child: Column(children: [
+              Text(title),
+              Text(content),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  TextButton(
+                    onPressed: () {},
+                    child: Text(cancel),
+                  ),
+                  TextButton(
+                    onPressed: () {},
+                    child: Text(ok),
+                  ),
+                ],
+              )
+            ]),
+          ),
+        );
+      },
+    );
+  }
+
+  void showSaveDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          contentPadding: EdgeInsets.zero, // 移除AlertDialog的内边距
+          content: Container(
+            padding: const EdgeInsets.all(15),
+            width: 500,
+            height: 200,
+            child: Column(children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text('Save Prompt'),
+                  InkWell(
+                    child: const Icon(Icons.close),
+                    onTap: () {
+                      Navigator.of(context).pop();
+                    },
+                  )
+                ],
+              ),
+              Row(
+                children: [
+                  const Text('Name'),
+                  SizedBox(
+                    width: 200,
+                    height: 40,
+                    child: TextField(
+                      controller: TextEditingController(),
+                      decoration: const InputDecoration(
+                        hintText: 'Please input name',
+                      ),
+                    ),
+                  )
+                ],
+              ),
+              const SizedBox(
+                height: 30,
+              ),
+              TextButton(
+                onPressed: () {},
+                child: const Text('Save'),
+              ),
+            ]),
+          ),
+        );
+      },
+    );
+  }
+
+  void showEditPromptDialog(BuildContext context) {
+    showTipDialog('Notification', 'Are you sure to delete this prompt?',
+        'cancel', ' Delete');
+    return;
+    showSaveDialog();
+    return;
+    List<String> items = List.generate(10, (index) => 'Item $index');
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          contentPadding: EdgeInsets.zero, // 移除AlertDialog的内边距
+          content: Container(
+            padding: const EdgeInsets.all(15),
+            width: 500,
+            height: 250,
+            // color: Colors.red,
+            child: Column(children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text('Edit Prompt'),
+                  InkWell(
+                    child: const Icon(Icons.close),
+                    onTap: () {
+                      Navigator.of(context).pop();
+                    },
+                  )
+                ],
+              ),
+              Expanded(
+                child: ReorderableListView(
+                  // shrinkWrap: true,
+                  children: items.map((item) {
+                    return ListTile(
+                      key: Key(item),
+                      title: Text(item),
+                    );
+                  }).toList(),
+                  onReorder: (oldIndex, newIndex) {
+                    setState(() {
+                      if (newIndex > oldIndex) {
+                        newIndex -= 1;
+                      }
+                      final String item = items.removeAt(oldIndex);
+                      items.insert(newIndex, item);
+                    });
+                  },
+                ),
+              ),
+            ]),
+          ),
+        );
+      },
+    );
+  }
+
   void showPromptDialog(
-      BuildContext context, String titleStr, List list, String type) {
+      BuildContext context, String titleStr, List list, String type) async {
+    if (type == STORAGE_PROMPTS_SELECT) {
+      var notes = await NotesDatabase.instance.readAllNotes();
+      if (notes.isEmpty) {
+        for (int i = 0; i < prompts.length; i++) {
+          addNote(0, i, prompts[i], promptsAbc[i], DateTime.now().toString());
+        }
+        debugPrint('notes==${notes.length}');
+      } else {
+        debugPrint('notes==${notes.length}');
+      }
+    }
     if (isWindowsOrMac) {
       isVisibleWebview.value = !isVisibleWebview.value;
       setState(() {});

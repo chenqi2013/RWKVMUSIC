@@ -16,11 +16,11 @@ class NoteFields {
 
 class Note {
   final int? id;
-  final bool isUserCreate;
-  final int orderNumber;
-  final String title;
-  final String content;
-  final DateTime createdTime;
+  final int? isUserCreate;
+  final int? orderNumber;
+  final String? title;
+  final String? content;
+  final String? createdTime;
 
   const Note({
     this.id,
@@ -33,36 +33,36 @@ class Note {
 
   Note copy({
     int? id,
-    bool? isImportant,
-    int? number,
+    int? isUserCreate,
+    int? orderNumber,
     String? title,
-    String? description,
-    DateTime? createdTime,
+    String? content,
+    String? createdTime,
   }) =>
       Note(
-        id: id ?? this.id,
-        isUserCreate: isImportant ?? isUserCreate,
-        orderNumber: number ?? orderNumber,
-        title: title ?? this.title,
-        content: description ?? content,
-        createdTime: createdTime ?? this.createdTime,
+        id: id,
+        isUserCreate: isUserCreate,
+        orderNumber: orderNumber,
+        title: title,
+        content: content,
+        createdTime: createdTime,
       );
 
   static Note fromJson(Map<String, Object?> json) => Note(
         id: json[NoteFields.id] as int?,
-        isUserCreate: json[NoteFields.isUserCreate] == 1,
+        isUserCreate: json[NoteFields.isUserCreate] as int,
         orderNumber: json[NoteFields.orderNumber] as int,
         title: json[NoteFields.title] as String,
         content: json[NoteFields.content] as String,
-        createdTime: DateTime.parse(json[NoteFields.createdTime] as String),
+        createdTime: json[NoteFields.createdTime] as String,
       );
 
   Map<String, Object?> toJson() => {
         NoteFields.id: id,
         NoteFields.title: title,
-        NoteFields.isUserCreate: isUserCreate ? 1 : 0,
+        NoteFields.isUserCreate: isUserCreate,
         NoteFields.orderNumber: orderNumber,
         NoteFields.content: content,
-        NoteFields.createdTime: createdTime.toIso8601String(),
+        NoteFields.createdTime: createdTime,
       };
 }
