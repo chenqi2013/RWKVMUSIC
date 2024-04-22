@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:ffi' hide Size;
 import 'dart:isolate';
+import 'dart:ui';
 import 'package:archive/archive_io.dart';
 import 'package:ffi/ffi.dart';
 // import 'dart:html';
@@ -181,9 +182,9 @@ void fetchABCDataByIsolate() async {
   } else if (Platform.isAndroid) {
     dllPath = await CommonUtils.loadDllFromAssets('libfaster_rwkvd.so');
     binPath = await CommonUtils.loadDllFromAssets(
-        'RWKV-5-ABC-82M-v1-20230901-ctx1024-ncnn.bin');
+        'RWKV-6-ABC-85M-v1-20240217-ctx1024-MTK-D9300.bin');
     configPath = await CommonUtils.loadDllFromAssets(
-        'RWKV-5-ABC-82M-v1-20230901-ctx1024-ncnn.config');
+        'RWKV-6-ABC-85M-v1-20240217-ctx1024-MTK-D9300.config');
     paramPath = await CommonUtils.loadDllFromAssets(
         'RWKV-5-ABC-82M-v1-20230901-ctx1024-ncnn.param');
   } else if (Platform.isWindows) {
@@ -266,7 +267,7 @@ void getABCDataByLocalModel(var array) async {
   Pointer<Char> promptChar = prompt.toNativeUtf8().cast<Char>();
   faster_rwkvd fastrwkv = faster_rwkvd(
       Platform.isIOS ? DynamicLibrary.process() : DynamicLibrary.open(dllPath));
-  Pointer<Char> strategy = 'ncnn fp32'.toNativeUtf8().cast<Char>();
+  Pointer<Char> strategy = 'mtk fp32'.toNativeUtf8().cast<Char>();
   Pointer<Void> model =
       fastrwkv.rwkv_model_create(binPath.toNativeUtf8().cast<Char>(), strategy);
   Pointer<Void> abcTokenizer = fastrwkv.rwkv_ABCTokenizer_create();
@@ -751,34 +752,59 @@ class _MyAppState extends State<MyApp> {
             children: [
               Container(
                 padding:
-                    const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
+                    const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    const Text(
-                      'RWKV AI Music Composer',
-                      style: TextStyle(
-                          color: Colors.white, fontWeight: FontWeight.bold),
+                    Row(
+                      children: [
+                        Image.asset(
+                          'assets/images/music.jpg',
+                          width: 20,
+                          height: 20,
+                          fit: BoxFit.cover,
+                        ),
+                        const SizedBox(
+                          width: 5,
+                        ),
+                        const Text(
+                          'RWKV AI Music Composer',
+                          style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16),
+                        ),
+                      ],
                     ),
                     const Spacer(),
                     Container(child: Obx(() {
                       return CupertinoSegmentedControl(
-                        children: const {
+                        children: {
                           0: Padding(
-                              padding: EdgeInsets.all(10),
+                              padding: const EdgeInsets.symmetric(
+                                  vertical: 8, horizontal: 10),
                               child: Text(
                                 'Preset Mode',
                                 style: TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold),
+                                  color: Colors.white,
+                                  fontSize: 14,
+                                  fontWeight: selectstate.value == 0
+                                      ? FontWeight.bold
+                                      : FontWeight.normal,
+                                ),
                               )),
                           1: Padding(
-                              padding: EdgeInsets.all(10),
+                              padding: const EdgeInsets.symmetric(
+                                  vertical: 8, horizontal: 10),
                               child: Text(
                                 'Creative Mode',
                                 style: TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold),
+                                  color: Colors.white,
+                                  fontSize: 14,
+                                  fontWeight: selectstate.value == 1
+                                      ? FontWeight.bold
+                                      : FontWeight.normal,
+                                ),
                               )),
                         },
                         onValueChanged: (int newValue) {
@@ -823,67 +849,77 @@ class _MyAppState extends State<MyApp> {
               //   ],
               // )),
               Expanded(
-                  flex: isWindowsOrMac ? 1 : 3,
+                  flex: isWindowsOrMac ? 1 : 2,
                   child: Visibility(
                       visible: isVisibleWebview.value,
                       key: const ValueKey('ValueKey33'),
                       child: Container(
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 15, vertical: 5),
+                            horizontal: 25, vertical: 2),
                         color: const Color(0xff3a3a3a),
                         child: Obx(
                           () => Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              if (selectstate.value == 0)
-                                Row(
-                                  children: [
-                                    creatBottomBtn('Prompts', () {
-                                      debugPrint("Promptss");
-                                      showPromptDialog(context, 'Prompts',
-                                          prompts, STORAGE_PROMPTS_SELECT);
-                                    }),
-                                    const SizedBox(
-                                      width: 8,
-                                    ),
-                                    creatBottomBtn('Sounds Effect', () {
-                                      debugPrint("Sounds Effect");
-                                      showPromptDialog(
-                                          context,
-                                          'Sounds Effect',
-                                          soundEffect.keys.toList(),
-                                          STORAGE_SOUNDSEFFECT_SELECT);
-                                    })
-                                  ],
-                                ),
-                              if (selectstate.value == 1)
-                                creatBottomBtn('Simulate keyboard', () {
-                                  debugPrint("Simulate keyboard");
-                                  showPromptDialog(context, 'Keyboard Options',
-                                      keyboardOptions, STORAGE_KEYBOARD_SELECT);
-                                }),
-                              const SizedBox(
-                                width: 15,
+                              // if (selectstate.value == 0)
+                              Row(
+                                children: [
+                                  creatBottomBtn('Prompts', () {
+                                    debugPrint("Promptss");
+                                    showPromptDialog(context, 'Prompts',
+                                        prompts, STORAGE_PROMPTS_SELECT);
+                                  }),
+                                  const SizedBox(
+                                    width: 8,
+                                  ),
+                                  creatBottomBtn('Sounds Effect', () {
+                                    debugPrint("Sounds Effect");
+                                    showPromptDialog(
+                                        context,
+                                        'Sounds Effect',
+                                        soundEffect.keys.toList(),
+                                        STORAGE_SOUNDSEFFECT_SELECT);
+                                  }),
+                                  const SizedBox(
+                                    width: 35,
+                                  ),
+                                  Obx(() => isGenerating.value
+                                      ? const CircularProgressIndicator(
+                                          valueColor:
+                                              AlwaysStoppedAnimation<Color>(
+                                                  Colors.white),
+                                        )
+                                      : Container(
+                                          child: null,
+                                        )),
+                                  ProgressbarTime(playProgress, pianoAllTime),
+                                  const SizedBox(
+                                    width: 20,
+                                  )
+                                ],
                               ),
-                              Obx(() => isGenerating.value
-                                  ? const CircularProgressIndicator(
-                                      valueColor: AlwaysStoppedAnimation<Color>(
-                                          Colors.white),
-                                    )
-                                  : Container(
-                                      child: null,
-                                    )),
-                              ProgressbarTime(playProgress, pianoAllTime),
-                              const Spacer(),
-                              Container(
+                              // if (selectstate.value == 1)
+                              //   creatBottomBtn('Simulate keyboard', () {
+                              //     debugPrint("Simulate keyboard");
+                              //     showPromptDialog(context, 'Keyboard Options',
+                              //         keyboardOptions, STORAGE_KEYBOARD_SELECT);
+                              //   }),
+                              Expanded(
                                 child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.end,
                                   children: [
                                     Obx(() => createButtonImageWithText(
                                             !isGenerating.value
                                                 ? 'Generate'
                                                 : 'Stop',
                                             !isGenerating.value
-                                                ? Icons.edit
-                                                : Icons.refresh, () {
+                                                ? Image.asset(
+                                                    'assets/images/generate.jpg',
+                                                    fit: BoxFit.cover,
+                                                  )
+                                                : Image.asset(
+                                                    'assets/images/stopgenerate.jpg'),
+                                            () {
                                           debugPrint('Generate');
                                           isGenerating.value =
                                               !isGenerating.value;
@@ -908,33 +944,48 @@ class _MyAppState extends State<MyApp> {
                                                 .fire("stop Generating");
                                           }
                                         })),
-                                    SizedBox(
-                                      width: isWindowsOrMac ? 10 : 4,
-                                    ),
+                                    if (selectstate.value == 1)
+                                      SizedBox(
+                                        width: isWindowsOrMac ? 10 : 20,
+                                      ),
                                     Obx(() => Visibility(
                                         visible: selectstate.value == 1,
                                         child: createButtonImageWithText(
-                                            'Undo', Icons.undo, () {
+                                            'Undo',
+                                            Image.asset(
+                                              'assets/images/undo.jpg',
+                                              fit: BoxFit.cover,
+                                            ), () {
                                           debugPrint('Undo');
                                           resetLastNote();
                                         }))),
                                     SizedBox(
-                                      width: isWindowsOrMac ? 10 : 4,
+                                      width: isWindowsOrMac ? 10 : 20,
                                     ),
                                     Obx(() {
                                       return createButtonImageWithText(
                                           !isPlay.value ? 'Play' : 'Pause',
                                           !isPlay.value
-                                              ? Icons.play_arrow
-                                              : Icons.pause, () {
+                                              ? Image.asset(
+                                                  'assets/images/play.jpg',
+                                                  fit: BoxFit.cover,
+                                                )
+                                              : Image.asset(
+                                                  'assets/images/pause.jpg',
+                                                  fit: BoxFit.cover,
+                                                ), () {
                                         playOrPausePiano();
                                       });
                                     }),
                                     SizedBox(
-                                      width: isWindowsOrMac ? 10 : 4,
+                                      width: isWindowsOrMac ? 10 : 20,
                                     ),
                                     createButtonImageWithText(
-                                        'Settings', Icons.settings, () {
+                                        'Settings',
+                                        Image.asset(
+                                          'assets/images/setting.jpg',
+                                          fit: BoxFit.cover,
+                                        ), () {
                                       debugPrint('Settings');
                                       // addNote();
                                       // notes = await NotesDatabase.instance
@@ -953,9 +1004,6 @@ class _MyAppState extends State<MyApp> {
                                         showCreateModelSettingDialog(context);
                                       }
                                     }),
-                                    SizedBox(
-                                      width: isWindowsOrMac ? 10 : 4,
-                                    ),
                                   ],
                                 ),
                               ),

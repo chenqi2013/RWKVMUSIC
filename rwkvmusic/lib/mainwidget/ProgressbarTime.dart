@@ -2,7 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-Widget ProgressbarTime(RxDouble _currentSliderValue, RxDouble totalTime) {
+Widget ProgressbarTime(RxDouble currentSliderValue, RxDouble totalTime) {
   return Obx(() => Row(children: [
         // 播放进度条
         SliderTheme(
@@ -13,31 +13,24 @@ Widget ProgressbarTime(RxDouble _currentSliderValue, RxDouble totalTime) {
             overlayColor: Colors.white.withOpacity(0.3), // 圆点覆盖颜色
             valueIndicatorColor: Colors.white, // 数值指示器颜色
             valueIndicatorTextStyle:
-                TextStyle(color: Colors.white), // 数值指示器文本样式
+                const TextStyle(color: Colors.white), // 数值指示器文本样式
           ),
           child: Slider(
-            value: _currentSliderValue.value,
+            value: currentSliderValue.value,
             min: 0.0,
             max: 1.0,
             onChanged: (value) {
-              _currentSliderValue.value = value;
+              currentSliderValue.value = value;
             },
           ),
         ),
         // 时间显示
-        Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-               Text(
-                    formatDuration(Duration(
-                        seconds:
-                            (totalTime.value/1000.0 * _currentSliderValue.value).toInt())),
-                    style: TextStyle(color: Colors.white),
-                  ),
-              ],
-            ))
+        Text(
+          formatDuration(Duration(
+              seconds: (totalTime.value / 1000.0 * currentSliderValue.value)
+                  .toInt())),
+          style: const TextStyle(color: Colors.white),
+        ),
       ]));
 }
 

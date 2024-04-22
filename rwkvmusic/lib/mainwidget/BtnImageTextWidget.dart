@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
 
 Widget createButtonImageWithText(
-    String text, IconData icondata, VoidCallback onPressed) {
+    String text, Image icondata, VoidCallback onPressed) {
   return InkWell(
     onTap: () {
       onPressed();
     },
     child: Container(
       // width: 80,
-      padding: const EdgeInsets.symmetric(vertical: 2, horizontal: 2),
+
+      padding: const EdgeInsets.symmetric(vertical: 0, horizontal: 0),
       decoration: BoxDecoration(
         // color: Colors.blue, // 设置背景色
         borderRadius: BorderRadius.circular(8), // 设置圆角
@@ -16,16 +17,21 @@ Widget createButtonImageWithText(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            icondata,
-            color: Colors.white, // 设置图标颜色
+          SizedBox(
+            width: 25,
+            height: 25,
+            child: icondata,
           ),
-          const SizedBox(height: 5),
+          // Icon(
+          //   icondata,
+          //   color: Colors.white, // 设置图标颜色
+          // ),
+          const SizedBox(height: 0),
           Text(
             text,
             style: const TextStyle(
               color: Colors.white, // 设置文本颜色
-              fontSize: 16,
+              fontSize: 12,
             ),
           ),
         ],

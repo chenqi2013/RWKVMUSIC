@@ -4,14 +4,15 @@ Widget creatBottomBtn(String text, VoidCallback onPressed) {
   return InkWell(
     onTap: () {
       // 按钮被点击时执行的操作
-        onPressed();
+      onPressed();
     },
     child: Container(
       padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 6),
       decoration: BoxDecoration(
         // color: Colors.blue, // 设置背景色
         borderRadius: BorderRadius.circular(8), // 设置圆角
-        border: Border.all(color: Color(0xff6d6d6d), width: 2),
+        border: Border.all(
+            color: const Color.fromARGB(255, 125, 125, 125), width: 1),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.start,
@@ -20,7 +21,7 @@ Widget creatBottomBtn(String text, VoidCallback onPressed) {
             text,
             style: const TextStyle(
               color: Colors.white, // 设置文本颜色
-              fontSize: 16,
+              fontSize: 14,
             ),
           ),
           const SizedBox(width: 2),

@@ -35,5 +35,8 @@
 		<provider android:name="androidx.core.content.FileProvider" android:authorities="${applicationId}.provider" android:exported="false" android:grantUriPermissions="true">
 			<meta-data android:name="android.support.FILE_PROVIDER_PATHS" android:resource="@xml/provider_paths" />
 		</provider>
+		<uses-native-library android:name="libneuronusdk_adapter.mtk.so" android:required="false" />
+		<uses-native-library android:name="libapuwareutils.mtk.so" android:required="false" />
+		<uses-native-library android:name="libapuwareutils_v2.mtk.so" android:required="false" />
 	</application>
 </manifest>
