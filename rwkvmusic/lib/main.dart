@@ -1106,7 +1106,7 @@ class _MyAppState extends State<MyApp> {
           child: SingleChildScrollView(
               child: Container(
             width: isWindowsOrMac ? 360.w : 510.w,
-            height: isWindowsOrMac ? 190.h : 390.h,
+            height: isWindowsOrMac ? 190.h : 398.h,
             padding: const EdgeInsets.all(20),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.start,
@@ -1352,7 +1352,7 @@ class _MyAppState extends State<MyApp> {
             child: Padding(
                 padding: const EdgeInsets.all(20),
                 child: SizedBox(
-                    width: isWindowsOrMac ? 360.w : 510.w,
+                    width: isWindowsOrMac ? 360.w : 530.w,
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.start,
                       crossAxisAlignment: CrossAxisAlignment.start,
