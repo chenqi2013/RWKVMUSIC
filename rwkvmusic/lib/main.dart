@@ -22,6 +22,8 @@ import 'package:group_radio_button/group_radio_button.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:rwkvmusic/gen/assets.gen.dart';
 import 'package:rwkvmusic/mainwidget/ProgressbarTime.dart';
+import 'package:rwkvmusic/mainwidget/add_prompt_top.dart';
+import 'package:rwkvmusic/mainwidget/reset_edit.dart';
 import 'package:rwkvmusic/services/storage.dart';
 import 'package:rwkvmusic/store/config.dart';
 import 'package:rwkvmusic/test/bletest.dart';
@@ -147,6 +149,8 @@ var currentClickNoteInfo = [];
 
 var noteLengthList = ['1/4', '1/8', '1/16'];
 List<Note> notes = [];
+var isEditPrompt = false.obs;
+var isAddPrompt = false.obs;
 
 void fetchABCDataByIsolate() async {
   String? dllPath;
@@ -588,6 +592,10 @@ class _MyAppState extends State<MyApp> {
               .playAudio('player/soundfont/acoustic_grand_piano-mp3/$name');
         }
         updatePianoNote(int.parse(jsMessage.message));
+        if (isAddPrompt.value && finalabcStringCreate.length > 100) {
+          Get.snackbar('Warning', 'Maximum note length ',
+              colorText: Colors.red);
+        }
       });
     // controllerKeyboard.loadFlutterAssetServer(filePathKeyboardAnimation);
     controllerKeyboard.loadRequest(Uri.parse(filePathKeyboardAnimation));
@@ -749,57 +757,74 @@ class _MyAppState extends State<MyApp> {
           color: const Color(0xff3a3a3a),
           child: Column(
             children: [
-              Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    InkWell(
-                      onTap: () {
-                        showEditPromptDialog(context);
-                      },
-                      child: const Text(
-                        'RWKV AI Music Composer',
-                        style: TextStyle(
-                            color: Colors.white, fontWeight: FontWeight.bold),
+              Obx(
+                () => isAddPrompt.value
+                    ? AddPromptTop(onPressed: (int type) {
+                        if (type == 0) {
+                          // cancel
+                          debugPrint('cancelcancel');
+                          isEditPrompt.value = false;
+                          isAddPrompt.value = false;
+                          segmengChange(0);
+                        } else {
+                          // save
+                          debugPrint('savesave');
+                          showSaveDialog();
+                        }
+                      })
+                    : Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 15, vertical: 15),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            InkWell(
+                              onTap: () {
+                                showEditPromptDialog(context);
+                              },
+                              child: const Text(
+                                'RWKV AI Music Composer',
+                                style: TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold),
+                              ),
+                            ),
+                            const Spacer(),
+                            Container(child: Obx(() {
+                              return CupertinoSegmentedControl(
+                                children: const {
+                                  0: Padding(
+                                      padding: EdgeInsets.all(10),
+                                      child: Text(
+                                        'Preset Mode',
+                                        style: TextStyle(
+                                            color: Colors.white,
+                                            fontWeight: FontWeight.bold),
+                                      )),
+                                  1: Padding(
+                                      padding: EdgeInsets.all(10),
+                                      child: Text(
+                                        'Creative Mode',
+                                        style: TextStyle(
+                                            color: Colors.white,
+                                            fontWeight: FontWeight.bold),
+                                      )),
+                                },
+                                onValueChanged: (int newValue) {
+                                  // 当选择改变时执行的操作
+                                  debugPrint('选择了选项 $newValue');
+                                  selectstate.value = newValue;
+                                  segmengChange(newValue);
+                                },
+                                groupValue: selectstate.value, // 当前选中的选项值
+                                selectedColor: const Color(0xff44be1c),
+                                unselectedColor: Colors.transparent,
+                                borderColor: const Color(0xff6d6d6d),
+                              );
+                            })),
+                          ],
+                        ),
                       ),
-                    ),
-                    const Spacer(),
-                    Container(child: Obx(() {
-                      return CupertinoSegmentedControl(
-                        children: const {
-                          0: Padding(
-                              padding: EdgeInsets.all(10),
-                              child: Text(
-                                'Preset Mode',
-                                style: TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold),
-                              )),
-                          1: Padding(
-                              padding: EdgeInsets.all(10),
-                              child: Text(
-                                'Creative Mode',
-                                style: TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold),
-                              )),
-                        },
-                        onValueChanged: (int newValue) {
-                          // 当选择改变时执行的操作
-                          debugPrint('选择了选项 $newValue');
-                          selectstate.value = newValue;
-                          segmengChange(newValue);
-                        },
-                        groupValue: selectstate.value, // 当前选中的选项值
-                        selectedColor: const Color(0xff44be1c),
-                        unselectedColor: Colors.transparent,
-                        borderColor: const Color(0xff6d6d6d),
-                      );
-                    })),
-                  ],
-                ),
               ),
               Flexible(
                 flex: isWindowsOrMac ? 2 : 5,
@@ -1742,7 +1767,8 @@ class _MyAppState extends State<MyApp> {
         duration: const Duration(milliseconds: 0), curve: Curves.easeInOut);
   }
 
-  void showTipDialog(String title, String content, String cancel, String ok) {
+  void showTipDialog(
+      String title, String content, String cancel, String ok, Function action) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -1750,20 +1776,32 @@ class _MyAppState extends State<MyApp> {
           contentPadding: EdgeInsets.zero, // 移除AlertDialog的内边距
           content: Container(
             padding: const EdgeInsets.all(15),
-            width: 500,
+            width: 400,
             height: 200,
-            child: Column(children: [
+            child:
+                Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
               Text(title),
+              const SizedBox(
+                height: 20,
+              ),
               Text(content),
+              const SizedBox(
+                height: 20,
+              ),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   TextButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      Get.back();
+                    },
                     child: Text(cancel),
                   ),
                   TextButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      action();
+                      Get.back();
+                    },
                     child: Text(ok),
                   ),
                 ],
@@ -1776,6 +1814,7 @@ class _MyAppState extends State<MyApp> {
   }
 
   void showSaveDialog() {
+    TextEditingController controller = TextEditingController();
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -1801,11 +1840,14 @@ class _MyAppState extends State<MyApp> {
               Row(
                 children: [
                   const Text('Name'),
+                  const SizedBox(
+                    width: 20,
+                  ),
                   SizedBox(
                     width: 200,
                     height: 40,
                     child: TextField(
-                      controller: TextEditingController(),
+                      controller: controller,
                       decoration: const InputDecoration(
                         hintText: 'Please input name',
                       ),
@@ -1817,7 +1859,18 @@ class _MyAppState extends State<MyApp> {
                 height: 30,
               ),
               TextButton(
-                onPressed: () {},
+                onPressed: () async {
+                  debugPrint('finalabcStringCreate==$finalabcStringCreate');
+                  await NotesDatabase.instance.create(Note(
+                      isUserCreate: 1,
+                      orderNumber: 100,
+                      title: controller.text,
+                      content: finalabcStringCreate,
+                      createdTime: DateTime.now().toString()));
+                  notes = await NotesDatabase.instance.readAllNotes();
+                  debugPrint('note length==${notes.length}');
+                  Get.back();
+                },
                 child: const Text('Save'),
               ),
             ]),
@@ -1829,7 +1882,10 @@ class _MyAppState extends State<MyApp> {
 
   void showEditPromptDialog(BuildContext context) {
     showTipDialog('Notification', 'Are you sure to delete this prompt?',
-        'cancel', ' Delete');
+        'Cancel', ' Delete', () async {
+      int result = await NotesDatabase.instance.delete(100);
+      debugPrint('result==$result');
+    });
     return;
     showSaveDialog();
     return;
@@ -1887,7 +1943,7 @@ class _MyAppState extends State<MyApp> {
   void showPromptDialog(
       BuildContext context, String titleStr, List list, String type) async {
     if (type == STORAGE_PROMPTS_SELECT) {
-      var notes = await NotesDatabase.instance.readAllNotes();
+      notes = await NotesDatabase.instance.readAllNotes();
       if (notes.isEmpty) {
         for (int i = 0; i < prompts.length; i++) {
           addNote(0, i, prompts[i], promptsAbc[i], DateTime.now().toString());
@@ -1933,7 +1989,24 @@ class _MyAppState extends State<MyApp> {
           title: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(titleStr),
+              Row(
+                children: [
+                  Text(titleStr),
+                  const SizedBox(
+                    width: 15,
+                  ),
+                  Obx(() => isEditPrompt.value
+                      ? InkWell(
+                          child: const Icon(Icons.add),
+                          onTap: () {
+                            isAddPrompt.value = true;
+                            Get.back();
+                            segmengChange(1);
+                          },
+                        )
+                      : const SizedBox())
+                ],
+              ),
               InkWell(
                 child: const Icon(Icons.close),
                 onTap: () {
@@ -1942,6 +2015,8 @@ class _MyAppState extends State<MyApp> {
                   //   setState(() {});
                   // }
                   // Navigator.of(context).pop();
+                  isEditPrompt.value = false;
+                  isAddPrompt.value = false;
                   closeDialog();
                 },
               )
@@ -1954,7 +2029,9 @@ class _MyAppState extends State<MyApp> {
                 // width: 40,
                 child: ListView.builder(
                   controller: _controller,
-                  itemCount: list.length,
+                  itemCount: type == STORAGE_PROMPTS_SELECT
+                      ? notes.length
+                      : list.length,
                   itemBuilder: (BuildContext context, int index) {
                     // ListTile(title: Text(list[index]));
                     if (type == STORAGE_PROMPTS_SELECT &&
@@ -1975,7 +2052,9 @@ class _MyAppState extends State<MyApp> {
                       return SizedBox(
                         height: 40,
                         child: RadioListTile(
-                          title: Text(list[index]),
+                          title: (type != STORAGE_PROMPTS_SELECT)
+                              ? Text(list[index])
+                              : Text(notes[index].title!),
                           value: index,
                           groupValue: type == STORAGE_KEYBOARD_SELECT
                               ? keyboardSelectedIndex.value
@@ -1998,8 +2077,10 @@ class _MyAppState extends State<MyApp> {
                               if (isRememberPrompt.value) {
                                 ConfigStore.to.savePromptsSelect(value!);
                               }
-                              presentPrompt =
-                                  CommonUtils.escapeString(promptsAbc[value!]);
+                              //从数据库读取
+                              debugPrint('从数据库读取==${notes[value!].content!}');
+                              presentPrompt = CommonUtils.escapeString(
+                                  notes[value].content!); //promptsAbc[value!]
                             } else if (type == STORAGE_SOUNDSEFFECT_SELECT) {
                               midiProgramValue = soundEffectInt[list[index]]!;
                               if (isRememberEffect.value) {
@@ -2090,6 +2171,21 @@ class _MyAppState extends State<MyApp> {
                     onTap: () {},
                   ),
                 ),
+              if (type == STORAGE_PROMPTS_SELECT)
+                ResetEdit(onPressed: (int type) {
+                  if (type == 0) {
+                    // reset opeartion
+                    showTipDialog(
+                        'Notification',
+                        'If you reset prompts, it will automatically reset the prompt order. It will not delete the added prompts.',
+                        'Cancel',
+                        'Reset',
+                        () {});
+                  } else {
+                    // edit operation
+                    isEditPrompt.value = true;
+                  }
+                }),
               // if (type == STORAGE_PROMPTS_SELECT)
               //   Obx(
               //     () => ListTile(
