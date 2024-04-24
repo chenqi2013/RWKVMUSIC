@@ -25,7 +25,7 @@ class Note {
   const Note({
     this.id,
     required this.isUserCreate,
-    this.orderNumber,
+    required this.orderNumber,
     required this.title,
     required this.content,
     required this.createdTime,

@@ -28,13 +28,13 @@ class NotesDatabase {
     const textType = 'TEXT NOT NULL';
     // const boolType = 'BOOLEAN NOT NULL';
     const integerType = 'INTEGER NOT NULL';
-    const autoType = 'INTEGER AUTO_INCREMENT';
+    // const autoType = 'INTEGER AUTO_INCREMENT';
 
     await db.execute('''
 CREATE TABLE $tableNotes ( 
   ${NoteFields.id} $idType, 
   ${NoteFields.isUserCreate} $integerType,
-  ${NoteFields.orderNumber} $autoType,
+  ${NoteFields.orderNumber} $integerType,
   ${NoteFields.title} $textType,
   ${NoteFields.content} $textType,
   ${NoteFields.createdTime} $integerType

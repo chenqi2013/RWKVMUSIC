@@ -152,6 +152,7 @@ var noteLengthList = ['1/4', '1/8', '1/16'];
 RxList notes = [].obs;
 var isEditPrompt = false.obs;
 var isAddPrompt = false.obs;
+var currentOrderNumber = 0;
 
 void fetchABCDataByIsolate() async {
   String? dllPath;
@@ -742,7 +743,7 @@ class _MyAppState extends State<MyApp> {
     final note = Note(
       // id: id ?? this.id,
       isUserCreate: isUserCreate,
-      // orderNumber: orderNumber,
+      orderNumber: orderNumber,
       title: title,
       content: content,
       createdTime: createdTime,
@@ -1861,10 +1862,14 @@ class _MyAppState extends State<MyApp> {
               ),
               TextButton(
                 onPressed: () async {
+                  if (controller.text.isEmpty) {
+                    toastInfo(msg: '请输入prompt的名称');
+                    return;
+                  }
                   debugPrint('finalabcStringCreate==$finalabcStringCreate');
                   await NotesDatabase.instance.create(Note(
                       isUserCreate: 1,
-                      orderNumber: 100,
+                      orderNumber: currentOrderNumber++,
                       title: controller.text,
                       content: finalabcStringCreate,
                       createdTime: DateTime.now().millisecondsSinceEpoch));
@@ -1955,9 +1960,11 @@ class _MyAppState extends State<MyApp> {
       notes.value = await NotesDatabase.instance.readAllNotes();
       if (notes.isEmpty) {
         for (int i = prompts.length - 1; i >= 0; i--) {
-          addNote(0, i, prompts[i], promptsAbc[i],
+          addNote(0, prompts.length - 1 - i, prompts[i], promptsAbc[i],
               DateTime.now().millisecondsSinceEpoch);
         }
+        currentOrderNumber = prompts.length;
+        notes.value = await NotesDatabase.instance.readAllNotes();
         debugPrint('notes==${notes.length}');
       } else {
         debugPrint('notes==${notes.length}');
@@ -2032,190 +2039,261 @@ class _MyAppState extends State<MyApp> {
               )
             ],
           ),
-          child: Column(
-            children: [
-              SizedBox(
-                height: isWindowsOrMac ? 200.h : 150.h,
-                // width: 40,
-                child: ListView.builder(
-                  controller: _controller,
-                  itemCount: type == STORAGE_PROMPTS_SELECT
-                      ? notes.length
-                      : list.length,
-                  itemBuilder: (BuildContext context, int index) {
-                    // ListTile(title: Text(list[index]));
-                    if (type == STORAGE_PROMPTS_SELECT &&
-                        isRememberPrompt.value) {
-                      promptSelectedIndex.value =
-                          ConfigStore.to.getPromptsSelect();
-                    } else if (type == STORAGE_SOUNDSEFFECT_SELECT &&
-                        isRememberEffect.value) {
-                      effectSelectedIndex.value =
-                          ConfigStore.to.getSoundsEffectSelect();
-                      if (effectSelectedIndex.value == -1) {
-                        currentSoundEffect = list[0];
-                      } else {
-                        currentSoundEffect = list[effectSelectedIndex.value];
-                      }
-                    }
-                    return Obx(() {
-                      return SizedBox(
-                        height: 40,
-                        child: RadioListTile(
-                          title: (type != STORAGE_PROMPTS_SELECT)
-                              ? Text(list[index])
-                              : Text(notes[index].title!),
-                          value: index,
-                          groupValue: type == STORAGE_KEYBOARD_SELECT
-                              ? keyboardSelectedIndex.value
-                              : (type == STORAGE_PROMPTS_SELECT
-                                  ? promptSelectedIndex.value
-                                  : type == STORAGE_SOUNDSEFFECT_SELECT
-                                      ? effectSelectedIndex.value
-                                      : noteLengthSelectedIndex.value),
-                          onChanged: (value) {
-                            if (type == STORAGE_PROMPTS_SELECT) {
-                              promptSelectedIndex.value = value!;
-                            } else if (type == STORAGE_SOUNDSEFFECT_SELECT) {
-                              effectSelectedIndex.value = value!;
-                            } else if (type == 'STORAGE_note_SELECT') {
-                              noteLengthSelectedIndex.value = value!;
-                            }
-                            // isHideWebview.value = !isHideWebview.value;
-                            // setState(() {});
-                            if (type == STORAGE_PROMPTS_SELECT) {
-                              if (isRememberPrompt.value) {
-                                ConfigStore.to.savePromptsSelect(value!);
-                              }
-                              //从数据库读取
-                              debugPrint('从数据库读取==${notes[value!].content!}');
-                              presentPrompt = CommonUtils.escapeString(
-                                  notes[value].content!); //promptsAbc[value!]
-                            } else if (type == STORAGE_SOUNDSEFFECT_SELECT) {
-                              midiProgramValue = soundEffectInt[list[index]]!;
-                              if (isRememberEffect.value) {
-                                ConfigStore.to.saveSoundsEffectSelect(value!);
-                                ConfigStore.to
-                                    .saveMidiProgramSelect(midiProgramValue);
-                              }
-                              currentSoundEffect =
-                                  list[effectSelectedIndex.value];
-                            } else if (type == STORAGE_KEYBOARD_SELECT) {
-                              if (index == 0) {
-                                //切换虚拟键盘
-                                closeDialog();
-                              } else if (index == 1) {
-                                //切换midi键盘，先判断有没有连接上
-                                debugPrint('deviceId==$connectDeviceId');
-                                Navigator.of(context).pop();
-                                if (connectDeviceId == null) {
-                                  showConnectDialog(context);
-                                } else {
-                                  debugPrint('onConnectionChanged');
-                                  UniversalBle.connect(connectDeviceId!);
-                                  UniversalBle.onConnectionChanged =
-                                      (String deviceId,
-                                          BleConnectionState state) {
-                                    print(
-                                        'OnConnectionChanged $deviceId, $state');
-                                    if (state == BleConnectionState.connected) {
-                                      toastInfo(msg: 'midi键盘已连接');
-                                    } else {
-                                      showConnectDialog(context);
-                                    }
-                                  };
+          child: Obx(() => Column(
+                children: [
+                  Obx(
+                    () => SizedBox(
+                      height: isWindowsOrMac ? 200.h : 150.h,
+                      // width: 40,
+                      child: isEditPrompt.value
+                          ? Expanded(
+                              child: Obx(() => ReorderableListView(
+                                    // shrinkWrap: true,
+                                    children: notes.map((item) {
+                                      // return ListTile(
+                                      //   key: Key(item.id.toString()),
+                                      //   title: Text(item.title!),
+                                      // );
+                                      return OrderItem(
+                                          key: Key(item.id.toString()),
+                                          title: item.title!,
+                                          isShowDelete: item.isUserCreate,
+                                          deleteAction: () {
+                                            showTipDialog(
+                                                'Notification',
+                                                'Are you sure to delete this prompt?',
+                                                'Cancel',
+                                                ' Delete', () async {
+                                              int result = await NotesDatabase
+                                                  .instance
+                                                  .delete(item.id);
+                                              notes.remove(item);
+                                              debugPrint('result==$result');
+                                            }, 160);
+                                          });
+                                    }).toList(),
+                                    onReorder: (oldIndex, newIndex) {
+                                      // setState(() {
+                                      // if (newIndex > oldIndex) {
+                                      //   newIndex -= 1;
+                                      // }
+                                      final Note item =
+                                          notes.removeAt(oldIndex);
+                                      notes.insert(newIndex, item);
+                                      // });
+                                    },
+                                  )),
+                            )
+                          : ListView.builder(
+                              controller: _controller,
+                              itemCount: type == STORAGE_PROMPTS_SELECT
+                                  ? notes.length
+                                  : list.length,
+                              itemBuilder: (BuildContext context, int index) {
+                                // ListTile(title: Text(list[index]));
+                                if (type == STORAGE_PROMPTS_SELECT &&
+                                    isRememberPrompt.value) {
+                                  promptSelectedIndex.value =
+                                      ConfigStore.to.getPromptsSelect();
+                                } else if (type ==
+                                        STORAGE_SOUNDSEFFECT_SELECT &&
+                                    isRememberEffect.value) {
+                                  effectSelectedIndex.value =
+                                      ConfigStore.to.getSoundsEffectSelect();
+                                  if (effectSelectedIndex.value == -1) {
+                                    currentSoundEffect = list[0];
+                                  } else {
+                                    currentSoundEffect =
+                                        list[effectSelectedIndex.value];
+                                  }
                                 }
-                                // toastInfo(msg: 'Midi device connected');
-                              }
-                            } else if (type == 'STORAGE_note_SELECT') {
-                              print('STORAGE_note_SELECT');
-                              updateNote(int.parse(currentClickNoteInfo[1]),
-                                  index, currentClickNoteInfo[0].toString());
-                            }
-                            if (selectstate.value == 0) {
-                              String abcstr = ABCHead.getABCWithInstrument(
-                                  presentPrompt, midiProgramValue);
-                              abcstr = ABCHead.appendTempoParam(
-                                  abcstr, tempo.value.toInt());
-                              controllerPiano.runJavaScript(
-                                  "setAbcString(\"$abcstr\", false)");
-                              controllerKeyboard.runJavaScript('resetPlay()');
-                              debugPrint(abcstr);
-                              Future.delayed(const Duration(microseconds: 300),
-                                  () {
-                                playOrPausePiano();
-                              });
+                                return Obx(() {
+                                  return SizedBox(
+                                    height: 40,
+                                    child: RadioListTile(
+                                      title: (type != STORAGE_PROMPTS_SELECT)
+                                          ? Text(list[index])
+                                          : Text(notes[index].title!),
+                                      value: index,
+                                      groupValue: type ==
+                                              STORAGE_KEYBOARD_SELECT
+                                          ? keyboardSelectedIndex.value
+                                          : (type == STORAGE_PROMPTS_SELECT
+                                              ? promptSelectedIndex.value
+                                              : type ==
+                                                      STORAGE_SOUNDSEFFECT_SELECT
+                                                  ? effectSelectedIndex.value
+                                                  : noteLengthSelectedIndex
+                                                      .value),
+                                      onChanged: (value) {
+                                        if (type == STORAGE_PROMPTS_SELECT) {
+                                          promptSelectedIndex.value = value!;
+                                        } else if (type ==
+                                            STORAGE_SOUNDSEFFECT_SELECT) {
+                                          effectSelectedIndex.value = value!;
+                                        } else if (type ==
+                                            'STORAGE_note_SELECT') {
+                                          noteLengthSelectedIndex.value =
+                                              value!;
+                                        }
+                                        // isHideWebview.value = !isHideWebview.value;
+                                        // setState(() {});
+                                        if (type == STORAGE_PROMPTS_SELECT) {
+                                          if (isRememberPrompt.value) {
+                                            ConfigStore.to
+                                                .savePromptsSelect(value!);
+                                          }
+                                          //从数据库读取
+                                          debugPrint(
+                                              '从数据库读取==${notes[value!].content!}');
+                                          presentPrompt = CommonUtils
+                                              .escapeString(notes[value]
+                                                  .content!); //promptsAbc[value!]
+                                        } else if (type ==
+                                            STORAGE_SOUNDSEFFECT_SELECT) {
+                                          midiProgramValue =
+                                              soundEffectInt[list[index]]!;
+                                          if (isRememberEffect.value) {
+                                            ConfigStore.to
+                                                .saveSoundsEffectSelect(value!);
+                                            ConfigStore.to
+                                                .saveMidiProgramSelect(
+                                                    midiProgramValue);
+                                          }
+                                          currentSoundEffect =
+                                              list[effectSelectedIndex.value];
+                                        } else if (type ==
+                                            STORAGE_KEYBOARD_SELECT) {
+                                          if (index == 0) {
+                                            //切换虚拟键盘
+                                            closeDialog();
+                                          } else if (index == 1) {
+                                            //切换midi键盘，先判断有没有连接上
+                                            debugPrint(
+                                                'deviceId==$connectDeviceId');
+                                            Navigator.of(context).pop();
+                                            if (connectDeviceId == null) {
+                                              showConnectDialog(context);
+                                            } else {
+                                              debugPrint('onConnectionChanged');
+                                              UniversalBle.connect(
+                                                  connectDeviceId!);
+                                              UniversalBle.onConnectionChanged =
+                                                  (String deviceId,
+                                                      BleConnectionState
+                                                          state) {
+                                                print(
+                                                    'OnConnectionChanged $deviceId, $state');
+                                                if (state ==
+                                                    BleConnectionState
+                                                        .connected) {
+                                                  toastInfo(msg: 'midi键盘已连接');
+                                                } else {
+                                                  showConnectDialog(context);
+                                                }
+                                              };
+                                            }
+                                            // toastInfo(msg: 'Midi device connected');
+                                          }
+                                        } else if (type ==
+                                            'STORAGE_note_SELECT') {
+                                          print('STORAGE_note_SELECT');
+                                          updateNote(
+                                              int.parse(
+                                                  currentClickNoteInfo[1]),
+                                              index,
+                                              currentClickNoteInfo[0]
+                                                  .toString());
+                                        }
+                                        if (selectstate.value == 0) {
+                                          String abcstr =
+                                              ABCHead.getABCWithInstrument(
+                                                  presentPrompt,
+                                                  midiProgramValue);
+                                          abcstr = ABCHead.appendTempoParam(
+                                              abcstr, tempo.value.toInt());
+                                          controllerPiano.runJavaScript(
+                                              "setAbcString(\"$abcstr\", false)");
+                                          controllerKeyboard
+                                              .runJavaScript('resetPlay()');
+                                          debugPrint(abcstr);
+                                          Future.delayed(
+                                              const Duration(microseconds: 300),
+                                              () {
+                                            playOrPausePiano();
+                                          });
+                                        }
+                                      },
+                                    ),
+                                  );
+                                });
+                              },
+                            ),
+                    ),
+                  ),
+                  if (selectstate.value == 0 && !isEditPrompt.value)
+                    const Divider(
+                      height: 1,
+                    ),
+                  if (selectstate.value == 0 && !isEditPrompt.value)
+                    Obx(
+                      () => ListTile(
+                        leading: Checkbox(
+                          value: type == STORAGE_PROMPTS_SELECT
+                              ? isRememberPrompt.value
+                              : isRememberEffect.value,
+                          onChanged: (bool? value) {
+                            if (type == STORAGE_PROMPTS_SELECT) {
+                              isRememberPrompt.value = value!;
+                              ConfigStore.to.saveRemberPromptSelect(value);
+                            } else {
+                              isRememberEffect.value = value!;
+                              ConfigStore.to.saveRemberEffectSelect(value);
                             }
                           },
                         ),
-                      );
-                    });
-                  },
-                ),
-              ),
-              if (selectstate.value == 0)
-                const Divider(
-                  height: 1,
-                ),
-              if (selectstate.value == 0)
-                Obx(
-                  () => ListTile(
-                    leading: Checkbox(
-                      value: type == STORAGE_PROMPTS_SELECT
-                          ? isRememberPrompt.value
-                          : isRememberEffect.value,
-                      onChanged: (bool? value) {
-                        if (type == STORAGE_PROMPTS_SELECT) {
-                          isRememberPrompt.value = value!;
-                          ConfigStore.to.saveRemberPromptSelect(value);
-                        } else {
-                          isRememberEffect.value = value!;
-                          ConfigStore.to.saveRemberEffectSelect(value);
-                        }
-                      },
+                        title: Transform.translate(
+                          offset: const Offset(-20, 0), // 向左移动文本以减少间距
+                          child: const Text('Remember Last Option'),
+                        ),
+                        onTap: () {},
+                      ),
                     ),
-                    title: Transform.translate(
-                      offset: const Offset(-20, 0), // 向左移动文本以减少间距
-                      child: const Text('Remember Last Option'),
-                    ),
-                    onTap: () {},
-                  ),
-                ),
-              if (type == STORAGE_PROMPTS_SELECT)
-                ResetEdit(onPressed: (int type) {
-                  if (type == 0) {
-                    // reset opeartion
-                    showTipDialog(
-                        'Notification',
-                        'If you reset prompts, it will automatically reset the prompt order. It will not delete the added prompts.',
-                        'Cancel',
-                        'Reset',
-                        () {},
-                        220);
-                  } else {
-                    // edit operation
-                    isEditPrompt.value = true;
-                  }
-                }),
-              // if (type == STORAGE_PROMPTS_SELECT)
-              //   Obx(
-              //     () => ListTile(
-              //       leading: Checkbox(
-              //         value: isAutoSwitch.value,
-              //         onChanged: (bool? value) {
-              //           isAutoSwitch.value = value!;
-              //           ConfigStore.to.saveAutoNext(value);
-              //         },
-              //       ),
-              //       title: Transform.translate(
-              //         offset: const Offset(-20, 0), // 向左移动文本以减少间距
-              //         child: const Text('Auto Switch Next Prompt'),
-              //       ),
-              //       onTap: () {},
-              //     ),
-              //   ),
-            ],
-          ),
+                  if (type == STORAGE_PROMPTS_SELECT && !isEditPrompt.value)
+                    ResetEdit(onPressed: (int type) {
+                      if (type == 0) {
+                        // reset opeartion
+                        showTipDialog(
+                            'Notification',
+                            'If you reset prompts, it will automatically reset the prompt order. It will not delete the added prompts.',
+                            'Cancel',
+                            'Reset',
+                            () {},
+                            220);
+                      } else {
+                        // edit operation
+                        isEditPrompt.value = true;
+                      }
+                    }),
+                  // if (type == STORAGE_PROMPTS_SELECT)
+                  //   Obx(
+                  //     () => ListTile(
+                  //       leading: Checkbox(
+                  //         value: isAutoSwitch.value,
+                  //         onChanged: (bool? value) {
+                  //           isAutoSwitch.value = value!;
+                  //           ConfigStore.to.saveAutoNext(value);
+                  //         },
+                  //       ),
+                  //       title: Transform.translate(
+                  //         offset: const Offset(-20, 0), // 向左移动文本以减少间距
+                  //         child: const Text('Auto Switch Next Prompt'),
+                  //       ),
+                  //       onTap: () {},
+                  //     ),
+                  //   ),
+                ],
+              )),
         ),
       ),
     );
