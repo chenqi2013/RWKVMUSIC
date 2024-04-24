@@ -28,15 +28,16 @@ class NotesDatabase {
     const textType = 'TEXT NOT NULL';
     // const boolType = 'BOOLEAN NOT NULL';
     const integerType = 'INTEGER NOT NULL';
+    const autoType = 'INTEGER AUTO_INCREMENT';
 
     await db.execute('''
 CREATE TABLE $tableNotes ( 
   ${NoteFields.id} $idType, 
   ${NoteFields.isUserCreate} $integerType,
-  ${NoteFields.orderNumber} $integerType,
+  ${NoteFields.orderNumber} $autoType,
   ${NoteFields.title} $textType,
   ${NoteFields.content} $textType,
-  ${NoteFields.createdTime} $textType
+  ${NoteFields.createdTime} $integerType
   )
 ''');
   }
@@ -76,7 +77,9 @@ CREATE TABLE $tableNotes (
   Future<List<Note>> readAllNotes() async {
     final db = await instance.database;
 
-    const orderBy = '${NoteFields.createdTime} ASC';
+    // const orderBy = '${NoteFields.createdTime} DESC'; //DESC
+
+    const orderBy = '${NoteFields.orderNumber} DESC'; //DESC ASC
     // final result =
     //     await db.rawQuery('SELECT * FROM $tableNotes ORDER BY $orderBy');
 

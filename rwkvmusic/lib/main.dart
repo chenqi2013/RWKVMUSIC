@@ -23,6 +23,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:rwkvmusic/gen/assets.gen.dart';
 import 'package:rwkvmusic/mainwidget/ProgressbarTime.dart';
 import 'package:rwkvmusic/mainwidget/add_prompt_top.dart';
+import 'package:rwkvmusic/mainwidget/order_item.dart';
 import 'package:rwkvmusic/mainwidget/reset_edit.dart';
 import 'package:rwkvmusic/services/storage.dart';
 import 'package:rwkvmusic/store/config.dart';
@@ -148,7 +149,7 @@ var tokens = ''.obs;
 var currentClickNoteInfo = [];
 
 var noteLengthList = ['1/4', '1/8', '1/16'];
-List<Note> notes = [];
+RxList notes = [].obs;
 var isEditPrompt = false.obs;
 var isAddPrompt = false.obs;
 
@@ -741,7 +742,7 @@ class _MyAppState extends State<MyApp> {
     final note = Note(
       // id: id ?? this.id,
       isUserCreate: isUserCreate,
-      orderNumber: orderNumber,
+      // orderNumber: orderNumber,
       title: title,
       content: content,
       createdTime: createdTime,
@@ -1767,8 +1768,8 @@ class _MyAppState extends State<MyApp> {
         duration: const Duration(milliseconds: 0), curve: Curves.easeInOut);
   }
 
-  void showTipDialog(
-      String title, String content, String cancel, String ok, Function action) {
+  void showTipDialog(String title, String content, String cancel, String ok,
+      Function action, double height) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -1776,8 +1777,8 @@ class _MyAppState extends State<MyApp> {
           contentPadding: EdgeInsets.zero, // 移除AlertDialog的内边距
           content: Container(
             padding: const EdgeInsets.all(15),
-            width: 400,
-            height: 200,
+            width: 200,
+            height: height,
             child:
                 Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
               Text(title),
@@ -1786,7 +1787,7 @@ class _MyAppState extends State<MyApp> {
               ),
               Text(content),
               const SizedBox(
-                height: 20,
+                height: 15,
               ),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -1866,8 +1867,8 @@ class _MyAppState extends State<MyApp> {
                       orderNumber: 100,
                       title: controller.text,
                       content: finalabcStringCreate,
-                      createdTime: DateTime.now().toString()));
-                  notes = await NotesDatabase.instance.readAllNotes();
+                      createdTime: DateTime.now().millisecondsSinceEpoch));
+                  notes.value = await NotesDatabase.instance.readAllNotes();
                   debugPrint('note length==${notes.length}');
                   Get.back();
                 },
@@ -1881,15 +1882,7 @@ class _MyAppState extends State<MyApp> {
   }
 
   void showEditPromptDialog(BuildContext context) {
-    showTipDialog('Notification', 'Are you sure to delete this prompt?',
-        'Cancel', ' Delete', () async {
-      int result = await NotesDatabase.instance.delete(100);
-      debugPrint('result==$result');
-    });
-    return;
-    showSaveDialog();
-    return;
-    List<String> items = List.generate(10, (index) => 'Item $index');
+    // List<String> items = List.generate(10, (index) => 'Item $index');
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -1914,24 +1907,40 @@ class _MyAppState extends State<MyApp> {
                 ],
               ),
               Expanded(
-                child: ReorderableListView(
-                  // shrinkWrap: true,
-                  children: items.map((item) {
-                    return ListTile(
-                      key: Key(item),
-                      title: Text(item),
-                    );
-                  }).toList(),
-                  onReorder: (oldIndex, newIndex) {
-                    setState(() {
-                      if (newIndex > oldIndex) {
-                        newIndex -= 1;
-                      }
-                      final String item = items.removeAt(oldIndex);
-                      items.insert(newIndex, item);
-                    });
-                  },
-                ),
+                child: Obx(() => ReorderableListView(
+                      // shrinkWrap: true,
+                      children: notes.map((item) {
+                        // return ListTile(
+                        //   key: Key(item.id.toString()),
+                        //   title: Text(item.title!),
+                        // );
+                        return OrderItem(
+                            key: Key(item.id.toString()),
+                            title: item.title!,
+                            isShowDelete: item.isUserCreate,
+                            deleteAction: () {
+                              showTipDialog(
+                                  'Notification',
+                                  'Are you sure to delete this prompt?',
+                                  'Cancel',
+                                  ' Delete', () async {
+                                int result = await NotesDatabase.instance
+                                    .delete(item.id);
+                                notes.remove(item);
+                                debugPrint('result==$result');
+                              }, 160);
+                            });
+                      }).toList(),
+                      onReorder: (oldIndex, newIndex) {
+                        // setState(() {
+                        // if (newIndex > oldIndex) {
+                        //   newIndex -= 1;
+                        // }
+                        final Note item = notes.removeAt(oldIndex);
+                        notes.insert(newIndex, item);
+                        // });
+                      },
+                    )),
               ),
             ]),
           ),
@@ -1943,10 +1952,11 @@ class _MyAppState extends State<MyApp> {
   void showPromptDialog(
       BuildContext context, String titleStr, List list, String type) async {
     if (type == STORAGE_PROMPTS_SELECT) {
-      notes = await NotesDatabase.instance.readAllNotes();
+      notes.value = await NotesDatabase.instance.readAllNotes();
       if (notes.isEmpty) {
-        for (int i = 0; i < prompts.length; i++) {
-          addNote(0, i, prompts[i], promptsAbc[i], DateTime.now().toString());
+        for (int i = prompts.length - 1; i >= 0; i--) {
+          addNote(0, i, prompts[i], promptsAbc[i],
+              DateTime.now().millisecondsSinceEpoch);
         }
         debugPrint('notes==${notes.length}');
       } else {
@@ -2180,7 +2190,8 @@ class _MyAppState extends State<MyApp> {
                         'If you reset prompts, it will automatically reset the prompt order. It will not delete the added prompts.',
                         'Cancel',
                         'Reset',
-                        () {});
+                        () {},
+                        220);
                   } else {
                     // edit operation
                     isEditPrompt.value = true;

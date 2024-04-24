@@ -20,12 +20,12 @@ class Note {
   final int? orderNumber;
   final String? title;
   final String? content;
-  final String? createdTime;
+  final int? createdTime;
 
   const Note({
     this.id,
     required this.isUserCreate,
-    required this.orderNumber,
+    this.orderNumber,
     required this.title,
     required this.content,
     required this.createdTime,
@@ -37,7 +37,7 @@ class Note {
     int? orderNumber,
     String? title,
     String? content,
-    String? createdTime,
+    int? createdTime,
   }) =>
       Note(
         id: id,
@@ -54,7 +54,7 @@ class Note {
         orderNumber: json[NoteFields.orderNumber] as int,
         title: json[NoteFields.title] as String,
         content: json[NoteFields.content] as String,
-        createdTime: json[NoteFields.createdTime] as String,
+        createdTime: json[NoteFields.createdTime] as int,
       );
 
   Map<String, Object?> toJson() => {
