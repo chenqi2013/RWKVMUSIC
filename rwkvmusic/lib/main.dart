@@ -854,8 +854,8 @@ class _MyAppState extends State<MyApp> {
                       visible: isVisibleWebview.value,
                       key: const ValueKey('ValueKey33'),
                       child: Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 25, vertical: 2),
+                        padding: const EdgeInsets.only(
+                            left: 20, top: 2, right: 25, bottom: 2),
                         color: const Color(0xff3a3a3a),
                         child: Obx(
                           () => Row(
@@ -864,15 +864,24 @@ class _MyAppState extends State<MyApp> {
                               // if (selectstate.value == 0)
                               Row(
                                 children: [
-                                  creatBottomBtn('Prompts', () {
-                                    debugPrint("Promptss");
-                                    showPromptDialog(context, 'Prompts',
-                                        prompts, STORAGE_PROMPTS_SELECT);
-                                  }),
+                                  selectstate.value == 0
+                                      ? creatBottomBtn('Prompts', () {
+                                          debugPrint("Promptss");
+                                          showPromptDialog(context, 'Prompts',
+                                              prompts, STORAGE_PROMPTS_SELECT);
+                                        })
+                                      : creatBottomBtn('Soft keyboard', () {
+                                          debugPrint("Simulate keyboard");
+                                          showPromptDialog(
+                                              context,
+                                              'Keyboard Options',
+                                              keyboardOptions,
+                                              STORAGE_KEYBOARD_SELECT);
+                                        }),
                                   const SizedBox(
                                     width: 8,
                                   ),
-                                  creatBottomBtn('Sounds Effect', () {
+                                  creatBottomBtn('Effect', () {
                                     debugPrint("Sounds Effect");
                                     showPromptDialog(
                                         context,
@@ -881,13 +890,17 @@ class _MyAppState extends State<MyApp> {
                                         STORAGE_SOUNDSEFFECT_SELECT);
                                   }),
                                   const SizedBox(
-                                    width: 35,
+                                    width: 20,
                                   ),
                                   Obx(() => isGenerating.value
-                                      ? const CircularProgressIndicator(
-                                          valueColor:
-                                              AlwaysStoppedAnimation<Color>(
-                                                  Colors.white),
+                                      ? const SizedBox(
+                                          width: 20,
+                                          height: 20,
+                                          child: CircularProgressIndicator(
+                                            valueColor:
+                                                AlwaysStoppedAnimation<Color>(
+                                                    Colors.white),
+                                          ),
                                         )
                                       : Container(
                                           child: null,
@@ -898,12 +911,6 @@ class _MyAppState extends State<MyApp> {
                                   )
                                 ],
                               ),
-                              // if (selectstate.value == 1)
-                              //   creatBottomBtn('Simulate keyboard', () {
-                              //     debugPrint("Simulate keyboard");
-                              //     showPromptDialog(context, 'Keyboard Options',
-                              //         keyboardOptions, STORAGE_KEYBOARD_SELECT);
-                              //   }),
                               Expanded(
                                 child: Row(
                                   mainAxisAlignment: MainAxisAlignment.end,
@@ -1373,7 +1380,7 @@ class _MyAppState extends State<MyApp> {
                 const SizedBox(
                   height: 20,
                 ),
-                const Center(child: Text('Version: 1.1.0')),
+                const Center(child: Text('Version: MTK RWKV-6 1.2.0')),
               ],
             ),
           )),
@@ -1734,7 +1741,7 @@ class _MyAppState extends State<MyApp> {
                         const SizedBox(
                           height: 20,
                         ),
-                        const Center(child: Text('Version: 1.1.0')),
+                        const Center(child: Text('Version: MTK RWKV-6 1.2.0')),
                         const SizedBox(
                           height: 10,
                         ),
