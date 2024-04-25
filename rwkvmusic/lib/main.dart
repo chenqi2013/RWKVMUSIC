@@ -620,7 +620,7 @@ class _MyAppState extends State<MyApp> {
     }
     finalabcStringCreate = sbff.toString();
     String sb =
-        "setAbcString(\"%%MIDI program $midiProgramValue}\\nL:1/4\\nM:$timeSingnatureStr\\nK:C\\n|\\$finalabcStringCreate\",false)";
+        "setAbcString(\"%%MIDI program $midiProgramValue\\nL:1/4\\nM:$timeSingnatureStr\\nK:C\\n|\\$finalabcStringCreate\",false)";
     sb = ABCHead.appendTempoParam(sb, tempo.value.toInt());
     debugPrint('curr=$sb');
     controllerPiano.runJavaScript(sb);
@@ -648,7 +648,7 @@ class _MyAppState extends State<MyApp> {
           "setAbcString(\"Q:${tempo.value.toInt()}\\nL:1/4\\nM:$timeSingnatureStr\\nK:C\\n|\\$finalabcStringCreate\",false)";
     } else {
       sb =
-          "setAbcString(\"%%MIDI program $midiProgramValue}\\nL:1/4\\nM:$timeSingnatureStr\\nK:C\\n|\\$finalabcStringCreate\",false)";
+          "setAbcString(\"%%MIDI program $midiProgramValue\\nL:1/4\\nM:$timeSingnatureStr\\nK:C\\n|\\$finalabcStringCreate\",false)";
     }
     sb = ABCHead.appendTempoParam(sb, tempo.value.toInt());
     debugPrint('curr=$sb');
@@ -658,7 +658,7 @@ class _MyAppState extends State<MyApp> {
 
   void updateTimeSignature() {
     String sb =
-        "setAbcString(\"%%MIDI program $midiProgramValue}\\nL:1/4\\nM:$timeSingnatureStr\\nK:C\\n|\\$finalabcStringCreate\",false)";
+        "setAbcString(\"%%MIDI program $midiProgramValue\\nL:1/4\\nM:$timeSingnatureStr\\nK:C\\n|\\$finalabcStringCreate\",false)";
     sb = ABCHead.appendTempoParam(sb, tempo.value.toInt());
     debugPrint('curr=$sb');
     controllerPiano.runJavaScript(sb);
@@ -681,7 +681,7 @@ class _MyAppState extends State<MyApp> {
           sbff.write(note);
         }
         String sb =
-            "setAbcString(\"%%MIDI program $midiProgramValue}\\nL:1/4\\nM:$timeSingnatureStr\\nK:C\\n|\\${sbff.toString()}\",false)";
+            "setAbcString(\"%%MIDI program $midiProgramValue\\nL:1/4\\nM:$timeSingnatureStr\\nK:C\\n|\\${sbff.toString()}\",false)";
         debugPrint('curr=$sb');
         sb = ABCHead.appendTempoParam(sb, tempo.value.toInt());
         controllerPiano.runJavaScript(sb);
@@ -905,7 +905,8 @@ class _MyAppState extends State<MyApp> {
                                       : Container(
                                           child: null,
                                         )),
-                                  ProgressbarTime(playProgress, pianoAllTime),
+                                  Obx(() => ProgressbarTime(
+                                      playProgress, pianoAllTime)),
                                   const SizedBox(
                                     width: 20,
                                   )
@@ -931,8 +932,9 @@ class _MyAppState extends State<MyApp> {
                                           isGenerating.value =
                                               !isGenerating.value;
                                           if (isGenerating.value) {
-                                            playProgress.value = 0.0;
-                                            pianoAllTime.value = 0.0;
+                                            resetPlay();
+                                            // playProgress.value = 0.0;
+                                            // pianoAllTime.value = 0.0;
                                             // controllerPiano.runJavaScript(
                                             //     "setAbcString(\"%%MIDI program 40\\nL:1/4\\nM:4/4\\nK:D\\n\\\"D\\\" A F F\", false)");
                                             // controllerPiano.runJavaScript(
@@ -942,9 +944,11 @@ class _MyAppState extends State<MyApp> {
                                             // } else {
                                             //   getABCDataByAPI();
                                             // }
-                                            controllerKeyboard
-                                                .runJavaScript('resetPlay()');
-                                            isFinishABCEvent = false;
+                                            // controllerKeyboard
+                                            //     .runJavaScript('resetPlay()');
+                                            // controllerPiano.runJavaScript(
+                                            //     'resetTimingCallbacks()');
+                                            // isFinishABCEvent = false;
                                           } else {
                                             // isolateSendPort.send('stop Generating');
                                             isolateEventBus
@@ -1114,7 +1118,24 @@ class _MyAppState extends State<MyApp> {
     });
   }
 
+  void resetPlay() {
+    // if (isPlay.value) {
+    debugPrint('pausePlay()');
+    // playOrPausePiano();
+    // controllerPiano.runJavaScript("pausePlay()");
+    controllerPiano.runJavaScript("resetTimingCallbacks()");
+    isPlay.value = false;
+    isNeedRestart = true;
+    timer.cancel();
+    playProgress.value = 0.0;
+    pianoAllTime.value = 0.0;
+    controllerKeyboard.runJavaScript('resetPlay()');
+    isFinishABCEvent = false;
+    // }
+  }
+
   void segmengChange(int index) {
+    resetPlay();
     if (index == 0) {
       //preset
       // controllerPiano.runJavaScript(
@@ -1790,10 +1811,10 @@ class _MyAppState extends State<MyApp> {
     );
   }
 
-  void _scrollToRow(int rowIndex) {
+  void scrollToRow(int rowIndex) {
     const double rowHeight = 40.0; // Assuming the height of each row is 56.0
     _controller.animateTo(rowIndex * rowHeight,
-        duration: const Duration(milliseconds: 0), curve: Curves.easeInOut);
+        duration: const Duration(milliseconds: 100), curve: Curves.easeInOut);
   }
 
   void showPromptDialog(
@@ -1942,15 +1963,25 @@ class _MyAppState extends State<MyApp> {
                               updateNote(int.parse(currentClickNoteInfo[1]),
                                   index, currentClickNoteInfo[0].toString());
                             }
-                            if (selectstate.value == 0) {
-                              String abcstr = ABCHead.getABCWithInstrument(
-                                  presentPrompt, midiProgramValue);
+                            if (type == STORAGE_PROMPTS_SELECT ||
+                                type == STORAGE_SOUNDSEFFECT_SELECT) {
+                              String abcstr = '';
+                              if (selectstate.value == 0) {
+                                abcstr = ABCHead.getABCWithInstrument(
+                                    presentPrompt, midiProgramValue);
+                              } else {
+                                abcstr = ABCHead.getABCWithInstrument(
+                                    createPrompt, midiProgramValue);
+                              }
                               abcstr = ABCHead.appendTempoParam(
                                   abcstr, tempo.value.toInt());
-                              controllerPiano.runJavaScript(
-                                  "setAbcString(\"$abcstr\", false)");
+                              finalabcStringPreset =
+                                  "setAbcString(\"$abcstr\", false)";
+                              controllerPiano
+                                  .runJavaScript(finalabcStringPreset);
                               controllerKeyboard.runJavaScript('resetPlay()');
-                              debugPrint(abcstr);
+                              debugPrint('选择prompt==$abcstr');
+
                               Future.delayed(const Duration(microseconds: 300),
                                   () {
                                 playOrPausePiano();
@@ -1963,11 +1994,11 @@ class _MyAppState extends State<MyApp> {
                   },
                 ),
               ),
-              if (selectstate.value == 0)
+              if (type != STORAGE_KEYBOARD_SELECT)
                 const Divider(
                   height: 1,
                 ),
-              if (selectstate.value == 0)
+              if (type != STORAGE_KEYBOARD_SELECT)
                 Obx(
                   () => ListTile(
                     leading: Checkbox(
@@ -2015,9 +2046,9 @@ class _MyAppState extends State<MyApp> {
     );
     Future.delayed(const Duration(milliseconds: 100)).then((value) {
       if (type == STORAGE_PROMPTS_SELECT) {
-        _scrollToRow(promptSelectedIndex.value);
+        scrollToRow(promptSelectedIndex.value);
       } else {
-        _scrollToRow(effectSelectedIndex.value);
+        scrollToRow(effectSelectedIndex.value);
       }
     });
   }
