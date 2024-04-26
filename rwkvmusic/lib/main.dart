@@ -1930,7 +1930,7 @@ class _MyAppState extends State<MyApp> {
                                   'Cancel',
                                   ' Delete', () async {
                                 int result = await NotesDatabase.instance
-                                    .delete(item.id);
+                                    .deleteByID(item.id);
                                 notes.remove(item);
                                 debugPrint('result==$result');
                               }, 160);
@@ -2066,7 +2066,7 @@ class _MyAppState extends State<MyApp> {
                                                 ' Delete', () async {
                                               int result = await NotesDatabase
                                                   .instance
-                                                  .delete(item.id);
+                                                  .deleteByID(item.id);
                                               notes.remove(item);
                                               debugPrint('result==$result');
                                             }, 160);
@@ -2267,9 +2267,12 @@ class _MyAppState extends State<MyApp> {
                             'Notification',
                             'If you reset prompts, it will automatically reset the prompt order. It will not delete the added prompts.',
                             'Cancel',
-                            'Reset',
-                            () {},
-                            220);
+                            'Reset', () async {
+                          debugPrint('reset opeartion');
+                          NotesDatabase.instance.deleteAllUserCreate(1);
+                          notes.value =
+                              await NotesDatabase.instance.readAllNotes();
+                        }, 220);
                       } else {
                         // edit operation
                         isEditPrompt.value = true;

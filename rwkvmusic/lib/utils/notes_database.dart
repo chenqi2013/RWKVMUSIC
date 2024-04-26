@@ -99,7 +99,17 @@ CREATE TABLE $tableNotes (
     );
   }
 
-  Future<int> delete(int id) async {
+  Future<int> deleteAllUserCreate(int isUserCreate) async {
+    final db = await instance.database;
+
+    return await db.delete(
+      tableNotes,
+      where: '${NoteFields.isUserCreate} = ?',
+      whereArgs: [isUserCreate],
+    );
+  }
+
+  Future<int> deleteByID(int id) async {
     final db = await instance.database;
 
     return await db.delete(
