@@ -1030,6 +1030,7 @@ class _MyAppState extends State<MyApp> {
   void playOrPausePiano() {
     debugPrint('playOrPausePiano');
     if (!isPlay.value) {
+      controllerKeyboard.runJavaScript('resetPlay()');
       controllerPiano.runJavaScript("startPlay()");
     } else {
       controllerPiano.runJavaScript("pausePlay()");
@@ -1119,19 +1120,20 @@ class _MyAppState extends State<MyApp> {
   }
 
   void resetPlay() {
-    // if (isPlay.value) {
-    debugPrint('pausePlay()');
-    // playOrPausePiano();
-    // controllerPiano.runJavaScript("pausePlay()");
-    controllerPiano.runJavaScript("resetTimingCallbacks()");
-    isPlay.value = false;
-    isNeedRestart = true;
-    timer.cancel();
-    playProgress.value = 0.0;
-    pianoAllTime.value = 0.0;
-    controllerKeyboard.runJavaScript('resetPlay()');
-    isFinishABCEvent = false;
-    // }
+    if (isPlay.value) {
+      playOrPausePiano();
+      controllerPiano.runJavaScript("resetTimingCallbacks()");
+      // controllerPiano.runJavaScript("setPlayButtonDisable(true)");
+      controllerKeyboard.runJavaScript('resetPlay()');
+      debugPrint('pausePlay()');
+      // controllerPiano.runJavaScript("pausePlay()");
+      isPlay.value = false;
+      isNeedRestart = true;
+      timer.cancel();
+      playProgress.value = 0.0;
+      pianoAllTime.value = 0.0;
+      isFinishABCEvent = false;
+    }
   }
 
   void segmengChange(int index) {
@@ -1839,10 +1841,10 @@ class _MyAppState extends State<MyApp> {
     //   );
     // } else {
     if (!isRememberEffect.value) {
-      effectSelectedIndex.value = 0;
+      // effectSelectedIndex.value = 0;
     }
     if (!isRememberPrompt.value) {
-      promptSelectedIndex.value = 0;
+      // promptSelectedIndex.value = 0;
     }
     showDialog(
       barrierDismissible: false,
@@ -1924,6 +1926,7 @@ class _MyAppState extends State<MyApp> {
                                   CommonUtils.escapeString(promptsAbc[value!]);
                             } else if (type == STORAGE_SOUNDSEFFECT_SELECT) {
                               midiProgramValue = soundEffectInt[list[index]]!;
+                              debugPrint('midiProgramValue==$midiProgramValue');
                               if (isRememberEffect.value) {
                                 ConfigStore.to.saveSoundsEffectSelect(value!);
                                 ConfigStore.to
@@ -1980,11 +1983,11 @@ class _MyAppState extends State<MyApp> {
                               controllerPiano
                                   .runJavaScript(finalabcStringPreset);
                               controllerKeyboard.runJavaScript('resetPlay()');
-                              debugPrint('选择prompt==$abcstr');
+                              // debugPrint('选择prompt==$abcstr');
 
                               Future.delayed(const Duration(microseconds: 300),
                                   () {
-                                playOrPausePiano();
+                                playOrPausePiano(); //音效播放不对，待查问题
                               });
                             }
                           },
