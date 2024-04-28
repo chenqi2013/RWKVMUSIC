@@ -239,6 +239,9 @@ void fetchABCDataByIsolate() async {
 void getABCDataByLocalModel(var array) async {
   SendPort sendPort = array[0];
   String currentPrompt = array[1];
+  currentPrompt = currentPrompt.replaceAll('\\"', '"');
+  // currentPrompt = 'L:1/8\nM:2/4\nK:none\n[K:C] "C" gg g>';
+  debugPrint('currentPrompt==$currentPrompt');
   int midiprogramvalue = array[2];
   int seed = array[3];
   double randomness = array[4];
@@ -298,14 +301,16 @@ void getABCDataByLocalModel(var array) async {
     double tokens = counts / duration;
     // debugPrint('tokens==$tokens');
     sendPort.send('tokens==$tokens');
-    if (token == result && result == 124) {
-      //双||abc展示出错
-      continue;
-    }
+    // if (token == result && result == 124) {
+    //   //双||abc展示出错
+    //   continue;
+    // }
     token = result;
     String resultstr = String.fromCharCode(result);
     // result :10=换行;47=/;41=);40=(;94=^;34=";32=空格
-    if (result == 10 || result == 0 || result == 34) {
+    if (result == 10) {
+      //|| result == 0
+      // || result == 34
       //|| result == 32
       // ||
       //   // result == 40 ||
