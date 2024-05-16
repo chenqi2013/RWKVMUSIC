@@ -1,0 +1,1 @@
+<start> pi:4a:0 pi:4a:7 t60 pi:4f:0 pi:4f:7 t60 pi:54:0 pi:54:7 t60 pi:52:0 pi:52:7 t60 pi:56:0 pi:56:7 t121 pi:51:0 pi:51:7 t121 pi:4f:0 pi:4f:7 t60 pi:4a:0 pi:4a:7 t58 v:32:0 s:3e:0 s:4a:0 f:3e:0 f:4a:0 t3 pi:52:0 pi:52:7 t60 pi:51:0 pi:51:7 t60 pi:4d:0 pi:4d:7 t121 pi:4a:0 pi:4a:7 pi:54:0 pi:54:0 t121 pi:45:0 pi:56:0 t125 t125 t125 pi:4a:0 pi:4d:0 pi:4f:0 pi:51:0 pi:52:0 <end>

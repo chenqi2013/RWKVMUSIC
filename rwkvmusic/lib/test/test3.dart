@@ -21,6 +21,8 @@ void main(List<String> args) {
 }
 
 class TestPage extends StatefulWidget {
+  const TestPage({super.key});
+
   @override
   State<TestPage> createState() => TestPageState();
 }
@@ -124,7 +126,7 @@ Page resource error:
         debugShowCheckedModeBanner: false,
         home: Scaffold(
           appBar: AppBar(
-            title: Text('h5页面'),
+            title: const Text('h5页面'),
           ),
           body: WebViewWidget(controller: _controller),
         ));

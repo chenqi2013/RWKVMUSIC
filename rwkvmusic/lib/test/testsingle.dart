@@ -8,9 +8,7 @@ class Stack {
 
   // 单例模式固定格式
   static Stack getInstance() {
-    if (_instance == null) {
-      _instance = Stack._();
-    }
+    _instance ??= Stack._();
     return _instance!;
   }
 

@@ -2,34 +2,30 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:ffi' hide Size;
 import 'dart:isolate';
-import 'dart:ui';
-import 'package:archive/archive_io.dart';
+import 'package:audioplayers/audioplayers.dart';
 import 'package:ffi/ffi.dart';
 // import 'dart:html';
 import 'dart:io';
-import 'dart:math';
-import 'package:audioplayers/audioplayers.dart';
 import 'package:filepicker_windows/filepicker_windows.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_cache_manager/flutter_cache_manager.dart';
-import 'package:flutter_inappwebview/flutter_inappwebview.dart';
+// import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 // import 'package:flutter_platform_alert/flutter_platform_alert.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_sound/flutter_sound.dart';
 // import 'package:flutter_share/flutter_share.dart';
 import 'package:get/get.dart';
 import 'package:group_radio_button/group_radio_button.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:rwkvmusic/gen/assets.gen.dart';
+import 'package:rwkvmusic/faster_rwkvd_gaotong.dart';
 import 'package:rwkvmusic/mainwidget/ProgressbarTime.dart';
 import 'package:rwkvmusic/services/storage.dart';
 import 'package:rwkvmusic/store/config.dart';
-import 'package:rwkvmusic/test/bletest.dart';
-import 'package:rwkvmusic/test/midi_devicelist_page.dart';
 import 'package:rwkvmusic/utils/abchead.dart';
 // import 'package:rwkvmusic/test/testwebviewuniversal.dart';
 import 'package:rwkvmusic/utils/audioplayer.dart';
+import 'package:rwkvmusic/mainwidget/custombutton.dart';
 import 'package:rwkvmusic/utils/midiconvertabc.dart';
 import 'package:rwkvmusic/utils/mididevicemanage.dart';
 import 'package:rwkvmusic/utils/commonutils.dart';
@@ -42,28 +38,33 @@ import 'package:rwkvmusic/values/storage.dart';
 import 'package:rwkvmusic/widgets/toast.dart';
 // import 'package:share_plus/share_plus.dart';
 import 'package:universal_ble/universal_ble.dart';
+import 'package:webview_flutter_plus/webview_flutter_plus.dart';
 import 'package:webview_win_floating/webview_plugin.dart';
+import 'package:xmidi_utils/xmidi_utils.dart';
+// import 'package:webview_win_floating/webview_plugin.dart';
 
-import 'faster_rwkvd.dart';
+// import 'faster_rwkvd.dart';
+// import 'faster_rwkvd_pc.dart';
 import 'mainwidget/BorderBtnWidget.dart';
 import 'mainwidget/BtnImageTextWidget.dart';
-import 'package:webview_flutter_plus/webview_flutter_plus.dart';
+// import 'package:webview_flutter_plus/webview_flutter_plus.dart';
 import 'package:on_popup_window_widget/on_popup_window_widget.dart';
 import 'package:window_manager/window_manager.dart';
 // import 'package:flutter_gen_runner/flutter_gen_runner.dart';
 import 'package:event_bus/event_bus.dart';
 
-import 'package:flutter/services.dart' show rootBundle;
-import 'package:path_provider/path_provider.dart' as path_provider;
-import 'package:path/path.dart' as p;
-import 'dart:io';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:share_extend/share_extend.dart';
-
+import 'package:xmidi_player/xmidi_player.dart';
+import 'package:path/path.dart' as p;
+import 'package:xmidi_rw/xmidi_rw.dart';
 // import 'package:share_plus/share_plus.dart';
+// import 'package:dart_vlc_ffi/dart_vlc_ffi.dart';
 
 void main(List<String> args) async {
   WidgetsFlutterBinding.ensureInitialized();
+  // DartVLC.initialize();
+
   if (Platform.isWindows || Platform.isMacOS) {
     WindowsWebViewPlatform.registerWith();
     if (Platform.isWindows) {
@@ -109,7 +110,7 @@ bool isFinishABCEvent = false;
 late String finalabcStringPreset;
 late String finalabcStringCreate;
 late bool isNeedRestart; //曲谱及键盘动画需要重新开始
-late String presentPrompt;
+String presentPrompt = "";
 late String createPrompt;
 String timeSingnatureStr = '4/4';
 OverlayEntry? overlayEntry;
@@ -148,8 +149,21 @@ var currentClickNoteInfo = [];
 
 var noteLengthList = ['1/4', '1/8', '1/16'];
 List<Note> notes = [];
+String selectMidiFilePath = '';
+String saveMidiFilePath = '';
+List keyBoardMidiNotes = []; //虚拟键盘直接返回的notes
+double temperature = 1.0;
+int top_k = 8;
+double top_p = 0.8;
+var isCreateGenerate = false.obs; //create模式生成過程中也是全鍵盤
 
 void fetchABCDataByIsolate() async {
+  if (saveMidiFilePath.isEmpty) {
+    String tempDirPath = Directory.current.absolute.path;
+    saveMidiFilePath =
+        '$tempDirPath/${DateTime.now().millisecondsSinceEpoch}.mid';
+    debugPrint('saveMidiFilePath=$saveMidiFilePath');
+  }
   String? dllPath;
   String? binPath;
   String? configPath;
@@ -206,7 +220,8 @@ void fetchABCDataByIsolate() async {
   // } else {
 // 创建 ReceivePort，以接收来自子线程的消息
   // 创建一个新的 Isolate
-  await Isolate.spawn(getABCDataByLocalModel, [
+  // getABCDataByLocalModel
+  await Isolate.spawn(getMidiByLocalModel, [
     mainReceivePort.sendPort,
     selectstate.value == 0 ? presentPrompt : createPrompt,
     midiProgramValue,
@@ -214,6 +229,11 @@ void fetchABCDataByIsolate() async {
     randomness.value,
     dllPath,
     binPath,
+    selectMidiFilePath,
+    saveMidiFilePath,
+    temperature,
+    top_k,
+    top_p,
   ]);
   // 监听来自子线线程的数据
   mainReceivePort.listen((data) {
@@ -236,10 +256,204 @@ void fetchABCDataByIsolate() async {
   // }
 }
 
+void getMidiByLocalModel(var array) async {
+  SendPort sendPort = array[0];
+  String currentPrompt = array[1];
+  // currentPrompt = currentPrompt.replaceAll('\\"', '"');
+  // currentPrompt = 'L:1/8\nM:2/4\nK:none\n[K:C] "C" gg g>';
+  debugPrint('currentPrompt==$currentPrompt');
+  int midiprogramvalue = array[2];
+  int seed = array[3];
+  double randomness = array[4];
+  String dllPath = array[5];
+  String binPath = array[6];
+  String inputPath = array[7];
+  String outputPath = array[8];
+  double temperature = array[9];
+  int topK = array[10];
+  double topP = array[11];
+  bool isPromptStr = false;
+  int eosId = 0;
+  String prompt = currentPrompt;
+  debugPrint('promptprompt==$prompt');
+  var isolateReceivePort = ReceivePort();
+  var isStopGenerating = false;
+  bool isIOS = Platform.isIOS;
+  // isolateReceivePort.listen((data) {
+  //   debugPrint('isolateReceivePort==$data');
+  //   isStopGenerating = true;
+  // });
+
+  EventBus eventBus = EventBus();
+
+  eventBus.on().listen((event) {
+    debugPrint('isolateReceivePort==$event');
+    isStopGenerating = true;
+    sendPort.send('finish');
+  });
+  sendPort.send(isolateReceivePort.sendPort);
+  sendPort.send(eventBus);
+  // Pointer<Char> promptChar = prompt.toNativeUtf8().cast<Char>();
+  if (inputPath.isEmpty) {
+    inputPath = '<pad> ';
+    isPromptStr = true;
+  }
+
+  Pointer<Char> inputPathChar = inputPath.toNativeUtf8().cast<Char>();
+
+  Pointer<Char> outputPathChar = outputPath.toNativeUtf8().cast<Char>();
+
+  String tokenizerBinPath = CommonUtils.tokenizerMidiBin();
+
+  Pointer<Char> tokenizerBinPathChar =
+      tokenizerBinPath.toNativeUtf8().cast<Char>();
+
+  faster_rwkvd fastrwkv = faster_rwkvd(
+      Platform.isIOS ? DynamicLibrary.process() : DynamicLibrary.open(dllPath));
+  // Pointer<Char> strategy = 'mtk fp32'.toNativeUtf8().cast<Char>();
+  Pointer<Char> strategy = 'qnn auto'.toNativeUtf8().cast<Char>();
+  Pointer<Void> model =
+      fastrwkv.rwkv_model_create(binPath.toNativeUtf8().cast<Char>(), strategy);
+  Pointer<Void> abcTokenizer =
+      fastrwkv.rwkv_Tokenizer_create(tokenizerBinPathChar);
+  // Pointer<Void> abcTokenizer = fastrwkv.rwkv_ABCTokenizer_create();
+  Pointer<Void> sampler = fastrwkv.rwkv_sampler_create();
+  debugPrint('seed = $seed');
+  fastrwkv.rwkv_sampler_set_seed(sampler, seed);
+  // StringBuffer stringBuffer = StringBuffer();
+  // int preTimestamp = 0;
+  // late String abcString;
+  // 默认的就按照pengbo的demo里面的temp=1.0 top_k=8, top_p=0.8?
+  // int token = fastrwkv.rwkv_abcmodel_run_prompt(model, abcTokenizer, sampler,
+  //     promptChar, prompt.length, 1.0, 8, randomness);
+  fastrwkv.rwkv_model_clear_states(model);
+  // int token = 0;
+  if (isPromptStr) {
+    fastrwkv.rwkv_midimodel_run_with_text_prompt(
+        model,
+        abcTokenizer,
+        sampler,
+        inputPathChar,
+        inputPath.length,
+        // outputPathChar,
+        // outputPath.length,
+        // 1024,
+        temperature,
+        topK, //8
+        topP);
+  } else {
+    fastrwkv.rwkv_midimodel_run_prompt_from_file(
+        model,
+        abcTokenizer,
+        sampler,
+        inputPathChar,
+        inputPath.length,
+        // outputPathChar,
+        // outputPath.length,
+        // 1024,
+        temperature,
+        topK, //8
+        topP);
+  }
+  //randomness
+  debugPrint('rwkv_midimodel_run_prompt_from_file done');
+  isGenerating.value = true;
+  int duration = 0;
+  for (int i = 0; i < 4096; i++) {
+    // debugPrint('count i=$i');
+    if (fastrwkv.rwkv_midimodel_check_stopped(abcTokenizer) == 1) {
+      debugPrint('rwkv_midimodel_check_stopped');
+      break;
+    }
+    if (isStopGenerating) {
+      debugPrint('stop getABCDataByLocalModel');
+      debugPrint('count i=$i');
+      break;
+    }
+    DateTime now = DateTime.now();
+    int millisecondsSinceEpoch1 = now.millisecondsSinceEpoch;
+    // int result = fastrwkv.rwkv_abcmodel_run_with_tokenizer_and_sampler(
+    //     model, abcTokenizer, sampler, token, 1.0, 8, randomness);
+    int result = 0;
+    fastrwkv.rwkv_midimodel_run_with_tokenizer_and_sampler(
+        model, abcTokenizer, sampler, temperature, topK, topP); //randomness
+    now = DateTime.now();
+    int millisecondsSinceEpoch2 = now.millisecondsSinceEpoch;
+    duration = duration + millisecondsSinceEpoch2 - millisecondsSinceEpoch1;
+    var counts = 1000 * i;
+    double tokens = counts / duration;
+    // debugPrint('tokens==$tokens');
+    sendPort.send('tokens==$tokens');
+    // if (token == result && result == 124) {
+    //   //双||abc展示出错
+    //   continue;
+    // }
+    // token = result;
+    // String resultstr = String.fromCharCode(result);
+    // // result :10=换行;47=/;41=);40=(;94=^;34=";32=空格
+    // if (result == 10 || result == 0 || result == 34 || result == 32) {
+    //   // ||
+    //   //   // result == 40 ||
+    //   //   // result == 94 ||
+    //   //   // result == 47 ||
+    //   //   // result == 41
+    //   debugPrint('continue responseData=$resultstr,resultint=$result');
+    //   continue;
+    // }
+    // sb.write(resultstr);
+    // debugPrint('getABCDataByLocalModel=$resultstr');
+    // if (result == 10) {
+    //   continue;
+    // }
+    // debugPrint('responseData=$resultstr,resultint=$result');
+    // String textstr = resultstr.replaceAll('\n', '').replaceAll('\r', '');
+    // stringBuffer.write(resultstr);
+    // textstr = CommonUtils.escapeString(stringBuffer.toString());
+    // abcString =
+    //     "setAbcString(\"${ABCHead.getABCWithInstrument(textstr, midiprogramvalue)}\",false)";
+    // abcString = ABCHead.appendTempoParam(abcString, tempo.value.toInt());
+    // debugPrint('abcString==$abcString');
+    // 方案一
+    // int currentTimestamp = DateTime.now().millisecondsSinceEpoch;
+    // int gap = currentTimestamp - preTimestamp;
+    // if (gap > 400) {
+    //   //&& resultstr.startsWith("|")
+    //   //&& tempStr.trim().isEmpty
+    //   // debugPrint('runJavaScript');
+    //   preTimestamp = currentTimestamp;
+    //   // if (i < 250) {
+    //   //   continue;
+    //   // }
+    //   // if (isIOS) {
+    //   //   controllerPiano.runJavaScript(abcString);
+    //   // } else {
+    //   sendPort.send(abcString);
+    //   // }
+    // }
+
+    // if (eosId == token) {
+    //   debugPrint('getABCDataByLocalModel break');
+    //   break;
+    // }
+  }
+  isGenerating.value = false;
+  // if (isIOS) {
+  //   controllerPiano.runJavaScript(abcString.toString());
+  // } else {
+  // sendPort.send(abcString.toString());
+  // }
+  fastrwkv.rwkv_midimodel_save_result_to_midi(
+      outputPathChar, outputPath.length);
+  sendPort.send('finish');
+  debugPrint('getMidiDataByLocalModel all data');
+
+  // debugPrint('getABCDataByLocalModel all data=${abcString.toString()}');
+}
+
 void getABCDataByLocalModel(var array) async {
   SendPort sendPort = array[0];
   String currentPrompt = array[1];
-  currentPrompt = currentPrompt.replaceAll('\\"', '"');
+  // currentPrompt = currentPrompt.replaceAll('\\"', '"');
   // currentPrompt = 'L:1/8\nM:2/4\nK:none\n[K:C] "C" gg g>';
   debugPrint('currentPrompt==$currentPrompt');
   int midiprogramvalue = array[2];
@@ -270,7 +484,8 @@ void getABCDataByLocalModel(var array) async {
   Pointer<Char> promptChar = prompt.toNativeUtf8().cast<Char>();
   faster_rwkvd fastrwkv = faster_rwkvd(
       Platform.isIOS ? DynamicLibrary.process() : DynamicLibrary.open(dllPath));
-  Pointer<Char> strategy = 'mtk fp32'.toNativeUtf8().cast<Char>();
+  // Pointer<Char> strategy = 'mtk fp32'.toNativeUtf8().cast<Char>();
+  Pointer<Char> strategy = 'qnn auto'.toNativeUtf8().cast<Char>();
   Pointer<Void> model =
       fastrwkv.rwkv_model_create(binPath.toNativeUtf8().cast<Char>(), strategy);
   Pointer<Void> abcTokenizer = fastrwkv.rwkv_ABCTokenizer_create();
@@ -284,34 +499,28 @@ void getABCDataByLocalModel(var array) async {
       promptChar, prompt.length, 1.0, 8, randomness);
   isGenerating.value = true;
   int duration = 0;
+  DateTime now = DateTime.now();
+  int millisecondsSinceEpoch1 = now.millisecondsSinceEpoch;
+  int counts = 0;
   for (int i = 0; i < 1024; i++) {
+    counts = i;
     if (isStopGenerating) {
       debugPrint('stop getABCDataByLocalModel');
       break;
     }
-    DateTime now = DateTime.now();
-    int millisecondsSinceEpoch1 = now.millisecondsSinceEpoch;
     // print(millisecondsSinceEpoch1);
     int result = fastrwkv.rwkv_abcmodel_run_with_tokenizer_and_sampler(
         model, abcTokenizer, sampler, token, 1.0, 8, randomness);
-    now = DateTime.now();
-    int millisecondsSinceEpoch2 = now.millisecondsSinceEpoch;
-    duration = duration + millisecondsSinceEpoch2 - millisecondsSinceEpoch1;
-    var counts = 1000 * i;
-    double tokens = counts / duration;
+
     // debugPrint('tokens==$tokens');
-    sendPort.send('tokens==$tokens');
-    // if (token == result && result == 124) {
-    //   //双||abc展示出错
-    //   continue;
-    // }
+    if (token == result && result == 124) {
+      //双||abc展示出错
+      continue;
+    }
     token = result;
     String resultstr = String.fromCharCode(result);
     // result :10=换行;47=/;41=);40=(;94=^;34=";32=空格
-    if (result == 10) {
-      //|| result == 0
-      // || result == 34
-      //|| result == 32
+    if (result == 10 || result == 0 || result == 34 || result == 32) {
       // ||
       //   // result == 40 ||
       //   // result == 94 ||
@@ -362,6 +571,12 @@ void getABCDataByLocalModel(var array) async {
   // } else {
   sendPort.send(abcString.toString());
   // }
+  now = DateTime.now();
+  int millisecondsSinceEpoch2 = now.millisecondsSinceEpoch;
+  duration = duration + millisecondsSinceEpoch2 - millisecondsSinceEpoch1;
+  counts = 1000 * counts;
+  double tokens = counts / duration;
+  sendPort.send('tokens==$tokens');
   sendPort.send('finish');
   debugPrint('getABCDataByLocalModel all data=${abcString.toString()}');
 }
@@ -377,14 +592,15 @@ class _MyAppState extends State<MyApp> {
   String filePathKeyboardAnimation =
       "http://leolin.wiki"; //assets/piano/index.html
   String filePathKeyboard = 'assets/piano/keyboard.html';
-  String filePathPiano = 'assets/player/player.html';
+  String filePathMidi = 'assets/player/indexmidi.html';
+  String filePathAbc = 'assets/player/player.html';
   late StringBuffer stringBuffer;
   int addGap = 2; //间隔多少刷新
   int addCount = 0; //刷新次数
   var isPlay = false.obs;
   var playProgress = 0.0.obs;
   var pianoAllTime = 0.0.obs;
-  late Timer timer;
+  Timer? timer;
   late StreamSubscription subscription;
   late HttpClient httpClient;
   int preTimestamp = 0;
@@ -425,7 +641,7 @@ class _MyAppState extends State<MyApp> {
     isWindowsOrMac = Platform.isWindows || Platform.isMacOS;
     stringBuffer = StringBuffer();
     deviceManage = MidiDeviceManage.getInstance();
-    debugPrint('deviceManage22=$identityHashCode($deviceManage)');
+    // debugPrint('deviceManage22=$identityHashCode($deviceManage)');
     deviceManage.receiveCallback = (int data) {
       debugPrint('receiveCallback main =$data');
       updatePianoNote(data);
@@ -463,7 +679,7 @@ class _MyAppState extends State<MyApp> {
           },
         ),
       )
-      ..loadFlutterAssetServer(filePathPiano)
+      ..loadFlutterAssetServer(filePathMidi)
       ..addJavaScriptChannel("flutteronStartPlay",
           onMessageReceived: (JavaScriptMessage jsMessage) {
         String message = jsMessage.message;
@@ -478,8 +694,18 @@ class _MyAppState extends State<MyApp> {
       ..addJavaScriptChannel("flutteronPausePlay",
           onMessageReceived: (JavaScriptMessage jsMessage) {
         debugPrint('flutteronPausePlay onMessageReceived=${jsMessage.message}');
-        timer.cancel();
+        timer?.cancel();
         isPlay.value = false;
+        isNeedRestart = false;
+      }) //flutteronMidiTime
+      ..addJavaScriptChannel("flutteronMidiTime",
+          onMessageReceived: (JavaScriptMessage jsMessage) {
+        String time = jsMessage.message;
+        debugPrint('flutteronMidiTime onMessageReceived=${jsMessage.message}');
+        pianoAllTime.value = double.parse(time) * 1000.0;
+        playProgress.value = 0.0;
+        createTimer();
+        isPlay.value = true;
         isNeedRestart = false;
       })
       ..addJavaScriptChannel("flutteronResumePlay",
@@ -581,6 +807,7 @@ class _MyAppState extends State<MyApp> {
       ..addJavaScriptChannel("flutteronNoteOn",
           onMessageReceived: (JavaScriptMessage jsMessage) {
         debugPrint('flutteronNoteOn onMessageReceived=${jsMessage.message}');
+        keyBoardMidiNotes.add(int.parse(jsMessage.message));
         String name =
             MidiToABCConverter().getNoteMp3Path(int.parse(jsMessage.message));
         if (currentSoundEffect != null) {
@@ -604,9 +831,11 @@ class _MyAppState extends State<MyApp> {
         // debugPrint('chenqi $event');
         tokens.value = ' -- ${event.toString()}';
       } else if (event == 'finish') {
-        Future.delayed(const Duration(seconds: 1), () {
-          playOrPausePiano();
-        });
+        // Future.delayed(const Duration(seconds: 1), () {
+        //   playOrPausePiano();
+        // });
+        keyBoardMidiNotes.clear();
+        playMidi(saveMidiFilePath);
       } else {
         controllerPiano.runJavaScript(event);
       }
@@ -670,8 +899,14 @@ class _MyAppState extends State<MyApp> {
   }
 
   void resetLastNote() {
+    if (isCreateGenerate.value) {
+      isCreateGenerate.value = false;
+      createModeDefault();
+      return;
+    }
     if (virtualNotes.isNotEmpty) {
       virtualNotes.removeLast();
+      keyBoardMidiNotes.removeLast();
       if (virtualNotes.isEmpty) {
         finalabcStringCreate =
             "setAbcString(\"${ABCHead.getABCWithInstrument('L:1/4\nM:$timeSingnatureStr\nK:C\n|', midiProgramValue)}\",false)";
@@ -714,9 +949,15 @@ class _MyAppState extends State<MyApp> {
   }
 
   void createTimer() {
+    if (timer != null) {
+      timer?.cancel();
+    }
     timer = Timer.periodic(const Duration(milliseconds: 1000), (Timer timer) {
+      debugPrint('periodicperiodic');
       if (playProgress.value >= 1) {
-        playProgress.value = 1;
+        playProgress.value = 0;
+        // pianoAllTime.value = 0;
+        isPlay.value = false;
         timer.cancel();
       } else {
         if (playProgress.value + 1000.0 / pianoAllTime.value > 1.0) {
@@ -730,7 +971,7 @@ class _MyAppState extends State<MyApp> {
 
   @override
   void dispose() {
-    timer.cancel();
+    timer?.cancel();
     httpClient.close();
     super.dispose();
   }
@@ -782,6 +1023,39 @@ class _MyAppState extends State<MyApp> {
                       ],
                     ),
                     const Spacer(),
+                    CustomButton(
+                      icon: Icons.add,
+                      text: 'MidiFile',
+                      onPressed: () {
+                        selectMidiFilePath = selectMidiFile();
+                        if (selectMidiFilePath.isEmpty) {
+                          debugPrint('selectMidiFilePath==null');
+                          return;
+                        }
+                        debugPrint('selectMidiFilePath==$selectMidiFilePath');
+                        // Directory tempDir =
+                        //     await getApplicationCacheDirectory();
+                        // String tempDirPath = tempDir.toString();
+                        String tempDirPath = Directory.current.absolute.path;
+                        saveMidiFilePath =
+                            '$tempDirPath/${DateTime.now().millisecondsSinceEpoch}.mid';
+                        debugPrint('saveMidiFilePath=$saveMidiFilePath');
+                        // playMidi();
+
+                        debugPrint('Generate');
+                        isGenerating.value = !isGenerating.value;
+                        if (isGenerating.value) {
+                          temperature = 1.0;
+                          top_k = 8;
+                          top_p = 0.8;
+                          resetPlay();
+                          fetchABCDataByIsolate();
+                        } else {
+                          // isolateSendPort.send('stop Generating');
+                          isolateEventBus.fire("stop Generating");
+                        }
+                      },
+                    ),
                     Container(child: Obx(() {
                       return CupertinoSegmentedControl(
                         children: {
@@ -827,20 +1101,37 @@ class _MyAppState extends State<MyApp> {
                   ],
                 ),
               ),
-              Flexible(
-                flex: isWindowsOrMac ? 2 : 5,
-                child: Visibility(
-                    key: const ValueKey('ValueKey11'),
-                    visible: isVisibleWebview.value,
-                    // maintainSize: true, // 保持占位空间
-                    // maintainAnimation: true, // 保持动画
-                    // maintainState: true,
-                    child: WebViewWidget(
-                      controller: controllerPiano,
+              Obx(() => (selectstate.value == 0 || isCreateGenerate.value)
+                  ? Flexible(
+                      flex: isWindowsOrMac ? 0 : 5,
+                      child: Visibility(
+                          key: const ValueKey('ValueKey11'),
+                          visible: isVisibleWebview.value,
+                          // maintainSize: true, // 保持占位空间
+                          // maintainAnimation: true, // 保持动画
+                          // maintainState: true,
+                          child: WebViewWidget(
+                            controller: controllerPiano,
+                          )),
+                    )
+                  : Flexible(
+                      flex: isWindowsOrMac ? 2 : 5,
+                      child: Visibility(
+                          key: const ValueKey('ValueKey11'),
+                          visible: isVisibleWebview.value,
+                          // maintainSize: true, // 保持占位空间
+                          // maintainAnimation: true, // 保持动画
+                          // maintainState: true,
+                          child: WebViewWidget(
+                            controller: controllerPiano,
+                          )),
                     )),
-              ),
-              Flexible(
-                  flex: isWindowsOrMac ? 3 : 5,
+              Obx(() => Flexible(
+                  flex: isWindowsOrMac
+                      ? ((selectstate.value == 0 || isCreateGenerate.value)
+                          ? 5
+                          : 3)
+                      : 5,
                   child: Visibility(
                     visible: isVisibleWebview.value,
                     // maintainSize: true, // 保持占位空间
@@ -850,7 +1141,7 @@ class _MyAppState extends State<MyApp> {
                     child: WebViewWidget(
                       controller: controllerKeyboard,
                     ),
-                  )),
+                  ))),
               //   ],
               // )),
               Expanded(
@@ -883,17 +1174,17 @@ class _MyAppState extends State<MyApp> {
                                               keyboardOptions,
                                               STORAGE_KEYBOARD_SELECT);
                                         }),
-                                  const SizedBox(
-                                    width: 8,
-                                  ),
-                                  creatBottomBtn('Effect', () {
-                                    debugPrint("Sounds Effect");
-                                    showPromptDialog(
-                                        context,
-                                        'Sounds Effect',
-                                        soundEffect.keys.toList(),
-                                        STORAGE_SOUNDSEFFECT_SELECT);
-                                  }),
+                                  // const SizedBox(
+                                  //   width: 8,
+                                  // ),
+                                  // creatBottomBtn('Effect', () {
+                                  //   debugPrint("Sounds Effect");
+                                  //   showPromptDialog(
+                                  //       context,
+                                  //       'Sounds Effect',
+                                  //       soundEffect.keys.toList(),
+                                  //       STORAGE_SOUNDSEFFECT_SELECT);
+                                  // }),
                                   const SizedBox(
                                     width: 20,
                                   ),
@@ -937,23 +1228,30 @@ class _MyAppState extends State<MyApp> {
                                           isGenerating.value =
                                               !isGenerating.value;
                                           if (isGenerating.value) {
-                                            resetPlay();
-                                            // playProgress.value = 0.0;
-                                            // pianoAllTime.value = 0.0;
-                                            // controllerPiano.runJavaScript(
-                                            //     "setAbcString(\"%%MIDI program 40\\nL:1/4\\nM:4/4\\nK:D\\n\\\"D\\\" A F F\", false)");
-                                            // controllerPiano.runJavaScript(
-                                            //     'resetTimingCallbacks()');
-                                            // if (isWindowsOrMac) {
-                                            fetchABCDataByIsolate();
-                                            // } else {
-                                            //   getABCDataByAPI();
-                                            // }
-                                            // controllerKeyboard
-                                            //     .runJavaScript('resetPlay()');
-                                            // controllerPiano.runJavaScript(
-                                            //     'resetTimingCallbacks()');
-                                            // isFinishABCEvent = false;
+                                            if (selectstate.value == 0) {
+                                              resetPlay();
+                                              fetchABCDataByIsolate();
+                                            } else {
+                                              // 键盘数据线转成midi file，再生成
+                                              isCreateGenerate.value = true;
+                                              controllerPiano
+                                                  .loadFlutterAssetServer(
+                                                      filePathMidi);
+                                              controllerKeyboard.loadRequest(
+                                                  Uri.parse(
+                                                      filePathKeyboardAnimation));
+
+                                              debugPrint(
+                                                  'keyBoardMidiNotes=$keyBoardMidiNotes');
+                                              selectMidiFilePath = Directory
+                                                  .current.absolute.path;
+                                              selectMidiFilePath =
+                                                  '$selectMidiFilePath/${DateTime.now().millisecondsSinceEpoch}.mid';
+                                              MidifileConvert.saveMidiFile2(
+                                                  keyBoardMidiNotes,
+                                                  selectMidiFilePath);
+                                              fetchABCDataByIsolate();
+                                            }
                                           } else {
                                             // isolateSendPort.send('stop Generating');
                                             isolateEventBus
@@ -1032,18 +1330,94 @@ class _MyAppState extends State<MyApp> {
         ));
   }
 
-  void playOrPausePiano() {
-    debugPrint('playOrPausePiano');
-    if (!isPlay.value) {
-      controllerKeyboard.runJavaScript('resetPlay()');
-      controllerPiano.runJavaScript("startPlay()");
-    } else {
-      controllerPiano.runJavaScript("pausePlay()");
+  void playMidi(var playMidiFilePath) async {
+    debugPrint('playMidi');
+    var list = CommonUtils.parseMifiFile(playMidiFilePath);
+    String jsstr = 'startPlay("$list")';
+    debugPrint('jsstr11==$jsstr');
+    controllerKeyboard.runJavaScript(jsstr);
+
+    String baseStr = await CommonUtils.fileToBase64(playMidiFilePath);
+    // debugPrint(baseStr);
+    controllerPiano.runJavaScript('playMidiBase64("$baseStr")');
+    // AudioPlayerManage()
+    //     .playAudio('player/soundfont/acoustic_grand_piano-mp3/A0.mp3');
+    // AudioPlayer audioPlayer = AudioPlayer();1
+    // //  audioPlayer.setFilePath(
+    // //     'assets/player/soundfont/acoustic_guitar_steel-mp3/A0.mp3');
+
+    // audioPlayer.setSource(AssetSource('player/刀剑如梦.mid'));
+    // AudioPlayerManage().playAudio('player/刀剑如梦.mid');
+    // audioPlayer.resume();
+
+    // MidiPlayer player = MidiPlayer();
+    // player.load((MidiReader()
+    //     .parseMidiFromFile(File.fromUri(Uri.file('assets/player/刀剑如梦.mid')))));
+    // player.play();
+
+    //  final player = FlutterSoundPlayer();
+    // await player.openAudioSession();
+    // await player.startPlayer(
+    //   fromURI: 'midiFilePath',
+    //   codec: Codec.aacADTS,
+    // );
+
+    // final player = Player(id: 69420);
+    // final asset =
+    //     Media.asset('assets/player/soundfont/acoustic_guitar_steel-mp3/A0.mp3');
+    // player.open(
+    //   asset,
+    //   autoStart: true, // default
+    // );
+    // player.play();
+  }
+
+  String selectMidiFile() {
+    final file = OpenFilePicker()
+      ..filterSpecification = {
+        // 'Word Document (*.doc)': '*.doc',
+        // 'Web Page (*.htm; *.html)': '*.htm;*.html',
+        // 'Text Document (*.txt)': '*.txt',
+        // 'All Files': '*.*'
+        'midi file (*.mid)': '*.mid;*.midi',
+      }
+      ..defaultFilterIndex = 0
+      ..defaultExtension = 'mid'
+      ..title = 'Select a midi file';
+
+    final result = file.getFile();
+    String filePath = '';
+    if (result != null) {
+      filePath = result.path;
+      print(filePath);
     }
-    playPianoAnimation(finalabcStringPreset, !isPlay.value);
-    // if (isWindowsOrMac) {
-    //   isPlay.value = !isPlay.value;
-    // }
+    return filePath;
+  }
+
+  void playOrPausePiano() {
+    // pianoAllTime.value = double.parse('16');
+    // playProgress.value = 0.0;
+    // createTimer();
+    // isPlay.value = true;
+    // isNeedRestart = false;
+    debugPrint('playOrPausePiano');
+    if (isWindowsOrMac) {
+      isPlay.value = !isPlay.value;
+    }
+    if (!isPlay.value) {
+      // controllerKeyboard.runJavaScript('resetPlay()');
+      controllerPiano.runJavaScript("stopMidi()");
+      timer?.cancel();
+    } else {
+      if (playProgress.value == 0) {
+        playMidi(saveMidiFilePath);
+        createTimer();
+      } else {
+        controllerPiano.runJavaScript("resumeMidi()");
+        createTimer();
+      }
+    }
+    // playPianoAnimation(finalabcStringPreset, !isPlay.value);
   }
 
   void getABCDataByAPI() async {
@@ -1134,16 +1508,17 @@ class _MyAppState extends State<MyApp> {
       // controllerPiano.runJavaScript("pausePlay()");
       isPlay.value = false;
       isNeedRestart = true;
-      timer.cancel();
-      playProgress.value = 0.0;
-      pianoAllTime.value = 0.0;
-      isFinishABCEvent = false;
     }
+    timer?.cancel();
+    playProgress.value = 0.0;
+    pianoAllTime.value = 0;
+    isFinishABCEvent = false;
   }
 
   void segmengChange(int index) {
     resetPlay();
     if (index == 0) {
+      controllerPiano.loadFlutterAssetServer(filePathMidi);
       //preset
       // controllerPiano.runJavaScript(
       //     "setAbcString(\"%%MIDI program $midiProgramValue\\nL:1/4\\nM:4/4\\nK:D\\n\\\"D\\\" A F F\", false)");
@@ -1154,23 +1529,28 @@ class _MyAppState extends State<MyApp> {
       controllerKeyboard.runJavaScript('resetPlay()');
       // controllerKeyboard.runJavaScript('setPiano(55, 76)');
     } else {
-      virtualNotes.clear();
-      //creative
-      // String str1 =
-      //     "setAbcString(\"%%MIDI program $midiProgramValue\\nL:1/4\\nM:4/4\\nK:C\\n|\", false)";
-      // debugPrint('str111==$str1');
-      finalabcStringCreate =
-          "setAbcString(\"${ABCHead.getABCWithInstrument(r'L:1/4\nM:4/4\nK:C\n|', midiProgramValue)}\",false)";
-      finalabcStringCreate =
-          ABCHead.appendTempoParam(finalabcStringCreate, tempo.value.toInt());
-      debugPrint('str112==$finalabcStringCreate');
-      controllerPiano.runJavaScript(finalabcStringCreate);
-      controllerPiano.runJavaScript("setPromptNoteNumberCount(0)");
-      controllerPiano.runJavaScript("setStyle()");
-      controllerKeyboard.loadFlutterAssetServer(filePathKeyboard);
-      controllerKeyboard.runJavaScript('resetPlay()');
-      createPrompt = '';
+      createModeDefault();
     }
+  }
+
+  void createModeDefault() {
+    controllerPiano.loadFlutterAssetServer(filePathAbc);
+    virtualNotes.clear();
+    //creative
+    // String str1 =
+    //     "setAbcString(\"%%MIDI program $midiProgramValue\\nL:1/4\\nM:4/4\\nK:C\\n|\", false)";
+    // debugPrint('str111==$str1');
+    finalabcStringCreate =
+        "setAbcString(\"${ABCHead.getABCWithInstrument(r'L:1/4\nM:4/4\nK:C\n|', midiProgramValue)}\",false)";
+    finalabcStringCreate =
+        ABCHead.appendTempoParam(finalabcStringCreate, tempo.value.toInt());
+    debugPrint('str112==$finalabcStringCreate');
+    controllerPiano.runJavaScript(finalabcStringCreate);
+    controllerPiano.runJavaScript("setPromptNoteNumberCount(0)");
+    controllerPiano.runJavaScript("setStyle()");
+    controllerKeyboard.loadFlutterAssetServer(filePathKeyboard);
+    controllerKeyboard.runJavaScript('resetPlay()');
+    createPrompt = '';
   }
 
   // Widget getLogoImage() {
@@ -1189,7 +1569,7 @@ class _MyAppState extends State<MyApp> {
           child: SingleChildScrollView(
               child: Container(
             width: isWindowsOrMac ? 360.w : 510.w,
-            height: isWindowsOrMac ? 190.h : 398.h,
+            height: isWindowsOrMac ? 200.h : 398.h,
             padding: const EdgeInsets.all(20),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.start,
@@ -1408,7 +1788,7 @@ class _MyAppState extends State<MyApp> {
                 const SizedBox(
                   height: 20,
                 ),
-                const Center(child: Text('Version: MTK RWKV-6 1.2.0')),
+                const Center(child: Text('Version: QNN RWKV-6-MIDI-120M')),
               ],
             ),
           )),
@@ -1769,7 +2149,8 @@ class _MyAppState extends State<MyApp> {
                         const SizedBox(
                           height: 20,
                         ),
-                        const Center(child: Text('Version: MTK RWKV-6 1.2.0')),
+                        const Center(
+                            child: Text('Version: QNN RWKV-6-MIDI-120M')),
                         const SizedBox(
                           height: 10,
                         ),
@@ -1826,6 +2207,7 @@ class _MyAppState extends State<MyApp> {
 
   void showPromptDialog(
       BuildContext context, String titleStr, List list, String type) {
+    CommonUtils.midiConvertNote();
     if (isWindowsOrMac) {
       isVisibleWebview.value = !isVisibleWebview.value;
       setState(() {});
@@ -1973,6 +2355,21 @@ class _MyAppState extends State<MyApp> {
                             }
                             if (type == STORAGE_PROMPTS_SELECT ||
                                 type == STORAGE_SOUNDSEFFECT_SELECT) {
+                              String midiFileName = promptsAbc[value!];
+                              Map midiParam = midiGenerateMap[prompts[value]];
+                              temperature = midiParam['temperature'];
+                              top_k = midiParam['top_k'];
+                              top_p = midiParam['top_p'];
+                              debugPrint(
+                                  'temperature=$temperature,top_k=$top_k,top_p=$top_p,');
+                              String currentPath =
+                                  Directory.current.absolute.path;
+                              String playMidiFilePath = selectMidiFilePath =
+                                  p.join(currentPath,
+                                      'lib/fastmodel/midi/$midiFileName');
+                              debugPrint('playMidiFilePath=$playMidiFilePath');
+                              playMidi(playMidiFilePath);
+                              return;
                               String abcstr = '';
                               if (selectstate.value == 0) {
                                 abcstr = ABCHead.getABCWithInstrument(
@@ -2198,6 +2595,7 @@ class _MyAppState extends State<MyApp> {
         connectDeviceId = device.deviceId;
         if (isWindowsOrMac) {
           Get.snackbar(device.name!, '连接成功', colorText: Colors.black);
+          keyBoardMidiNotes.clear();
         } else {
           toastInfo(msg: 'device connected');
         }
@@ -2214,6 +2612,7 @@ class _MyAppState extends State<MyApp> {
             // Get characteristic updates in `onValueChanged`
             UniversalBle.onValueChanged =
                 (String deviceId, String characteristicId, Uint8List value) {
+              debugPrint('ble value=$value');
               Uint8List sublist = value.sublist(2);
               debugPrint(
                   'onValueChanged $deviceId, $characteristicId, $sublist');
@@ -2222,6 +2621,7 @@ class _MyAppState extends State<MyApp> {
               if ((result[0] as String).isNotEmpty) {
                 String path = convertABC.getNoteMp3Path(result[1]);
                 updatePianoNote(result[1]);
+                keyBoardMidiNotes.add(result.last);
                 AudioPlayerManage().playAudio(
                     'player/soundfont/acoustic_grand_piano-mp3/$path');
               }

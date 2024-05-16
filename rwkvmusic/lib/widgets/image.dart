@@ -29,9 +29,9 @@ Widget netImageCached(
     placeholder: (context, url) {
       return Container(
         alignment: Alignment.center,
-        child: CircularProgressIndicator(),
+        child: const CircularProgressIndicator(),
       );
     },
-    errorWidget: (context, url, error) => Icon(Icons.error),
+    errorWidget: (context, url, error) => const Icon(Icons.error),
   );
 }

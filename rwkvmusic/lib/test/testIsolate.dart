@@ -1,6 +1,5 @@
 import 'dart:io';
 import 'dart:isolate';
-import 'dart:async';
 import 'package:path/path.dart' as p;
 
 void main() async {

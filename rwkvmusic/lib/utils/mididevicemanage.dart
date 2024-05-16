@@ -22,7 +22,7 @@ class MidiDeviceManage {
 
   var virtualDeviceActivated = false.obs;
   var iOSNetworkSessionEnabled = false.obs;
-  var _didAskForBluetoothPermissions = false.obs;
+  final _didAskForBluetoothPermissions = false.obs;
 
   ReceiveCallback? receiveCallback;
 
@@ -38,9 +38,7 @@ class MidiDeviceManage {
 
   // 单例模式固定格式
   static MidiDeviceManage getInstance() {
-    if (_instance == null) {
-      _instance = MidiDeviceManage._();
-    }
+    _instance ??= MidiDeviceManage._();
     return _instance!;
   }
 
@@ -265,7 +263,7 @@ class MidiDeviceManage {
       }).catchError((err) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
             content: Text("Error: ${(err as PlatformException?)?.message}")));
-        print('Error: ${(err as PlatformException?)?.message}');
+        print('Error: ${(err)?.message}');
       });
     }
   }

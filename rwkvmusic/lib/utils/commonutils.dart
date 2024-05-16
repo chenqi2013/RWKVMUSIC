@@ -6,6 +6,8 @@ import 'package:path/path.dart' as p;
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:xmidi_player/xmidi_player.dart';
+import 'package:xmidi_utils/xmidi_utils.dart';
 
 class CommonUtils {
   static String? extractTextValue(String jsonData) {
@@ -56,9 +58,21 @@ class CommonUtils {
     } else {
       String currentPath = Directory.current.absolute.path;
       path = p.join(currentPath,
-          'lib/fastmodel/RWKV-5-ABC-82M-v1-20230901-ctx1024-ncnn.bin');
+          'lib/fastmodel/RWKV-6-MIDI-120M-20240220-ctx4096-QNN-XElite.bin');
     }
     debugPrint('getBinPath===$path');
+    return path;
+  }
+
+  static String tokenizerMidiBin() {
+    String path;
+    // if (Platform.isAndroid || Platform.isIOS) {
+    //   path = 'assets/fastmodel/RWKV-5-ABC-82M-v1-20230901-ctx1024-ncnn.bin';
+    // } else {
+    String currentPath = Directory.current.absolute.path;
+    path = p.join(currentPath, 'lib/fastmodel/tokenizer_midi.bin');
+    // }
+    debugPrint('tokenizerMidiBin===$path');
     return path;
   }
 
@@ -145,5 +159,86 @@ class CommonUtils {
       // 处理错误
       debugPrint('请求发生错误: $error');
     });
+  }
+
+  // 将文件转换为Base64字符串
+  static Future<String> fileToBase64(String path) async {
+    File file = File(path);
+    List<int> imageBytes = await file.readAsBytes();
+    String result = base64Encode(imageBytes);
+    return result;
+  }
+
+  static void midiConvertNote() {
+    final note = MidiUtils.midiToNote(36);
+    final midi = MidiUtils.noteToMidi('C1');
+
+    print('note: $note, midi: $midi');
+  }
+
+  static List parseMifiFile(String path) {
+    List listParseMidiDatas = [];
+    // Open a file containing midi data
+    var file = File(path);
+
+    // Construct a midi reader
+    var reader = MidiReader();
+
+    // Parse midi directly from file. You can also use parseMidiFromBuffer to directly parse List<int>
+    MidiFile parsedMidi = reader.parseMidiFromFile(file);
+
+    // You can now access your parsed [MidiFile]
+    List<List<MidiEvent>> tracks = parsedMidi.tracks;
+    print(tracks.length.toString());
+
+    //  String jsstr =
+    //     r'startPlay("[[0,\"on\",49],[333,\"on\",46],[333,\"off\",49],[1000,\"off\",46]]")';
+    // var jsstr =
+    //    'startPlay("[[0, \\"on\\", 74], [500, \\"off\\", 74]]")';
+    int timeGap = 0;
+    for (int i = 0; i < tracks.length; i++) {
+      List<MidiEvent> events = tracks[i];
+      for (int j = 0; j < events.length; j++) {
+        if (j > 100) {
+          break;
+        }
+        MidiEvent event = events[j];
+        debugPrint('event type=${event.type}');
+        if (event is NoteOnEvent) {
+          NoteOnEvent noteOn = event;
+          debugPrint(
+              'NoteOnEvent=${noteOn.noteNumber},time=${noteOn.deltaTime}');
+          listParseMidiDatas.add('[$timeGap, \\"off\\", ${noteOn.noteNumber}]');
+          timeGap += 500;
+        } else if (event is NoteOffEvent) {
+          NoteOffEvent noteOff = event;
+          debugPrint(
+              'NoteOffEvent=${noteOff.noteNumber},time=${noteOff.deltaTime}');
+          listParseMidiDatas.add('[$timeGap, \\"on\\", ${noteOff.noteNumber}]');
+          timeGap += 500;
+        } else if (event is TextEvent) {
+          TextEvent sigure = event;
+          debugPrint('TextEvent=${sigure.text}');
+        } else if (event is SetTempoEvent) {
+          SetTempoEvent sigure = event;
+          debugPrint('SetTempoEvent=${sigure.microsecondsPerBeat}');
+        } else if (event is ProgramChangeMidiEvent) {
+          ProgramChangeMidiEvent sigure = event;
+          debugPrint('ProgramChangeMidiEvent=${sigure.programNumber}');
+        } else if (event is EndOfTrackEvent) {
+          EndOfTrackEvent sigure = event;
+          debugPrint('EndOfTrackEvent=${sigure.type}');
+        }
+      }
+    }
+
+    return listParseMidiDatas;
+
+    // // Construct a midi writer
+    // var writer = MidiWriter();
+
+    // // Let's write and encode our midi data again
+    // // You can also control `running` flag to compress file and  `useByte9ForNoteOff` to use 0x09 for noteOff when velocity is zero
+    // writer.writeMidiToFile(parsedMidi, File('output.mid'));
   }
 }

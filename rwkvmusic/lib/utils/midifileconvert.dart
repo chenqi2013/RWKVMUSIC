@@ -86,8 +86,7 @@ class MidifileConvert {
           duration: duration,
           volume: 100);
     });
-
-    var outputFile = File('$path/${DateTime.now().millisecondsSinceEpoch}.mid');
+    var outputFile = File(path);
     myMIDI.writeFile(outputFile);
   }
 }

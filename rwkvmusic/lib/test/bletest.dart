@@ -18,13 +18,15 @@ class FlutterBlueApp extends StatelessWidget {
   RxList<BluetoothDevice> list = <BluetoothDevice>[].obs;
   FlutterBlue flutterBlue = FlutterBlue.instance;
   late BluetoothDevice currentDevice;
+
+  FlutterBlueApp({super.key});
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('ble scan'),
+        title: const Text('ble scan'),
         leading: IconButton(
-          icon: Icon(Icons.arrow_back),
+          icon: const Icon(Icons.arrow_back),
           onPressed: () {
             Get.back();
           },
@@ -33,6 +35,7 @@ class FlutterBlueApp extends StatelessWidget {
       body: Center(
         child: Container(
           child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Expanded(
                 child: getlistwidget(),
@@ -57,7 +60,6 @@ class FlutterBlueApp extends StatelessWidget {
                 flex: 1,
               ),
             ],
-            mainAxisAlignment: MainAxisAlignment.center,
           ),
         ),
       ),
@@ -65,13 +67,13 @@ class FlutterBlueApp extends StatelessWidget {
   }
 
   void startScanBLE() {
-    flutterBlue.startScan(timeout: Duration(seconds: 4));
+    flutterBlue.startScan(timeout: const Duration(seconds: 4));
     var subscription = flutterBlue.scanResults.listen((results) {
       // do something with scan results
       for (ScanResult r in results) {
         String name = r.device.name;
         print('$name found! rssi: ${r.rssi}');
-        if (!name.isEmpty &&
+        if (name.isNotEmpty &&
             name.startsWith('SMK25V2') &&
             !list.contains(r.device)) {
           list.add(r.device);
@@ -137,7 +139,7 @@ class FlutterBlueApp extends StatelessWidget {
                 });
               },
               child: ListTile(
-                leading: Icon(Icons.star),
+                leading: const Icon(Icons.star),
                 title: Text(list[index].name),
               ),
             );

@@ -28,3 +28,4 @@ doc/api/
 rwkvmusic/lib/fastmodel/RWKV-5-ABC-82M-v1-20230901-ctx1024-ncnn.bin
 rwkvmusic/windows/.vs/
 rwkvmusic/assets/fastmodel/RWKV-5-ABC-82M-v1-20230901-ctx1024-ncnn.bin
+*.mid

@@ -14,7 +14,7 @@ import 'package:rwkvmusic/utils/mididevicemanage.dart';
 void main() => runApp(const MIDIDeviceListPage());
 
 class MIDIDeviceListPage extends StatefulWidget {
-  const MIDIDeviceListPage({Key? key}) : super(key: key);
+  const MIDIDeviceListPage({super.key});
 
   @override
   MIDIDeviceListPageState createState() => MIDIDeviceListPageState();
@@ -64,7 +64,7 @@ class MIDIDeviceListPageState extends State<MIDIDeviceListPage> {
                       await deviceManage.midiCommand!.devices;
                   allDives.clear();
                   if (list!.isNotEmpty) {
-                    allDives.addAll(list!);
+                    allDives.addAll(list);
                   }
                 },
                 icon: const Icon(Icons.refresh));

@@ -68,12 +68,12 @@ class MidiToABCConverter {
 
   String getNoteName(int noteNumber) {
     //note names by abc
-    final noteString =
+    const noteString =
         "C, ^C, D, ^D, E, F, ^F, G, ^G, A, ^A, B, C ^C D ^D E F ^F G ^G A ^A B c ^c d ^d e f ^f g ^g a ^a b c' ^c' d' ^d' e' f' ^f' g' ^g' a' ^a' b'";
     final noteArray = noteString.split(" ");
     final noteIndex = noteNumber % 48;
     print("noteNumber=$noteNumber noteIndex=$noteIndex");
-    return "${noteArray[noteIndex]}";
+    return noteArray[noteIndex];
   }
 
   String getNoteMp3Path(int noteNumber) {
@@ -85,7 +85,7 @@ class MidiToABCConverter {
 
   String durationToABC(double duration) {
     final durationSymbols = ["1", "2", "4", "8", "16", "32", "64", "128"];
-    final maxDuration = 1.0; // 根据实际需求调整
+    const maxDuration = 1.0; // 根据实际需求调整
     for (var i = 0; i < durationSymbols.length; i++) {
       final durationValue = 1.0 / (1 << i);
       if (duration <= maxDuration * durationValue) {

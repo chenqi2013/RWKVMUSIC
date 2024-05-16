@@ -263,6 +263,6 @@ class InstrumentType {
   ];
 
   static String getInstrumentDirName(int instrument) {
-    return INSTRUMENT_NAMES[instrument] + "-mp3";
+    return "${INSTRUMENT_NAMES[instrument]}-mp3";
   }
 }

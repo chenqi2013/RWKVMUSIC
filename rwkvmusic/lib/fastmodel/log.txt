@@ -1,0 +1,2 @@
+CMD: C:\Users\HCKTest\Desktop\4bead9ac674f3b230c18930e650f09a5_2a059094a59d56fd5a84d1d936441873_8\midi-prompt-1.0\test_prompt.mid --output lib\fastmodel\prompt.txt
+Current Path: C:\Users\HCKTest\Documents\RWKVMUSIC\rwkvmusic

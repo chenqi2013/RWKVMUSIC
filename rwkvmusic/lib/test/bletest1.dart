@@ -7,6 +7,8 @@ void main() {
 }
 
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -16,6 +18,8 @@ class MyApp extends StatelessWidget {
 }
 
 class MyBluetoothApp extends StatefulWidget {
+  const MyBluetoothApp({super.key});
+
   @override
   _MyBluetoothAppState createState() => _MyBluetoothAppState();
 }
@@ -43,7 +47,7 @@ class _MyBluetoothAppState extends State<MyBluetoothApp> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Bluetooth Example'),
+        title: const Text('Bluetooth Example'),
       ),
       body: Center(
         child: Column(
@@ -61,7 +65,7 @@ class _MyBluetoothAppState extends State<MyBluetoothApp> {
                   context: context,
                   builder: (BuildContext context) {
                     return BluetoothDeviceListDialog(
-                      devices: [],//flutterBlue.scanResults.map((result) => result.device).toList()
+                      devices: const [],//flutterBlue.scanResults.map((result) => result.device).toList()
                     );
                   },
                 );
@@ -72,7 +76,7 @@ class _MyBluetoothAppState extends State<MyBluetoothApp> {
                   await connectToDevice(device11);
                 }
               },
-              child: Text('Select Device'),
+              child: const Text('Select Device'),
             ),
             ElevatedButton(
               onPressed: () async {
@@ -84,7 +88,7 @@ class _MyBluetoothAppState extends State<MyBluetoothApp> {
                   });
                 }
               },
-              child: Text('Disconnect'),
+              child: const Text('Disconnect'),
             ),
             ElevatedButton(
               onPressed: () {
@@ -93,7 +97,7 @@ class _MyBluetoothAppState extends State<MyBluetoothApp> {
                   discoverServices();
                 }
               },
-              child: Text('Discover Services'),
+              child: const Text('Discover Services'),
             ),
           ],
         ),
@@ -136,15 +140,15 @@ class BluetoothDeviceListDialog extends StatelessWidget {
   List<BluetoothDevice> devices;
 
   BluetoothDeviceListDialog({
-    Key? key,
+    super.key,
     required this.devices,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text('Select a Bluetooth Device'),
-      content: Container(
+      title: const Text('Select a Bluetooth Device'),
+      content: SizedBox(
         width: double.maxFinite,
         height: 300,
         child: ListView.builder(
