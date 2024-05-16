@@ -52,13 +52,16 @@ class CommonUtils {
   }
 
   static Future<String> getBinPath() async {
-    String path;
+    var currentPath = Directory.current.absolute.path;
+    String path = p.join(currentPath, 'lib/fastmodel/');
     if (Platform.isAndroid || Platform.isIOS) {
       path = 'assets/fastmodel/RWKV-5-ABC-82M-v1-20230901-ctx1024-ncnn.bin';
     } else {
       String currentPath = Directory.current.absolute.path;
       path = p.join(currentPath,
           'lib/fastmodel/RWKV-6-MIDI-120M-20240220-ctx4096-QNN-XElite.bin');
+      // // String currentPath = Directory.current.absolute.path;
+      // path = p.join(path, 'RWKV-5-ABC-82M-v1-20230901-ctx1024-ncnn.bin');
     }
     debugPrint('getBinPath===$path');
     return path;

@@ -106,6 +106,7 @@ dependencies:
   # dart_vlc_ffi: ^0.2.0+1
   xmidi_utils: ^0.2.0
   xmidi_rw: ^0.1.0
+  flutter_svg: ^2.0.9
 
 
 dev_dependencies:

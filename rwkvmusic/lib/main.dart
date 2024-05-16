@@ -20,6 +20,7 @@ import 'package:group_radio_button/group_radio_button.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:rwkvmusic/faster_rwkvd_gaotong.dart';
 import 'package:rwkvmusic/mainwidget/ProgressbarTime.dart';
+import 'package:rwkvmusic/mainwidget/v2/ContainerTextIcon.dart';
 import 'package:rwkvmusic/services/storage.dart';
 import 'package:rwkvmusic/store/config.dart';
 import 'package:rwkvmusic/utils/abchead.dart';
@@ -92,9 +93,10 @@ void main(List<String> args) async {
   }
   await Get.putAsync<StorageService>(() => StorageService().init());
   Get.put<ConfigStore>(ConfigStore());
-  runApp(const ScreenUtilInit(
-    designSize: Size(812, 375),
-    child: GetMaterialApp(
+  runApp(ScreenUtilInit(
+    designSize:
+        Platform.isWindows ? const Size(2880, 1600) : const Size(812, 375),
+    child: const GetMaterialApp(
       debugShowCheckedModeBanner: false,
       home: MyApp(),
     ),
@@ -1020,6 +1022,7 @@ class _MyAppState extends State<MyApp> {
                               fontWeight: FontWeight.bold,
                               fontSize: 16),
                         ),
+                        // const ContainerTextIcon(),
                       ],
                     ),
                     const Spacer(),

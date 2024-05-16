@@ -14,7 +14,7 @@
   width: 100%;
 }
 
-#paper g{
+#paper g {
   scroll-margin: 100px;
 }
 
@@ -26,6 +26,7 @@ body {
   line-height: 22px;
   color: currentColor;
   overflow: hidden;
+  background: #212121;
 }
 
 header {
@@ -69,7 +70,8 @@ textarea {
   padding: 10px;
 }
 
-pre, span.code {
+pre,
+span.code {
   font-size: 14px;
   padding: 5px;
   font-family: Monaco, monospace;
@@ -110,9 +112,9 @@ button {
 }
 
 button:hover {
-  background-color: #3FB07C;
+  background-color: #3fb07c;
   color: white;
-  border-color: #3FB07C;
+  border-color: #3fb07c;
 }
 
 .visible-background svg {
@@ -127,13 +129,14 @@ th {
   text-align: start;
 }
 
-th, td {
+th,
+td {
   border: 1px solid #dfe2e5;
   padding: 16px 20px;
 }
 
 tr:nth-child(even) {
-  background-color: #F6F8FA;
+  background-color: #f6f8fa;
 }
 
 .table-header td {
@@ -141,8 +144,14 @@ tr:nth-child(even) {
   font-size: 22px;
 }
 
-@media only screen and (min-width:700px) {
+.container {
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
 
+@media only screen and (min-width: 700px) {
   header {
     max-width: 1000px;
     margin: 0 auto 30px auto;
@@ -168,20 +177,53 @@ tr:nth-child(even) {
     color: #ffffff;
     background: #121212;
   }
+
   .table-header td {
     color: #000000;
   }
+
   tr:nth-child(even) {
     background-color: #666666;
   }
+
   .visible-background svg {
     background: #404040;
   }
 }
 
-.abcjs-highlight {
-fill: red;
+/* 乐谱播放高亮乐符 */
+.abcjs-note .abcjs-highlight {
+  fill: rgba(186, 242, 70, 1) !important;
+  filter: drop-shadow(0px 0px 1.5px rgba(186, 242, 70, 1)) !important;
 }
+
+/* 乐谱播放进度线条 */
 .abcjs-cursor {
-stroke: red;
+  stroke: rgba(186, 242, 70, 1);
 }
+
+/* 乐谱基准线 */
+.abcjs-staff {
+  /* color: rgba(255, 255, 255, 0.233); */
+  color: #ffffff9d;
+}
+
+.abcjs-top-line {
+  color: #ffffff9d;
+}
+
+.abcjs-note_selected {
+  fill: rgba(186, 242, 70, 1) !important;
+  filter: drop-shadow(0px 0px 1.5px rgba(186, 242, 70, 1)) !important;
+}
+
+.abcjs-note {
+  fill: white;
+}
+
+.abcjs-staff-extra {
+  fill: white;
+}
+
+/* abcjs-note abcjs-d0-25 abcjs-p3 abcjs-l0 abcjs-m0 abcjs-mm0 abcjs-v0 abcjs-n13 abcjs-note_selected
+abcjs-note abcjs-d0-25 abcjs-p3 abcjs-l0 abcjs-m0 abcjs-mm0 abcjs-v0 abcjs-n12 */
