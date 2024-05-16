@@ -23,6 +23,7 @@ import 'package:group_radio_button/group_radio_button.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:rwkvmusic/gen/assets.gen.dart';
 import 'package:rwkvmusic/mainwidget/ProgressbarTime.dart';
+import 'package:rwkvmusic/mainwidget/v2/ContainerTextIcon.dart';
 import 'package:rwkvmusic/services/storage.dart';
 import 'package:rwkvmusic/store/config.dart';
 import 'package:rwkvmusic/test/bletest.dart';
@@ -91,9 +92,10 @@ void main(List<String> args) async {
   }
   await Get.putAsync<StorageService>(() => StorageService().init());
   Get.put<ConfigStore>(ConfigStore());
-  runApp(const ScreenUtilInit(
-    designSize: Size(812, 375),
-    child: GetMaterialApp(
+  runApp(ScreenUtilInit(
+    designSize:
+        Platform.isWindows ? const Size(2880, 1600) : const Size(812, 375),
+    child: const GetMaterialApp(
       debugShowCheckedModeBanner: false,
       home: MyApp(),
     ),
@@ -239,6 +241,7 @@ void fetchABCDataByIsolate() async {
 void getABCDataByLocalModel(var array) async {
   SendPort sendPort = array[0];
   String currentPrompt = array[1];
+  currentPrompt = currentPrompt.replaceAll('\\"', '"');
   int midiprogramvalue = array[2];
   int seed = array[3];
   double randomness = array[4];
@@ -267,7 +270,7 @@ void getABCDataByLocalModel(var array) async {
   Pointer<Char> promptChar = prompt.toNativeUtf8().cast<Char>();
   faster_rwkvd fastrwkv = faster_rwkvd(
       Platform.isIOS ? DynamicLibrary.process() : DynamicLibrary.open(dllPath));
-  Pointer<Char> strategy = 'mtk fp32'.toNativeUtf8().cast<Char>();
+  Pointer<Char> strategy = 'ncnn fp32'.toNativeUtf8().cast<Char>();
   Pointer<Void> model =
       fastrwkv.rwkv_model_create(binPath.toNativeUtf8().cast<Char>(), strategy);
   Pointer<Void> abcTokenizer = fastrwkv.rwkv_ABCTokenizer_create();
@@ -774,6 +777,7 @@ class _MyAppState extends State<MyApp> {
                               fontWeight: FontWeight.bold,
                               fontSize: 16),
                         ),
+                        // const ContainerTextIcon(),
                       ],
                     ),
                     const Spacer(),

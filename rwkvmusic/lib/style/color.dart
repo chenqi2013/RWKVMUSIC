@@ -1,6 +1,12 @@
 import 'package:flutter/material.dart';
 
 class AppColor {
+  static const Color color_494949 = Color(0xff494949);
+  static const Color color_323232 = Color(0xff323232);
+  static const Color color_ffffff = Color(0xFFFFFFFF);
+  static const Color color_000000 = Color(0xFF000000);
+  static const Color color_2C2C2C = Color(0xFF2C2C2C);
+
   /// 页面背景颜色
   static const Color scaffoldBackground = Color(0xFFFFFFFF);
 

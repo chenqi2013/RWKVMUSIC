@@ -2,14 +2,15 @@
 <html lang="en">
 
 <head>
-  <meta charset="utf-8">
-  <meta http-equiv="x-ua-compatible" content="ie=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="stylesheet" type="text/css" href="examples-styles.css">
-  <link rel="stylesheet" type="text/css" href="abcjs-audio.css">
+  <meta charset="utf-8" />
+  <meta http-equiv="x-ua-compatible" content="ie=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" type="text/css" href="examples-styles.css" />
+  <link rel="stylesheet" type="text/css" href="abcjs-audio.css" />
   <script src="abcjs-basic.js" type="text/javascript"></script>
   <script src="midiplayer.js" type="text/javascript"></script>
   <script src="index.js" type="text/javascript"></script>
+
 
   <script type="text/javascript">
     var abcjsEditor;
@@ -22,55 +23,77 @@
       console.log("window.onload");
       abcjsEditor = new ABCJS.Editor("abc", {
         canvas_id: "paper",
-        render_options: {},
+        render_options: { responsive: "resize" },
         warnings_id: "warnings",
         synth: {
           el: "#audio",
-          options: { displayLoop: false, displayRestart: false, displayPlay: true, displayProgress: true, displayWarp: false, }
+          options: {
+            displayLoop: false,
+            displayRestart: false,
+            displayPlay: true,
+            displayProgress: true,
+            displayWarp: false,
+          },
         },
         abcjsParams: {
           add_classes: true,
-          afterParsing: afterParsing
+          afterParsing: afterParsing,
         },
-        selectionChangeCallback: selectionChangeCallback
+        selectionChangeCallback: selectionChangeCallback,
       });
 
+      document
+        .querySelector(".abcjs-midi-start")
+        .addEventListener("click", startTimer);
 
-      document.querySelector(".abcjs-midi-start").addEventListener("click", startTimer);
-
-      setAbcString("\nL:1/4\nM:4/4\nK:D\n\"D\" A F F", false);
-
+      setAbcString(
+        '\nL:1/4\nM:4/4\nK:D\n"D" A F F A F F F A F A A F F F',
+        false
+      );
     };
 
     function afterParsing(tune, tuneNumber, abcString) {
       if (self.isGenerateAbc != true) {
-        var a = countNotesInEditor(tune)
-        console.log("afterParsing:" + a)
-        countofnotes = a
+        var a = countNotesInEditor(tune);
+        console.log("afterParsing:" + a);
+        countofnotes = a;
 
         //  if(typeof controller !== "undefined"){
         //       controller.onCountPromptNoteNumber(a);
         //   } else {
         //       alert("Running outside Android app");
         //   }
-        flutteronCountPromptNoteNumber.postMessage(a);
+        // flutteronCountPromptNoteNumber.postMessage(a);
       }
     }
 
     function setPromptNoteNumberCount(count) {
-      self.countofnotes = count
+      self.countofnotes = count;
     }
 
-    function clickListener(abcElem, tuneNumber, classes, analysis, drag, mouseEvent) {
+    function clickListener(
+      abcElem,
+      tuneNumber,
+      classes,
+      analysis,
+      drag,
+      mouseEvent
+    ) {
       var lastClicked = abcElem.midiPitches;
-      if (!lastClicked)
-        return;
+      if (!lastClicked) return;
 
-      ABCJS.synth.playEvent(lastClicked, abcElem.midiGraceNotePitches, abcjsEditor.millisecondsPerMeasure()).then(function (response) {
-        console.log("note played");
-      }).catch(function (error) {
-        console.log("error playing note", error);
-      });
+      ABCJS.synth
+        .playEvent(
+          lastClicked,
+          abcElem.midiGraceNotePitches,
+          abcjsEditor.millisecondsPerMeasure()
+        )
+        .then(function (response) {
+          console.log("note played");
+        })
+        .catch(function (error) {
+          console.log("error playing note", error);
+        });
     }
 
     function selectionChangeCallback(start, end) {
@@ -80,124 +103,137 @@
     }
 
     function ABCtoEvents(x) {
-      midi_data = ABCJS.synth.getMidiFile(x, { chordsOff: false, midiOutputType: 'binary' })[0]
-      Player.loadArrayBuffer(midi_data)
-      midi_events = Player.events
-      var events = []
+      midi_data = ABCJS.synth.getMidiFile(x, {
+        chordsOff: false,
+        midiOutputType: "binary",
+      })[0];
+      Player.loadArrayBuffer(midi_data);
+      midi_events = Player.events;
+      var events = [];
       for (var i in midi_events) {
         for (var x of midi_events[i]) {
-          detail = (i == 1) ? '' : '-chord'
-          if (x.name == 'Note on') // output 125bpm, real 180bpm
-            events.push([Math.round(x.tick * 125 / 180), "on" + detail, x.noteNumber - 20])
-          else if (x.name == 'Note off')
-            events.push([Math.round(x.tick * 125 / 180), "off" + detail, x.noteNumber - 20])
+          detail = i == 1 ? "" : "-chord";
+          if (x.name == "Note on")
+            // output 125bpm, real 180bpm
+            events.push([
+              Math.round((x.tick * 125) / 180),
+              "on" + detail,
+              x.noteNumber - 20,
+            ]);
+          else if (x.name == "Note off")
+            events.push([
+              Math.round((x.tick * 125) / 180),
+              "off" + detail,
+              x.noteNumber - 20,
+            ]);
         }
       }
       events.sort(function (a, b) {
-        if (a[0] != b[0])
-          return a[0] - b[0]
-        else
-          return a[1].length - b[1].length
-      })
-      var cnt = {}
-      for (var i = 1; i <= 88; i++)
-        cnt[i] = 0
-      var to_remove = []
+        if (a[0] != b[0]) return a[0] - b[0];
+        else return a[1].length - b[1].length;
+      });
+      var cnt = {};
+      for (var i = 1; i <= 88; i++) cnt[i] = 0;
+      var to_remove = [];
       for (var i in events) {
-        var x = events[i]
+        var x = events[i];
         if (x[1].includes("on")) {
-          if (cnt[x[2]] > 0)
-            to_remove.push(i)
-          cnt[x[2]] += 1
-        }
-        else if (x[1].includes("off")) {
-          if (cnt[x[2]] > 1)
-            to_remove.push(i)
-          cnt[x[2]] -= 1
+          if (cnt[x[2]] > 0) to_remove.push(i);
+          cnt[x[2]] += 1;
+        } else if (x[1].includes("off")) {
+          if (cnt[x[2]] > 1) to_remove.push(i);
+          cnt[x[2]] -= 1;
         }
       }
-      to_remove.sort((a, b) => b - a)
+      to_remove.sort((a, b) => b - a);
       for (var i of to_remove) {
         // console.log(events[i])
-        events.splice(i, 1)
+        events.splice(i, 1);
       }
-      var eventJson = JSON.stringify(events)
+      var eventJson = JSON.stringify(events);
 
       // if(typeof controller !== "undefined"){
       //     controller.onEvents("" + eventJson + "");
       // } else {
       //     alert("Running outside Android app");
       // }
-      flutteronEvents.postMessage("" + eventJson + "");
-      return eventJson
+      //   flutteronEvents.postMessage("" + eventJson + "");
+      return eventJson;
     }
 
     function setStyle() {
-      const start = 0
-      const end = countofnotes - 1
+      const start = 0;
+      const end = countofnotes - 1;
       if (countofnotes < 1) {
-        return
+        return;
       }
 
       var paper = document.querySelector("#paper");
 
       for (let i = start; i <= end; i++) {
         var elems = paper.querySelectorAll('[data-index="' + i + '"]');
-        var index = 0, length = elems.length;
+        var index = 0,
+          length = elems.length;
 
         for (; index < length; index++) {
           //elems[index].style.opacity = 0.5;
           elems[index].setAttribute("fill", "rgb(33,150,243)");
           //elems[index].setAttribute("stroke","pink");
-
         }
       }
     }
 
     function getMidiData(abcString) {
-      midi_data = ABCJS.synth.getMidiFile(abcString, { chordsOff: false, midiOutputType: 'binary' })[0]
-      Player.loadArrayBuffer(midi_data)
-      console.log("midi_data=" + midi_data)
+      midi_data = ABCJS.synth.getMidiFile(abcString, {
+        chordsOff: false,
+        midiOutputType: "binary",
+      })[0];
+      Player.loadArrayBuffer(midi_data);
+      console.log("midi_data=" + midi_data);
     }
 
     var synthForPlay;
     function playAbc(abcString) {
       if (synthForPlay == null) {
-        synthForPlay = new ABCJS.synth.CreateSynth()
+        synthForPlay = new ABCJS.synth.CreateSynth();
       } else {
-        synthForPlay.stop()
+        synthForPlay.stop();
       }
       var myContext = new AudioContext();
-      var visualObj = ABCJS.renderAbc("paper", abcString, {
-      })[0];
-      synthForPlay.init({
-        audioContext: myContext,
-        visualObj: visualObj,
-      }).then(function (results) {
+      var visualOptions = { responsive: "resize" };
 
-        synthForPlay.prime().then((response) => {
-          console.log(response.status)
-          synthForPlay.start();
+      var visualObj = ABCJS.renderAbc("paper", abcString, visualOptions)[0];
+      synthForPlay
+        .init({
+          audioContext: myContext,
+          visualObj: visualObj,
+        })
+        .then(function (results) {
+          synthForPlay.prime().then((response) => {
+            console.log(response.status);
+            synthForPlay.start();
+          });
+        })
+        .catch(function (reason) {
+          console.log(reason);
         });
-      }).catch(function (reason) {
-        console.log(reason)
-      });
     }
 
     function countNotesInEditor(tunes) {
-      countofnotes = 0
+      countofnotes = 0;
       try {
-        var elems = tunes.lines[0].staff[0].voices[0]
-        var index = 0, length = elems.length;
+        var elems = tunes.lines[0].staff[0].voices[0];
+        var index = 0,
+          length = elems.length;
         for (; index < length; index++) {
-          if (elems[index].el_type == 'note') {
-            countofnotes = countofnotes + 1
+          if (elems[index].el_type == "note") {
+            countofnotes = countofnotes + 1;
           }
         }
       } catch (e) {
-        console.log(e)
+        console.log(e);
       }
-      return countofnotes
+      return countofnotes;
     }
 
     function setAbcString(output, isGenerateAbc) {
@@ -209,27 +245,27 @@
       textarea.dispatchEvent(event);
 
       function delay(time) {
-        return new Promise(resolve => setTimeout(resolve, time));
+        return new Promise((resolve) => setTimeout(resolve, time));
       }
       delay(0).then(() => {
-        const paper = document.getElementById("paper")
-        var pElements = paper.querySelectorAll("g")
-        pElements[pElements.length - 1].scrollIntoView()
-      })
+        const paper = document.getElementById("paper");
+        var pElements = paper.querySelectorAll("g");
+        pElements[pElements.length - 1].scrollIntoView();
+      });
       delay(200).then(() => {
-        const paper = document.getElementById("paper")
-        var pElements = paper.querySelectorAll("g")
-        pElements[pElements.length - 1].scrollIntoView()
-      })
+        const paper = document.getElementById("paper");
+        var pElements = paper.querySelectorAll("g");
+        pElements[pElements.length - 1].scrollIntoView();
+      });
       delay(400).then(() => {
-        const paper = document.getElementById("paper")
-        var pElements = paper.querySelectorAll("g")
-        pElements[pElements.length - 1].scrollIntoView()
-      })
+        const paper = document.getElementById("paper");
+        var pElements = paper.querySelectorAll("g");
+        pElements[pElements.length - 1].scrollIntoView();
+      });
     }
 
     function resetTimingCallbacks() {
-      self.timingCallbacks = null
+      self.timingCallbacks = null;
     }
 
     function triggerButtonClick() {
@@ -237,23 +273,22 @@
       //const playBtn = document.getElementById("btnPlay");
 
       //playBtn.click();
-      var button = document.getElementById('btnPlay');
+      var button = document.getElementById("btnPlay");
       var rect = button.getBoundingClientRect();
-      var x = rect.left + (rect.width / 2);
-      var y = rect.top + (rect.height / 2);
-      var event = new MouseEvent('click', {
-        'view': window,
-        'bubbles': true,
-        'cancelable': true,
-        'clientX': x,
-        'clientY': y
+      var x = rect.left + rect.width / 2;
+      var y = rect.top + rect.height / 2;
+      var event = new MouseEvent("click", {
+        view: window,
+        bubbles: true,
+        cancelable: true,
+        clientX: x,
+        clientY: y,
       });
       button.dispatchEvent(event);
-
     }
 
     function setPlayButtonDisable(disable) {
-      document.getElementById('btnPlay').disabled = disable;
+      document.getElementById("btnPlay").disabled = disable;
     }
 
     function CursorControl(rootSelector) {
@@ -269,28 +304,30 @@
         // This is called when the timer starts so we know the svg has been drawn by now.
         // Create the cursor and add it to the sheet music's svg.
         var svg = document.querySelector(self.rootSelector + " svg");
-        self.cursor = document.createElementNS("http://www.w3.org/2000/svg", "line");
+        self.cursor = document.createElementNS(
+          "http://www.w3.org/2000/svg",
+          "line"
+        );
         self.cursor.setAttribute("class", "abcjs-cursor");
-        self.cursor.setAttributeNS(null, 'x1', 0);
-        self.cursor.setAttributeNS(null, 'y1', 0);
-        self.cursor.setAttributeNS(null, 'x2', 0);
-        self.cursor.setAttributeNS(null, 'y2', 0);
+        self.cursor.setAttributeNS(null, "x1", 0);
+        self.cursor.setAttributeNS(null, "y1", 0);
+        self.cursor.setAttributeNS(null, "x2", 0);
+        self.cursor.setAttributeNS(null, "y2", 0);
         svg.appendChild(self.cursor);
       };
 
       self.removeSelection = function () {
         // Unselect any previously selected notes.
-        var lastSelection = document.querySelectorAll(self.rootSelector + " .abcjs-highlight");
+        var lastSelection = document.querySelectorAll(
+          self.rootSelector + " .abcjs-highlight"
+        );
         for (var k = 0; k < lastSelection.length; k++)
           lastSelection[k].classList.remove("abcjs-highlight");
       };
 
-
       self.onEvent = function (ev) {
-
         // This is called every time a note or a rest is reached and contains the coordinates of it.
-        if (ev.measureStart && ev.left === null)
-          return; // this was the second part of a tie across a measure line. Just ignore it.
+        if (ev.measureStart && ev.left === null) return; // this was the second part of a tie across a measure line. Just ignore it.
 
         self.removeSelection();
 
@@ -300,8 +337,8 @@
           for (var j = 0; j < note.length; j++) {
             note[j].classList.add("abcjs-highlight");
           }
-          note[0].scrollIntoView()
-          note[note.length - 1].scrollIntoView({ behavior: 'smooth' })
+          note[0].scrollIntoView();
+          note[note.length - 1].scrollIntoView({ behavior: "smooth" });
         }
 
         // Move the cursor to the location of the current note.
@@ -313,15 +350,15 @@
         }
 
         if (ev.measureStart) {
-          var elements = document.querySelectorAll('.abcjs-mm' + ev.measureNumber);
+          var elements = document.querySelectorAll(
+            ".abcjs-mm" + ev.measureNumber
+          );
           for (var j = 0; j < elements.length; j++) {
             const element = elements[j];
-            if (!element.classList.contains('abcjs-bar'))
-              element.classList.add('hide-note');
+            if (!element.classList.contains("abcjs-bar"))
+              element.classList.add("hide-note");
           }
         }
-
-
       };
       self.onFinished = function () {
         self.removeSelection();
@@ -334,11 +371,10 @@
           self.cursor.setAttribute("y2", 0);
         }
 
-
-        var elements = document.querySelectorAll('.hide-note');
+        var elements = document.querySelectorAll(".hide-note");
         for (var j = 0; j < elements.length; j++) {
           const element = elements[j];
-          element.classList.remove('hide-note');
+          element.classList.remove("hide-note");
         }
 
         // if(typeof controller !== "undefined"){
@@ -346,30 +382,28 @@
         // } else {
         //     alert("Running outside Android app");
         // }
-        flutteronPlayFinish.postMessage('true');
+        // flutteronPlayFinish.postMessage('true');
       };
     }
 
     var cursorControl = new CursorControl("#paper");
 
-
     function onEvent(ev) {
-      if (ev)
-        cursorControl.onEvent(ev);
-      else
-        cursorControl.onFinished();
+      if (ev) cursorControl.onEvent(ev);
+      else cursorControl.onFinished();
     }
 
     function onStartPlay(isUserClick, duration) {
-      console.log("onStartPlay isUserClick=" + isUserClick + " duration=" + duration)
+      console.log(
+        "onStartPlay isUserClick=" + isUserClick + " duration=" + duration
+      );
       // if(typeof controller !== "undefined"){
       // controller.onStartPlay(isUserClick, duration);
       // } else {
       //     alert("Running outside Android app");
       // }
-      flutteronStartPlay.postMessage(isUserClick + ',' + duration);
+      //   flutteronStartPlay.postMessage(isUserClick + ',' + duration);
     }
-
 
     function onPausePlay() {
       // if(typeof controller !== "undefined"){
@@ -377,7 +411,7 @@
       // } else {
       // alert("Running outside Android app");
       // }
-      flutteronPausePlay.postMessage('true');
+      //   flutteronPausePlay.postMessage('true');
     }
 
     function onResumePlay() {
@@ -386,7 +420,7 @@
       // } else {
       //     alert("Running outside Android app");
       // }
-      flutteronResumePlay.postMessage('true');
+      //   flutteronResumePlay.postMessage('true');
     }
 
     function startTimer(event) {
@@ -406,7 +440,6 @@
           timingCallbacks.pause();
           console.log("pausePlay");
           onPausePlay();
-
         } else {
           timingCallbacks.start();
           onStartPlay(event.isTrusted, timingCallbacks.lastMoment);
@@ -416,9 +449,9 @@
 
     function startPlay() {
       console.log("startPlay");
-      var evt = document.createEvent('CustomEvent');
+      var evt = document.createEvent("CustomEvent");
       evt.isTrusted = true;
-      triggerButtonClick()
+      triggerButtonClick();
     }
 
     function pausePlay() {
@@ -428,35 +461,38 @@
       }
     }
 
-
     function exportMidiFile(abcString, fileName) {
-      var midi = ABCJS.synth.getMidiFile(abcString, { midiOutputType: 'binary', fileName: fileName });
-      console.log("saveMidiFile midi=" + midi)
+      var midi = ABCJS.synth.getMidiFile(abcString, {
+        midiOutputType: "binary",
+        fileName: fileName,
+      });
+      console.log("saveMidiFile midi=" + midi);
       return midi.toString();
     }
 
-    window.setAbcString = setAbcString
-    window.triggerButtonClick = triggerButtonClick
-    window.ABCtoEvents = ABCtoEvents
-    window.countNotesInEditor = countNotesInEditor
-    window.setStyle = setStyle
-    window.get_chord = get_chord
-    window.resetTimingCallbacks = resetTimingCallbacks
-    window.setPromptNoteNumberCount = setPromptNoteNumberCount
-    window.saveMidiFile = saveMidiFile
-    window.startPlay = startPlay
-    window.pausePlay = pausePlay
-
+    window.setAbcString = setAbcString;
+    window.triggerButtonClick = triggerButtonClick;
+    window.ABCtoEvents = ABCtoEvents;
+    window.countNotesInEditor = countNotesInEditor;
+    window.setStyle = setStyle;
+    window.get_chord = get_chord;
+    window.resetTimingCallbacks = resetTimingCallbacks;
+    window.setPromptNoteNumberCount = setPromptNoteNumberCount;
+    window.saveMidiFile = saveMidiFile;
+    window.startPlay = startPlay;
+    window.pausePlay = pausePlay;
   </script>
+
+
 </head>
 
 <body>
   <div class="container">
     <div id="audio"></div>
     <div id="paper"></div>
-    <div id="warnings" style="display: none;"></div>
-    <textarea id="abc" style="display: none;" cols="80" rows="15" spellcheck="false">
-    </textarea>
+    <div id="warnings" style="display: none"></div>
+    <textarea id="abc" style="display: none" cols="80" rows="15" spellcheck="false">
+      </textarea>
   </div>
 </body>
 
