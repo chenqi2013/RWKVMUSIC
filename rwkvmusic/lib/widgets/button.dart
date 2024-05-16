@@ -16,35 +16,36 @@ Widget btnFlatButtonWidget({
   String fontName = "Montserrat",
   FontWeight fontWeight = FontWeight.w400,
 }) {
-  return Container(
+  return SizedBox(
     width: width.w,
     height: height.h,
     child: TextButton(
       style: ButtonStyle(
-        textStyle: MaterialStateProperty.all(TextStyle(
+        textStyle: WidgetStateProperty.all(TextStyle(
           fontSize: 16.sp,
         )),
-        foregroundColor: MaterialStateProperty.resolveWith(
+        foregroundColor: WidgetStateProperty.resolveWith(
           (states) {
-            if (states.contains(MaterialState.focused) &&
-                !states.contains(MaterialState.pressed)) {
+            if (states.contains(WidgetState.focused) &&
+                !states.contains(WidgetState.pressed)) {
               return Colors.blue;
-            } else if (states.contains(MaterialState.pressed)) {
+            } else if (states.contains(WidgetState.pressed)) {
               return Colors.deepPurple;
             }
             return fontColor;
           },
         ),
-        backgroundColor: MaterialStateProperty.resolveWith((states) {
-          if (states.contains(MaterialState.pressed)) {
+        backgroundColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.pressed)) {
             return Colors.blue[200];
           }
           return gbColor;
         }),
-        shape: MaterialStateProperty.all(RoundedRectangleBorder(
+        shape: WidgetStateProperty.all(const RoundedRectangleBorder(
           borderRadius: Radii.k6pxRadius,
         )),
       ),
+      onPressed: onPressed,
       child: Text(
         title,
         textAlign: TextAlign.center,
@@ -56,7 +57,6 @@ Widget btnFlatButtonWidget({
           height: 1,
         ),
       ),
-      onPressed: onPressed,
     ),
   );
 }
@@ -68,7 +68,7 @@ Widget btnFlatButtonBorderOnlyWidget({
   double height = 44,
   required String iconFileName,
 }) {
-  return Container(
+  return SizedBox(
     width: width.w,
     height: height.h,
     child: TextButton(
@@ -93,14 +93,14 @@ Widget btnFlatButtonBorderOnlyWidget({
         //   }
         //   return AppColors.primaryElement;
         // }),
-        shape: MaterialStateProperty.all(RoundedRectangleBorder(
+        shape: WidgetStateProperty.all(const RoundedRectangleBorder(
           borderRadius: Radii.k6pxRadius,
         )),
       ),
+      onPressed: onPressed,
       child: Image.asset(
         "assets/images/icons-$iconFileName.png",
       ),
-      onPressed: onPressed,
     ),
   );
 }

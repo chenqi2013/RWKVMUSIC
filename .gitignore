@@ -25,3 +25,10 @@ doc/api/
 
 .flutter-plugins
 .flutter-plugins-dependencies
+rwkvmusic/lib/fastmodel/RWKV-5-ABC-82M-v1-20230901-ctx1024-ncnn.bin
+rwkvmusic/windows/.vs/
+rwkvmusic/assets/fastmodel/RWKV-5-ABC-82M-v1-20230901-ctx1024-ncnn.bin
+*.mid
+rwkvmusic/lib/fastmodel/RWKV-6-ABC-85M-v1-20240217-ctx1024-Qualcomm-XElite.bin
+rwkvmusic/lib/fastmodel/RWKV-6-MIDI-120M-20240220-ctx4096-QNN-XElite.bin
+rwkvmusic/lib/fastmodel/RWKV-6-MIDI-120M-20240220-ctx4096-QNN-XElite.bin.a8w16

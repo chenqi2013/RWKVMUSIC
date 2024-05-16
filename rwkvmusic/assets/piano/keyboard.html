@@ -2,25 +2,66 @@
 <html lang="en">
 
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Piano</title>
   <style>
     html,
     body {
       margin: 0;
-      font-family: 'Noto Serif', serif;
+      font-family: "Noto Serif", serif;
     }
 
     body {
       position: absolute;
-      top: 0;
-      bottom: 0;
-      left: 2px;
-      right: 2px;
+      top: 0px;
+      bottom: 0px;
+      left: 0px;
+      right: 0px;
       display: flex;
       justify-content: center;
       align-items: center;
+      background: #000000;
+    }
+
+    .container {
+      border-bottom: 1px solid #ffffff99;
+      box-shadow: -1px -1px 0.5px 0px #ffffff99 inset;
+      border-radius: 9px;
+      margin: 0;
+      top: 0px;
+      bottom: 0px;
+      left: 0px;
+      right: 0px;
+      width: 100%;
+      height: calc(100% - 1px);
+      position: absolute;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    #keyboard {
+      border: 5px solid #212121;
+      border-radius: 9px;
+      background: #212121;
+      margin: 0;
+      top: 0px;
+      bottom: 0px;
+      left: 0px;
+      right: 0px;
+      width: calc(100% - 10px);
+      height: calc(100% - 10px);
+      position: absolute;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .svg-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 100%;
+      height: 100%;
     }
 
     * {
@@ -44,6 +85,8 @@
 
     .white,
     .black {
+      /* height: 100%;
+        width: 100%; */
       position: relative;
       float: left;
       display: flex;
@@ -51,42 +94,58 @@
       align-items: flex-end;
       user-select: none;
       cursor: pointer;
-      font-size: 12px;
+      font-size: 0.4rem;
     }
 
     .white {
       height: 100%;
-      z-index: 1;
-      border-left: 1px solid hsl(0, 0%, 73%);
-      border-bottom: 1px solid hsl(0, 0%, 73%);
-      border-radius: 0 0 5px 5px;
-      box-shadow: -1px 0 0 var(--white-80) inset, 0 0 5px hsl(0, 0%, 80%) inset,
-        0 0 3px var(--black-20);
-      background: linear-gradient(to bottom, hsl(0, 0%, 99%) 0%, white 100%);
-      color: var(--black-30);
+      width: 100%;
+      background-image: url("data:image/svg+xml,%3Csvg width='40' height='204' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cmask id='mask0_33_189' style='mask-type:alpha' maskUnits='userSpaceOnUse' x='0' y='0' width='40' height='204'%3E%3Cpath d='M0.666667 0.666667H39.3333V199.2C39.3333 200.051 39.3328 200.649 39.2947 201.116C39.2572 201.575 39.1866 201.848 39.079 202.059C38.8553 202.498 38.4983 202.855 38.0593 203.079C37.8481 203.187 37.5751 203.257 37.1161 203.295C36.6493 203.333 36.0511 203.333 35.2 203.333H4.8C3.94892 203.333 3.35071 203.333 2.88389 203.295C2.42486 203.257 2.15191 203.187 1.94069 203.079C1.50165 202.855 1.14469 202.498 0.920984 202.059C0.813361 201.848 0.742829 201.575 0.705325 201.116C0.667185 200.649 0.666667 200.051 0.666667 199.2V0.666667Z' fill='url(%23paint0_linear_33_189)' stroke='url(%23paint1_linear_33_189)' stroke-width='1.33333'/%3E%3C/mask%3E%3Cg mask='url(%23mask0_33_189)'%3E%3Cpath d='M0 0H40V199.2C40 200.88 40 201.72 39.673 202.362C39.3854 202.926 38.9265 203.385 38.362 203.673C37.7202 204 36.8802 204 35.2 204H4.8C3.11984 204 2.27976 204 1.63803 203.673C1.07354 203.385 0.614601 202.926 0.32698 202.362C0 201.72 0 200.88 0 199.2V0Z' fill='%23D9D9D9'/%3E%3Cg filter='url(%23filter0_f_33_189)'%3E%3Cpath d='M0 -2H40V197.2C40 198.88 40 199.72 39.673 200.362C39.3854 200.926 38.9265 201.385 38.362 201.673C37.7202 202 36.8802 202 35.2 202H4.8C3.11984 202 2.27976 202 1.63803 201.673C1.07354 201.385 0.614601 200.926 0.32698 200.362C0 199.72 0 198.88 0 197.2V-2Z' fill='url(%23paint2_linear_33_189)'/%3E%3Cpath d='M0.666667 -1.33333H39.3333V197.2C39.3333 198.051 39.3328 198.649 39.2947 199.116C39.2572 199.575 39.1866 199.848 39.079 200.059C38.8553 200.498 38.4984 200.855 38.0593 201.079C37.8481 201.187 37.5751 201.257 37.1161 201.295C36.6493 201.333 36.0511 201.333 35.2 201.333H4.8C3.94892 201.333 3.35071 201.333 2.88389 201.295C2.42486 201.257 2.15191 201.187 1.94069 201.079C1.50164 200.855 1.14469 200.498 0.920988 200.059C0.813362 199.848 0.742829 199.575 0.705325 199.116C0.667185 198.649 0.666667 198.051 0.666667 197.2V-1.33333Z' stroke='url(%23paint3_linear_33_189)' stroke-width='1.33333'/%3E%3C/g%3E%3C/g%3E%3Cdefs%3E%3Cfilter id='filter0_f_33_189' x='-1.33333' y='-3.33333' width='42.6667' height='206.667' filterUnits='userSpaceOnUse' color-interpolation-filters='sRGB'%3E%3CfeFlood flood-opacity='0' result='BackgroundImageFix'/%3E%3CfeBlend mode='normal' in='SourceGraphic' in2='BackgroundImageFix' result='shape'/%3E%3CfeGaussianBlur stdDeviation='0.666667' result='effect1_foregroundBlur_33_189'/%3E%3C/filter%3E%3ClinearGradient id='paint0_linear_33_189' x1='20' y1='0' x2='20' y2='204' gradientUnits='userSpaceOnUse'%3E%3Cstop stop-color='%238F8F8F'/%3E%3Cstop offset='0.312675' stop-color='%23F6F6F6'/%3E%3Cstop offset='1' stop-color='%23F7F7F7'/%3E%3C/linearGradient%3E%3ClinearGradient id='paint1_linear_33_189' x1='20' y1='0' x2='20' y2='204' gradientUnits='userSpaceOnUse'%3E%3Cstop stop-color='%236C6C6C'/%3E%3Cstop offset='1' stop-color='white'/%3E%3C/linearGradient%3E%3ClinearGradient id='paint2_linear_33_189' x1='20' y1='-2' x2='20' y2='202' gradientUnits='userSpaceOnUse'%3E%3Cstop stop-color='%238F8F8F'/%3E%3Cstop offset='0.312675' stop-color='%23F6F6F6'/%3E%3Cstop offset='1' stop-color='%23F5F5F5'/%3E%3C/linearGradient%3E%3ClinearGradient id='paint3_linear_33_189' x1='20' y1='-2' x2='20' y2='202' gradientUnits='userSpaceOnUse'%3E%3Cstop stop-color='%236C6C6C'/%3E%3Cstop offset='1' stop-color='white'/%3E%3C/linearGradient%3E%3C/defs%3E%3C/svg%3E%0A");
+      background-size: 100% 100%;
+      /* 图片填满整个div，可能会导致失真 */
+      background-repeat: no-repeat;
+      /* 防止图片重复 */
+      background-position: center;
+      /* 图片居中 */
+      /* margin-left: 1px;
+        margin-right: 1px; */
     }
 
     .black {
       position: absolute;
-      width: 10px;
+      /* width: 10px; */
       height: 62%;
       z-index: 2;
-      border: 1px solid black;
+      /* border: 1px solid black; */
       border-radius: 0 0 3px 3px;
-      box-shadow: -1px -1px 2px var(--white-20) inset,
-        0 -5px 2px 3px var(--black-60) inset, 0 2px 4px var(--black-50);
-      background: linear-gradient(45deg, hsl(0, 0%, 13%) 0%, hsl(0, 0%, 33%) 100%);
-      color: var(--white-50);
+      /* background: url("./style-assets/black-key.svg"); */
+      background-image: url("data:image/svg+xml,%3Csvg width='30' height='116' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath fill-rule='evenodd' clip-rule='evenodd' d='M30 1.24084e-05L30.0001 112.969C30.0002 113.122 30.0003 113.338 29.9843 113.534C29.9651 113.769 29.9133 114.144 29.7094 114.544C29.4537 115.046 29.0458 115.454 28.544 115.709C28.1438 115.913 27.7689 115.965 27.5341 115.984C27.3382 116 27.1216 116 26.9686 116H3.03143C2.87843 116 2.66189 116 2.46597 115.984C2.23112 115.965 1.8563 115.913 1.45606 115.709C0.954296 115.454 0.546348 115.046 0.290686 114.544C0.0867532 114.144 0.0349492 113.769 0.0157612 113.534C-0.000246067 113.338 -9.08553e-05 113.122 1.90557e-05 112.969C0.011457 76.3229 1.90557e-05 2.38525e-05 1.90557e-05 2.38525e-05C5.83287 -2.20368e-05 30 1.24084e-05 30 1.24084e-05ZM2.0727 2.36402C2.00004 2.50663 2.00004 2.69331 2.00004 3.06668V112.933C2.00004 113.307 2.00004 113.493 2.0727 113.636C2.13661 113.761 2.2386 113.863 2.36404 113.927C2.50665 114 2.69334 114 3.0667 114H26.9334C27.3067 114 27.4934 114 27.636 113.927C27.7615 113.863 27.8635 113.761 27.9274 113.636C28 113.493 28 113.307 28 112.933V3.06668C28 2.69331 28 2.50663 27.9274 2.36402C27.8635 2.23858 27.7615 2.13659 27.636 2.07268C27.4934 2.00001 27.3067 2.00001 26.9334 2.00001H3.0667C2.69333 2.00001 2.50665 2.00001 2.36404 2.07268C2.2386 2.13659 2.13661 2.23858 2.0727 2.36402Z' fill='%231F1F1F'/%3E%3Cpath d='M2 3.06668C2 2.69331 2 2.50663 2.07266 2.36402C2.13658 2.23858 2.23856 2.13659 2.36401 2.07268C2.50661 2.00002 2.6933 2.00002 3.06667 2.00002H26.9333C27.3067 2.00002 27.4934 2.00002 27.636 2.07268C27.7614 2.13659 27.8634 2.23858 27.9273 2.36402C28 2.50663 28 2.69331 28 3.06668V112.933C28 113.307 28 113.493 27.9273 113.636C27.8634 113.761 27.7614 113.863 27.636 113.927C27.4934 114 27.3067 114 26.9333 114H3.06667C2.6933 114 2.50661 114 2.36401 113.927C2.23856 113.863 2.13658 113.761 2.07266 113.636C2 113.493 2 113.307 2 112.933V3.06668Z' fill='url(%23paint0_linear_33_237)'/%3E%3Cg filter='url(%23filter0_f_33_237)'%3E%3Cpath d='M3.66675 106.467V91.5C3.66675 94.1136 4.33341 95.4538 4.84205 96.452C5.28946 97.3301 6.00337 98.044 6.88146 98.4914C7.87971 99.0001 9.1865 99.0001 11.8001 99.0001C9.1865 99.0001 7.87971 99.0001 6.88146 99.5087C6.00337 99.9561 5.28946 100.67 4.84205 101.548C4.33341 102.546 3.66675 103.853 3.66675 106.467Z' fill='%23AAAAAA'/%3E%3C/g%3E%3Cg filter='url(%23filter1_f_33_237)'%3E%3Cpath d='M25.1581 96.452C25.6667 95.4538 26.3334 94.1136 26.3334 91.5V106.467C26.3334 103.853 25.6667 102.546 25.1581 101.548C24.7107 100.67 23.9968 99.9561 23.1187 99.5087C22.1204 99.0001 20.8137 99.0001 18.2001 99.0001C20.8137 99.0001 22.1204 99.0001 23.1187 98.4914C23.9968 98.044 24.7107 97.3301 25.1581 96.452Z' fill='%23545550'/%3E%3C/g%3E%3Cpath d='M4.84197 101.867C5.28938 100.879 6.00329 100.076 6.88138 99.5723C7.87963 99.0001 9.18642 99.0001 11.8 99.0001H18.2C20.8136 99.0001 22.1204 99.0001 23.1186 99.5723C23.9967 100.076 24.7106 100.879 25.158 101.867C26.5828 105.012 26.2776 110.424 27 114H3C3.72237 110.424 3.41721 105.012 4.84197 101.867Z' fill='url(%23paint1_linear_33_237)'/%3E%3Cpath d='M4 2.00002H26V91.5333C26 94.1469 26 95.4537 25.4914 96.452C25.044 97.3301 24.33 98.044 23.452 98.4914C22.4537 99 21.1469 99 18.5333 99H11.4667C8.85309 99 7.5463 99 6.54804 98.4914C5.66995 98.044 4.95605 97.3301 4.50864 96.452C4 95.4537 4 94.1469 4 91.5333V2.00002Z' fill='url(%23paint2_linear_33_237)'/%3E%3Cg filter='url(%23filter2_f_33_237)'%3E%3Cpath d='M4 2.00002H26V91.5333C26 94.1469 26 95.4537 25.4914 96.452C25.044 97.3301 24.33 98.044 23.452 98.4914C22.4537 99 21.1469 99 18.5333 99H11.4667C8.85309 99 7.5463 99 6.54804 98.4914C5.66995 98.044 4.95605 97.3301 4.50864 96.452C4 95.4537 4 94.1469 4 91.5333V2.00002Z' stroke='url(%23paint3_linear_33_237)' stroke-width='0.466667'/%3E%3C/g%3E%3Cg opacity='0.78' filter='url(%23filter3_f_33_237)'%3E%3Crect x='14' y='99' width='2' height='15' fill='url(%23paint4_linear_33_237)'/%3E%3C/g%3E%3Cdefs%3E%3Cfilter id='filter0_f_33_237' x='3.00008' y='90.8333' width='9.46663' height='16.3' filterUnits='userSpaceOnUse' color-interpolation-filters='sRGB'%3E%3CfeFlood flood-opacity='0' result='BackgroundImageFix'/%3E%3CfeBlend mode='normal' in='SourceGraphic' in2='BackgroundImageFix' result='shape'/%3E%3CfeGaussianBlur stdDeviation='0.333333' result='effect1_foregroundBlur_33_237'/%3E%3C/filter%3E%3Cfilter id='filter1_f_33_237' x='17.5334' y='90.8333' width='9.46663' height='16.3' filterUnits='userSpaceOnUse' color-interpolation-filters='sRGB'%3E%3CfeFlood flood-opacity='0' result='BackgroundImageFix'/%3E%3CfeBlend mode='normal' in='SourceGraphic' in2='BackgroundImageFix' result='shape'/%3E%3CfeGaussianBlur stdDeviation='0.333333' result='effect1_foregroundBlur_33_237'/%3E%3C/filter%3E%3Cfilter id='filter2_f_33_237' x='3.56672' y='1.56668' width='22.8666' height='97.8667' filterUnits='userSpaceOnUse' color-interpolation-filters='sRGB'%3E%3CfeFlood flood-opacity='0' result='BackgroundImageFix'/%3E%3CfeBlend mode='normal' in='SourceGraphic' in2='BackgroundImageFix' result='shape'/%3E%3CfeGaussianBlur stdDeviation='0.1' result='effect1_foregroundBlur_33_237'/%3E%3C/filter%3E%3Cfilter id='filter3_f_33_237' x='13.5' y='98.5' width='3' height='16' filterUnits='userSpaceOnUse' color-interpolation-filters='sRGB'%3E%3CfeFlood flood-opacity='0' result='BackgroundImageFix'/%3E%3CfeBlend mode='normal' in='SourceGraphic' in2='BackgroundImageFix' result='shape'/%3E%3CfeGaussianBlur stdDeviation='0.25' result='effect1_foregroundBlur_33_237'/%3E%3C/filter%3E%3ClinearGradient id='paint0_linear_33_237' x1='15' y1='2.00002' x2='15' y2='114' gradientUnits='userSpaceOnUse'%3E%3Cstop stop-color='%23222222'/%3E%3Cstop offset='0.027231' stop-color='%23383838'/%3E%3Cstop offset='0.149892' stop-color='%235D5D5D'/%3E%3Cstop offset='0.523165' stop-color='%23A2A2A2'/%3E%3Cstop offset='1' stop-color='%23545454'/%3E%3C/linearGradient%3E%3ClinearGradient id='paint1_linear_33_237' x1='15' y1='99.0001' x2='15' y2='114' gradientUnits='userSpaceOnUse'%3E%3Cstop stop-color='%234A4A4A'/%3E%3Cstop offset='1' stop-color='%237B7B7B'/%3E%3C/linearGradient%3E%3ClinearGradient id='paint2_linear_33_237' x1='15' y1='2.00002' x2='15' y2='99' gradientUnits='userSpaceOnUse'%3E%3Cstop stop-color='%23111111'/%3E%3Cstop offset='0.521751' stop-color='%2348494C'/%3E%3Cstop offset='1' stop-color='%23242426'/%3E%3C/linearGradient%3E%3ClinearGradient id='paint3_linear_33_237' x1='15' y1='2.00002' x2='15' y2='99' gradientUnits='userSpaceOnUse'%3E%3Cstop stop-opacity='0.29'/%3E%3Cstop offset='1'/%3E%3C/linearGradient%3E%3ClinearGradient id='paint4_linear_33_237' x1='15' y1='99' x2='15' y2='114' gradientUnits='userSpaceOnUse'%3E%3Cstop stop-color='%230F0F0F' stop-opacity='0'/%3E%3Cstop offset='1' stop-color='%230F0F0F'/%3E%3C/linearGradient%3E%3C/defs%3E%3C/svg%3E%0A");
+      background-size: 100% 100%;
+      /* 图片填满整个div，可能会导致失真 */
+      background-repeat: no-repeat;
+      /* 防止图片重复 */
+      background-position: center;
+      /* 图片居中 */
     }
 
     .white.pressed {
-      border-top: 1px solid hsl(0, 0%, 47%);
-      border-left: 1px solid hsl(0, 0%, 60%);
-      border-bottom: 1px solid hsl(0, 0%, 60%);
-      box-shadow: 2px 0 3px var(--black-10) inset,
-        -5px 5px 20px var(--black-20) inset, 0 0 3px var(--black-20);
-      background: linear-gradient(to bottom, white 0%, hsl(0, 0%, 91%) 100%);
-      outline: none;
+      /* border-top: 1px solid hsl(0, 0%, 47%);
+        border-left: 1px solid hsl(0, 0%, 60%);
+        border-bottom: 1px solid hsl(0, 0%, 60%);
+        box-shadow: 2px 0 3px var(--black-10) inset,
+          -5px 5px 20px var(--black-20) inset, 0 0 3px var(--black-20);
+        background: linear-gradient(to bottom, white 0%, hsl(0, 0%, 91%) 100%);
+        outline: none; */
+
+      height: 99%;
+      width: 100%;
+      background-image: url("data:image/svg+xml,%3Csvg width='38' height='198' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cmask id='mask0_33_144' style='mask-type:alpha' maskUnits='userSpaceOnUse' x='0' y='0' width='38' height='198'%3E%3Cpath d='M0.666667 0.666667H37.3333V193.2C37.3333 194.051 37.3328 194.649 37.2947 195.116C37.2572 195.575 37.1866 195.848 37.079 196.059C36.8553 196.498 36.4984 196.855 36.0593 197.079C35.8481 197.187 35.5751 197.257 35.1161 197.295C34.6493 197.333 34.0511 197.333 33.2 197.333H4.8C3.94892 197.333 3.35071 197.333 2.88389 197.295C2.42486 197.257 2.15191 197.187 1.94069 197.079C1.50164 196.855 1.14469 196.498 0.920984 196.059C0.813362 195.848 0.742829 195.575 0.705325 195.116C0.667185 194.649 0.666667 194.051 0.666667 193.2V0.666667Z' fill='url(%23paint0_linear_33_144)' stroke='url(%23paint1_linear_33_144)' stroke-width='1.33333'/%3E%3C/mask%3E%3Cg mask='url(%23mask0_33_144)'%3E%3Cpath d='M-1 0H39V193.2C39 194.88 39 195.72 38.673 196.362C38.3854 196.926 37.9265 197.385 37.362 197.673C36.7202 198 35.8802 198 34.2 198H3.8C2.11984 198 1.27976 198 0.638029 197.673C0.0735422 197.385 -0.385399 196.926 -0.67302 196.362C-1 195.72 -1 194.88 -1 193.2V0Z' fill='%23D9D9D9'/%3E%3Cg filter='url(%23filter0_f_33_144)'%3E%3Cpath d='M-1 -1.33333H39V161.867C39 163.547 39 164.387 38.673 165.029C38.3854 165.593 37.9265 166.052 37.362 166.34C36.7202 166.667 35.8802 166.667 34.2 166.667H3.8C2.11984 166.667 1.27976 166.667 0.638029 166.34C0.0735422 166.052 -0.385399 165.593 -0.67302 165.029C-1 164.387 -1 163.547 -1 161.867V-1.33333Z' fill='url(%23paint2_linear_33_144)'/%3E%3Cpath d='M-0.333333 -0.666662H38.3333V161.867C38.3333 162.718 38.3328 163.316 38.2947 163.783C38.2572 164.242 38.1866 164.515 38.079 164.726C37.8553 165.165 37.4984 165.522 37.0593 165.746C36.8481 165.853 36.5751 165.924 36.1161 165.961C35.6493 165.999 35.0511 166 34.2 166H3.8C2.94892 166 2.35071 165.999 1.88389 165.961C1.42486 165.924 1.15191 165.853 0.940689 165.746C0.501649 165.522 0.144692 165.165 -0.0790157 164.726C-0.186639 164.515 -0.257171 164.242 -0.294675 163.783C-0.332815 163.316 -0.333333 162.718 -0.333333 161.867V-0.666662Z' stroke='url(%23paint3_linear_33_144)' stroke-width='1.33333'/%3E%3C/g%3E%3Cg filter='url(%23filter1_f_33_144)'%3E%3Cpath d='M-1 0H39V193.2C39 194.88 39 195.72 38.673 196.362C38.3854 196.926 37.9265 197.385 37.362 197.673C36.7202 198 35.8802 198 34.2 198H3.8C2.11984 198 1.27976 198 0.638029 197.673C0.0735422 197.385 -0.385399 196.926 -0.67302 196.362C-1 195.72 -1 194.88 -1 193.2V0Z' fill='url(%23paint4_linear_33_144)'/%3E%3Cpath d='M-1 0H39V193.2C39 194.88 39 195.72 38.673 196.362C38.3854 196.926 37.9265 197.385 37.362 197.673C36.7202 198 35.8802 198 34.2 198H3.8C2.11984 198 1.27976 198 0.638029 197.673C0.0735422 197.385 -0.385399 196.926 -0.67302 196.362C-1 195.72 -1 194.88 -1 193.2V0Z' fill='url(%23paint5_linear_33_144)' fill-opacity='0.2'/%3E%3Cpath d='M-0.333333 0.666667H38.3333V193.2C38.3333 194.051 38.3328 194.649 38.2947 195.116C38.2572 195.575 38.1866 195.848 38.079 196.059C37.8553 196.498 37.4984 196.855 37.0593 197.079C36.8481 197.187 36.5751 197.257 36.1161 197.295C35.6493 197.333 35.0511 197.333 34.2 197.333H3.8C2.94892 197.333 2.35071 197.333 1.88389 197.295C1.42486 197.257 1.15191 197.187 0.940689 197.079C0.501642 196.855 0.144688 196.498 -0.0790157 196.059C-0.186638 195.848 -0.257171 195.575 -0.294675 195.116C-0.332815 194.649 -0.333333 194.051 -0.333333 193.2V0.666667Z' stroke='url(%23paint6_linear_33_144)' stroke-width='1.33333'/%3E%3C/g%3E%3C/g%3E%3Cdefs%3E%3Cfilter id='filter0_f_33_144' x='-2.33333' y='-2.66666' width='42.6667' height='170.667' filterUnits='userSpaceOnUse' color-interpolation-filters='sRGB'%3E%3CfeFlood flood-opacity='0' result='BackgroundImageFix'/%3E%3CfeBlend mode='normal' in='SourceGraphic' in2='BackgroundImageFix' result='shape'/%3E%3CfeGaussianBlur stdDeviation='0.666667' result='effect1_foregroundBlur_33_144'/%3E%3C/filter%3E%3Cfilter id='filter1_f_33_144' x='-2.33333' y='-1.33333' width='42.6667' height='200.667' filterUnits='userSpaceOnUse' color-interpolation-filters='sRGB'%3E%3CfeFlood flood-opacity='0' result='BackgroundImageFix'/%3E%3CfeBlend mode='normal' in='SourceGraphic' in2='BackgroundImageFix' result='shape'/%3E%3CfeGaussianBlur stdDeviation='0.666667' result='effect1_foregroundBlur_33_144'/%3E%3C/filter%3E%3ClinearGradient id='paint0_linear_33_144' x1='19' y1='0' x2='19' y2='202.829' gradientUnits='userSpaceOnUse'%3E%3Cstop stop-color='%238F8F8F'/%3E%3Cstop offset='0.312675' stop-color='%23F6F6F6'/%3E%3Cstop offset='1' stop-color='%23F7F7F7'/%3E%3C/linearGradient%3E%3ClinearGradient id='paint1_linear_33_144' x1='19' y1='0' x2='19' y2='202.829' gradientUnits='userSpaceOnUse'%3E%3Cstop stop-color='%236C6C6C'/%3E%3Cstop offset='1' stop-color='white'/%3E%3C/linearGradient%3E%3ClinearGradient id='paint2_linear_33_144' x1='19' y1='-1.33333' x2='19' y2='166.667' gradientUnits='userSpaceOnUse'%3E%3Cstop stop-color='%238F8F8F'/%3E%3Cstop offset='0.312675' stop-color='%23F6F6F6'/%3E%3Cstop offset='1' stop-color='%23F5F5F5'/%3E%3C/linearGradient%3E%3ClinearGradient id='paint3_linear_33_144' x1='19' y1='-1.33333' x2='19' y2='166.667' gradientUnits='userSpaceOnUse'%3E%3Cstop stop-color='%236C6C6C'/%3E%3Cstop offset='1' stop-color='white'/%3E%3C/linearGradient%3E%3ClinearGradient id='paint4_linear_33_144' x1='19' y1='0' x2='19' y2='198' gradientUnits='userSpaceOnUse'%3E%3Cstop offset='0.00202319' stop-color='%230D0D0D'/%3E%3Cstop offset='0.0430758' stop-color='%233D3D3D'/%3E%3Cstop offset='0.420274' stop-color='%23B6B6B6'/%3E%3Cstop offset='1' stop-color='%23E0E0E0'/%3E%3C/linearGradient%3E%3ClinearGradient id='paint5_linear_33_144' x1='19' y1='119.625' x2='-1' y2='119.625' gradientUnits='userSpaceOnUse'%3E%3Cstop stop-opacity='0'/%3E%3Cstop offset='1'/%3E%3C/linearGradient%3E%3ClinearGradient id='paint6_linear_33_144' x1='19' y1='0' x2='19' y2='198' gradientUnits='userSpaceOnUse'%3E%3Cstop/%3E%3Cstop offset='1' stop-color='white'/%3E%3C/linearGradient%3E%3C/defs%3E%3C/svg%3E%0A");
+      background-size: 100% 100%;
+      /* 图片填满整个div，可能会导致失真 */
+      background-repeat: no-repeat;
+      /* 防止图片重复 */
+      background-position: center;
+      /* 图片居中 */
     }
 
     .black.pressed {
@@ -101,21 +160,14 @@
     .offset {
       margin: 0 0 0 -1rem;
     }
-
-    #keyboard {
-      width: 100%;
-      height: calc(100% - 2px);
-      position: absolute;
-
-      display: flex;
-      justify-content: space-between;
-    }
   </style>
 </head>
 
 <body>
-  <div id="keyboard">
-    <!-- 生成88个黑白钢琴键 -->
+  <div class="container">
+    <div id="keyboard">
+      <!-- 生成88个黑白钢琴键 -->
+    </div>
   </div>
   <script>
     // JavaScript 代码用于动态创建钢琴键盘
@@ -130,14 +182,14 @@
         });
       }
       if (start < 21 || end > 108) {
-        alert('please set number between 21 and 108')
+        alert("please set number between 21 and 108");
         return;
       }
-      const piano = document.querySelector('#keyboard');
+      const piano = document.querySelector("#keyboard");
       const blackKeyArray = [1, 3, 6, 8, 10]; // 黑键的键位
       // 定义起始和结束键位
       let startNote = start; // 21对应A0音符，根据需要修改
-      let endNote = end;  // 108对应C8音符，根据需要修改
+      let endNote = end; // 108对应C8音符，根据需要修改
       // 这里是兼容情况，如果起始和结束键位是黑键，则向前或向后移动一位
       if (blackKeyArray.includes(startNote % 12)) {
         startNote = startNote - 1;
@@ -153,48 +205,64 @@
       }
       const everyWhiteKeyWidth = 100 / whiteCount;
 
-      console.log(whiteCount)
+      console.log(whiteCount);
 
       let prevWhiteKeyCount = 0;
       for (let i = startNote; i <= endNote; i++) {
         midiKey = i;
-        const key = document.createElement('div');
-        key.classList.add('key');
+
+        const key = document.createElement("div");
+
+        key.classList.add("key");
+
         if (blackKeyArray.includes(i % 12)) {
-          key.classList.add('black');
+          key.classList.add("black");
           const keyWidth = everyWhiteKeyWidth * (2 / 3);
-          key.style.width = `${keyWidth}%`
+          key.style.width = `${keyWidth}%`;
           // 根据白色键的位置计算黑色键的位置
-          key.style.left = `calc(${((prevWhiteKeyCount) * everyWhiteKeyWidth) - (keyWidth / 2)}% - 0.5px)`;
+          key.style.left = `calc(${prevWhiteKeyCount * everyWhiteKeyWidth - keyWidth / 2
+            }% - 0.5px)`;
         } else {
-          key.classList.add('white');
+          key.classList.add("white");
+
           prevWhiteKeyCount = prevWhiteKeyCount + 1;
 
           const renderMidiKey = midiKey - 20;
           const whichGroup = parseInt(renderMidiKey / 12);
           const currentNum = renderMidiKey % 12;
+
           // 每七个白键为一组，分别为ABCDEFG，这里要展示C键和第几组
           if (currentNum === 4) {
             key.innerText = `C${whichGroup + 1}`;
           }
         }
-        key.setAttribute('data-midiKey', midiKey);
+        key.setAttribute("data-midiKey", midiKey);
         piano.appendChild(key);
       }
       // 计算所有白色键的宽度，1px是因为有
-      const allWhiteKeys = document.querySelectorAll('.white');
+      const allWhiteKeys = document.querySelectorAll(".white");
+      // allWhiteKeys.forEach((key) => {
+      //   key.style.width = `calc(${everyWhiteKeyWidth}% - 1px)`;
+      // });
+
+      // 设置白色键的margin
       allWhiteKeys.forEach((key) => {
-        key.style.width = `calc(${everyWhiteKeyWidth}% - 1px)`;
+        const marginLeft = (everyWhiteKeyWidth * 0.026).toFixed(2);
+        const marginRight = (everyWhiteKeyWidth * 0.026).toFixed(2);
+        key.style.marginLeft = `calc(${marginLeft}% )`;
+        key.style.marginRight = `calc(${marginRight}% )`;
       });
 
       // 开始键盘监听逻辑
       const keyElements = document.querySelectorAll(".key");
-      console.log(keyElements.length)
+      console.log(keyElements.length);
       // 坚挺多个事件
       keyElements.forEach((element) => {
         element.addEventListener("touchstart", handleMouseDown);
         element.addEventListener("touchend", handleMouseUp);
         element.addEventListener("touchcancel", handleMouseUp);
+        element.addEventListener("mousedown", handleMouseDown); // 添加mousedown事件
+        element.addEventListener("mouseup", handleMouseUp);
       });
 
       function handleMouseDown(event) {
@@ -204,11 +272,11 @@
         if (!midiKey) return;
         const key = document.querySelector(`.key[data-midiKey="${midiKey}"]`);
         key.classList.add("pressed");
-        console.log('mousedown midiKey: ', midiKey);
+        console.log("mousedown midiKey: ", midiKey);
         // 由这里调用安卓程序
+        flutteronNoteOn.postMessage(midiKey);
         // if (typeof controller !== "undefined") {
-          // controller.onNoteOn(parseInt(midiKey));
-          flutteronNoteOn.postMessage(parseInt(midiKey));
+        //   controller.onNoteOn(parseInt(midiKey));
         // } else {
         //   alert("Running outside Android app down");
         // }
@@ -225,15 +293,16 @@
         });
 
         // 由这里调用安卓程序
+
+        flutteronNoteOff.postMessage(midiKey);
         // if (typeof controller !== "undefined") {
-          // controller.onNoteOff(parseInt(midiKey));
-          flutteronNoteOff.postMessage(parseInt(midiKey));
+        //   controller.onNoteOff(parseInt(midiKey));
         // } else {
         //   alert("Running outside Android app up");
         // }
       }
-    }
-    setPiano(21, 108);
+    };
+    setPiano(21, 80);
   </script>
 </body>
 

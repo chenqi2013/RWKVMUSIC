@@ -21,24 +21,24 @@ import '../values/server.dart';
   * https://github.com/flutterchina/dio/blob/master/migration_to_4.x.md
 */
 class HttpUtil {
-  static HttpUtil _instance = HttpUtil._internal();
+  static final HttpUtil _instance = HttpUtil._internal();
   factory HttpUtil() => _instance;
 
   late Dio dio;
-  CancelToken cancelToken = new CancelToken();
+  CancelToken cancelToken = CancelToken();
 
   HttpUtil._internal() {
     // BaseOptions、Options、RequestOptions 都可以配置参数，优先级别依次递增，且可以根据优先级别覆盖参数
-    BaseOptions options = new BaseOptions(
+    BaseOptions options = BaseOptions(
       // 请求基地址,可以包含子路径
       baseUrl: SERVER_API_URL,
 
       // baseUrl: storage.read(key: STORAGE_KEY_APIURL) ?? SERVICE_API_BASEURL,
       //连接服务器超时时间，单位是毫秒.
-      connectTimeout: Duration(milliseconds: 10000),
+      connectTimeout: const Duration(milliseconds: 10000),
 
       // 响应流上前后两次接受到数据的间隔，单位为毫秒。
-      receiveTimeout: Duration(milliseconds: 5000),
+      receiveTimeout: const Duration(milliseconds: 5000),
 
       // Http请求头.
       headers: {},
@@ -59,7 +59,7 @@ class HttpUtil {
       responseType: ResponseType.json,
     );
 
-    dio = new Dio(options);
+    dio = Dio(options);
 
     // Cookie管理
     CookieJar cookieJar = CookieJar();
@@ -82,7 +82,7 @@ class HttpUtil {
         // 如果你想终止请求并触发一个错误,你可以 reject 一个`DioError`对象,如`handler.reject(error)`，
         // 这样请求将被中止并触发异常，上层catchError会被调用。
       },
-      onError: (DioError e, handler) {
+      onError: (DioException e, handler) {
         // Do something with response error
         Loading.dismiss();
         ErrorEntity eInfo = createErrorEntity(e);
@@ -100,10 +100,7 @@ class HttpUtil {
 
   // 错误处理
   void onError(ErrorEntity eInfo) {
-    print('error.code -> ' +
-        eInfo.code.toString() +
-        ', error.message -> ' +
-        eInfo.message);
+    print('error.code -> ${eInfo.code}, error.message -> ${eInfo.message}');
     switch (eInfo.code) {
       case 401:
         UserStore.to.onLogout();
@@ -116,19 +113,19 @@ class HttpUtil {
   }
 
   // 错误信息
-  ErrorEntity createErrorEntity(DioError error) {
+  ErrorEntity createErrorEntity(DioException error) {
     switch (error.type) {
-      case DioErrorType.cancel:
+      case DioExceptionType.cancel:
         return ErrorEntity(code: -1, message: "请求取消");
-      case DioErrorType.connectionTimeout:
+      case DioExceptionType.connectionTimeout:
         return ErrorEntity(code: -1, message: "连接超时");
-      case DioErrorType.sendTimeout:
+      case DioExceptionType.sendTimeout:
         return ErrorEntity(code: -1, message: "请求超时");
-      case DioErrorType.receiveTimeout:
+      case DioExceptionType.receiveTimeout:
         return ErrorEntity(code: -1, message: "响应超时");
-      case DioErrorType.cancel:
+      case DioExceptionType.cancel:
         return ErrorEntity(code: -1, message: "请求取消");
-      case DioErrorType.badResponse:
+      case DioExceptionType.badResponse:
         {
           try {
             int errCode =
@@ -212,9 +209,7 @@ class HttpUtil {
     bool cacheDisk = false,
   }) async {
     Options requestOptions = options ?? Options();
-    if (requestOptions.extra == null) {
-      requestOptions.extra = Map();
-    }
+    requestOptions.extra ??= Map();
     requestOptions.extra!.addAll({
       "refresh": refresh,
       "noCache": noCache,
@@ -386,6 +381,7 @@ class ErrorEntity implements Exception {
   String message = "";
   ErrorEntity({required this.code, required this.message});
 
+  @override
   String toString() {
     if (message == "") return "Exception";
     return "Exception: code $code, $message";
