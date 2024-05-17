@@ -701,7 +701,7 @@ class _MyAppState extends State<MyApp> {
     }
   }
 
-  void playPianoAnimation(String abcString, bool play) {
+  void playPianoAnimation(String playAbcString, bool play) {
     if (!isPlay.value) {
       // controllerKeyboard.runJavaScript('resetPlay()');
       controllerPiano.runJavaScript("startPlay()");
@@ -715,10 +715,11 @@ class _MyAppState extends State<MyApp> {
         controllerKeyboard.runJavaScript('resumePlay()');
         // createTimer();
       } else {
-        abcString = abcString.replaceAll('setAbcString', 'ABCtoEvents');
+        String abcStringTmp =
+            playAbcString.replaceAll('setAbcString', 'ABCtoEvents');
         // abcString = r'ABCtoEvents("L:1/4\nM:4/4\nK:D\n\"D\" A F F")';
-        debugPrint('playOrPausePiano  ABCtoEvents==$abcString');
-        controllerPiano.runJavaScript(abcString);
+        debugPrint('playOrPausePiano  ABCtoEvents==$abcStringTmp');
+        controllerPiano.runJavaScript(abcStringTmp);
       }
     } else {
       controllerKeyboard.runJavaScript('pausePlay()');
@@ -1056,7 +1057,9 @@ class _MyAppState extends State<MyApp> {
 
   void playOrPausePiano() {
     debugPrint('playOrPausePiano=${isPlay.value}');
-    playPianoAnimation(finalabcStringPreset, !isPlay.value);
+    playPianoAnimation(
+        selectstate.value == 0 ? finalabcStringPreset : finalabcStringCreate,
+        !isPlay.value);
     // if (isWindowsOrMac) {
     //   isPlay.value = !isPlay.value;
     // }
@@ -1341,7 +1344,11 @@ class _MyAppState extends State<MyApp> {
                             //     'playPianoAnimation ABCtoEvents==');
                             // isNeedConvertMidiNotes = true;
                             // controllerPiano.runJavaScript(oriabcString);
-                            playPianoAnimation(finalabcStringPreset, true);
+                            playPianoAnimation(
+                                selectstate.value == 0
+                                    ? finalabcStringPreset
+                                    : finalabcStringCreate,
+                                true);
                             Future.delayed(const Duration(seconds: 2),
                                 () async {
                               debugPrint('Delayed action after 3 seconds');
@@ -1719,7 +1726,10 @@ class _MyAppState extends State<MyApp> {
                                     // controllerPiano.runJavaScript(oriabcString);
 
                                     playPianoAnimation(
-                                        finalabcStringPreset, true);
+                                        selectstate.value == 0
+                                            ? finalabcStringPreset
+                                            : finalabcStringCreate,
+                                        true);
                                     Future.delayed(const Duration(seconds: 2),
                                         () {
                                       debugPrint(
@@ -2002,10 +2012,18 @@ class _MyAppState extends State<MyApp> {
                               }
                               abcstr = ABCHead.appendTempoParam(
                                   abcstr, tempo.value.toInt());
-                              finalabcStringPreset =
-                                  "setAbcString(\"$abcstr\", false)";
-                              controllerPiano
-                                  .runJavaScript(finalabcStringPreset);
+                              if (selectstate.value == 0) {
+                                finalabcStringPreset =
+                                    "setAbcString(\"$abcstr\", false)";
+                                controllerPiano
+                                    .runJavaScript(finalabcStringPreset);
+                              } else {
+                                finalabcStringCreate =
+                                    "setAbcString(\"$abcstr\", false)";
+                                controllerPiano
+                                    .runJavaScript(finalabcStringCreate);
+                              }
+
                               controllerKeyboard.runJavaScript('resetPlay()');
                               // debugPrint('选择prompt==$abcstr');
 
