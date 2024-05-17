@@ -14,7 +14,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
-import 'package:flutter_inappwebview/flutter_inappwebview.dart';
+// import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 // import 'package:flutter_platform_alert/flutter_platform_alert.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 // import 'package:flutter_share/flutter_share.dart';
@@ -92,10 +92,9 @@ void main(List<String> args) async {
   }
   await Get.putAsync<StorageService>(() => StorageService().init());
   Get.put<ConfigStore>(ConfigStore());
-  runApp(ScreenUtilInit(
-    designSize:
-        Platform.isWindows ? const Size(2880, 1600) : const Size(812, 375),
-    child: const GetMaterialApp(
+  runApp(const ScreenUtilInit(
+    designSize: Size(812, 375), // Platform.isWindows ? const Size(2880, 1600) :
+    child: GetMaterialApp(
       debugShowCheckedModeBanner: false,
       home: MyApp(),
     ),
@@ -110,7 +109,7 @@ late SendPort isolateSendPort;
 bool isFinishABCEvent = false;
 late String finalabcStringPreset;
 late String finalabcStringCreate;
-late bool isNeedRestart; //曲谱及键盘动画需要重新开始
+// late bool isNeedRestart; //曲谱及键盘动画需要重新开始
 late String presentPrompt;
 late String createPrompt;
 String timeSingnatureStr = '4/4';
@@ -134,7 +133,7 @@ RxBool autoChord = true.obs;
 RxBool infiniteGeneration = false.obs;
 
 List midiNotes = [];
-bool isNeedConvertMidiNotes = false;
+// bool isNeedConvertMidiNotes = false;
 
 List virtualNotes = []; //虚拟键盘按键音符
 var selectstate = 0.obs;
@@ -286,7 +285,7 @@ void getABCDataByLocalModel(var array) async {
       promptChar, prompt.length, 1.0, 8, randomness);
   isGenerating.value = true;
   int duration = 0;
-  for (int i = 0; i < 1024; i++) {
+  for (int i = 0; i < 200; i++) {
     if (isStopGenerating) {
       debugPrint('stop getABCDataByLocalModel');
       break;
@@ -475,14 +474,14 @@ class _MyAppState extends State<MyApp> {
         playProgress.value = 0.0;
         createTimer();
         isPlay.value = true;
-        isNeedRestart = false;
+        // isNeedRestart = false;
       })
       ..addJavaScriptChannel("flutteronPausePlay",
           onMessageReceived: (JavaScriptMessage jsMessage) {
         debugPrint('flutteronPausePlay onMessageReceived=${jsMessage.message}');
         timer.cancel();
         isPlay.value = false;
-        isNeedRestart = false;
+        // isNeedRestart = false;
       })
       ..addJavaScriptChannel("flutteronResumePlay",
           onMessageReceived: (JavaScriptMessage jsMessage) {
@@ -490,7 +489,7 @@ class _MyAppState extends State<MyApp> {
             'flutteronResumePlay onMessageReceived=${jsMessage.message}');
         createTimer();
         isPlay.value = true;
-        isNeedRestart = false;
+        // isNeedRestart = false;
       })
       ..addJavaScriptChannel("flutteronCountPromptNoteNumber",
           onMessageReceived: (JavaScriptMessage jsMessage) {
@@ -501,24 +500,25 @@ class _MyAppState extends State<MyApp> {
           onMessageReceived: (JavaScriptMessage jsMessage) {
         debugPrint('flutteronEvents onMessageReceived=${jsMessage.message}');
         midiNotes = jsonDecode(jsMessage.message);
-        if (!isNeedConvertMidiNotes) {
-          // String jsstr =
-          //     r'startPlay("[[0,\"on\",49],[333,\"on\",46],[333,\"off\",49],[1000,\"off\",46]]")';
-          String jsstr =
-              r'startPlay("' + jsMessage.message.replaceAll('"', r'\"') + r'")';
-          controllerKeyboard.runJavaScript(jsstr);
-          isFinishABCEvent = true;
-          debugPrint('isFinishABCEvent == true');
-        } else {
-          isNeedConvertMidiNotes = false;
-        }
+        // if (!isNeedConvertMidiNotes) {
+        //   // String jsstr =
+        //   //     r'startPlay("[[0,\"on\",49],[333,\"on\",46],[333,\"off\",49],[1000,\"off\",46]]")';
+        String jsstr =
+            r'startPlay("' + jsMessage.message.replaceAll('"', r'\"') + r'")';
+        controllerKeyboard.runJavaScript(jsstr);
+        isFinishABCEvent = true;
+        debugPrint('isFinishABCEvent == true');
+        // } else {
+        //   isNeedConvertMidiNotes = false;
+        // }
       })
       ..addJavaScriptChannel("flutteronPlayFinish",
           onMessageReceived: (JavaScriptMessage jsMessage) {
         debugPrint(
             'flutteronPlayFinish onMessageReceived=${jsMessage.message}');
         isPlay.value = false;
-        isNeedRestart = true;
+        isFinishABCEvent = false;
+        // isNeedRestart = true;
         if (isAutoSwitch.value) {
           //自动切换下一个prompt
           promptSelectedIndex.value += 1;
@@ -698,15 +698,22 @@ class _MyAppState extends State<MyApp> {
   }
 
   void playPianoAnimation(String abcString, bool play) {
+    if (!isPlay.value) {
+      // controllerKeyboard.runJavaScript('resetPlay()');
+      controllerPiano.runJavaScript("startPlay()");
+    } else {
+      controllerPiano.runJavaScript("pausePlay()");
+    }
     if (play) {
-      if (isFinishABCEvent && !isNeedRestart && !isNeedConvertMidiNotes) {
+      if (isFinishABCEvent) {
+        //&& !isNeedRestart && !isNeedConvertMidiNotes
+        debugPrint('playOrPausePiano resumePlay() keyboard');
         controllerKeyboard.runJavaScript('resumePlay()');
-        debugPrint('resumePlay()playPianoAnimation');
         // createTimer();
       } else {
         abcString = abcString.replaceAll('setAbcString', 'ABCtoEvents');
         // abcString = r'ABCtoEvents("L:1/4\nM:4/4\nK:D\n\"D\" A F F")';
-        debugPrint('playPianoAnimation ABCtoEvents==$abcString');
+        debugPrint('playOrPausePiano  ABCtoEvents==$abcString');
         controllerPiano.runJavaScript(abcString);
       }
     } else {
@@ -956,7 +963,13 @@ class _MyAppState extends State<MyApp> {
                                             //     .runJavaScript('resetPlay()');
                                             // controllerPiano.runJavaScript(
                                             //     'resetTimingCallbacks()');
-                                            // isFinishABCEvent = false;
+                                            isFinishABCEvent = false;
+                                            if (selectstate.value == 1) {
+                                              // controllerKeyboard.loadFlutterAssetServer(filePathKeyboardAnimation);
+                                              controllerKeyboard.loadRequest(
+                                                  Uri.parse(
+                                                      filePathKeyboardAnimation));
+                                            }
                                           } else {
                                             // isolateSendPort.send('stop Generating');
                                             isolateEventBus
@@ -1036,13 +1049,7 @@ class _MyAppState extends State<MyApp> {
   }
 
   void playOrPausePiano() {
-    debugPrint('playOrPausePiano');
-    if (!isPlay.value) {
-      controllerKeyboard.runJavaScript('resetPlay()');
-      controllerPiano.runJavaScript("startPlay()");
-    } else {
-      controllerPiano.runJavaScript("pausePlay()");
-    }
+    debugPrint('playOrPausePiano=${isPlay.value}');
     playPianoAnimation(finalabcStringPreset, !isPlay.value);
     // if (isWindowsOrMac) {
     //   isPlay.value = !isPlay.value;
@@ -1136,7 +1143,7 @@ class _MyAppState extends State<MyApp> {
       debugPrint('pausePlay()');
       // controllerPiano.runJavaScript("pausePlay()");
       isPlay.value = false;
-      isNeedRestart = true;
+      // isNeedRestart = true;
       timer.cancel();
       playProgress.value = 0.0;
       pianoAllTime.value = 0.0;
@@ -1323,13 +1330,13 @@ class _MyAppState extends State<MyApp> {
                             // // abcString = r'ABCtoEvents("L:1/4\nM:4/4\nK:D\n\"D\" A F F")';
                             // debugPrint(
                             //     'playPianoAnimation ABCtoEvents==');
-                            isNeedConvertMidiNotes = true;
+                            // isNeedConvertMidiNotes = true;
                             // controllerPiano.runJavaScript(oriabcString);
                             playPianoAnimation(finalabcStringPreset, true);
                             Future.delayed(const Duration(seconds: 2),
                                 () async {
                               debugPrint('Delayed action after 3 seconds');
-                              isNeedConvertMidiNotes = false;
+                              // isNeedConvertMidiNotes = false;
                               if (isWindowsOrMac) {
                                 final file = DirectoryPicker()
                                   ..title = 'Select a directory';
@@ -1699,7 +1706,7 @@ class _MyAppState extends State<MyApp> {
                                     // // abcString = r'ABCtoEvents("L:1/4\nM:4/4\nK:D\n\"D\" A F F")';
                                     // debugPrint(
                                     //     'playPianoAnimation ABCtoEvents==$oriabcString');
-                                    isNeedConvertMidiNotes = true;
+                                    // isNeedConvertMidiNotes = true;
                                     // controllerPiano.runJavaScript(oriabcString);
 
                                     playPianoAnimation(
@@ -1708,7 +1715,7 @@ class _MyAppState extends State<MyApp> {
                                         () {
                                       debugPrint(
                                           'Delayed action after 3 seconds');
-                                      isNeedConvertMidiNotes = false;
+                                      // isNeedConvertMidiNotes = false;
                                       final file = DirectoryPicker()
                                         ..title = 'Select a directory';
                                       final result = file.getDirectory();

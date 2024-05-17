@@ -63,7 +63,7 @@
         //   } else {
         //       alert("Running outside Android app");
         //   }
-        // flutteronCountPromptNoteNumber.postMessage(a);
+        flutteronCountPromptNoteNumber.postMessage(a);
       }
     }
 
@@ -157,7 +157,7 @@
       // } else {
       //     alert("Running outside Android app");
       // }
-      //   flutteronEvents.postMessage("" + eventJson + "");
+      flutteronEvents.postMessage("" + eventJson + "");
       return eventJson;
     }
 
@@ -382,7 +382,7 @@
         // } else {
         //     alert("Running outside Android app");
         // }
-        // flutteronPlayFinish.postMessage('true');
+        flutteronPlayFinish.postMessage('true');
       };
     }
 
@@ -402,7 +402,7 @@
       // } else {
       //     alert("Running outside Android app");
       // }
-      //   flutteronStartPlay.postMessage(isUserClick + ',' + duration);
+      flutteronStartPlay.postMessage(isUserClick + ',' + duration);
     }
 
     function onPausePlay() {
@@ -411,7 +411,7 @@
       // } else {
       // alert("Running outside Android app");
       // }
-      //   flutteronPausePlay.postMessage('true');
+      flutteronPausePlay.postMessage('true');
     }
 
     function onResumePlay() {
@@ -420,7 +420,7 @@
       // } else {
       //     alert("Running outside Android app");
       // }
-      //   flutteronResumePlay.postMessage('true');
+      flutteronResumePlay.postMessage('true');
     }
 
     function startTimer(event) {
