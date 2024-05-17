@@ -230,7 +230,11 @@ void fetchABCDataByIsolate() async {
     } else if (data.toString().startsWith('tokens')) {
       eventBus.fire(data);
     } else {
-      finalabcStringPreset = data;
+      if (selectstate.value == 0) {
+        finalabcStringPreset = data;
+      } else {
+        finalabcStringCreate = data;
+      }
       eventBus.fire(data);
     }
   });
@@ -1136,19 +1140,22 @@ class _MyAppState extends State<MyApp> {
 
   void resetPlay() {
     if (isPlay.value) {
-      playOrPausePiano();
-      controllerPiano.runJavaScript("resetTimingCallbacks()");
-      // controllerPiano.runJavaScript("setPlayButtonDisable(true)");
-      controllerKeyboard.runJavaScript('resetPlay()');
-      debugPrint('pausePlay()');
-      // controllerPiano.runJavaScript("pausePlay()");
+      // playOrPausePiano();
+      // controllerPiano.runJavaScript("resetTimingCallbacks()");
+      // // controllerPiano.runJavaScript("setPlayButtonDisable(true)");
+      // controllerKeyboard.runJavaScript('resetPlay()');
+      // debugPrint('pausePlay()');
+      controllerPiano.runJavaScript("pausePlay()");
+      controllerKeyboard.runJavaScript('pausePlay()');
       isPlay.value = false;
-      // isNeedRestart = true;
       timer.cancel();
+      // isNeedRestart = true;
+    }
+    if (playProgress.value > 0) {
       playProgress.value = 0.0;
       pianoAllTime.value = 0.0;
-      isFinishABCEvent = false;
     }
+    isFinishABCEvent = false;
   }
 
   void segmengChange(int index) {
