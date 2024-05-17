@@ -379,8 +379,8 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   late WebViewControllerPlus controllerKeyboard;
-  String filePathKeyboardAnimation =
-      "http://leolin.wiki"; //assets/piano/index.html
+  String filePathKeyboardAnimation = "http://leolin.wiki";
+  // String filePathKeyboardAnimation = "assets/doctor/doctor.html";
   String filePathKeyboard = 'assets/piano/keyboard.html';
   String filePathPiano = 'assets/player/player.html';
   late StringBuffer stringBuffer;
@@ -729,7 +729,7 @@ class _MyAppState extends State<MyApp> {
   void createTimer() {
     timer = Timer.periodic(const Duration(milliseconds: 1000), (Timer timer) {
       if (playProgress.value >= 1) {
-        playProgress.value = 1;
+        playProgress.value = 0;
         timer.cancel();
       } else {
         if (playProgress.value + 1000.0 / pianoAllTime.value > 1.0) {
@@ -969,7 +969,9 @@ class _MyAppState extends State<MyApp> {
                                             //     'resetTimingCallbacks()');
                                             isFinishABCEvent = false;
                                             if (selectstate.value == 1) {
-                                              // controllerKeyboard.loadFlutterAssetServer(filePathKeyboardAnimation);
+                                              // controllerKeyboard
+                                              //     .loadFlutterAssetServer(
+                                              //         filePathKeyboardAnimation);
                                               controllerKeyboard.loadRequest(
                                                   Uri.parse(
                                                       filePathKeyboardAnimation));
