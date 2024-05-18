@@ -11,7 +11,6 @@
   <script src="midiplayer.js" type="text/javascript"></script>
   <script src="index.js" type="text/javascript"></script>
 
-
   <script type="text/javascript">
     var abcjsEditor;
     var timingCallbacks;
@@ -102,7 +101,10 @@
       }
     }
 
-    function ABCtoEvents(x) {
+    function ABCtoEvents(base64Input) {
+      var x = atob(base64Input);
+      console.log("转码前：" + x)
+
       midi_data = ABCJS.synth.getMidiFile(x, {
         chordsOff: false,
         midiOutputType: "binary",
@@ -151,6 +153,7 @@
         events.splice(i, 1);
       }
       var eventJson = JSON.stringify(events);
+      console.log("转码后：" + eventJson)
 
       // if(typeof controller !== "undefined"){
       //     controller.onEvents("" + eventJson + "");
@@ -158,6 +161,76 @@
       //     alert("Running outside Android app");
       // }
       flutteronEvents.postMessage("" + eventJson + "");
+      return eventJson;
+    }
+
+    //现在改为接收base64编码的ABC谱
+    function ABCtoEvents2(base64Input) {
+      // 解码 Base64 字符串为原始的 ABC 记谱字符串
+      var abcNotation = atob(base64Input);
+
+      // 获取 MIDI 文件
+      var midi_data = ABCJS.synth.getMidiFile(abcNotation, {
+        chordsOff: false,
+        midiOutputType: "binary",
+      })[0];
+
+      // 加载 MIDI 数据到 Player
+      Player.loadArrayBuffer(midi_data);
+      var midi_events = Player.events;
+      var events = [];
+
+      // 处理 MIDI 事件
+      for (var i in midi_events) {
+        for (var x of midi_events[i]) {
+          var detail = i == 1 ? "" : "-chord";
+          if (x.name == "Note on") {
+            // 输出 125bpm，实际 180bpm
+            events.push([
+              Math.round((x.tick * 125) / 180),
+              "on" + detail,
+              x.noteNumber - 20,
+            ]);
+          } else if (x.name == "Note off") {
+            events.push([
+              Math.round((x.tick * 125) / 180),
+              "off" + detail,
+              x.noteNumber - 20,
+            ]);
+          }
+        }
+      }
+
+      // 对事件进行排序
+      events.sort(function (a, b) {
+        if (a[0] != b[0]) return a[0] - b[0];
+        else return a[1].length - b[1].length;
+      });
+
+      // 移除重复的 Note on/off 事件
+      var cnt = {};
+      for (var i = 1; i <= 88; i++) cnt[i] = 0;
+      var to_remove = [];
+      for (var i in events) {
+        var x = events[i];
+        if (x[1].includes("on")) {
+          if (cnt[x[2]] > 0) to_remove.push(i);
+          cnt[x[2]] += 1;
+        } else if (x[1].includes("off")) {
+          if (cnt[x[2]] > 1) to_remove.push(i);
+          cnt[x[2]] -= 1;
+        }
+      }
+      to_remove.sort((a, b) => b - a);
+      for (var i of to_remove) {
+        events.splice(i, 1);
+      }
+
+      // 转换事件数组为 JSON 字符串
+      var eventJson = JSON.stringify(events);
+      console.log("转码后：", eventJson);
+
+      // 返回 JSON 字符串
       return eventJson;
     }
 
@@ -482,8 +555,6 @@
     window.startPlay = startPlay;
     window.pausePlay = pausePlay;
   </script>
-
-
 </head>
 
 <body>
