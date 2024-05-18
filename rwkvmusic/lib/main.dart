@@ -380,7 +380,7 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   late WebViewControllerPlus controllerKeyboard;
-  String filePathKeyboardAnimation = "http://leolin.wiki";
+  String filePathKeyboardAnimation = "http://192.168.3.14:3000/";
   // String filePathKeyboardAnimation = "assets/doctor/doctor.html";
   String filePathKeyboard = 'assets/piano/keyboard.html';
   String filePathPiano = 'assets/player/player.html';
