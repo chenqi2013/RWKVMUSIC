@@ -11,6 +11,17 @@ class ABCHead {
     return "%%MIDI program $instrumentType\\n$content";
   }
 
+  static String modifyABCWithInstrument(String content, int instrumentType) {
+    String result = content
+        .replaceAll('MIDI program 0', 'MIDI program $instrumentType')
+        .replaceAll('MIDI program 40', 'MIDI program $instrumentType')
+        .replaceAll('MIDI program 79', 'MIDI program $instrumentType')
+        .replaceAll('MIDI program 42', 'MIDI program $instrumentType')
+        .replaceAll('MIDI program 25', 'MIDI program $instrumentType');
+
+    return result;
+  }
+
   static String appendTempoParam(String abc, int tempo) {
     // String tempoConfig = "Q:$tempo";
     // if (abc.contains("Q:")) {

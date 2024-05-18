@@ -31,6 +31,7 @@ import 'package:rwkvmusic/test/midi_devicelist_page.dart';
 import 'package:rwkvmusic/utils/abchead.dart';
 // import 'package:rwkvmusic/test/testwebviewuniversal.dart';
 import 'package:rwkvmusic/utils/audioplayer.dart';
+import 'package:rwkvmusic/utils/justaudioplayer.dart';
 import 'package:rwkvmusic/utils/midiconvertabc.dart';
 import 'package:rwkvmusic/utils/mididevicemanage.dart';
 import 'package:rwkvmusic/utils/commonutils.dart';
@@ -430,7 +431,7 @@ class _MyAppState extends State<MyApp> {
     isWindowsOrMac = Platform.isWindows || Platform.isMacOS;
     stringBuffer = StringBuffer();
     deviceManage = MidiDeviceManage.getInstance();
-    debugPrint('deviceManage22=$identityHashCode($deviceManage)');
+    // debugPrint('deviceManage22=$identityHashCode($deviceManage)');
     deviceManage.receiveCallback = (int data) {
       debugPrint('receiveCallback main =$data');
       updatePianoNote(data);
@@ -511,7 +512,7 @@ class _MyAppState extends State<MyApp> {
             r'startPlay("' + jsMessage.message.replaceAll('"', r'\"') + r'")';
         controllerKeyboard.runJavaScript(jsstr);
         isFinishABCEvent = true;
-        debugPrint('isFinishABCEvent == true');
+        debugPrint('isFinishABCEvent == true,,,$jsstr');
         // } else {
         //   isNeedConvertMidiNotes = false;
         // }
@@ -592,12 +593,22 @@ class _MyAppState extends State<MyApp> {
         if (currentSoundEffect != null) {
           String? mp3Folder = soundEffect[currentSoundEffect];
           debugPrint('mp3Folder==$mp3Folder');
-          AudioPlayerManage().playAudio('player/soundfont/$mp3Folder/$name');
+          if (isWindowsOrMac) {
+            AudioPlayerManage().playAudio('player/soundfont/$mp3Folder/$name');
+          } else {
+            JustAudioPlayerManage()
+                .playAudio('player/soundfont/$mp3Folder/$name');
+          }
           debugPrint('player/soundfont/$mp3Folder/$name');
         } else {
           debugPrint('mp3Folder==null');
-          AudioPlayerManage()
-              .playAudio('player/soundfont/acoustic_grand_piano-mp3/$name');
+          if (isWindowsOrMac) {
+            AudioPlayerManage()
+                .playAudio('player/soundfont/acoustic_grand_piano-mp3/$name');
+          } else {
+            JustAudioPlayerManage()
+                .playAudio('player/soundfont/acoustic_grand_piano-mp3/$name');
+          }
         }
         updatePianoNote(int.parse(jsMessage.message));
       });
@@ -610,7 +621,8 @@ class _MyAppState extends State<MyApp> {
         // debugPrint('chenqi $event');
         tokens.value = ' -- ${event.toString()}';
       } else if (event == 'finish') {
-        Future.delayed(const Duration(seconds: 1), () {
+        Future.delayed(const Duration(milliseconds: 1000), () {
+          //改短了播放状态不对，曲谱没播放
           playOrPausePiano();
         });
       } else {
@@ -702,6 +714,7 @@ class _MyAppState extends State<MyApp> {
   }
 
   void playPianoAnimation(String playAbcString, bool play) {
+    debugPrint('playAbcString==$playAbcString');
     if (!isPlay.value) {
       // controllerKeyboard.runJavaScript('resetPlay()');
       controllerPiano.runJavaScript("startPlay()");
@@ -1151,7 +1164,7 @@ class _MyAppState extends State<MyApp> {
       // controllerKeyboard.runJavaScript('resetPlay()');
       // debugPrint('pausePlay()');
       controllerPiano.runJavaScript("pausePlay()");
-      controllerKeyboard.runJavaScript('pausePlay()');
+      controllerKeyboard.runJavaScript('resetPlay()');
       isPlay.value = false;
       timer.cancel();
       // isNeedRestart = true;
@@ -2000,8 +2013,7 @@ class _MyAppState extends State<MyApp> {
                               updateNote(int.parse(currentClickNoteInfo[1]),
                                   index, currentClickNoteInfo[0].toString());
                             }
-                            if (type == STORAGE_PROMPTS_SELECT ||
-                                type == STORAGE_SOUNDSEFFECT_SELECT) {
+                            if (type == STORAGE_PROMPTS_SELECT) {
                               String abcstr = '';
                               if (selectstate.value == 0) {
                                 abcstr = ABCHead.getABCWithInstrument(
@@ -2017,20 +2029,59 @@ class _MyAppState extends State<MyApp> {
                                     "setAbcString(\"$abcstr\", false)";
                                 controllerPiano
                                     .runJavaScript(finalabcStringPreset);
+                                debugPrint(
+                                    'finalabcStringPreset=$finalabcStringPreset');
                               } else {
                                 finalabcStringCreate =
                                     "setAbcString(\"$abcstr\", false)";
                                 controllerPiano
                                     .runJavaScript(finalabcStringCreate);
+                                debugPrint(
+                                    'finalabcStringCreate=$finalabcStringCreate');
                               }
 
-                              controllerKeyboard.runJavaScript('resetPlay()');
                               // debugPrint('选择prompt==$abcstr');
 
-                              Future.delayed(const Duration(microseconds: 300),
-                                  () {
-                                playOrPausePiano(); //音效播放不对，待查问题
-                              });
+                              resetPlay();
+                              // Future.delayed(const Duration(microseconds: 300),
+                              //     () {
+                              //   // resetPlay();
+                              //   playPianoAnimation(
+                              //       selectstate.value == 0
+                              //           ? finalabcStringPreset
+                              //           : finalabcStringCreate,
+                              //       true);
+                              // });
+                            } else if (type == STORAGE_SOUNDSEFFECT_SELECT) {
+                              debugPrint(
+                                  '选择midiProgramValue==$midiProgramValue');
+                              String modifyABCWithInstrument =
+                                  ABCHead.modifyABCWithInstrument(
+                                      selectstate.value == 0
+                                          ? finalabcStringPreset
+                                          : finalabcStringCreate,
+                                      midiProgramValue);
+                              debugPrint(
+                                  'modifyABCWithInstrument==$modifyABCWithInstrument');
+                              if (selectstate.value == 0) {
+                                finalabcStringPreset = modifyABCWithInstrument;
+                                controllerPiano
+                                    .runJavaScript(finalabcStringPreset);
+                              } else {
+                                finalabcStringCreate = modifyABCWithInstrument;
+                                controllerPiano
+                                    .runJavaScript(finalabcStringCreate);
+                              }
+                              resetPlay();
+                              // Future.delayed(const Duration(microseconds: 300),
+                              //     () {
+                              //   // resetPlay();
+                              //   playPianoAnimation(
+                              //       selectstate.value == 0
+                              //           ? finalabcStringPreset
+                              //           : finalabcStringCreate,
+                              //       true);
+                              // });
                             }
                           },
                         ),
@@ -2259,8 +2310,13 @@ class _MyAppState extends State<MyApp> {
               if ((result[0] as String).isNotEmpty) {
                 String path = convertABC.getNoteMp3Path(result[1]);
                 updatePianoNote(result[1]);
-                AudioPlayerManage().playAudio(
-                    'player/soundfont/acoustic_grand_piano-mp3/$path');
+                if (isWindowsOrMac) {
+                  AudioPlayerManage().playAudio(
+                      'player/soundfont/acoustic_grand_piano-mp3/$path');
+                } else {
+                  JustAudioPlayerManage().playAudio(
+                      'player/soundfont/acoustic_grand_piano-mp3/$path');
+                }
               }
             };
           }
