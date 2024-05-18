@@ -31,6 +31,7 @@ import 'package:rwkvmusic/test/midi_devicelist_page.dart';
 import 'package:rwkvmusic/utils/abchead.dart';
 // import 'package:rwkvmusic/test/testwebviewuniversal.dart';
 import 'package:rwkvmusic/utils/audioplayer.dart';
+import 'package:rwkvmusic/utils/justaudioplayer.dart';
 import 'package:rwkvmusic/utils/midiconvertabc.dart';
 import 'package:rwkvmusic/utils/mididevicemanage.dart';
 import 'package:rwkvmusic/utils/commonutils.dart';
@@ -379,7 +380,7 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   late WebViewControllerPlus controllerKeyboard;
-  String filePathKeyboardAnimation = "http://leolin.wiki";
+  String filePathKeyboardAnimation = "http://192.168.3.14:3000/";
   // String filePathKeyboardAnimation = "assets/doctor/doctor.html";
   String filePathKeyboard = 'assets/piano/keyboard.html';
   String filePathPiano = 'assets/player/player.html';
@@ -592,12 +593,22 @@ class _MyAppState extends State<MyApp> {
         if (currentSoundEffect != null) {
           String? mp3Folder = soundEffect[currentSoundEffect];
           debugPrint('mp3Folder==$mp3Folder');
-          AudioPlayerManage().playAudio('player/soundfont/$mp3Folder/$name');
+          if (isWindowsOrMac) {
+            AudioPlayerManage().playAudio('player/soundfont/$mp3Folder/$name');
+          } else {
+            JustAudioPlayerManage()
+                .playAudio('player/soundfont/$mp3Folder/$name');
+          }
           debugPrint('player/soundfont/$mp3Folder/$name');
         } else {
           debugPrint('mp3Folder==null');
-          AudioPlayerManage()
-              .playAudio('player/soundfont/acoustic_grand_piano-mp3/$name');
+          if (isWindowsOrMac) {
+            AudioPlayerManage()
+                .playAudio('player/soundfont/acoustic_grand_piano-mp3/$name');
+          } else {
+            JustAudioPlayerManage()
+                .playAudio('player/soundfont/acoustic_grand_piano-mp3/$name');
+          }
         }
         updatePianoNote(int.parse(jsMessage.message));
       });
@@ -2259,8 +2270,13 @@ class _MyAppState extends State<MyApp> {
               if ((result[0] as String).isNotEmpty) {
                 String path = convertABC.getNoteMp3Path(result[1]);
                 updatePianoNote(result[1]);
-                AudioPlayerManage().playAudio(
-                    'player/soundfont/acoustic_grand_piano-mp3/$path');
+                if (isWindowsOrMac) {
+                  AudioPlayerManage().playAudio(
+                      'player/soundfont/acoustic_grand_piano-mp3/$path');
+                } else {
+                  JustAudioPlayerManage().playAudio(
+                      'player/soundfont/acoustic_grand_piano-mp3/$path');
+                }
               }
             };
           }
