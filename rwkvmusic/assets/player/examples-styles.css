@@ -217,6 +217,7 @@ tr:nth-child(even) {
   filter: drop-shadow(0px 0px 1.5px rgba(186, 242, 70, 1)) !important;
 }
 
+/* 
 .abcjs-note {
   fill: white;
 }
@@ -225,5 +226,60 @@ tr:nth-child(even) {
   fill: white;
 }
 
-/* abcjs-note abcjs-d0-25 abcjs-p3 abcjs-l0 abcjs-m0 abcjs-mm0 abcjs-v0 abcjs-n13 abcjs-note_selected
-abcjs-note abcjs-d0-25 abcjs-p3 abcjs-l0 abcjs-m0 abcjs-mm0 abcjs-v0 abcjs-n12 */
+.abcjs-beam-elem {
+  fill: white
+}
+
+.abcjs-bar {
+  fill: white
+}
+.abcjs-legato{
+  fill:white
+}
+.abcjs-ledger{
+  fill:white
+}
+.abcjs-slur{
+  fill:white
+}
+.abcjs-rest{
+  fill:white
+}
+.abcjs-tempo{
+  fill:white
+} */
+.abcjs-l0 {
+  fill: white
+}
+
+.abcjs-l1 {
+  fill: white
+}
+
+.abcjs-l2 {
+  fill: white
+}
+
+.abcjs-l3 {
+  fill: white
+}
+
+.abcjs-l4 {
+  fill: white
+}
+
+.abcjs-l5 {
+  fill: white
+}
+
+.abcjs-l6 {
+  fill: white
+}
+
+.abcjs-l7 {
+  fill: white
+}
+
+text {
+  fill: white
+}

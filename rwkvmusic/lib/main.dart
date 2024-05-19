@@ -290,7 +290,7 @@ void getABCDataByLocalModel(var array) async {
       promptChar, prompt.length, 1.0, 8, randomness);
   isGenerating.value = true;
   int duration = 0;
-  for (int i = 0; i < 200; i++) {
+  for (int i = 0; i < 100; i++) {
     if (isStopGenerating) {
       debugPrint('stop getABCDataByLocalModel');
       break;
@@ -642,13 +642,13 @@ class _MyAppState extends State<MyApp> {
     for (String note in virtualNotes) {
       sbff.write(note);
     }
-    finalabcStringCreate = sbff.toString();
+    createPrompt = sbff.toString();
     String sb =
-        "setAbcString(\"%%MIDI program $midiProgramValue\\nL:1/4\\nM:$timeSingnatureStr\\nK:C\\n|\\$finalabcStringCreate\",false)";
-    sb = ABCHead.appendTempoParam(sb, tempo.value.toInt());
-    debugPrint('curr=$sb');
-    controllerPiano.runJavaScript(sb);
-    createPrompt = finalabcStringCreate;
+        "setAbcString(\"%%MIDI program $midiProgramValue\\nL:1/4\\nM:$timeSingnatureStr\\nK:C\\n|\\$createPrompt\",false)";
+    finalabcStringCreate = ABCHead.appendTempoParam(sb, tempo.value.toInt());
+    debugPrint('curr=$finalabcStringCreate');
+    controllerPiano.runJavaScript(finalabcStringCreate);
+    // createPrompt = sbff.toString();
   }
 
   void updatePianoNote(int node) {
@@ -665,19 +665,19 @@ class _MyAppState extends State<MyApp> {
     for (String note in virtualNotes) {
       sbff.write(note);
     }
-    finalabcStringCreate = sbff.toString();
+    createPrompt = sbff.toString();
     String sb;
     if (isChangeTempo) {
       sb =
-          "setAbcString(\"Q:${tempo.value.toInt()}\\nL:1/4\\nM:$timeSingnatureStr\\nK:C\\n|\\$finalabcStringCreate\",false)";
+          "setAbcString(\"Q:${tempo.value.toInt()}\\nL:1/4\\nM:$timeSingnatureStr\\nK:C\\n|\\$createPrompt\",false)";
     } else {
       sb =
-          "setAbcString(\"%%MIDI program $midiProgramValue\\nL:1/4\\nM:$timeSingnatureStr\\nK:C\\n|\\$finalabcStringCreate\",false)";
+          "setAbcString(\"%%MIDI program $midiProgramValue\\nL:1/4\\nM:$timeSingnatureStr\\nK:C\\n|\\$createPrompt\",false)";
     }
-    sb = ABCHead.appendTempoParam(sb, tempo.value.toInt());
-    debugPrint('curr=$sb');
-    controllerPiano.runJavaScript(sb);
-    createPrompt = finalabcStringCreate;
+    finalabcStringCreate = ABCHead.appendTempoParam(sb, tempo.value.toInt());
+    debugPrint('curr=$finalabcStringCreate');
+    controllerPiano.runJavaScript(finalabcStringCreate);
+    // createPrompt = finalabcStringCreate;
   }
 
   void updateTimeSignature() {
@@ -2051,21 +2051,15 @@ class _MyAppState extends State<MyApp> {
                                 debugPrint(
                                     'finalabcStringCreate=$finalabcStringCreate');
                               }
-
-                              // debugPrint('选择prompt==$abcstr');
-
-                              resetPlay();
-
-                              // Future.delayed(const Duration(microseconds: 1000),
-                              //     () {
-                              //   playOrPausePiano();
-                              //   // //   // resetPlay();
-                              //   // playPianoAnimation(
-                              //   //     selectstate.value == 0
-                              //   //         ? finalabcStringPreset
-                              //   //         : finalabcStringCreate,
-                              //   //     true);
-                              // });
+                              Future.delayed(const Duration(microseconds: 1000),
+                                  () {
+                                resetPlay();
+                                // playPianoAnimation(
+                                //     selectstate.value == 0
+                                //         ? finalabcStringPreset
+                                //         : finalabcStringCreate,
+                                //     true);
+                              });
                               closeDialog();
                             } else if (type == STORAGE_SOUNDSEFFECT_SELECT) {
                               debugPrint(
@@ -2087,17 +2081,15 @@ class _MyAppState extends State<MyApp> {
                                 controllerPiano
                                     .runJavaScript(finalabcStringCreate);
                               }
-                              resetPlay();
-                              // Future.delayed(const Duration(microseconds: 1000),
-                              //     () {
-                              //   playOrPausePiano();
-                              //   // //   // resetPlay();
-                              //   // playPianoAnimation(
-                              //   //     selectstate.value == 0
-                              //   //         ? finalabcStringPreset
-                              //   //         : finalabcStringCreate,
-                              //   //     true);
-                              // });
+                              Future.delayed(const Duration(microseconds: 1000),
+                                  () {
+                                resetPlay();
+                                // playPianoAnimation(
+                                //     selectstate.value == 0
+                                //         ? finalabcStringPreset
+                                //         : finalabcStringCreate,
+                                //     true);
+                              });
                               closeDialog();
                             }
                           },
