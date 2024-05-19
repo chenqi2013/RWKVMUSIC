@@ -1,36 +1,57 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_svg/svg.dart';
 
-Widget creatBottomBtn(String text, VoidCallback onPressed) {
+Widget creatBottomBtn(
+    String text,
+    VoidCallback onPressed,
+    String bgName,
+    double widthBG,
+    double heightBG,
+    String iconName,
+    double widthIcon,
+    double heightIcon) {
   return InkWell(
     onTap: () {
       // 按钮被点击时执行的操作
       onPressed();
     },
-    child: Container(
-      padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 12),
-      decoration: BoxDecoration(
-        // color: Colors.blue, // 设置背景色
-        borderRadius: BorderRadius.circular(8), // 设置圆角
-        border: Border.all(
-            color: const Color.fromARGB(255, 125, 125, 125), width: 1),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.start,
-        children: [
-          Text(
-            text,
-            style: const TextStyle(
-              color: Colors.white, // 设置文本颜色
-              fontSize: 14,
+    child: Stack(
+      children: [
+        SvgPicture.asset(
+          'assets/images/$bgName.svg',
+          height: 153.h,
+          fit: BoxFit.cover,
+        ),
+        Positioned(
+          left: 40.w, // 将Text放置在左侧
+          top: 0,
+          bottom: 0, // 垂直居中的位置
+          child: Align(
+            alignment: Alignment.centerLeft,
+            child: Text(
+              text,
+              style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 39.sp,
+                  fontWeight: FontWeight.w700),
             ),
           ),
-          const SizedBox(width: 2),
-          const Icon(
-            Icons.arrow_drop_down_sharp,
-            color: Colors.white, // 设置图标颜色
+        ),
+        Positioned(
+          right: 40.w, // 将Text放置在左侧
+          top: 0,
+          bottom: 0, // 垂直居中的位置
+          child: Align(
+            alignment: Alignment.centerLeft,
+            child: SvgPicture.asset(
+              'assets/images/$iconName.svg',
+              width: widthIcon,
+              height: heightIcon,
+            ),
           ),
-        ],
-      ),
+        ),
+      ],
     ),
   );
 }

@@ -17,6 +17,7 @@ import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 // import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 // import 'package:flutter_platform_alert/flutter_platform_alert.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_svg/svg.dart';
 // import 'package:flutter_share/flutter_share.dart';
 import 'package:get/get.dart';
 import 'package:group_radio_button/group_radio_button.dart';
@@ -93,9 +94,10 @@ void main(List<String> args) async {
   }
   await Get.putAsync<StorageService>(() => StorageService().init());
   Get.put<ConfigStore>(ConfigStore());
-  runApp(const ScreenUtilInit(
-    designSize: Size(812, 375), // Platform.isWindows ? const Size(2880, 1600) :
-    child: GetMaterialApp(
+  runApp(ScreenUtilInit(
+    designSize:
+        Platform.isWindows ? const Size(2880, 1600) : const Size(812, 375), //
+    child: const GetMaterialApp(
       debugShowCheckedModeBanner: false,
       home: MyApp(),
     ),
@@ -290,7 +292,7 @@ void getABCDataByLocalModel(var array) async {
       promptChar, prompt.length, 1.0, 8, randomness);
   isGenerating.value = true;
   int duration = 0;
-  for (int i = 0; i < 100; i++) {
+  for (int i = 0; i < 200; i++) {
     if (isStopGenerating) {
       debugPrint('stop getABCDataByLocalModel');
       break;
@@ -504,7 +506,7 @@ class _MyAppState extends State<MyApp> {
       })
       ..addJavaScriptChannel("flutteronEvents",
           onMessageReceived: (JavaScriptMessage jsMessage) {
-        debugPrint('flutteronEvents onMessageReceived=${jsMessage.message}');
+        // debugPrint('flutteronEvents onMessageReceived=${jsMessage.message}');
         midiNotes = jsonDecode(jsMessage.message);
         // if (!isNeedConvertMidiNotes) {
         //   // String jsstr =
@@ -513,7 +515,7 @@ class _MyAppState extends State<MyApp> {
             r'startPlay("' + jsMessage.message.replaceAll('"', r'\"') + r'")';
         controllerKeyboard.runJavaScript(jsstr);
         isFinishABCEvent = true;
-        debugPrint('isFinishABCEvent == true,,,$jsstr');
+        // debugPrint('isFinishABCEvent == true,,,$jsstr');
         // } else {
         //   isNeedConvertMidiNotes = false;
         // }
@@ -627,6 +629,7 @@ class _MyAppState extends State<MyApp> {
           playOrPausePiano();
         });
       } else {
+        debugPrint('abcset=$event');
         controllerPiano.runJavaScript(event);
       }
     });
@@ -791,7 +794,14 @@ class _MyAppState extends State<MyApp> {
     return Scaffold(
         resizeToAvoidBottomInset: false,
         body: Container(
-          color: const Color(0xff3a3a3a),
+          padding: EdgeInsets.symmetric(horizontal: 85.w, vertical: 70.h),
+          decoration: const BoxDecoration(
+            image: DecorationImage(
+              image:
+                  AssetImage('assets/images/backgroundbg.jpg'), // 替换为你的背景图片路径
+              fit: BoxFit.cover,
+            ),
+          ),
           child: Column(
             children: [
               Container(
@@ -799,71 +809,119 @@ class _MyAppState extends State<MyApp> {
                     const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
+                    Container(
+                      child: Obx(() {
+                        return CupertinoSegmentedControl(
+                          children: {
+                            0: Padding(
+                                padding: const EdgeInsets.symmetric(
+                                    vertical: 8, horizontal: 10),
+                                child: Text(
+                                  'Preset Mode',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 14,
+                                    fontWeight: selectstate.value == 0
+                                        ? FontWeight.bold
+                                        : FontWeight.normal,
+                                  ),
+                                )),
+                            1: Padding(
+                                padding: const EdgeInsets.symmetric(
+                                    vertical: 8, horizontal: 10),
+                                child: Text(
+                                  'Creative Mode',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 14,
+                                    fontWeight: selectstate.value == 1
+                                        ? FontWeight.bold
+                                        : FontWeight.normal,
+                                  ),
+                                )),
+                          },
+                          onValueChanged: (int newValue) {
+                            // 当选择改变时执行的操作
+                            debugPrint('选择了选项 $newValue');
+                            selectstate.value = newValue;
+                            segmengChange(newValue);
+                          },
+                          groupValue: selectstate.value, // 当前选中的选项值
+                          selectedColor: const Color(0xff44be1c),
+                          unselectedColor: Colors.transparent,
+                          borderColor: const Color(0xff6d6d6d),
+                        );
+                      }),
+                    ),
                     Row(
+                      // main
                       children: [
-                        Image.asset(
-                          'assets/images/music.jpg',
-                          width: 20,
-                          height: 20,
-                          fit: BoxFit.cover,
-                        ),
+                        selectstate.value == 0
+                            ? creatBottomBtn('Prompts', () {
+                                debugPrint("Promptss");
+                                showPromptDialog(context, 'Prompts', prompts,
+                                    STORAGE_PROMPTS_SELECT);
+                              }, 'btn_prompts', 243.w, 123.h, 'ic_arrowdown',
+                                28.w, 21.h)
+                            : creatBottomBtn('Soft keyboard', () {
+                                debugPrint("Simulate keyboard");
+                                showPromptDialog(context, 'Keyboard Options',
+                                    keyboardOptions, STORAGE_KEYBOARD_SELECT);
+                              }, 'ic_arrowdown', 253.w, 123.h, 'ic_arrowdown',
+                                20.w, 30.h),
                         const SizedBox(
-                          width: 5,
+                          width: 8,
                         ),
-                        const Text(
-                          'RWKV AI Music Composer',
-                          style: TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16),
-                        ),
-                        // const ContainerTextIcon(),
+                        creatBottomBtn('Instrument', () {
+                          debugPrint("Sounds Effect");
+                          showPromptDialog(
+                              context,
+                              'Instrument',
+                              soundEffect.keys.toList(),
+                              STORAGE_SOUNDSEFFECT_SELECT);
+                        }, 'btn_instrument', 348.w, 123.h, 'ic-piano', 61.w,
+                            61.h),
+
+                        creatBottomBtn('', () {
+                          debugPrint('Settings');
+                          if (isWindowsOrMac) {
+                            isVisibleWebview.value = !isVisibleWebview.value;
+                            setState(() {});
+                          }
+                          // Get.to(FlutterBlueApp());
+                          // Get.to(const MIDIDeviceListPage());
+                          if (selectstate.value == 0) {
+                            showSettingDialog(context);
+                          } else {
+                            showCreateModelSettingDialog(context);
+                          }
+                        }, 'btn_setting', 123.w, 123.h, 'ic_setting', 61.w,
+                            57.h),
+
+                        // createButtonImageWithText(
+                        //     'Settings',
+                        //     Image.asset(
+                        //       'assets/images/setting.jpg',
+                        //       fit: BoxFit.cover,
+                        //     ), () {
+                        //   debugPrint('Settings');
+
+                        //   if (isWindowsOrMac) {
+                        //     isVisibleWebview.value = !isVisibleWebview.value;
+                        //     setState(() {});
+                        //   }
+                        //   // Get.to(FlutterBlueApp());
+                        //   // Get.to(const MIDIDeviceListPage());
+                        //   if (selectstate.value == 0) {
+                        //     showSettingDialog(context);
+                        //   } else {
+                        //     showCreateModelSettingDialog(context);
+                        //   }
+                        // }),
                       ],
                     ),
-                    const Spacer(),
-                    Container(child: Obx(() {
-                      return CupertinoSegmentedControl(
-                        children: {
-                          0: Padding(
-                              padding: const EdgeInsets.symmetric(
-                                  vertical: 8, horizontal: 10),
-                              child: Text(
-                                'Preset Mode',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 14,
-                                  fontWeight: selectstate.value == 0
-                                      ? FontWeight.bold
-                                      : FontWeight.normal,
-                                ),
-                              )),
-                          1: Padding(
-                              padding: const EdgeInsets.symmetric(
-                                  vertical: 8, horizontal: 10),
-                              child: Text(
-                                'Creative Mode',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 14,
-                                  fontWeight: selectstate.value == 1
-                                      ? FontWeight.bold
-                                      : FontWeight.normal,
-                                ),
-                              )),
-                        },
-                        onValueChanged: (int newValue) {
-                          // 当选择改变时执行的操作
-                          debugPrint('选择了选项 $newValue');
-                          selectstate.value = newValue;
-                          segmengChange(newValue);
-                        },
-                        groupValue: selectstate.value, // 当前选中的选项值
-                        selectedColor: const Color(0xff44be1c),
-                        unselectedColor: Colors.transparent,
-                        borderColor: const Color(0xff6d6d6d),
-                      );
-                    })),
                   ],
                 ),
               ),
@@ -878,6 +936,9 @@ class _MyAppState extends State<MyApp> {
                     child: WebViewWidget(
                       controller: controllerPiano,
                     )),
+              ),
+              SizedBox(
+                height: 33.h,
               ),
               Flexible(
                   flex: isWindowsOrMac ? 3 : 5,
@@ -901,7 +962,6 @@ class _MyAppState extends State<MyApp> {
                       child: Container(
                         padding: const EdgeInsets.only(
                             left: 20, top: 2, right: 25, bottom: 2),
-                        color: const Color(0xff3a3a3a),
                         child: Obx(
                           () => Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -909,31 +969,6 @@ class _MyAppState extends State<MyApp> {
                               // if (selectstate.value == 0)
                               Row(
                                 children: [
-                                  selectstate.value == 0
-                                      ? creatBottomBtn('Prompts', () {
-                                          debugPrint("Promptss");
-                                          showPromptDialog(context, 'Prompts',
-                                              prompts, STORAGE_PROMPTS_SELECT);
-                                        })
-                                      : creatBottomBtn('Soft keyboard', () {
-                                          debugPrint("Simulate keyboard");
-                                          showPromptDialog(
-                                              context,
-                                              'Keyboard Options',
-                                              keyboardOptions,
-                                              STORAGE_KEYBOARD_SELECT);
-                                        }),
-                                  const SizedBox(
-                                    width: 8,
-                                  ),
-                                  creatBottomBtn('Effect', () {
-                                    debugPrint("Sounds Effect");
-                                    showPromptDialog(
-                                        context,
-                                        'Sounds Effect',
-                                        soundEffect.keys.toList(),
-                                        STORAGE_SOUNDSEFFECT_SELECT);
-                                  }),
                                   const SizedBox(
                                     width: 20,
                                   ),
@@ -1044,30 +1079,6 @@ class _MyAppState extends State<MyApp> {
                                     SizedBox(
                                       width: isWindowsOrMac ? 10 : 20,
                                     ),
-                                    createButtonImageWithText(
-                                        'Settings',
-                                        Image.asset(
-                                          'assets/images/setting.jpg',
-                                          fit: BoxFit.cover,
-                                        ), () {
-                                      debugPrint('Settings');
-                                      // addNote();
-                                      // notes = await NotesDatabase.instance
-                                      //     .readAllNotes();
-                                      // debugPrint('notes==${notes.length}');
-                                      if (isWindowsOrMac) {
-                                        isVisibleWebview.value =
-                                            !isVisibleWebview.value;
-                                        setState(() {});
-                                      }
-                                      // Get.to(FlutterBlueApp());
-                                      // Get.to(const MIDIDeviceListPage());
-                                      if (selectstate.value == 0) {
-                                        showSettingDialog(context);
-                                      } else {
-                                        showCreateModelSettingDialog(context);
-                                      }
-                                    }),
                                   ],
                                 ),
                               ),
