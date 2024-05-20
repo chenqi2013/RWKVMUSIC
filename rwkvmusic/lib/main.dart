@@ -24,6 +24,7 @@ import 'package:group_radio_button/group_radio_button.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:rwkvmusic/gen/assets.gen.dart';
 import 'package:rwkvmusic/mainwidget/ProgressbarTime.dart';
+import 'package:rwkvmusic/mainwidget/customsegmentcontroller.dart';
 import 'package:rwkvmusic/mainwidget/v2/ContainerTextIcon.dart';
 import 'package:rwkvmusic/services/storage.dart';
 import 'package:rwkvmusic/store/config.dart';
@@ -806,71 +807,81 @@ class _MyAppState extends State<MyApp> {
             children: [
               Container(
                 padding:
-                    const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
+                    const EdgeInsets.symmetric(vertical: 10, horizontal: 0),
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Container(
-                      child: Obx(() {
-                        return CupertinoSegmentedControl(
-                          children: {
-                            0: Padding(
-                                padding: const EdgeInsets.symmetric(
-                                    vertical: 8, horizontal: 10),
-                                child: Text(
-                                  'Preset Mode',
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 14,
-                                    fontWeight: selectstate.value == 0
-                                        ? FontWeight.bold
-                                        : FontWeight.normal,
-                                  ),
-                                )),
-                            1: Padding(
-                                padding: const EdgeInsets.symmetric(
-                                    vertical: 8, horizontal: 10),
-                                child: Text(
-                                  'Creative Mode',
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 14,
-                                    fontWeight: selectstate.value == 1
-                                        ? FontWeight.bold
-                                        : FontWeight.normal,
-                                  ),
-                                )),
-                          },
-                          onValueChanged: (int newValue) {
-                            // 当选择改变时执行的操作
-                            debugPrint('选择了选项 $newValue');
-                            selectstate.value = newValue;
-                            segmengChange(newValue);
-                          },
-                          groupValue: selectstate.value, // 当前选中的选项值
-                          selectedColor: const Color(0xff44be1c),
-                          unselectedColor: Colors.transparent,
-                          borderColor: const Color(0xff6d6d6d),
-                        );
-                      }),
+                    CustomSegment(
+                      callBack: (int newValue) {
+                        // 当选择改变时执行的操作
+                        debugPrint('选择了选项 $newValue');
+                        selectstate.value = newValue;
+                        segmengChange(newValue);
+                      },
                     ),
+                    // Container(
+                    //   child: Obx(() {
+                    //     return CupertinoSegmentedControl(
+                    //       children: {
+                    //         0: Padding(
+                    //             padding: const EdgeInsets.symmetric(
+                    //                 vertical: 8, horizontal: 0),
+                    //             child: Text(
+                    //               'Preset Mode',
+                    //               style: TextStyle(
+                    //                 color: Colors.white,
+                    //                 fontSize: 14,
+                    //                 fontWeight: selectstate.value == 0
+                    //                     ? FontWeight.bold
+                    //                     : FontWeight.normal,
+                    //               ),
+                    //             )),
+                    //         1: Padding(
+                    //             padding: const EdgeInsets.symmetric(
+                    //                 vertical: 8, horizontal: 10),
+                    //             child: Text(
+                    //               'Creative Mode',
+                    //               style: TextStyle(
+                    //                 color: Colors.white,
+                    //                 fontSize: 14,
+                    //                 fontWeight: selectstate.value == 1
+                    //                     ? FontWeight.bold
+                    //                     : FontWeight.normal,
+                    //               ),
+                    //             )),
+                    //       },
+                    //       onValueChanged: (int newValue) {
+                    //         // 当选择改变时执行的操作
+                    //         debugPrint('选择了选项 $newValue');
+                    //         selectstate.value = newValue;
+                    //         segmengChange(newValue);
+                    //       },
+                    //       groupValue: selectstate.value, // 当前选中的选项值
+                    //       selectedColor: const Color(0xff44be1c),
+                    //       unselectedColor: Colors.transparent,
+                    //       borderColor: const Color(0xff6d6d6d),
+                    //     );
+                    //   }),
+                    // ),
                     Row(
                       // main
                       children: [
-                        selectstate.value == 0
-                            ? creatBottomBtn('Prompts', () {
-                                debugPrint("Promptss");
-                                showPromptDialog(context, 'Prompts', prompts,
-                                    STORAGE_PROMPTS_SELECT);
-                              }, 'btn_prompts', 243.w, 123.h, 'ic_arrowdown',
-                                28.w, 21.h)
-                            : creatBottomBtn('Soft keyboard', () {
-                                debugPrint("Simulate keyboard");
-                                showPromptDialog(context, 'Keyboard Options',
-                                    keyboardOptions, STORAGE_KEYBOARD_SELECT);
-                              }, 'ic_arrowdown', 253.w, 123.h, 'ic_arrowdown',
-                                20.w, 30.h),
+                        Obx(
+                          () => selectstate.value == 0
+                              ? creatBottomBtn('Prompts', () {
+                                  debugPrint("Promptss");
+                                  showPromptDialog(context, 'Prompts', prompts,
+                                      STORAGE_PROMPTS_SELECT);
+                                }, 'btn_prompts', 243.w, 123.h, 'ic_arrowdown',
+                                  28.w, 21.h)
+                              : creatBottomBtn('Soft keyboard', () {
+                                  debugPrint("Simulate keyboard");
+                                  showPromptDialog(context, 'Keyboard Options',
+                                      keyboardOptions, STORAGE_KEYBOARD_SELECT);
+                                }, 'btn_softkeyboard', 253.w, 123.h,
+                                  'ic_arrowdown', 20.w, 30.h),
+                        ),
                         const SizedBox(
                           width: 8,
                         ),
@@ -883,7 +894,6 @@ class _MyAppState extends State<MyApp> {
                               STORAGE_SOUNDSEFFECT_SELECT);
                         }, 'btn_instrument', 348.w, 123.h, 'ic-piano', 61.w,
                             61.h),
-
                         creatBottomBtn('', () {
                           debugPrint('Settings');
                           if (isWindowsOrMac) {
@@ -961,7 +971,7 @@ class _MyAppState extends State<MyApp> {
                       key: const ValueKey('ValueKey33'),
                       child: Container(
                         padding: EdgeInsets.only(
-                            left: 0, top: 40.h, right: 25, bottom: 2),
+                            left: 0, top: 40.h, right: 0, bottom: 2),
                         child: Obx(
                           () => Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -988,6 +998,9 @@ class _MyAppState extends State<MyApp> {
                                       : Container(
                                           child: null,
                                         )),
+                                  SizedBox(
+                                    width: 40.w,
+                                  ),
                                   Obx(() => ProgressbarTime(
                                           playProgress, pianoAllTime, () {
                                         playOrPausePiano();
@@ -997,68 +1010,122 @@ class _MyAppState extends State<MyApp> {
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.end,
                                 children: [
-                                  Obx(() => createButtonImageWithText(
-                                          !isGenerating.value
-                                              ? 'Generate'
-                                              : 'Stop',
-                                          !isGenerating.value
-                                              ? Image.asset(
-                                                  'assets/images/generate.jpg',
-                                                  fit: BoxFit.cover,
-                                                )
-                                              : Image.asset(
-                                                  'assets/images/stopgenerate.jpg'),
-                                          () {
-                                        debugPrint('Generate');
-                                        isGenerating.value =
-                                            !isGenerating.value;
-                                        if (isGenerating.value) {
-                                          resetPlay();
-                                          // playProgress.value = 0.0;
-                                          // pianoAllTime.value = 0.0;
-                                          // controllerPiano.runJavaScript(
-                                          //     "setAbcString(\"%%MIDI program 40\\nL:1/4\\nM:4/4\\nK:D\\n\\\"D\\\" A F F\", false)");
-                                          // controllerPiano.runJavaScript(
-                                          //     'resetTimingCallbacks()');
-                                          // if (isWindowsOrMac) {
-                                          fetchABCDataByIsolate();
-                                          // } else {
-                                          //   getABCDataByAPI();
-                                          // }
-                                          // controllerKeyboard
-                                          //     .runJavaScript('resetPlay()');
-                                          // controllerPiano.runJavaScript(
-                                          //     'resetTimingCallbacks()');
-                                          isFinishABCEvent = false;
-                                          if (selectstate.value == 1) {
-                                            controllerKeyboard
-                                                .loadFlutterAssetServer(
-                                                    filePathKeyboardAnimation);
-                                            // controllerKeyboard.loadRequest(
-                                            //     Uri.parse(
-                                            //         filePathKeyboardAnimation));
-                                          }
-                                        } else {
-                                          // isolateSendPort.send('stop Generating');
-                                          isolateEventBus
-                                              .fire("stop Generating");
+                                  creatBottomBtn('AI Compose', () {
+                                    {
+                                      debugPrint('Generate');
+                                      isGenerating.value = !isGenerating.value;
+                                      if (isGenerating.value) {
+                                        resetPlay();
+                                        // playProgress.value = 0.0;
+                                        // pianoAllTime.value = 0.0;
+                                        // controllerPiano.runJavaScript(
+                                        //     "setAbcString(\"%%MIDI program 40\\nL:1/4\\nM:4/4\\nK:D\\n\\\"D\\\" A F F\", false)");
+                                        // controllerPiano.runJavaScript(
+                                        //     'resetTimingCallbacks()');
+                                        // if (isWindowsOrMac) {
+                                        fetchABCDataByIsolate();
+                                        // } else {
+                                        //   getABCDataByAPI();
+                                        // }
+                                        // controllerKeyboard
+                                        //     .runJavaScript('resetPlay()');
+                                        // controllerPiano.runJavaScript(
+                                        //     'resetTimingCallbacks()');
+                                        isFinishABCEvent = false;
+                                        if (selectstate.value == 1) {
+                                          controllerKeyboard
+                                              .loadFlutterAssetServer(
+                                                  filePathKeyboardAnimation);
+                                          // controllerKeyboard.loadRequest(
+                                          //     Uri.parse(
+                                          //         filePathKeyboardAnimation));
                                         }
-                                      })),
-                                  if (selectstate.value == 1)
-                                    SizedBox(
-                                      width: isWindowsOrMac ? 10 : 20,
-                                    ),
+                                      } else {
+                                        // isolateSendPort.send('stop Generating');
+                                        isolateEventBus.fire("stop Generating");
+                                      }
+                                    }
+                                  },
+                                      selectstate.value == 0
+                                          ? 'btn_generate'
+                                          : 'btn_create_generate',
+                                      656.w,
+                                      123.h,
+                                      'ic_generate',
+                                      68.w,
+                                      75.h),
+                                  // Obx(() => createButtonImageWithText(
+                                  //         !isGenerating.value
+                                  //             ? 'Generate'
+                                  //             : 'Stop',
+                                  //         !isGenerating.value
+                                  //             ? Image.asset(
+                                  //                 'assets/images/generate.jpg',
+                                  //                 fit: BoxFit.cover,
+                                  //               )
+                                  //             : Image.asset(
+                                  //                 'assets/images/stopgenerate.jpg'),
+                                  //         () {
+                                  //       debugPrint('Generate');
+                                  //       isGenerating.value =
+                                  //           !isGenerating.value;
+                                  //       if (isGenerating.value) {
+                                  //         resetPlay();
+                                  //         // playProgress.value = 0.0;
+                                  //         // pianoAllTime.value = 0.0;
+                                  //         // controllerPiano.runJavaScript(
+                                  //         //     "setAbcString(\"%%MIDI program 40\\nL:1/4\\nM:4/4\\nK:D\\n\\\"D\\\" A F F\", false)");
+                                  //         // controllerPiano.runJavaScript(
+                                  //         //     'resetTimingCallbacks()');
+                                  //         // if (isWindowsOrMac) {
+                                  //         fetchABCDataByIsolate();
+                                  //         // } else {
+                                  //         //   getABCDataByAPI();
+                                  //         // }
+                                  //         // controllerKeyboard
+                                  //         //     .runJavaScript('resetPlay()');
+                                  //         // controllerPiano.runJavaScript(
+                                  //         //     'resetTimingCallbacks()');
+                                  //         isFinishABCEvent = false;
+                                  //         if (selectstate.value == 1) {
+                                  //           controllerKeyboard
+                                  //               .loadFlutterAssetServer(
+                                  //                   filePathKeyboardAnimation);
+                                  //           // controllerKeyboard.loadRequest(
+                                  //           //     Uri.parse(
+                                  //           //         filePathKeyboardAnimation));
+                                  //         }
+                                  //       } else {
+                                  //         // isolateSendPort.send('stop Generating');
+                                  //         isolateEventBus
+                                  //             .fire("stop Generating");
+                                  //       }
+                                  //     })),
+                                  // if (selectstate.value == 1)
+                                  //   SizedBox(
+                                  //     width: isWindowsOrMac ? 10 : 20,
+                                  //   ),
+
                                   Obx(() => Visibility(
-                                      visible: selectstate.value == 1,
-                                      child: createButtonImageWithText(
-                                          'Undo',
-                                          Image.asset(
-                                            'assets/images/undo.jpg',
-                                            fit: BoxFit.cover,
-                                          ), () {
-                                        debugPrint('Undo');
-                                        resetLastNote();
-                                      }))),
+                                        visible: selectstate.value == 1,
+                                        child: creatBottomBtn('Undo', () {
+                                          debugPrint('Undo');
+                                          resetLastNote();
+                                        }, 'btn_undo', 48.w, 123.h, 'ic_undo',
+                                            61.w, 61.h),
+                                      )),
+
+                                  // Obx(() => Visibility(
+                                  //     visible: selectstate.value == 1,
+                                  //     child: createButtonImageWithText(
+                                  //         'Undo',
+                                  //         Image.asset(
+                                  //           'assets/images/undo.jpg',
+                                  //           fit: BoxFit.cover,
+                                  //         ), () {
+                                  //       debugPrint('Undo');
+                                  //       resetLastNote();
+                                  //     }))),
                                   // SizedBox(
                                   //   width: isWindowsOrMac ? 10 : 20,
                                   // ),

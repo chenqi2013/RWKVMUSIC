@@ -11,6 +11,21 @@
   <script src="midiplayer.js" type="text/javascript"></script>
   <script src="index.js" type="text/javascript"></script>
 
+  <script>
+    document.addEventListener('wheel', function (event) {
+      if (event.ctrlKey) {
+        event.preventDefault();
+      }
+    }, { passive: false });
+
+    document.addEventListener('keydown', function (event) {
+      if (event.ctrlKey && (event.key === '+' || event.key === '-' || event.key === '=')) {
+        event.preventDefault();
+      }
+    });
+  </script>
+
+
   <script type="text/javascript">
     var abcjsEditor;
     var timingCallbacks;
@@ -45,10 +60,7 @@
         .querySelector(".abcjs-midi-start")
         .addEventListener("click", startTimer);
 
-      setAbcString(
-        '\nL:1/4\nM:4/4\nK:D\n"D" A F F A F F F A F A A F F F',
-        false
-      );
+      setAbcString('\nL:1/4\nM:4/4\nK:D\n"D" A F F A F F F A F A A F F F', false);
     };
 
     function afterParsing(tune, tuneNumber, abcString) {
@@ -102,8 +114,19 @@
     }
 
     function ABCtoEvents(base64Input) {
+      console.log("转码前BASE64：" + base64Input);
       var x = atob(base64Input);
-      console.log("转码前：" + x)
+      console.log("转码前：" + x);
+      x = x.replace(/\\(?!n)/g, "");
+      console.log("删除 \\ 后：" + x);
+      // 替换 \n 为真实的换行符
+      x = x.replace(/\\n/g, "\n");
+      console.log("替换 \\n 后：" + x);
+      // 在字符串的最前面加一个 % ，如果最前面没有 %
+      if (x[0] !== "%") {
+        x = "%" + x;
+      }
+      console.log("添加 % 后：" + x);
 
       midi_data = ABCJS.synth.getMidiFile(x, {
         chordsOff: false,
@@ -153,7 +176,7 @@
         events.splice(i, 1);
       }
       var eventJson = JSON.stringify(events);
-      console.log("转码后：" + eventJson)
+      console.log("转码后：" + eventJson);
 
       // if(typeof controller !== "undefined"){
       //     controller.onEvents("" + eventJson + "");
@@ -273,9 +296,9 @@
         synthForPlay.stop();
       }
       var myContext = new AudioContext();
-      var visualOptions = { responsive: "resize" };
+      // var visualOptions = { responsive: "resize" };
 
-      var visualObj = ABCJS.renderAbc("paper", abcString, visualOptions)[0];
+      var visualObj = ABCJS.renderAbc("paper", abcString)[0];
       synthForPlay
         .init({
           audioContext: myContext,
@@ -310,7 +333,11 @@
     }
 
     function setAbcString(output, isGenerateAbc) {
-      // console.log("setAbcString:" + output + ", isGenerateAbc:" + isGenerateAbc)
+      console.log("===========================");
+      console.log(
+        "setAbcString:" + output + ", isGenerateAbc:" + isGenerateAbc
+      );
+      console.log("===========================");
       self.isGenerateAbc = isGenerateAbc;
       const textarea = document.getElementById("abc");
       textarea.value = output;
@@ -323,17 +350,17 @@
       delay(0).then(() => {
         const paper = document.getElementById("paper");
         var pElements = paper.querySelectorAll("g");
-        pElements[pElements.length - 1].scrollIntoView();
+        // pElements[pElements.length - 1].scrollIntoView();
       });
       delay(200).then(() => {
         const paper = document.getElementById("paper");
         var pElements = paper.querySelectorAll("g");
-        pElements[pElements.length - 1].scrollIntoView();
+        // pElements[pElements.length - 1].scrollIntoView();
       });
       delay(400).then(() => {
         const paper = document.getElementById("paper");
         var pElements = paper.querySelectorAll("g");
-        pElements[pElements.length - 1].scrollIntoView();
+        // pElements[pElements.length - 1].scrollIntoView();
       });
     }
 
@@ -410,8 +437,8 @@
           for (var j = 0; j < note.length; j++) {
             note[j].classList.add("abcjs-highlight");
           }
-          note[0].scrollIntoView();
-          note[note.length - 1].scrollIntoView({ behavior: "smooth" });
+          // note[0].scrollIntoView();
+          // note[note.length - 1].scrollIntoView({ behavior: "smooth" });
         }
 
         // Move the cursor to the location of the current note.
@@ -455,7 +482,7 @@
         // } else {
         //     alert("Running outside Android app");
         // }
-        flutteronPlayFinish.postMessage('true');
+        flutteronPlayFinish.postMessage("true");
       };
     }
 
@@ -475,7 +502,7 @@
       // } else {
       //     alert("Running outside Android app");
       // }
-      flutteronStartPlay.postMessage(isUserClick + ',' + duration);
+      flutteronStartPlay.postMessage(isUserClick + "," + duration);
     }
 
     function onPausePlay() {
@@ -484,7 +511,7 @@
       // } else {
       // alert("Running outside Android app");
       // }
-      flutteronPausePlay.postMessage('true');
+      flutteronPausePlay.postMessage("true");
     }
 
     function onResumePlay() {
@@ -493,7 +520,7 @@
       // } else {
       //     alert("Running outside Android app");
       // }
-      flutteronResumePlay.postMessage('true');
+      flutteronResumePlay.postMessage("true");
     }
 
     function startTimer(event) {
