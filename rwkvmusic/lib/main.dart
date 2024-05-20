@@ -26,6 +26,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:rwkvmusic/gen/assets.gen.dart';
 import 'package:rwkvmusic/mainwidget/ProgressbarTime.dart';
 import 'package:rwkvmusic/mainwidget/customsegmentcontroller.dart';
+import 'package:rwkvmusic/mainwidget/CustomSegmentControl.dart';
 import 'package:rwkvmusic/services/storage.dart';
 import 'package:rwkvmusic/store/config.dart';
 import 'package:rwkvmusic/test/bletest.dart';
@@ -851,14 +852,22 @@ class _MyAppState extends State<MyApp> {
                     //     ),
                     //   ],
                     // ),
-                    CustomSegment(
-                      callBack: (int newValue) {
-                        // 当选择改变时执行的操作
-                        debugPrint('选择了选项 $newValue');
-                        selectstate.value = newValue;
-                        segmengChange(newValue);
-                      },
+
+                    SizedBox(
+                      width: 575.w,
+                      height: 123.h,
+                      child: const CustomSegmentControl(
+                        segments: ['Prompt Mode', 'Create Mode'],
+                      ),
                     ),
+                    // CustomSegment(
+                    //   callBack: (int newValue) {
+                    //     // 当选择改变时执行的操作
+                    //     debugPrint('选择了选项 $newValue');
+                    //     selectstate.value = newValue;
+                    //     segmengChange(newValue);
+                    //   },
+                    // ),
 
                     // Container(
                     //   child: Obx(() {
