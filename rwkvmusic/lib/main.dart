@@ -960,18 +960,21 @@ class _MyAppState extends State<MyApp> {
                       visible: isVisibleWebview.value,
                       key: const ValueKey('ValueKey33'),
                       child: Container(
-                        padding: const EdgeInsets.only(
-                            left: 20, top: 2, right: 25, bottom: 2),
+                        padding: EdgeInsets.only(
+                            left: 0, top: 40.h, right: 25, bottom: 2),
                         child: Obx(
                           () => Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
+                              SvgPicture.asset(
+                                'assets/images/title_logo.svg',
+                                width: 433.w,
+                                height: 33.h,
+                                fit: BoxFit.cover,
+                              ),
                               // if (selectstate.value == 0)
                               Row(
                                 children: [
-                                  const SizedBox(
-                                    width: 20,
-                                  ),
                                   Obx(() => isGenerating.value
                                       ? const SizedBox(
                                           width: 20,
@@ -986,101 +989,98 @@ class _MyAppState extends State<MyApp> {
                                           child: null,
                                         )),
                                   Obx(() => ProgressbarTime(
-                                      playProgress, pianoAllTime)),
-                                  const SizedBox(
-                                    width: 20,
-                                  )
+                                          playProgress, pianoAllTime, () {
+                                        playOrPausePiano();
+                                      }, isPlay.value)),
                                 ],
                               ),
-                              Expanded(
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.end,
-                                  children: [
-                                    Obx(() => createButtonImageWithText(
-                                            !isGenerating.value
-                                                ? 'Generate'
-                                                : 'Stop',
-                                            !isGenerating.value
-                                                ? Image.asset(
-                                                    'assets/images/generate.jpg',
-                                                    fit: BoxFit.cover,
-                                                  )
-                                                : Image.asset(
-                                                    'assets/images/stopgenerate.jpg'),
-                                            () {
-                                          debugPrint('Generate');
-                                          isGenerating.value =
-                                              !isGenerating.value;
-                                          if (isGenerating.value) {
-                                            resetPlay();
-                                            // playProgress.value = 0.0;
-                                            // pianoAllTime.value = 0.0;
-                                            // controllerPiano.runJavaScript(
-                                            //     "setAbcString(\"%%MIDI program 40\\nL:1/4\\nM:4/4\\nK:D\\n\\\"D\\\" A F F\", false)");
-                                            // controllerPiano.runJavaScript(
-                                            //     'resetTimingCallbacks()');
-                                            // if (isWindowsOrMac) {
-                                            fetchABCDataByIsolate();
-                                            // } else {
-                                            //   getABCDataByAPI();
-                                            // }
-                                            // controllerKeyboard
-                                            //     .runJavaScript('resetPlay()');
-                                            // controllerPiano.runJavaScript(
-                                            //     'resetTimingCallbacks()');
-                                            isFinishABCEvent = false;
-                                            if (selectstate.value == 1) {
-                                              controllerKeyboard
-                                                  .loadFlutterAssetServer(
-                                                      filePathKeyboardAnimation);
-                                              // controllerKeyboard.loadRequest(
-                                              //     Uri.parse(
-                                              //         filePathKeyboardAnimation));
-                                            }
-                                          } else {
-                                            // isolateSendPort.send('stop Generating');
-                                            isolateEventBus
-                                                .fire("stop Generating");
-                                          }
-                                        })),
-                                    if (selectstate.value == 1)
-                                      SizedBox(
-                                        width: isWindowsOrMac ? 10 : 20,
-                                      ),
-                                    Obx(() => Visibility(
-                                        visible: selectstate.value == 1,
-                                        child: createButtonImageWithText(
-                                            'Undo',
-                                            Image.asset(
-                                              'assets/images/undo.jpg',
-                                              fit: BoxFit.cover,
-                                            ), () {
-                                          debugPrint('Undo');
-                                          resetLastNote();
-                                        }))),
-                                    SizedBox(
-                                      width: isWindowsOrMac ? 10 : 20,
-                                    ),
-                                    Obx(() {
-                                      return createButtonImageWithText(
-                                          !isPlay.value ? 'Play' : 'Pause',
-                                          !isPlay.value
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.end,
+                                children: [
+                                  Obx(() => createButtonImageWithText(
+                                          !isGenerating.value
+                                              ? 'Generate'
+                                              : 'Stop',
+                                          !isGenerating.value
                                               ? Image.asset(
-                                                  'assets/images/play.jpg',
+                                                  'assets/images/generate.jpg',
                                                   fit: BoxFit.cover,
                                                 )
                                               : Image.asset(
-                                                  'assets/images/pause.jpg',
-                                                  fit: BoxFit.cover,
-                                                ), () {
-                                        playOrPausePiano();
-                                      });
-                                    }),
+                                                  'assets/images/stopgenerate.jpg'),
+                                          () {
+                                        debugPrint('Generate');
+                                        isGenerating.value =
+                                            !isGenerating.value;
+                                        if (isGenerating.value) {
+                                          resetPlay();
+                                          // playProgress.value = 0.0;
+                                          // pianoAllTime.value = 0.0;
+                                          // controllerPiano.runJavaScript(
+                                          //     "setAbcString(\"%%MIDI program 40\\nL:1/4\\nM:4/4\\nK:D\\n\\\"D\\\" A F F\", false)");
+                                          // controllerPiano.runJavaScript(
+                                          //     'resetTimingCallbacks()');
+                                          // if (isWindowsOrMac) {
+                                          fetchABCDataByIsolate();
+                                          // } else {
+                                          //   getABCDataByAPI();
+                                          // }
+                                          // controllerKeyboard
+                                          //     .runJavaScript('resetPlay()');
+                                          // controllerPiano.runJavaScript(
+                                          //     'resetTimingCallbacks()');
+                                          isFinishABCEvent = false;
+                                          if (selectstate.value == 1) {
+                                            controllerKeyboard
+                                                .loadFlutterAssetServer(
+                                                    filePathKeyboardAnimation);
+                                            // controllerKeyboard.loadRequest(
+                                            //     Uri.parse(
+                                            //         filePathKeyboardAnimation));
+                                          }
+                                        } else {
+                                          // isolateSendPort.send('stop Generating');
+                                          isolateEventBus
+                                              .fire("stop Generating");
+                                        }
+                                      })),
+                                  if (selectstate.value == 1)
                                     SizedBox(
                                       width: isWindowsOrMac ? 10 : 20,
                                     ),
-                                  ],
-                                ),
+                                  Obx(() => Visibility(
+                                      visible: selectstate.value == 1,
+                                      child: createButtonImageWithText(
+                                          'Undo',
+                                          Image.asset(
+                                            'assets/images/undo.jpg',
+                                            fit: BoxFit.cover,
+                                          ), () {
+                                        debugPrint('Undo');
+                                        resetLastNote();
+                                      }))),
+                                  // SizedBox(
+                                  //   width: isWindowsOrMac ? 10 : 20,
+                                  // ),
+                                  // Obx(() {
+                                  //   return createButtonImageWithText(
+                                  //       !isPlay.value ? 'Play' : 'Pause',
+                                  //       !isPlay.value
+                                  //           ? Image.asset(
+                                  //               'assets/images/play.jpg',
+                                  //               fit: BoxFit.cover,
+                                  //             )
+                                  //           : Image.asset(
+                                  //               'assets/images/pause.jpg',
+                                  //               fit: BoxFit.cover,
+                                  //             ), () {
+                                  //     playOrPausePiano();
+                                  //   });
+                                  // }),
+                                  // SizedBox(
+                                  //   width: isWindowsOrMac ? 10 : 20,
+                                  // ),
+                                ],
                               ),
                             ],
                           ),
