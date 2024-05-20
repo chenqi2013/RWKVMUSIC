@@ -36,8 +36,8 @@ class CustomSegment extends StatelessWidget {
             blurRadius: 1.18,
             spreadRadius: 0,
             offset: const Offset(
-              -2.36,
-              -2.36,
+              2.36,
+              2.36,
             ),
           ),
           const BoxShadow(
@@ -45,8 +45,8 @@ class CustomSegment extends StatelessWidget {
             blurRadius: 1.18,
             spreadRadius: 0,
             offset: Offset(
-              2.36,
-              2.36,
+              -2.36,
+              -2.36,
             ),
           ),
         ],
@@ -64,7 +64,7 @@ class CustomSegment extends StatelessWidget {
             spreadRadius: 0,
             offset: const Offset(
               0.0,
-              2.36,
+              -2.36,
             ),
           ),
           BoxShadow(
@@ -73,7 +73,7 @@ class CustomSegment extends StatelessWidget {
             spreadRadius: 0,
             offset: const Offset(
               0.0,
-              -2.36,
+              2.36,
             ),
           ),
         ],
