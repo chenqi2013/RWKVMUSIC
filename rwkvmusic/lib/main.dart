@@ -13,6 +13,7 @@ import 'package:filepicker_windows/filepicker_windows.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_advanced_segment/flutter_advanced_segment.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 // import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 // import 'package:flutter_platform_alert/flutter_platform_alert.dart';
@@ -25,7 +26,6 @@ import 'package:path_provider/path_provider.dart';
 import 'package:rwkvmusic/gen/assets.gen.dart';
 import 'package:rwkvmusic/mainwidget/ProgressbarTime.dart';
 import 'package:rwkvmusic/mainwidget/customsegmentcontroller.dart';
-import 'package:rwkvmusic/mainwidget/v2/ContainerTextIcon.dart';
 import 'package:rwkvmusic/services/storage.dart';
 import 'package:rwkvmusic/store/config.dart';
 import 'package:rwkvmusic/test/bletest.dart';
@@ -65,6 +65,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:share_extend/share_extend.dart';
 
 // import 'package:share_plus/share_plus.dart';
+// final controller = AdvancedSegmentController('all');
 
 void main(List<String> args) async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -812,6 +813,44 @@ class _MyAppState extends State<MyApp> {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
+                    // AdvancedSegment(
+
+                    //   // controller: _controller, // AdvancedSegmentController
+                    //   segments: const {
+                    //     // Map<String, String>
+                    //     'all': 'All',
+                    //     'primary': 'Primary',
+                    //     'secondary': 'Secondary',
+                    //     'tertiary': 'Tertiary',
+                    //   },
+                    //   activeStyle: const TextStyle(
+                    //     // TextStyle
+                    //     color: Colors.white,
+                    //     fontWeight: FontWeight.w600,
+                    //   ),
+                    //   inactiveStyle: const TextStyle(
+                    //     // TextStyle
+                    //     color: Colors.white54,
+                    //   ),
+                    //   backgroundColor: Colors.black26, // Color
+                    //   sliderColor: Colors.white, // Color
+                    //   sliderOffset: 2.0, // Double
+                    //   borderRadius: const BorderRadius.all(
+                    //       Radius.circular(8.0)), // BorderRadius
+                    //   itemPadding: const EdgeInsets.symmetric(
+                    //     // EdgeInsets
+                    //     horizontal: 15,
+                    //     vertical: 10,
+                    //   ),
+                    //   animationDuration:
+                    //       const Duration(milliseconds: 250), // Duration
+                    //   shadow: const <BoxShadow>[
+                    //     BoxShadow(
+                    //       color: Colors.black26,
+                    //       blurRadius: 8.0,
+                    //     ),
+                    //   ],
+                    // ),
                     CustomSegment(
                       callBack: (int newValue) {
                         // 当选择改变时执行的操作
@@ -820,6 +859,7 @@ class _MyAppState extends State<MyApp> {
                         segmengChange(newValue);
                       },
                     ),
+
                     // Container(
                     //   child: Obx(() {
                     //     return CupertinoSegmentedControl(
@@ -865,50 +905,131 @@ class _MyAppState extends State<MyApp> {
                     //   }),
                     // ),
                     Row(
-                      // main
                       children: [
                         Obx(
                           () => selectstate.value == 0
-                              ? creatBottomBtn('Prompts', () {
-                                  debugPrint("Promptss");
-                                  showPromptDialog(context, 'Prompts', prompts,
-                                      STORAGE_PROMPTS_SELECT);
-                                }, 'btn_prompts', 243.w, 123.h, 'ic_arrowdown',
-                                  28.w, 21.h)
-                              : creatBottomBtn('Soft keyboard', () {
-                                  debugPrint("Simulate keyboard");
-                                  showPromptDialog(context, 'Keyboard Options',
-                                      keyboardOptions, STORAGE_KEYBOARD_SELECT);
-                                }, 'btn_softkeyboard', 253.w, 123.h,
-                                  'ic_arrowdown', 20.w, 30.h),
+                              ? CreatBottomBtn(
+                                  width: 253.w,
+                                  height: 123.h,
+                                  text: 'Prompt',
+                                  icon: SvgPicture.asset(
+                                    'assets/images/ic_arrowdown.svg',
+                                    width: 28.w,
+                                    height: 21.h,
+                                  ),
+                                  onPressed: () {
+                                    debugPrint("Promptss");
+                                    showPromptDialog(context, 'Prompts',
+                                        prompts, STORAGE_PROMPTS_SELECT);
+                                  },
+                                )
+                              : CreatBottomBtn(
+                                  width: 372.w,
+                                  height: 123.h,
+                                  text: 'Soft keyboard',
+                                  icon: SvgPicture.asset(
+                                    'assets/images/ic_arrowdown.svg',
+                                    width: 28.w,
+                                    height: 21.h,
+                                  ),
+                                  onPressed: () {
+                                    debugPrint("Simulate keyboard");
+                                    showPromptDialog(
+                                        context,
+                                        'Keyboard Options',
+                                        keyboardOptions,
+                                        STORAGE_KEYBOARD_SELECT);
+                                  },
+                                ),
                         ),
-                        const SizedBox(
-                          width: 8,
+                        // Obx(
+                        //   () => selectstate.value == 0
+                        //       ? creatBottomBtn('Prompts', () {
+                        //           debugPrint("Promptss");
+                        //           showPromptDialog(context, 'Prompts', prompts,
+                        //               STORAGE_PROMPTS_SELECT);
+                        //         }, 'btn_prompts', 243.w, 123.h, 'ic_arrowdown',
+                        //           28.w, 21.h)
+                        //       : creatBottomBtn('Soft keyboard', () {
+                        //           debugPrint("Simulate keyboard");
+                        //           showPromptDialog(context, 'Keyboard Options',
+                        //               keyboardOptions, STORAGE_KEYBOARD_SELECT);
+                        //         }, 'btn_softkeyboard', 253.w, 123.h,
+                        //           'ic_arrowdown', 20.w, 30.h),
+                        // ),
+                        SizedBox(
+                          width: 55.w,
                         ),
-                        creatBottomBtn('Instrument', () {
-                          debugPrint("Sounds Effect");
-                          showPromptDialog(
-                              context,
-                              'Instrument',
-                              soundEffect.keys.toList(),
-                              STORAGE_SOUNDSEFFECT_SELECT);
-                        }, 'btn_instrument', 348.w, 123.h, 'ic-piano', 61.w,
-                            61.h),
-                        creatBottomBtn('', () {
-                          debugPrint('Settings');
-                          if (isWindowsOrMac) {
-                            isVisibleWebview.value = !isVisibleWebview.value;
-                            setState(() {});
-                          }
-                          // Get.to(FlutterBlueApp());
-                          // Get.to(const MIDIDeviceListPage());
-                          if (selectstate.value == 0) {
-                            showSettingDialog(context);
-                          } else {
-                            showCreateModelSettingDialog(context);
-                          }
-                        }, 'btn_setting', 123.w, 123.h, 'ic_setting', 61.w,
-                            57.h),
+                        CreatBottomBtn(
+                          width: 358.w,
+                          height: 123.h,
+                          text: 'Instrument',
+                          icon: SvgPicture.asset(
+                            'assets/images/ic-piano.svg',
+                            width: 61.w,
+                            height: 57.h,
+                          ),
+                          onPressed: () {
+                            debugPrint("Sounds Effect");
+                            showPromptDialog(
+                                context,
+                                'Instrument',
+                                soundEffect.keys.toList(),
+                                STORAGE_SOUNDSEFFECT_SELECT);
+                          },
+                        ),
+                        // creatBottomBtn('Instrument', () {
+                        //   debugPrint("Sounds Effect");
+                        //   showPromptDialog(
+                        //       context,
+                        //       'Instrument',
+                        //       soundEffect.keys.toList(),
+                        //       STORAGE_SOUNDSEFFECT_SELECT);
+                        // }, 'btn_instrument', 348.w, 123.h, 'ic-piano', 61.w,
+                        //     61.h),
+                        SizedBox(
+                          width: 55.w,
+                        ),
+                        CreatBottomBtn(
+                          width: 123.w,
+                          height: 123.h,
+                          text: '',
+                          icon: SvgPicture.asset(
+                            'assets/images/ic_setting.svg',
+                            width: 61.w,
+                            height: 61.h,
+                          ),
+                          onPressed: () {
+                            debugPrint('Settings');
+                            if (isWindowsOrMac) {
+                              isVisibleWebview.value = !isVisibleWebview.value;
+                              setState(() {});
+                            }
+                            // Get.to(FlutterBlueApp());
+                            // Get.to(const MIDIDeviceListPage());
+                            if (selectstate.value == 0) {
+                              showSettingDialog(context);
+                            } else {
+                              showCreateModelSettingDialog(context);
+                            }
+                          },
+                        ),
+
+                        // creatBottomBtn('', () {
+                        //   debugPrint('Settings');
+                        //   if (isWindowsOrMac) {
+                        //     isVisibleWebview.value = !isVisibleWebview.value;
+                        //     setState(() {});
+                        //   }
+                        //   // Get.to(FlutterBlueApp());
+                        //   // Get.to(const MIDIDeviceListPage());
+                        //   if (selectstate.value == 0) {
+                        //     showSettingDialog(context);
+                        //   } else {
+                        //     showCreateModelSettingDialog(context);
+                        //   }
+                        // }, 'btn_setting', 123.w, 123.h, 'ic_setting', 61.w,
+                        //     57.h),
 
                         // createButtonImageWithText(
                         //     'Settings',
@@ -934,6 +1055,9 @@ class _MyAppState extends State<MyApp> {
                     ),
                   ],
                 ),
+              ),
+              SizedBox(
+                height: 33.h,
               ),
               Flexible(
                 flex: isWindowsOrMac ? 2 : 5,
@@ -986,10 +1110,11 @@ class _MyAppState extends State<MyApp> {
                               Row(
                                 children: [
                                   Obx(() => isGenerating.value
-                                      ? const SizedBox(
-                                          width: 20,
-                                          height: 20,
-                                          child: CircularProgressIndicator(
+                                      ? SizedBox(
+                                          width: 48.w,
+                                          height: 48.w,
+                                          child:
+                                              const CircularProgressIndicator(
                                             valueColor:
                                                 AlwaysStoppedAnimation<Color>(
                                                     Colors.white),
@@ -1010,8 +1135,17 @@ class _MyAppState extends State<MyApp> {
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.end,
                                 children: [
-                                  creatBottomBtn('AI Compose', () {
-                                    {
+                                  CreatBottomBtn(
+                                    width:
+                                        selectstate.value == 0 ? 666.w : 453.w,
+                                    height: 123.h,
+                                    text: 'AI Compose',
+                                    icon: SvgPicture.asset(
+                                      'assets/images/ic_generate.svg',
+                                      width: 68.w,
+                                      height: 75.h,
+                                    ),
+                                    onPressed: () {
                                       debugPrint('Generate');
                                       isGenerating.value = !isGenerating.value;
                                       if (isGenerating.value) {
@@ -1044,16 +1178,52 @@ class _MyAppState extends State<MyApp> {
                                         // isolateSendPort.send('stop Generating');
                                         isolateEventBus.fire("stop Generating");
                                       }
-                                    }
-                                  },
-                                      selectstate.value == 0
-                                          ? 'btn_generate'
-                                          : 'btn_create_generate',
-                                      656.w,
-                                      123.h,
-                                      'ic_generate',
-                                      68.w,
-                                      75.h),
+                                    },
+                                  ),
+                                  // creatBottomBtn('AI Compose', () {
+                                  //   {
+                                  //     debugPrint('Generate');
+                                  //     isGenerating.value = !isGenerating.value;
+                                  //     if (isGenerating.value) {
+                                  //       resetPlay();
+                                  //       // playProgress.value = 0.0;
+                                  //       // pianoAllTime.value = 0.0;
+                                  //       // controllerPiano.runJavaScript(
+                                  //       //     "setAbcString(\"%%MIDI program 40\\nL:1/4\\nM:4/4\\nK:D\\n\\\"D\\\" A F F\", false)");
+                                  //       // controllerPiano.runJavaScript(
+                                  //       //     'resetTimingCallbacks()');
+                                  //       // if (isWindowsOrMac) {
+                                  //       fetchABCDataByIsolate();
+                                  //       // } else {
+                                  //       //   getABCDataByAPI();
+                                  //       // }
+                                  //       // controllerKeyboard
+                                  //       //     .runJavaScript('resetPlay()');
+                                  //       // controllerPiano.runJavaScript(
+                                  //       //     'resetTimingCallbacks()');
+                                  //       isFinishABCEvent = false;
+                                  //       if (selectstate.value == 1) {
+                                  //         controllerKeyboard
+                                  //             .loadFlutterAssetServer(
+                                  //                 filePathKeyboardAnimation);
+                                  //         // controllerKeyboard.loadRequest(
+                                  //         //     Uri.parse(
+                                  //         //         filePathKeyboardAnimation));
+                                  //       }
+                                  //     } else {
+                                  //       // isolateSendPort.send('stop Generating');
+                                  //       isolateEventBus.fire("stop Generating");
+                                  //     }
+                                  //   }
+                                  // },
+                                  //     selectstate.value == 0
+                                  //         ? 'btn_generate'
+                                  //         : 'btn_create_generate',
+                                  //     656.w,
+                                  //     123.h,
+                                  //     'ic_generate',
+                                  //     68.w,
+                                  //     75.h),
                                   // Obx(() => createButtonImageWithText(
                                   //         !isGenerating.value
                                   //             ? 'Generate'
@@ -1101,20 +1271,35 @@ class _MyAppState extends State<MyApp> {
                                   //             .fire("stop Generating");
                                   //       }
                                   //     })),
-                                  // if (selectstate.value == 1)
-                                  //   SizedBox(
-                                  //     width: isWindowsOrMac ? 10 : 20,
-                                  //   ),
-
+                                  if (selectstate.value == 1)
+                                    SizedBox(
+                                      width: 55.w,
+                                    ),
                                   Obx(() => Visibility(
                                         visible: selectstate.value == 1,
-                                        child: creatBottomBtn('Undo', () {
-                                          debugPrint('Undo');
-                                          resetLastNote();
-                                        }, 'btn_undo', 48.w, 123.h, 'ic_undo',
-                                            61.w, 61.h),
+                                        child: CreatBottomBtn(
+                                          width: 257.w,
+                                          height: 123.h,
+                                          text: 'Undo',
+                                          icon: SvgPicture.asset(
+                                            'assets/images/ic_undo.svg',
+                                            width: 61.w,
+                                            height: 61.h,
+                                          ),
+                                          onPressed: () {
+                                            debugPrint('Undo');
+                                            resetLastNote();
+                                          },
+                                        ),
                                       )),
-
+                                  // Obx(() => Visibility(
+                                  //       visible: selectstate.value == 1,
+                                  //       child: creatBottomBtn('Undo', () {
+                                  //         debugPrint('Undo');
+                                  //         resetLastNote();
+                                  //       }, 'btn_undo', 48.w, 123.h, 'ic_undo',
+                                  //           61.w, 61.h),
+                                  //     )),
                                   // Obx(() => Visibility(
                                   //     visible: selectstate.value == 1,
                                   //     child: createButtonImageWithText(
@@ -1313,8 +1498,8 @@ class _MyAppState extends State<MyApp> {
         return Dialog(
           child: SingleChildScrollView(
               child: Container(
-            width: isWindowsOrMac ? 360.w : 510.w,
-            height: isWindowsOrMac ? 190.h : 398.h,
+            width: isWindowsOrMac ? 1400.w : 510.w,
+            height: isWindowsOrMac ? 1000.h : 398.h,
             padding: const EdgeInsets.all(20),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.start,
@@ -1537,7 +1722,7 @@ class _MyAppState extends State<MyApp> {
                 const SizedBox(
                   height: 20,
                 ),
-                const Center(child: Text('Version: MTK RWKV-6 1.2.0')),
+                const Center(child: Text('Version: RWKV-6 1.2.0')),
               ],
             ),
           )),
@@ -1564,7 +1749,7 @@ class _MyAppState extends State<MyApp> {
             child: Padding(
                 padding: const EdgeInsets.all(20),
                 child: SizedBox(
-                    width: isWindowsOrMac ? 360.w : 530.w,
+                    width: isWindowsOrMac ? 1400.w : 530.w,
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.start,
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -1901,7 +2086,7 @@ class _MyAppState extends State<MyApp> {
                         const SizedBox(
                           height: 20,
                         ),
-                        const Center(child: Text('Version: MTK RWKV-6 1.2.0')),
+                        const Center(child: Text('Version: RWKV-6 1.2.0')),
                         const SizedBox(
                           height: 10,
                         ),
@@ -2011,7 +2196,7 @@ class _MyAppState extends State<MyApp> {
           child: Column(
             children: [
               SizedBox(
-                height: isWindowsOrMac ? 200.h : 150.h,
+                height: isWindowsOrMac ? 600.h : 150.h,
                 // width: 40,
                 child: ListView.builder(
                   controller: _controller,
@@ -2199,7 +2384,7 @@ class _MyAppState extends State<MyApp> {
                       },
                     ),
                     title: Transform.translate(
-                      offset: const Offset(-20, 0), // 向左移动文本以减少间距
+                      offset: const Offset(0, 0), // 向左移动文本以减少间距
                       child: const Text('Remember Last Option'),
                     ),
                     onTap: () {},

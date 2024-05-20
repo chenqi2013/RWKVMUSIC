@@ -10,7 +10,13 @@ class CustomSegment extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return CustomSlidingSegmentedControl<int>(
+      // height: 143.h,
+      // isStretch: true,
+      // innerPadding: const EdgeInsets.all(10),
+      // fixedWidth: 300.w,
       initialValue: 1,
+      // padding: 20.w,
+      // height: 123.h,
       children: {
         1: Text(
           'Prompt Mode',

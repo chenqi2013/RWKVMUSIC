@@ -1,6 +1,81 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:rwkvmusic/style/color.dart';
+
+class CreatBottomBtn extends StatelessWidget {
+  const CreatBottomBtn(
+      {super.key,
+      required this.width,
+      required this.height,
+      required this.text,
+      required this.icon,
+      required this.onPressed});
+  final double width;
+  final double height;
+  final String text;
+  final Widget icon;
+  final VoidCallback onPressed;
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+        onTap: () {
+          // 按钮被点击时执行的操作
+          onPressed();
+        },
+        child: Container(
+          width: width,
+          height: height,
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [AppColor.color_494949, AppColor.color_323232]),
+            borderRadius: BorderRadius.circular(11.h),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.white.withOpacity(.2),
+                blurRadius: 1.18,
+                spreadRadius: 0,
+                offset: const Offset(
+                  0.0,
+                  -2.36,
+                ),
+              ),
+              BoxShadow(
+                color: Colors.black.withOpacity(.42),
+                blurRadius: 1.18,
+                spreadRadius: 0,
+                offset: const Offset(
+                  0.0,
+                  2.36,
+                ),
+              ),
+            ],
+          ),
+          child: Center(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                if (text.isNotEmpty)
+                  Text(
+                    text,
+                    style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 39.sp,
+                        fontWeight: FontWeight.w700),
+                  ),
+                if (text.isNotEmpty)
+                  SizedBox(
+                    width: 35.w,
+                  ),
+                icon,
+              ],
+            ),
+          ),
+        ));
+  }
+}
 
 Widget creatBottomBtn(
     String text,
