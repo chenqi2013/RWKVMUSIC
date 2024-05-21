@@ -338,6 +338,15 @@
         "setAbcString:" + output + ", isGenerateAbc:" + isGenerateAbc
       );
       console.log("===========================");
+      // 判断 output 是否包含 "MIDI program"
+      if (!output.includes("MIDI program")) {
+        try {
+          // 如果不包含，假设是 Base64 编码并尝试解码
+          output = atob(output);
+        } catch (e) {
+          console.error("Base64 解码失败:", e);
+        }
+      }
       self.isGenerateAbc = isGenerateAbc;
       const textarea = document.getElementById("abc");
       textarea.value = output;

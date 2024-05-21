@@ -26,7 +26,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:rwkvmusic/gen/assets.gen.dart';
 import 'package:rwkvmusic/mainwidget/ProgressbarTime.dart';
 import 'package:rwkvmusic/mainwidget/customsegmentcontroller.dart';
-import 'package:rwkvmusic/mainwidget/CustomSegmentControl.dart';
+import 'package:rwkvmusic/mainwidget/Custom_Segment_Controller.dart';
 import 'package:rwkvmusic/services/storage.dart';
 import 'package:rwkvmusic/store/config.dart';
 import 'package:rwkvmusic/test/bletest.dart';
@@ -281,7 +281,8 @@ void getABCDataByLocalModel(var array) async {
   Pointer<Char> promptChar = prompt.toNativeUtf8().cast<Char>();
   faster_rwkvd fastrwkv = faster_rwkvd(
       Platform.isIOS ? DynamicLibrary.process() : DynamicLibrary.open(dllPath));
-  Pointer<Char> strategy = 'ncnn fp32'.toNativeUtf8().cast<Char>();
+  // Pointer<Char> strategy = 'ncnn fp32'.toNativeUtf8().cast<Char>();
+  Pointer<Char> strategy = 'qnn auto'.toNativeUtf8().cast<Char>();
   Pointer<Void> model =
       fastrwkv.rwkv_model_create(binPath.toNativeUtf8().cast<Char>(), strategy);
   Pointer<Void> abcTokenizer = fastrwkv.rwkv_ABCTokenizer_create();
@@ -295,7 +296,7 @@ void getABCDataByLocalModel(var array) async {
       promptChar, prompt.length, 1.0, 8, randomness);
   isGenerating.value = true;
   int duration = 0;
-  for (int i = 0; i < 200; i++) {
+  for (int i = 0; i < 1024; i++) {
     if (isStopGenerating) {
       debugPrint('stop getABCDataByLocalModel');
       break;
@@ -632,8 +633,16 @@ class _MyAppState extends State<MyApp> {
           playOrPausePiano();
         });
       } else {
-        debugPrint('abcset=$event');
-        controllerPiano.runJavaScript(event);
+        // debugPrint('abcset=$event');
+        String result =
+            event.replaceAll('setAbcString("%%', '').replaceAll('",false)', '');
+        debugPrint('setAbcString replace==$result');
+        String encodedString = base64.encode(utf8.encode(result));
+        print("Encoded setAbcString: $encodedString");
+        String base64AbcString = "setAbcString('$encodedString',false)";
+        controllerPiano.runJavaScript(base64AbcString);
+        // debugPrint('base64abctoEvents==$base64abctoEvents');
+        // controllerPiano.runJavaScript(event);
       }
     });
   }
@@ -856,8 +865,14 @@ class _MyAppState extends State<MyApp> {
                     SizedBox(
                       width: 575.w,
                       height: 123.h,
-                      child: const CustomSegmentControl(
-                        segments: ['Prompt Mode', 'Create Mode'],
+                      child: CustomSegmentControl11(
+                        segments: const ['Prompt Mode', 'Create Mode'],
+                        callBack: (int newValue) {
+                          // 当选择改变时执行的操作
+                          debugPrint('选择了选项 $newValue');
+                          selectstate.value = newValue;
+                          segmengChange(newValue);
+                        },
                       ),
                     ),
                     // CustomSegment(
