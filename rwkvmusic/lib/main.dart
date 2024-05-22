@@ -158,6 +158,7 @@ var currentClickNoteInfo = [];
 var noteLengthList = ['1/4', '1/8', '1/16'];
 List<Note> notes = [];
 Isolate? userIsolate;
+var isCreateGenerate = false.obs;
 
 void fetchABCDataByIsolate() async {
   String? dllPath;
@@ -719,6 +720,15 @@ class _MyAppState extends State<MyApp> {
   }
 
   void resetLastNote() {
+    if (isCreateGenerate.value) {
+      if (!isGenerating.value) {
+        isCreateGenerate.value = false;
+        segmentChange(1);
+      } else {
+        debugPrint('需要先停止生成再暫停');
+      }
+      return;
+    }
     if (virtualNotes.isNotEmpty) {
       virtualNotes.removeLast();
       if (virtualNotes.isEmpty) {
@@ -897,7 +907,7 @@ class _MyAppState extends State<MyApp> {
                           // 当选择改变时执行的操作
                           debugPrint('选择了选项 $newValue');
                           selectstate.value = newValue;
-                          segmengChange(newValue);
+                          segmentChange(newValue);
                         },
                       ),
                     ),
@@ -1223,6 +1233,7 @@ class _MyAppState extends State<MyApp> {
                                           //     'resetTimingCallbacks()');
                                           isFinishABCEvent = false;
                                           if (selectstate.value == 1) {
+                                            isCreateGenerate.value = true;
                                             controllerKeyboard
                                                 .loadFlutterAssetServer(
                                                     filePathKeyboardAnimation);
@@ -1338,7 +1349,9 @@ class _MyAppState extends State<MyApp> {
                                         child: CreatBottomBtn(
                                           width: 257.w,
                                           height: 123.h,
-                                          text: 'Undo',
+                                          text: !isCreateGenerate.value
+                                              ? 'Undo'
+                                              : 'Reset',
                                           icon: SvgPicture.asset(
                                             'assets/images/ic_undo.svg',
                                             width: 61.w,
@@ -1514,7 +1527,7 @@ class _MyAppState extends State<MyApp> {
     isFinishABCEvent = false;
   }
 
-  void segmengChange(int index) {
+  void segmentChange(int index) {
     resetPlay();
     if (index == 0) {
       //preset
@@ -1527,23 +1540,27 @@ class _MyAppState extends State<MyApp> {
       controllerKeyboard.runJavaScript('resetPlay()');
       // controllerKeyboard.runJavaScript('setPiano(55, 76)');
     } else {
-      virtualNotes.clear();
-      //creative
-      // String str1 =
-      //     "setAbcString(\"%%MIDI program $midiProgramValue\\nL:1/4\\nM:4/4\\nK:C\\n|\", false)";
-      // debugPrint('str111==$str1');
-      finalabcStringCreate =
-          "setAbcString(\"${ABCHead.getABCWithInstrument(r'L:1/4\nM:4/4\nK:C\n|', midiProgramValue)}\",false)";
-      finalabcStringCreate =
-          ABCHead.appendTempoParam(finalabcStringCreate, tempo.value.toInt());
-      debugPrint('str112==$finalabcStringCreate');
-      controllerPiano.runJavaScript(finalabcStringCreate);
-      controllerPiano.runJavaScript("setPromptNoteNumberCount(0)");
-      controllerPiano.runJavaScript("setStyle()");
-      controllerKeyboard.loadFlutterAssetServer(filePathKeyboard);
-      controllerKeyboard.runJavaScript('resetPlay()');
-      createPrompt = '';
+      createModeDefault();
     }
+  }
+
+  void createModeDefault() {
+    virtualNotes.clear();
+    //creative
+    // String str1 =
+    //     "setAbcString(\"%%MIDI program $midiProgramValue\\nL:1/4\\nM:4/4\\nK:C\\n|\", false)";
+    // debugPrint('str111==$str1');
+    finalabcStringCreate =
+        "setAbcString(\"${ABCHead.getABCWithInstrument(r'L:1/4\nM:4/4\nK:C\n|', midiProgramValue)}\",false)";
+    finalabcStringCreate =
+        ABCHead.appendTempoParam(finalabcStringCreate, tempo.value.toInt());
+    debugPrint('str112==$finalabcStringCreate');
+    controllerPiano.runJavaScript(finalabcStringCreate);
+    controllerPiano.runJavaScript("setPromptNoteNumberCount(0)");
+    controllerPiano.runJavaScript("setStyle()");
+    controllerKeyboard.loadFlutterAssetServer(filePathKeyboard);
+    controllerKeyboard.runJavaScript('resetPlay()');
+    createPrompt = '';
   }
 
   // Widget getLogoImage() {
@@ -2386,14 +2403,14 @@ class _MyAppState extends State<MyApp> {
                                 debugPrint(
                                     'finalabcStringCreate=$finalabcStringCreate');
                               }
+                              resetPlay();
                               Future.delayed(const Duration(microseconds: 1000),
                                   () {
-                                resetPlay();
-                                // playPianoAnimation(
-                                //     selectstate.value == 0
-                                //         ? finalabcStringPreset
-                                //         : finalabcStringCreate,
-                                //     true);
+                                playPianoAnimation(
+                                    selectstate.value == 0
+                                        ? finalabcStringPreset
+                                        : finalabcStringCreate,
+                                    true);
                               });
                               closeDialog();
                             } else if (type == STORAGE_SOUNDSEFFECT_SELECT) {
@@ -2416,14 +2433,14 @@ class _MyAppState extends State<MyApp> {
                                 controllerPiano
                                     .runJavaScript(finalabcStringCreate);
                               }
+                              resetPlay();
                               Future.delayed(const Duration(microseconds: 1000),
                                   () {
-                                resetPlay();
-                                // playPianoAnimation(
-                                //     selectstate.value == 0
-                                //         ? finalabcStringPreset
-                                //         : finalabcStringCreate,
-                                //     true);
+                                playPianoAnimation(
+                                    selectstate.value == 0
+                                        ? finalabcStringPreset
+                                        : finalabcStringCreate,
+                                    true);
                               });
                               closeDialog();
                             }
