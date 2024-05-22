@@ -119,7 +119,7 @@ late String finalabcStringPreset;
 late String finalabcStringCreate;
 // late bool isNeedRestart; //曲谱及键盘动画需要重新开始
 late String presentPrompt;
-late String createPrompt;
+var createPrompt = '';
 String timeSingnatureStr = '4/4';
 OverlayEntry? overlayEntry;
 
@@ -710,8 +710,9 @@ class _MyAppState extends State<MyApp> {
   }
 
   void updateTimeSignature() {
+    // setAbcString("%%MIDI program 0\nL:1/4\nM:4/4\nK:C\n|",false)
     String sb =
-        "setAbcString(\"%%MIDI program $midiProgramValue\\nL:1/4\\nM:$timeSingnatureStr\\nK:C\\n|\\$finalabcStringCreate\",false)";
+        "setAbcString(\"%%MIDI program $midiProgramValue\\nL:1/4\\nM:$timeSingnatureStr\\nK:C\\n|$createPrompt\",false)";
     sb = ABCHead.appendTempoParam(sb, tempo.value.toInt());
     debugPrint('curr=$sb');
     controllerPiano.runJavaScript(sb);
