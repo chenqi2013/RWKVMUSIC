@@ -51,6 +51,14 @@ Map<String, int> soundEffectInt = {
   "Guitar": 25,
 };
 
+List<String> instruments = [
+  'piano',
+  'violin',
+  'ocarina',
+  'cello',
+  'guitar',
+];
+
 List<String> promptsAbc = [
   r'''
 L:1/4

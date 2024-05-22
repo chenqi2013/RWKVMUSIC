@@ -1020,24 +1020,24 @@ class _MyAppState extends State<MyApp> {
                         SizedBox(
                           width: 55.w,
                         ),
-                        CreatBottomBtn(
-                          width: 358.w,
-                          height: 123.h,
-                          text: 'Instrument',
-                          icon: SvgPicture.asset(
-                            'assets/images/ic-piano.svg',
-                            width: 61.w,
-                            height: 57.h,
-                          ),
-                          onPressed: () {
-                            debugPrint("Sounds Effect");
-                            showPromptDialog(
-                                context,
-                                'Instrument',
-                                soundEffect.keys.toList(),
-                                STORAGE_SOUNDSEFFECT_SELECT);
-                          },
-                        ),
+                        Obx(() => CreatBottomBtn(
+                              width: 358.w,
+                              height: 123.h,
+                              text: 'Instrument',
+                              icon: SvgPicture.asset(
+                                'assets/images/ic-${instruments[effectSelectedIndex.value]}.svg',
+                                width: 61.w,
+                                height: 57.h,
+                              ),
+                              onPressed: () {
+                                debugPrint("Sounds Effect");
+                                showPromptDialog(
+                                    context,
+                                    'Instrument',
+                                    soundEffect.keys.toList(),
+                                    STORAGE_SOUNDSEFFECT_SELECT);
+                              },
+                            )),
                         // creatBottomBtn('Instrument', () {
                         //   debugPrint("Sounds Effect");
                         //   showPromptDialog(
@@ -2414,6 +2414,13 @@ class _MyAppState extends State<MyApp> {
                               });
                               closeDialog();
                             } else if (type == STORAGE_SOUNDSEFFECT_SELECT) {
+                              // if (isPlay.value == false) {
+                              //   controllerPiano.runJavaScript("resetPage()");
+                              //   if (selectstate.value == 0) {
+                              //     controllerKeyboard.loadFlutterAssetServer(
+                              //         filePathKeyboardAnimation);
+                              //   }
+                              // }
                               debugPrint(
                                   '选择midiProgramValue==$midiProgramValue');
                               String modifyABCWithInstrument =
