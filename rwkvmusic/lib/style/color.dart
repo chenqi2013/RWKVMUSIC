@@ -7,6 +7,7 @@ class AppColor {
   static const Color color_000000 = Color(0xFF000000);
   static const Color color_2C2C2C = Color(0xFF2C2C2C);
   static const Color color_FF757575 = Color(0xFF757575);
+  static const Color color_FFA1D632 = Color(0xFFA1D632);
 
   /// 页面背景颜色
   static const Color scaffoldBackground = Color(0xFFFFFFFF);

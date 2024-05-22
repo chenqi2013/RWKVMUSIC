@@ -29,6 +29,7 @@ import 'package:rwkvmusic/mainwidget/customsegmentcontroller.dart';
 import 'package:rwkvmusic/mainwidget/Custom_Segment_Controller.dart';
 import 'package:rwkvmusic/services/storage.dart';
 import 'package:rwkvmusic/store/config.dart';
+import 'package:rwkvmusic/style/color.dart';
 import 'package:rwkvmusic/test/bletest.dart';
 import 'package:rwkvmusic/test/midi_devicelist_page.dart';
 import 'package:rwkvmusic/utils/abchead.dart';
@@ -42,6 +43,7 @@ import 'package:rwkvmusic/utils/midifileconvert.dart';
 import 'package:rwkvmusic/utils/note.dart';
 import 'package:rwkvmusic/utils/notecaculate.dart';
 import 'package:rwkvmusic/utils/notes_database.dart';
+import 'package:rwkvmusic/values/colors.dart';
 import 'package:rwkvmusic/values/constantdata.dart';
 import 'package:rwkvmusic/values/storage.dart';
 import 'package:rwkvmusic/widgets/toast.dart';
@@ -155,6 +157,7 @@ var currentClickNoteInfo = [];
 
 var noteLengthList = ['1/4', '1/8', '1/16'];
 List<Note> notes = [];
+Isolate? userIsolate;
 
 void fetchABCDataByIsolate() async {
   String? dllPath;
@@ -213,7 +216,7 @@ void fetchABCDataByIsolate() async {
   // } else {
 // 创建 ReceivePort，以接收来自子线程的消息
   // 创建一个新的 Isolate
-  await Isolate.spawn(getABCDataByLocalModel, [
+  userIsolate = await Isolate.spawn(getABCDataByLocalModel, [
     mainReceivePort.sendPort,
     selectstate.value == 0 ? presentPrompt : createPrompt,
     midiProgramValue,
@@ -231,6 +234,8 @@ void fetchABCDataByIsolate() async {
       isolateEventBus = data;
     } else if (data == "finish") {
       mainReceivePort.close(); // 操作完成后，关闭 ReceivePort
+      userIsolate!.kill();
+      debugPrint('userIsolate!.kill()');
       isGenerating.value = false;
       eventBus.fire('finish');
     } else if (data.toString().startsWith('tokens')) {
@@ -291,6 +296,7 @@ void getABCDataByLocalModel(var array) async {
   StringBuffer stringBuffer = StringBuffer();
   int preTimestamp = 0;
   late String abcString;
+  fastrwkv.rwkv_model_clear_states(model);
   // 默认的就按照pengbo的demo里面的temp=1.0 top_k=8, top_p=0.8?
   int token = fastrwkv.rwkv_abcmodel_run_prompt(model, abcTokenizer, sampler,
       promptChar, prompt.length, 1.0, 8, randomness);
@@ -480,9 +486,10 @@ class _MyAppState extends State<MyApp> {
       ..addJavaScriptChannel("flutteronStartPlay",
           onMessageReceived: (JavaScriptMessage jsMessage) {
         String message = jsMessage.message;
-        debugPrint('flutteronStartPlay onMessageReceived=$message');
+        debugPrint(
+            'playOrPausePiano flutteronStartPlay onMessageReceived=$message');
         pianoAllTime.value = double.parse(message.split(',')[1]);
-        debugPrint('pianoAllTime:${pianoAllTime.value}');
+        debugPrint('playOrPausePiano pianoAllTime:${pianoAllTime.value}');
         playProgress.value = 0.0;
         createTimer();
         isPlay.value = true;
@@ -490,7 +497,8 @@ class _MyAppState extends State<MyApp> {
       })
       ..addJavaScriptChannel("flutteronPausePlay",
           onMessageReceived: (JavaScriptMessage jsMessage) {
-        debugPrint('flutteronPausePlay onMessageReceived=${jsMessage.message}');
+        debugPrint(
+            'playOrPausePiano flutteronPausePlay onMessageReceived=${jsMessage.message}');
         timer.cancel();
         isPlay.value = false;
         // isNeedRestart = false;
@@ -498,7 +506,7 @@ class _MyAppState extends State<MyApp> {
       ..addJavaScriptChannel("flutteronResumePlay",
           onMessageReceived: (JavaScriptMessage jsMessage) {
         debugPrint(
-            'flutteronResumePlay onMessageReceived=${jsMessage.message}');
+            'playOrPausePiano flutteronResumePlay onMessageReceived=${jsMessage.message}');
         createTimer();
         isPlay.value = true;
         // isNeedRestart = false;
@@ -518,8 +526,11 @@ class _MyAppState extends State<MyApp> {
         String jsstr =
             r'startPlay("' + jsMessage.message.replaceAll('"', r'\"') + r'")';
         controllerKeyboard.runJavaScript(jsstr);
+        // controllerPiano.runJavaScript("startPlay()");
+        // debugPrint('isFinishABCEvent == true,,,controllerPiano startPlay()');
+
         isFinishABCEvent = true;
-        // debugPrint('isFinishABCEvent == true,,,$jsstr');
+        debugPrint('isFinishABCEvent == true,,,$jsstr');
         // } else {
         //   isNeedConvertMidiNotes = false;
         // }
@@ -628,17 +639,20 @@ class _MyAppState extends State<MyApp> {
         // debugPrint('chenqi $event');
         tokens.value = ' -- ${event.toString()}';
       } else if (event == 'finish') {
+        // if (!isPlay.value) {
         Future.delayed(const Duration(milliseconds: 1000), () {
           //改短了播放状态不对，曲谱没播放
+          // isPlay.value = false;
           playOrPausePiano();
         });
+        // }
       } else {
         // debugPrint('abcset=$event');
         String result =
             event.replaceAll('setAbcString("%%', '').replaceAll('",false)', '');
-        debugPrint('setAbcString replace==$result');
+        // debugPrint('setAbcString replace==$result');
         String encodedString = base64.encode(utf8.encode(result));
-        print("Encoded setAbcString: $encodedString");
+        // debugPrint("Encoded setAbcString: $encodedString");
         String base64AbcString = "setAbcString('$encodedString',false)";
         controllerPiano.runJavaScript(base64AbcString);
         // debugPrint('base64abctoEvents==$base64abctoEvents');
@@ -729,18 +743,26 @@ class _MyAppState extends State<MyApp> {
     }
   }
 
-  void playPianoAnimation(String playAbcString, bool play) {
+  void playPianoAnimation(String playAbcString, bool needPlayKeyboard) {
     debugPrint('playAbcString==$playAbcString');
-    if (!isPlay.value) {
-      // controllerKeyboard.runJavaScript('resetPlay()');
-      controllerPiano.runJavaScript("startPlay()");
+    if (isFinishABCEvent) {
+      if (!isPlay.value) {
+        // controllerKeyboard.runJavaScript('resetPlay()');
+        controllerPiano.runJavaScript("startPlay()");
+        debugPrint('playOrPausePiano controllerPiano startPlay()');
+      } else {
+        controllerPiano.runJavaScript("pausePlay()");
+        debugPrint('playOrPausePiano controllerPiano pausePlay()');
+      }
     } else {
-      controllerPiano.runJavaScript("pausePlay()");
+      debugPrint('playPianoAnimation isFinishABCEvent not');
     }
-    if (play) {
+
+    if (needPlayKeyboard) {
       if (isFinishABCEvent) {
         //&& !isNeedRestart && !isNeedConvertMidiNotes
-        debugPrint('playOrPausePiano resumePlay() keyboard');
+        debugPrint(
+            'playOrPausePiano isFinishABCEvent yes  resumePlay() keyboard');
         controllerKeyboard.runJavaScript('resumePlay()');
         // createTimer();
       } else {
@@ -752,7 +774,8 @@ class _MyAppState extends State<MyApp> {
         print("Encoded string: $encodedString");
         String base64abctoEvents = "ABCtoEvents('$encodedString',false)";
         controllerPiano.runJavaScript(base64abctoEvents);
-        debugPrint('base64abctoEvents==$base64abctoEvents');
+        debugPrint('playOrPausePiano base64abctoEvents==$base64abctoEvents');
+        controllerPiano.runJavaScript("startPlay()");
 
         // String abcStringTmp =
         //     playAbcString.replaceAll('setAbcString', 'ABCtoEvents');
@@ -763,6 +786,7 @@ class _MyAppState extends State<MyApp> {
       }
     } else {
       controllerKeyboard.runJavaScript('pausePlay()');
+      debugPrint('playOrPausePiano controllerKeyboard pausePlay()');
       // timer.cancel();
     }
   }
@@ -866,6 +890,7 @@ class _MyAppState extends State<MyApp> {
                       width: 575.w,
                       height: 123.h,
                       child: CustomSegmentControl11(
+                        selectedIndex: selectstate,
                         segments: const ['Prompt Mode', 'Create Mode'],
                         callBack: (int newValue) {
                           // 当选择改变时执行的操作
@@ -1159,142 +1184,150 @@ class _MyAppState extends State<MyApp> {
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.end,
                                 children: [
-                                  CreatBottomBtn(
-                                    width:
-                                        selectstate.value == 0 ? 666.w : 453.w,
-                                    height: 123.h,
-                                    text: 'AI Compose',
-                                    icon: SvgPicture.asset(
-                                      'assets/images/ic_generate.svg',
-                                      width: 68.w,
-                                      height: 75.h,
-                                    ),
-                                    onPressed: () {
-                                      debugPrint('Generate');
-                                      isGenerating.value = !isGenerating.value;
-                                      if (isGenerating.value) {
-                                        resetPlay();
-                                        // playProgress.value = 0.0;
-                                        // pianoAllTime.value = 0.0;
-                                        // controllerPiano.runJavaScript(
-                                        //     "setAbcString(\"%%MIDI program 40\\nL:1/4\\nM:4/4\\nK:D\\n\\\"D\\\" A F F\", false)");
-                                        // controllerPiano.runJavaScript(
-                                        //     'resetTimingCallbacks()');
-                                        // if (isWindowsOrMac) {
-                                        fetchABCDataByIsolate();
-                                        // } else {
-                                        //   getABCDataByAPI();
-                                        // }
-                                        // controllerKeyboard
-                                        //     .runJavaScript('resetPlay()');
-                                        // controllerPiano.runJavaScript(
-                                        //     'resetTimingCallbacks()');
-                                        isFinishABCEvent = false;
-                                        if (selectstate.value == 1) {
-                                          controllerKeyboard
-                                              .loadFlutterAssetServer(
-                                                  filePathKeyboardAnimation);
-                                          // controllerKeyboard.loadRequest(
-                                          //     Uri.parse(
-                                          //         filePathKeyboardAnimation));
+                                  Obx(
+                                    () => CreatBottomBtn(
+                                      textColor: AppColor.color_FFA1D632,
+                                      width: selectstate.value == 0
+                                          ? 666.w
+                                          : 453.w,
+                                      height: 123.h,
+                                      text: !isGenerating.value
+                                          ? 'AI Compose'
+                                          : 'Stop Compose',
+                                      icon: SvgPicture.asset(
+                                        'assets/images/ic_generate.svg',
+                                        width: 68.w,
+                                        height: 75.h,
+                                      ),
+                                      onPressed: () {
+                                        debugPrint('Generate');
+                                        isGenerating.value =
+                                            !isGenerating.value;
+                                        if (isGenerating.value) {
+                                          resetPlay();
+                                          // playProgress.value = 0.0;
+                                          // pianoAllTime.value = 0.0;
+                                          // controllerPiano.runJavaScript(
+                                          //     "setAbcString(\"%%MIDI program 40\\nL:1/4\\nM:4/4\\nK:D\\n\\\"D\\\" A F F\", false)");
+                                          // controllerPiano.runJavaScript(
+                                          //     'resetTimingCallbacks()');
+                                          // if (isWindowsOrMac) {
+                                          fetchABCDataByIsolate();
+                                          // } else {
+                                          //   getABCDataByAPI();
+                                          // }
+                                          // controllerKeyboard
+                                          //     .runJavaScript('resetPlay()');
+                                          // controllerPiano.runJavaScript(
+                                          //     'resetTimingCallbacks()');
+                                          isFinishABCEvent = false;
+                                          if (selectstate.value == 1) {
+                                            controllerKeyboard
+                                                .loadFlutterAssetServer(
+                                                    filePathKeyboardAnimation);
+                                            // controllerKeyboard.loadRequest(
+                                            //     Uri.parse(
+                                            //         filePathKeyboardAnimation));
+                                          }
+                                        } else {
+                                          // isolateSendPort.send('stop Generating');
+                                          isolateEventBus
+                                              .fire("stop Generating");
                                         }
-                                      } else {
-                                        // isolateSendPort.send('stop Generating');
-                                        isolateEventBus.fire("stop Generating");
-                                      }
-                                    },
+                                      },
+                                    ),
+                                    // creatBottomBtn('AI Compose', () {
+                                    //   {
+                                    //     debugPrint('Generate');
+                                    //     isGenerating.value = !isGenerating.value;
+                                    //     if (isGenerating.value) {
+                                    //       resetPlay();
+                                    //       // playProgress.value = 0.0;
+                                    //       // pianoAllTime.value = 0.0;
+                                    //       // controllerPiano.runJavaScript(
+                                    //       //     "setAbcString(\"%%MIDI program 40\\nL:1/4\\nM:4/4\\nK:D\\n\\\"D\\\" A F F\", false)");
+                                    //       // controllerPiano.runJavaScript(
+                                    //       //     'resetTimingCallbacks()');
+                                    //       // if (isWindowsOrMac) {
+                                    //       fetchABCDataByIsolate();
+                                    //       // } else {
+                                    //       //   getABCDataByAPI();
+                                    //       // }
+                                    //       // controllerKeyboard
+                                    //       //     .runJavaScript('resetPlay()');
+                                    //       // controllerPiano.runJavaScript(
+                                    //       //     'resetTimingCallbacks()');
+                                    //       isFinishABCEvent = false;
+                                    //       if (selectstate.value == 1) {
+                                    //         controllerKeyboard
+                                    //             .loadFlutterAssetServer(
+                                    //                 filePathKeyboardAnimation);
+                                    //         // controllerKeyboard.loadRequest(
+                                    //         //     Uri.parse(
+                                    //         //         filePathKeyboardAnimation));
+                                    //       }
+                                    //     } else {
+                                    //       // isolateSendPort.send('stop Generating');
+                                    //       isolateEventBus.fire("stop Generating");
+                                    //     }
+                                    //   }
+                                    // },
+                                    //     selectstate.value == 0
+                                    //         ? 'btn_generate'
+                                    //         : 'btn_create_generate',
+                                    //     656.w,
+                                    //     123.h,
+                                    //     'ic_generate',
+                                    //     68.w,
+                                    //     75.h),
+                                    // Obx(() => createButtonImageWithText(
+                                    //         !isGenerating.value
+                                    //             ? 'Generate'
+                                    //             : 'Stop',
+                                    //         !isGenerating.value
+                                    //             ? Image.asset(
+                                    //                 'assets/images/generate.jpg',
+                                    //                 fit: BoxFit.cover,
+                                    //               )
+                                    //             : Image.asset(
+                                    //                 'assets/images/stopgenerate.jpg'),
+                                    //         () {
+                                    //       debugPrint('Generate');
+                                    //       isGenerating.value =
+                                    //           !isGenerating.value;
+                                    //       if (isGenerating.value) {
+                                    //         resetPlay();
+                                    //         // playProgress.value = 0.0;
+                                    //         // pianoAllTime.value = 0.0;
+                                    //         // controllerPiano.runJavaScript(
+                                    //         //     "setAbcString(\"%%MIDI program 40\\nL:1/4\\nM:4/4\\nK:D\\n\\\"D\\\" A F F\", false)");
+                                    //         // controllerPiano.runJavaScript(
+                                    //         //     'resetTimingCallbacks()');
+                                    //         // if (isWindowsOrMac) {
+                                    //         fetchABCDataByIsolate();
+                                    //         // } else {
+                                    //         //   getABCDataByAPI();
+                                    //         // }
+                                    //         // controllerKeyboard
+                                    //         //     .runJavaScript('resetPlay()');
+                                    //         // controllerPiano.runJavaScript(
+                                    //         //     'resetTimingCallbacks()');
+                                    //         isFinishABCEvent = false;
+                                    //         if (selectstate.value == 1) {
+                                    //           controllerKeyboard
+                                    //               .loadFlutterAssetServer(
+                                    //                   filePathKeyboardAnimation);
+                                    //           // controllerKeyboard.loadRequest(
+                                    //           //     Uri.parse(
+                                    //           //         filePathKeyboardAnimation));
+                                    //         }
+                                    //       } else {
+                                    //         // isolateSendPort.send('stop Generating');
+                                    //         isolateEventBus
+                                    //             .fire("stop Generating");
+                                    //       }
+                                    //     })),
                                   ),
-                                  // creatBottomBtn('AI Compose', () {
-                                  //   {
-                                  //     debugPrint('Generate');
-                                  //     isGenerating.value = !isGenerating.value;
-                                  //     if (isGenerating.value) {
-                                  //       resetPlay();
-                                  //       // playProgress.value = 0.0;
-                                  //       // pianoAllTime.value = 0.0;
-                                  //       // controllerPiano.runJavaScript(
-                                  //       //     "setAbcString(\"%%MIDI program 40\\nL:1/4\\nM:4/4\\nK:D\\n\\\"D\\\" A F F\", false)");
-                                  //       // controllerPiano.runJavaScript(
-                                  //       //     'resetTimingCallbacks()');
-                                  //       // if (isWindowsOrMac) {
-                                  //       fetchABCDataByIsolate();
-                                  //       // } else {
-                                  //       //   getABCDataByAPI();
-                                  //       // }
-                                  //       // controllerKeyboard
-                                  //       //     .runJavaScript('resetPlay()');
-                                  //       // controllerPiano.runJavaScript(
-                                  //       //     'resetTimingCallbacks()');
-                                  //       isFinishABCEvent = false;
-                                  //       if (selectstate.value == 1) {
-                                  //         controllerKeyboard
-                                  //             .loadFlutterAssetServer(
-                                  //                 filePathKeyboardAnimation);
-                                  //         // controllerKeyboard.loadRequest(
-                                  //         //     Uri.parse(
-                                  //         //         filePathKeyboardAnimation));
-                                  //       }
-                                  //     } else {
-                                  //       // isolateSendPort.send('stop Generating');
-                                  //       isolateEventBus.fire("stop Generating");
-                                  //     }
-                                  //   }
-                                  // },
-                                  //     selectstate.value == 0
-                                  //         ? 'btn_generate'
-                                  //         : 'btn_create_generate',
-                                  //     656.w,
-                                  //     123.h,
-                                  //     'ic_generate',
-                                  //     68.w,
-                                  //     75.h),
-                                  // Obx(() => createButtonImageWithText(
-                                  //         !isGenerating.value
-                                  //             ? 'Generate'
-                                  //             : 'Stop',
-                                  //         !isGenerating.value
-                                  //             ? Image.asset(
-                                  //                 'assets/images/generate.jpg',
-                                  //                 fit: BoxFit.cover,
-                                  //               )
-                                  //             : Image.asset(
-                                  //                 'assets/images/stopgenerate.jpg'),
-                                  //         () {
-                                  //       debugPrint('Generate');
-                                  //       isGenerating.value =
-                                  //           !isGenerating.value;
-                                  //       if (isGenerating.value) {
-                                  //         resetPlay();
-                                  //         // playProgress.value = 0.0;
-                                  //         // pianoAllTime.value = 0.0;
-                                  //         // controllerPiano.runJavaScript(
-                                  //         //     "setAbcString(\"%%MIDI program 40\\nL:1/4\\nM:4/4\\nK:D\\n\\\"D\\\" A F F\", false)");
-                                  //         // controllerPiano.runJavaScript(
-                                  //         //     'resetTimingCallbacks()');
-                                  //         // if (isWindowsOrMac) {
-                                  //         fetchABCDataByIsolate();
-                                  //         // } else {
-                                  //         //   getABCDataByAPI();
-                                  //         // }
-                                  //         // controllerKeyboard
-                                  //         //     .runJavaScript('resetPlay()');
-                                  //         // controllerPiano.runJavaScript(
-                                  //         //     'resetTimingCallbacks()');
-                                  //         isFinishABCEvent = false;
-                                  //         if (selectstate.value == 1) {
-                                  //           controllerKeyboard
-                                  //               .loadFlutterAssetServer(
-                                  //                   filePathKeyboardAnimation);
-                                  //           // controllerKeyboard.loadRequest(
-                                  //           //     Uri.parse(
-                                  //           //         filePathKeyboardAnimation));
-                                  //         }
-                                  //       } else {
-                                  //         // isolateSendPort.send('stop Generating');
-                                  //         isolateEventBus
-                                  //             .fire("stop Generating");
-                                  //       }
-                                  //     })),
                                   if (selectstate.value == 1)
                                     SizedBox(
                                       width: 55.w,
@@ -1368,7 +1401,7 @@ class _MyAppState extends State<MyApp> {
   }
 
   void playOrPausePiano() {
-    debugPrint('playOrPausePiano=${isPlay.value}');
+    debugPrint('playOrPausePiano status =${isPlay.value}');
     playPianoAnimation(
         selectstate.value == 0 ? finalabcStringPreset : finalabcStringCreate,
         !isPlay.value);
@@ -1458,12 +1491,17 @@ class _MyAppState extends State<MyApp> {
   void resetPlay() {
     if (isPlay.value) {
       // playOrPausePiano();
-      // controllerPiano.runJavaScript("resetTimingCallbacks()");
       // // controllerPiano.runJavaScript("setPlayButtonDisable(true)");
       // controllerKeyboard.runJavaScript('resetPlay()');
       // debugPrint('pausePlay()');
-      controllerPiano.runJavaScript("pausePlay()");
-      controllerKeyboard.runJavaScript('resetPlay()');
+
+      controllerPiano.runJavaScript("resetPage()");
+      // controllerPiano.runJavaScript("resetTimingCallbacks()");
+      // controllerKeyboard.runJavaScript('resetPlay()');
+      if (selectstate.value == 0) {
+        controllerKeyboard.loadFlutterAssetServer(filePathKeyboardAnimation);
+      }
+
       isPlay.value = false;
       timer.cancel();
       // isNeedRestart = true;
@@ -1729,7 +1767,7 @@ class _MyAppState extends State<MyApp> {
                     flex: 3,
                     child: TextButton(
                       onPressed: () {
-                        showBleDeviceOverlay(context);
+                        showBleDeviceOverlay(context, false);
                       },
                       style: TextButton.styleFrom(
                         backgroundColor: Colors.black,
@@ -2094,7 +2132,7 @@ class _MyAppState extends State<MyApp> {
                               flex: 3,
                               child: TextButton(
                                 onPressed: () {
-                                  showBleDeviceOverlay(context);
+                                  showBleDeviceOverlay(context, false);
                                 },
                                 style: TextButton.styleFrom(
                                   backgroundColor: Colors.black,
@@ -2149,7 +2187,7 @@ class _MyAppState extends State<MyApp> {
               onPressed: () {
                 // 处理确定按钮点击事件
                 Navigator.of(buildcontext).pop();
-                showBleDeviceOverlay(buildcontext);
+                showBleDeviceOverlay(buildcontext, true);
               },
               child: const Text("Bluetooth Connect"),
             ),
@@ -2292,6 +2330,10 @@ class _MyAppState extends State<MyApp> {
                                   showConnectDialog(context);
                                 } else {
                                   debugPrint('onConnectionChanged');
+                                  if (isWindowsOrMac) {
+                                    isVisibleWebview.value = true;
+                                    setState(() {});
+                                  }
                                   UniversalBle.connect(connectDeviceId!);
                                   UniversalBle.onConnectionChanged =
                                       (String deviceId,
@@ -2299,7 +2341,12 @@ class _MyAppState extends State<MyApp> {
                                     print(
                                         'OnConnectionChanged $deviceId, $state');
                                     if (state == BleConnectionState.connected) {
-                                      toastInfo(msg: 'midi键盘已连接');
+                                      if (isWindowsOrMac) {
+                                        Get.snackbar('提示', 'midi键盘已连接',
+                                            colorText: Colors.black);
+                                      } else {
+                                        toastInfo(msg: 'midi键盘已连接');
+                                      }
                                     } else {
                                       showConnectDialog(context);
                                     }
@@ -2458,7 +2505,7 @@ class _MyAppState extends State<MyApp> {
     }
   }
 
-  void showBleDeviceOverlay(BuildContext context) async {
+  void showBleDeviceOverlay(BuildContext context, bool isVisible) async {
     String? tips;
     AvailabilityState state = await UniversalBle
         .getBluetoothAvailabilityState(); // e.g. poweredOff or poweredOn,
@@ -2490,7 +2537,7 @@ class _MyAppState extends State<MyApp> {
         child: Material(
           color: Colors.transparent,
           child: SizedBox(
-              height: 100.h,
+              height: 300.h,
               width: 300.w,
               child: Container(
                 padding: const EdgeInsets.all(10),
@@ -2502,7 +2549,13 @@ class _MyAppState extends State<MyApp> {
                           title: Text(bleList[index].name!),
                           subtitle: Text(bleList[index].deviceId),
                           onTap: () {
+                            debugPrint('stopScanstopScan');
+                            if (isWindowsOrMac) {
+                              isVisibleWebview.value = isVisible;
+                              setState(() {});
+                            }
                             UniversalBle.stopScan();
+                            debugPrint('isVisibleWebview.value = $isVisible');
                             conectDevice(bleList[index]);
                             overlayEntry!.remove();
                           },

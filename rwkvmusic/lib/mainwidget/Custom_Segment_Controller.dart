@@ -4,7 +4,11 @@ import 'package:get/get.dart';
 import 'package:rwkvmusic/style/color.dart';
 
 class CustomSegmentControl11 extends StatelessWidget {
-  CustomSegmentControl11({super.key, required this.callBack, this.segments});
+  CustomSegmentControl11(
+      {super.key,
+      required this.callBack,
+      required this.selectedIndex,
+      this.segments});
   final segments;
   var selectedIndex = 0.obs;
   final Function(int) callBack;

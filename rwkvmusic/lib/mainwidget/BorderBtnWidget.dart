@@ -1,21 +1,25 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:rwkvmusic/style/color.dart';
 
 class CreatBottomBtn extends StatelessWidget {
-  const CreatBottomBtn(
+  CreatBottomBtn(
       {super.key,
       required this.width,
       required this.height,
       required this.text,
       required this.icon,
-      required this.onPressed});
+      required this.onPressed,
+      this.textColor});
   final double width;
   final double height;
   final String text;
   final Widget icon;
   final VoidCallback onPressed;
+  Color? textColor;
   @override
   Widget build(BuildContext context) {
     return InkWell(
@@ -61,7 +65,7 @@ class CreatBottomBtn extends StatelessWidget {
                   Text(
                     text,
                     style: TextStyle(
-                        color: Colors.white,
+                        color: textColor ?? Colors.white,
                         fontSize: 39.sp,
                         fontWeight: FontWeight.w700),
                   ),
