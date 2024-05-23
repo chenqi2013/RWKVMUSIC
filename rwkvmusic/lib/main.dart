@@ -100,8 +100,9 @@ void main(List<String> args) async {
   await Get.putAsync<StorageService>(() => StorageService().init());
   Get.put<ConfigStore>(ConfigStore());
   runApp(ScreenUtilInit(
-    designSize:
-        Platform.isWindows ? const Size(2880, 1600) : const Size(812, 375), //
+    designSize: Platform.isWindows
+        ? const Size(2880, 1600)
+        : const Size(2436, 1125), //812, 375
     child: const GetMaterialApp(
       debugShowCheckedModeBanner: false,
       home: MyApp(),
