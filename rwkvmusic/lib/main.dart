@@ -66,6 +66,7 @@ import 'package:path/path.dart' as p;
 import 'dart:io';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:share_extend/share_extend.dart';
+// import 'package:snapping_sheet/snapping_sheet.dart';
 
 // import 'package:share_plus/share_plus.dart';
 // final controller = AdvancedSegmentController('all');
@@ -288,8 +289,9 @@ void getABCDataByLocalModel(var array) async {
   Pointer<Char> promptChar = prompt.toNativeUtf8().cast<Char>();
   faster_rwkvd fastrwkv = faster_rwkvd(
       Platform.isIOS ? DynamicLibrary.process() : DynamicLibrary.open(dllPath));
-  // Pointer<Char> strategy = 'ncnn fp32'.toNativeUtf8().cast<Char>();
-  Pointer<Char> strategy = 'qnn auto'.toNativeUtf8().cast<Char>();
+  Pointer<Char> strategy = 'ncnn fp32'.toNativeUtf8().cast<Char>();
+  // Pointer<Char> strategy = 'webgpu auto'.toNativeUtf8().cast<Char>();
+  // Pointer<Char> strategy = 'qnn auto'.toNativeUtf8().cast<Char>();
   Pointer<Void> model =
       fastrwkv.rwkv_model_create(binPath.toNativeUtf8().cast<Char>(), strategy);
   Pointer<Void> abcTokenizer = fastrwkv.rwkv_ABCTokenizer_create();
@@ -405,7 +407,7 @@ class _MyAppState extends State<MyApp> {
   var isPlay = false.obs;
   var playProgress = 0.0.obs;
   var pianoAllTime = 0.0.obs;
-  late Timer timer;
+  Timer? timer;
   late StreamSubscription subscription;
   late HttpClient httpClient;
   int preTimestamp = 0;
@@ -501,7 +503,7 @@ class _MyAppState extends State<MyApp> {
           onMessageReceived: (JavaScriptMessage jsMessage) {
         debugPrint(
             'playOrPausePiano flutteronPausePlay onMessageReceived=${jsMessage.message}');
-        timer.cancel();
+        timer?.cancel();
         isPlay.value = false;
         // isNeedRestart = false;
       })
@@ -532,7 +534,7 @@ class _MyAppState extends State<MyApp> {
         // debugPrint('isFinishABCEvent == true,,,controllerPiano startPlay()');
 
         isFinishABCEvent = true;
-        debugPrint('isFinishABCEvent == true,,,$jsstr');
+        debugPrint('isFinishABCEvent == true,,,');
         // } else {
         //   isNeedConvertMidiNotes = false;
         // }
@@ -649,14 +651,15 @@ class _MyAppState extends State<MyApp> {
         });
         // }
       } else {
-        // debugPrint('abcset=$event');
-        String result =
-            event.replaceAll('setAbcString("%%', '').replaceAll('",false)', '');
-        // debugPrint('setAbcString replace==$result');
-        String encodedString = base64.encode(utf8.encode(result));
-        // debugPrint("Encoded setAbcString: $encodedString");
-        String base64AbcString = "setAbcString('$encodedString',false)";
-        controllerPiano.runJavaScript(base64AbcString);
+        // // debugPrint('abcset=$event');
+
+        // String result =
+        //     event.replaceAll('setAbcString("%%', '').replaceAll('",false)', '');
+        // // debugPrint('setAbcString replace==$result');
+        // String encodedString = base64.encode(utf8.encode(result));
+        // // debugPrint("Encoded setAbcString: $encodedString");
+        // String base64AbcString = "setAbcString('$encodedString',false)";
+        controllerPiano.runJavaScript(ABCHead.base64AbcString(event));
         // debugPrint('base64abctoEvents==$base64abctoEvents');
         // controllerPiano.runJavaScript(event);
       }
@@ -778,15 +781,15 @@ class _MyAppState extends State<MyApp> {
         controllerKeyboard.runJavaScript('resumePlay()');
         // createTimer();
       } else {
-        String result = playAbcString
-            .replaceAll('setAbcString("%%', '')
-            .replaceAll('",false)', '');
-        debugPrint('replace==$result');
-        String encodedString = base64.encode(utf8.encode(result));
-        print("Encoded string: $encodedString");
-        String base64abctoEvents = "ABCtoEvents('$encodedString',false)";
-        controllerPiano.runJavaScript(base64abctoEvents);
-        debugPrint('playOrPausePiano base64abctoEvents==$base64abctoEvents');
+        // String result = playAbcString
+        //     .replaceAll('setAbcString("%%', '')
+        //     .replaceAll('",false)', '');
+        // debugPrint('replace==$result');
+        // String encodedString = base64.encode(utf8.encode(result));
+        // print("Encoded string: $encodedString");
+        // String base64abctoEvents = "ABCtoEvents('$encodedString',false)";
+        controllerPiano.runJavaScript(ABCHead.base64abctoEvents(playAbcString));
+        // debugPrint('playOrPausePiano base64abctoEvents==$base64abctoEvents');
         controllerPiano.runJavaScript("startPlay()");
 
         // String abcStringTmp =
@@ -820,7 +823,7 @@ class _MyAppState extends State<MyApp> {
 
   @override
   void dispose() {
-    timer.cancel();
+    timer?.cancel();
     httpClient.close();
     super.dispose();
   }
@@ -1066,6 +1069,8 @@ class _MyAppState extends State<MyApp> {
                               isVisibleWebview.value = !isVisibleWebview.value;
                               setState(() {});
                             }
+                            // bottomsheetsetting();
+                            // return;
                             // Get.to(FlutterBlueApp());
                             // Get.to(const MIDIDeviceListPage());
                             if (selectstate.value == 0) {
@@ -1216,7 +1221,7 @@ class _MyAppState extends State<MyApp> {
                                         isGenerating.value =
                                             !isGenerating.value;
                                         if (isGenerating.value) {
-                                          resetPlay();
+                                          resetPianoAndKeyboard();
                                           // playProgress.value = 0.0;
                                           // pianoAllTime.value = 0.0;
                                           // controllerPiano.runJavaScript(
@@ -1503,24 +1508,24 @@ class _MyAppState extends State<MyApp> {
     });
   }
 
-  void resetPlay() {
-    if (isPlay.value) {
-      // playOrPausePiano();
-      // // controllerPiano.runJavaScript("setPlayButtonDisable(true)");
-      // controllerKeyboard.runJavaScript('resetPlay()');
-      // debugPrint('pausePlay()');
+  void resetPianoAndKeyboard() {
+    // if (isPlay.value) {
+    // playOrPausePiano();
+    // // controllerPiano.runJavaScript("setPlayButtonDisable(true)");
+    // controllerKeyboard.runJavaScript('resetPlay()');
+    // debugPrint('pausePlay()');
 
-      controllerPiano.runJavaScript("resetPage()");
-      // controllerPiano.runJavaScript("resetTimingCallbacks()");
-      // controllerKeyboard.runJavaScript('resetPlay()');
-      if (selectstate.value == 0) {
-        controllerKeyboard.loadFlutterAssetServer(filePathKeyboardAnimation);
-      }
+    controllerPiano.runJavaScript("pausePlay()");
+    controllerPiano.runJavaScript("resetTimingCallbacks()");
+    controllerKeyboard.runJavaScript('resetPlay()');
+    // if (selectstate.value == 0) {
+    //   controllerKeyboard.loadFlutterAssetServer(filePathKeyboardAnimation);
+    // }
 
-      isPlay.value = false;
-      timer.cancel();
-      // isNeedRestart = true;
-    }
+    isPlay.value = false;
+    timer?.cancel();
+    // isNeedRestart = true;
+    // }
     if (playProgress.value > 0) {
       playProgress.value = 0.0;
       pianoAllTime.value = 0.0;
@@ -1529,12 +1534,14 @@ class _MyAppState extends State<MyApp> {
   }
 
   void segmentChange(int index) {
-    resetPlay();
+    resetPianoAndKeyboard();
     if (index == 0) {
       //preset
       // controllerPiano.runJavaScript(
       //     "setAbcString(\"%%MIDI program $midiProgramValue\\nL:1/4\\nM:4/4\\nK:D\\n\\\"D\\\" A F F\", false)");
-      controllerPiano.runJavaScript(finalabcStringPreset);
+      controllerPiano
+          .runJavaScript(ABCHead.base64AbcString(finalabcStringPreset));
+      debugPrint('finalabcStringPreset=$finalabcStringPreset');
       controllerPiano.runJavaScript("setPromptNoteNumberCount(3)");
       controllerKeyboard.loadFlutterAssetServer(filePathKeyboardAnimation);
       // controllerKeyboard.loadRequest(Uri.parse(filePathKeyboardAnimation));
@@ -2379,6 +2386,7 @@ class _MyAppState extends State<MyApp> {
                                   index, currentClickNoteInfo[0].toString());
                             }
                             if (type == STORAGE_PROMPTS_SELECT) {
+                              resetPianoAndKeyboard();
                               String abcstr = '';
                               if (selectstate.value == 0) {
                                 abcstr = ABCHead.getABCWithInstrument(
@@ -2404,8 +2412,7 @@ class _MyAppState extends State<MyApp> {
                                 debugPrint(
                                     'finalabcStringCreate=$finalabcStringCreate');
                               }
-                              resetPlay();
-                              Future.delayed(const Duration(microseconds: 1000),
+                              Future.delayed(const Duration(microseconds: 100),
                                   () {
                                 playPianoAnimation(
                                     selectstate.value == 0
@@ -2422,6 +2429,7 @@ class _MyAppState extends State<MyApp> {
                               //         filePathKeyboardAnimation);
                               //   }
                               // }
+                              resetPianoAndKeyboard();
                               debugPrint(
                                   '选择midiProgramValue==$midiProgramValue');
                               String modifyABCWithInstrument =
@@ -2434,15 +2442,16 @@ class _MyAppState extends State<MyApp> {
                                   'modifyABCWithInstrument==$modifyABCWithInstrument');
                               if (selectstate.value == 0) {
                                 finalabcStringPreset = modifyABCWithInstrument;
-                                controllerPiano
-                                    .runJavaScript(finalabcStringPreset);
+                                controllerPiano.runJavaScript(
+                                    ABCHead.base64AbcString(
+                                        finalabcStringPreset));
                               } else {
                                 finalabcStringCreate = modifyABCWithInstrument;
-                                controllerPiano
-                                    .runJavaScript(finalabcStringCreate);
+                                controllerPiano.runJavaScript(
+                                    ABCHead.base64AbcString(
+                                        finalabcStringCreate));
                               }
-                              resetPlay();
-                              Future.delayed(const Duration(microseconds: 1000),
+                              Future.delayed(const Duration(microseconds: 100),
                                   () {
                                 playPianoAnimation(
                                     selectstate.value == 0
@@ -2723,5 +2732,23 @@ class _MyAppState extends State<MyApp> {
     //   text: 'midi文件分享',
     //   filePath: filepath,
     // );
+  }
+
+  void bottomsheetsetting() {
+    // 弹出底部面板
+    showModalBottomSheet(
+      context: context,
+      builder: (BuildContext context) {
+        return Container(
+          width: MediaQuery.of(context).size.width,
+          height: 3100.h,
+          color: Colors.white,
+          child: const Text(
+            'This is a Bottom Sheet',
+            style: TextStyle(fontSize: 20),
+          ),
+        );
+      },
+    );
   }
 }
