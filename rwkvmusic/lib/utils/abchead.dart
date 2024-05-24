@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 class ABCHead {
   static const String headContent = "L:1/4\n"
       "M:4/4\n"
@@ -30,5 +32,26 @@ class ABCHead {
     return abc;
     // return "$tempoConfig\n$abc";
     // }
+  }
+
+  static String base64AbcString(String event) {
+    String result =
+        event.replaceAll('setAbcString("', '').replaceAll('",false)', ''); //%%
+    // debugPrint('setAbcString replace==$result');
+    String encodedString = base64.encode(utf8.encode(result));
+    // debugPrint("Encoded setAbcString: $encodedString");
+    String base64AbcString = "setAbcString('$encodedString',false)";
+    return base64AbcString;
+  }
+
+  static String base64abctoEvents(String playAbcString) {
+    String result = playAbcString
+        .replaceAll('setAbcString("%%', '')
+        .replaceAll('",false)', '');
+    print('replace==$result');
+    String encodedString = base64.encode(utf8.encode(result));
+    print("Encoded string: $encodedString");
+    String base64abctoEvents = "ABCtoEvents('$encodedString',false)";
+    return base64abctoEvents;
   }
 }
