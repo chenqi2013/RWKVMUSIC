@@ -21,12 +21,14 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 // import 'package:flutter_share/flutter_share.dart';
 import 'package:get/get.dart';
+import 'package:get/get_utils/get_utils.dart';
 import 'package:group_radio_button/group_radio_button.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:rwkvmusic/gen/assets.gen.dart';
 import 'package:rwkvmusic/mainwidget/ProgressbarTime.dart';
 import 'package:rwkvmusic/mainwidget/customsegmentcontroller.dart';
 import 'package:rwkvmusic/mainwidget/Custom_Segment_Controller.dart';
+import 'package:rwkvmusic/mainwidget/prompt_sheet.dart';
 import 'package:rwkvmusic/services/storage.dart';
 import 'package:rwkvmusic/store/config.dart';
 import 'package:rwkvmusic/style/color.dart';
@@ -47,6 +49,8 @@ import 'package:rwkvmusic/values/colors.dart';
 import 'package:rwkvmusic/values/constantdata.dart';
 import 'package:rwkvmusic/values/storage.dart';
 import 'package:rwkvmusic/widgets/toast.dart';
+import 'package:side_sheet/side_sheet.dart';
+import 'package:top_modal_sheet/top_modal_sheet.dart';
 // import 'package:share_plus/share_plus.dart';
 import 'package:universal_ble/universal_ble.dart';
 import 'package:webview_win_floating/webview_plugin.dart';
@@ -289,9 +293,9 @@ void getABCDataByLocalModel(var array) async {
   Pointer<Char> promptChar = prompt.toNativeUtf8().cast<Char>();
   faster_rwkvd fastrwkv = faster_rwkvd(
       Platform.isIOS ? DynamicLibrary.process() : DynamicLibrary.open(dllPath));
-  Pointer<Char> strategy = 'ncnn fp32'.toNativeUtf8().cast<Char>();
+  // Pointer<Char> strategy = 'ncnn fp32'.toNativeUtf8().cast<Char>();
   // Pointer<Char> strategy = 'webgpu auto'.toNativeUtf8().cast<Char>();
-  // Pointer<Char> strategy = 'qnn auto'.toNativeUtf8().cast<Char>();
+  Pointer<Char> strategy = 'qnn auto'.toNativeUtf8().cast<Char>();
   Pointer<Void> model =
       fastrwkv.rwkv_model_create(binPath.toNativeUtf8().cast<Char>(), strategy);
   Pointer<Void> abcTokenizer = fastrwkv.rwkv_ABCTokenizer_create();
@@ -862,6 +866,12 @@ class _MyAppState extends State<MyApp> {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
+                    // PromptSheet(list: const [
+                    //   'asdfadf11',
+                    //   'asdfadf22',
+                    //   'asdfadf44',
+                    //   'asdfadf55',
+                    // ], title: 'title', isRemember: true, groupValue: 2),
                     // AdvancedSegment(
 
                     //   // controller: _controller, // AdvancedSegmentController
@@ -1063,16 +1073,27 @@ class _MyAppState extends State<MyApp> {
                             width: 61.w,
                             height: 61.h,
                           ),
-                          onPressed: () {
+                          onPressed: () async {
                             debugPrint('Settings');
                             if (isWindowsOrMac) {
                               isVisibleWebview.value = !isVisibleWebview.value;
                               setState(() {});
                             }
                             // bottomsheetsetting();
+                            // final value = await showTopModalSheet<String?>(
+                            //   startOffset: const Offset(0, 350),
+                            //   context,
+                            //   const Text('textsdgsdfgsdfg'),
+                            //   backgroundColor: Colors.white,
+                            //   borderRadius: const BorderRadius.vertical(
+                            //     bottom: Radius.circular(20),
+                            //   ),
+                            // );
                             // return;
                             // Get.to(FlutterBlueApp());
                             // Get.to(const MIDIDeviceListPage());
+                            // bottomsheet(context);
+                            // return;
                             if (selectstate.value == 0) {
                               showSettingDialog(context);
                             } else {
@@ -1517,10 +1538,11 @@ class _MyAppState extends State<MyApp> {
 
     controllerPiano.runJavaScript("pausePlay()");
     controllerPiano.runJavaScript("resetTimingCallbacks()");
+    // controllerPiano.runJavaScript("resetPage()");
     controllerKeyboard.runJavaScript('resetPlay()');
-    // if (selectstate.value == 0) {
-    //   controllerKeyboard.loadFlutterAssetServer(filePathKeyboardAnimation);
-    // }
+    if (selectstate.value == 0 || isCreateGenerate.value) {
+      controllerKeyboard.loadFlutterAssetServer(filePathKeyboardAnimation);
+    }
 
     isPlay.value = false;
     timer?.cancel();
@@ -1535,6 +1557,8 @@ class _MyAppState extends State<MyApp> {
 
   void segmentChange(int index) {
     resetPianoAndKeyboard();
+    // Future.delayed(const Duration(milliseconds: 200), () {
+    debugPrint('22233333');
     if (index == 0) {
       //preset
       // controllerPiano.runJavaScript(
@@ -1550,6 +1574,7 @@ class _MyAppState extends State<MyApp> {
     } else {
       createModeDefault();
     }
+    // });
   }
 
   void createModeDefault() {
@@ -1574,6 +1599,20 @@ class _MyAppState extends State<MyApp> {
   // Widget getLogoImage() {
   //   return Assets.images.logo.image();
   // }
+
+  void bottomsheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      builder: (BuildContext context) {
+        return PromptSheet(list: const [
+          'asdfadf11',
+          'asdfadf22',
+          'asdfadf44',
+          'asdfadf55',
+        ], title: 'title', isRemember: true, groupValue: 2);
+      },
+    );
+  }
 
   void showSettingDialog(BuildContext context) {
     TextEditingController controller = TextEditingController(
@@ -1725,7 +1764,7 @@ class _MyAppState extends State<MyApp> {
                                     ? finalabcStringPreset
                                     : finalabcStringCreate,
                                 true);
-                            Future.delayed(const Duration(seconds: 2),
+                            Future.delayed(const Duration(milliseconds: 2000),
                                 () async {
                               debugPrint('Delayed action after 3 seconds');
                               // isNeedConvertMidiNotes = false;
@@ -2106,8 +2145,8 @@ class _MyAppState extends State<MyApp> {
                                             ? finalabcStringPreset
                                             : finalabcStringCreate,
                                         true);
-                                    Future.delayed(const Duration(seconds: 2),
-                                        () {
+                                    Future.delayed(
+                                        const Duration(milliseconds: 2000), () {
                                       debugPrint(
                                           'Delayed action after 3 seconds');
                                       // isNeedConvertMidiNotes = false;
@@ -2234,6 +2273,10 @@ class _MyAppState extends State<MyApp> {
     if (isWindowsOrMac) {
       isVisibleWebview.value = !isVisibleWebview.value;
       setState(() {});
+    }
+    if (type == STORAGE_SOUNDSEFFECT_SELECT || type == STORAGE_PROMPTS_SELECT) {
+      // debugPrint('resetPianoAndKeyboard');
+      // resetPianoAndKeyboard();
     }
     // if (!isWindows) {
     //   FlutterPlatformAlert.showAlert(
@@ -2387,6 +2430,8 @@ class _MyAppState extends State<MyApp> {
                             }
                             if (type == STORAGE_PROMPTS_SELECT) {
                               resetPianoAndKeyboard();
+                              // Future.delayed(const Duration(milliseconds: 200),
+                              //     () {
                               String abcstr = '';
                               if (selectstate.value == 0) {
                                 abcstr = ABCHead.getABCWithInstrument(
@@ -2412,15 +2457,14 @@ class _MyAppState extends State<MyApp> {
                                 debugPrint(
                                     'finalabcStringCreate=$finalabcStringCreate');
                               }
-                              Future.delayed(const Duration(microseconds: 100),
-                                  () {
-                                playPianoAnimation(
-                                    selectstate.value == 0
-                                        ? finalabcStringPreset
-                                        : finalabcStringCreate,
-                                    true);
-                              });
-                              closeDialog();
+
+                              playPianoAnimation(
+                                  selectstate.value == 0
+                                      ? finalabcStringPreset
+                                      : finalabcStringCreate,
+                                  true);
+                              // });
+                              // closeDialog();
                             } else if (type == STORAGE_SOUNDSEFFECT_SELECT) {
                               // if (isPlay.value == false) {
                               //   controllerPiano.runJavaScript("resetPage()");
@@ -2430,6 +2474,8 @@ class _MyAppState extends State<MyApp> {
                               //   }
                               // }
                               resetPianoAndKeyboard();
+                              // Future.delayed(const Duration(milliseconds: 200),
+                              //     () {
                               debugPrint(
                                   '选择midiProgramValue==$midiProgramValue');
                               String modifyABCWithInstrument =
@@ -2451,15 +2497,14 @@ class _MyAppState extends State<MyApp> {
                                     ABCHead.base64AbcString(
                                         finalabcStringCreate));
                               }
-                              Future.delayed(const Duration(microseconds: 100),
-                                  () {
-                                playPianoAnimation(
-                                    selectstate.value == 0
-                                        ? finalabcStringPreset
-                                        : finalabcStringCreate,
-                                    true);
-                              });
-                              closeDialog();
+
+                              playPianoAnimation(
+                                  selectstate.value == 0
+                                      ? finalabcStringPreset
+                                      : finalabcStringCreate,
+                                  true);
+                              // });
+                              // closeDialog();
                             }
                           },
                         ),
@@ -2720,7 +2765,7 @@ class _MyAppState extends State<MyApp> {
 
   Future<void> shareFile(String filepath) async {
     print('shareFile path=$filepath');
-    ShareExtend.share(filepath, "file");
+    await ShareExtend.share(filepath, "file");
 
     // ShareExtend.share("share text", "text",
     //     sharePanelTitle: "share text title", subject: "share text subject");
