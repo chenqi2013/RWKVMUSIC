@@ -27,6 +27,7 @@ import 'package:rwkvmusic/gen/assets.gen.dart';
 import 'package:rwkvmusic/mainwidget/ProgressbarTime.dart';
 import 'package:rwkvmusic/mainwidget/checkbox_item.dart';
 import 'package:rwkvmusic/mainwidget/container_line.dart';
+import 'package:rwkvmusic/mainwidget/container_textfield.dart';
 import 'package:rwkvmusic/mainwidget/customsegmentcontroller.dart';
 import 'package:rwkvmusic/mainwidget/Custom_Segment_Controller.dart';
 import 'package:rwkvmusic/mainwidget/drop_button_down.dart';
@@ -1661,31 +1662,40 @@ class _MyAppState extends State<MyApp> {
                 const SizedBox(
                   height: 10,
                 ),
-                Obx(() => Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          TextItem(text: 'Seed: ${seed.value}'),
-                          SizedBox(
-                              width: 200,
-                              height: 40,
-                              child: TextField(
-                                controller: controller,
-                                keyboardType: TextInputType.number,
-                                inputFormatters: <TextInputFormatter>[
-                                  FilteringTextInputFormatter.allow(
-                                      RegExp(r'[0-9]')), // 只允许输入数字
-                                ],
-                                decoration: const InputDecoration(
-                                    labelText: 'Please input seed value',
-                                    hintText: 'Enter a number',
-                                    border: OutlineInputBorder()),
-                                onChanged: (text) {
-                                  // 当文本字段内容变化时调用
-                                  seed.value = int.parse(text);
-                                  debugPrint('Current text: ');
-                                },
-                              )),
-                        ])),
+                Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Obx(() => TextItem(text: 'Seed: ${seed.value}')),
+                      ContainerTextField(
+                        seed: seed.value,
+                        onChanged: (String text) {
+                          // 当文本字段内容变化时调用
+                          seed.value = int.parse(text);
+                          debugPrint('Current text: ');
+                        },
+                      ),
+                      // SizedBox(
+                      //   width: 200,
+                      //   height: 40,
+                      //   child: TextField(
+                      //     controller: controller,
+                      //     keyboardType: TextInputType.number,
+                      //     inputFormatters: <TextInputFormatter>[
+                      //       FilteringTextInputFormatter.allow(
+                      //           RegExp(r'[0-9]')), // 只允许输入数字
+                      //     ],
+                      //     decoration: const InputDecoration(
+                      //         labelText: 'Please input seed value',
+                      //         hintText: 'Enter a number',
+                      //         border: OutlineInputBorder()),
+                      //     onChanged: (text) {
+                      //       // 当文本字段内容变化时调用
+                      //       seed.value = int.parse(text);
+                      //       debugPrint('Current text: ');
+                      //     },
+                      //   ),
+                      // ),
+                    ]),
                 const SizedBox(
                   height: 10,
                 ),
@@ -2050,33 +2060,40 @@ class _MyAppState extends State<MyApp> {
                         SizedBox(
                           height: 20.h,
                         ),
-                        Obx(() => Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  TextItem(text: 'Seed: ${seed.value}'),
-                                  SizedBox(
-                                      height: 40,
-                                      width: 200,
-                                      child: TextField(
-                                        controller: controller,
-                                        keyboardType: TextInputType.number,
-                                        inputFormatters: <TextInputFormatter>[
-                                          FilteringTextInputFormatter.allow(
-                                              RegExp(r'[0-9]')), // 只允许输入数字
-                                        ],
-                                        decoration: const InputDecoration(
-                                            labelText:
-                                                'Please input seed value',
-                                            hintText: 'Enter a number',
-                                            border: OutlineInputBorder()),
-                                        onChanged: (text) {
-                                          // 当文本字段内容变化时调用
-                                          seed.value = int.parse(text);
-                                          debugPrint('Current text: ');
-                                        },
-                                      )),
-                                ])),
+                        Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Obx(() => TextItem(text: 'Seed: ${seed.value}')),
+                              ContainerTextField(
+                                seed: seed.value,
+                                onChanged: (String text) {
+                                  // 当文本字段内容变化时调用
+                                  seed.value = int.parse(text);
+                                  debugPrint('Current text: ');
+                                },
+                              ),
+                              // SizedBox(
+                              //     height: 40,
+                              //     width: 200,
+                              //     child: TextField(
+                              //       controller: controller,
+                              //       keyboardType: TextInputType.number,
+                              //       inputFormatters: <TextInputFormatter>[
+                              //         FilteringTextInputFormatter.allow(
+                              //             RegExp(r'[0-9]')), // 只允许输入数字
+                              //       ],
+                              //       decoration: const InputDecoration(
+                              //           labelText:
+                              //               'Please input seed value',
+                              //           hintText: 'Enter a number',
+                              //           border: OutlineInputBorder()),
+                              //       onChanged: (text) {
+                              //         // 当文本字段内容变化时调用
+                              //         seed.value = int.parse(text);
+                              //         debugPrint('Current text: ');
+                              //       },
+                              //     )),
+                            ]),
                         Obx(() => Row(
                                 mainAxisAlignment:
                                     MainAxisAlignment.spaceBetween,
