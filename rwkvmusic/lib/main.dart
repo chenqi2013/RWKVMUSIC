@@ -1646,18 +1646,22 @@ class _MyAppState extends State<MyApp> {
                 Obx(() => Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          TextItem(
-                              text:
-                                  'Randomness: ${(randomness.value * 100).toInt()}%'),
-                          Slider(
-                            activeColor: Colors.white,
-                            inactiveColor: Colors.black,
-                            thumbColor: Colors.white,
-                            value: randomness.value,
-                            onChanged: (newValue) {
-                              randomness.value = newValue;
-                            },
-                          ),
+                          const TextItem(text: 'Randomness'),
+                          Row(
+                            children: [
+                              Slider(
+                                activeColor: Colors.white,
+                                inactiveColor: Colors.black,
+                                thumbColor: Colors.white,
+                                value: randomness.value,
+                                onChanged: (newValue) {
+                                  randomness.value = newValue;
+                                },
+                              ),
+                              TextItem(
+                                  text: '${(randomness.value * 100).toInt()}%'),
+                            ],
+                          )
                         ])),
                 const SizedBox(
                   height: 10,
@@ -1665,7 +1669,7 @@ class _MyAppState extends State<MyApp> {
                 Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Obx(() => TextItem(text: 'Seed: ${seed.value}')),
+                      const TextItem(text: 'Seed'), //: ${seed.value}
                       ContainerTextField(
                         seed: seed.value,
                         onChanged: (String text) {
@@ -2044,18 +2048,23 @@ class _MyAppState extends State<MyApp> {
                                 mainAxisAlignment:
                                     MainAxisAlignment.spaceBetween,
                                 children: [
-                                  TextItem(
-                                      text:
-                                          'Randomness: ${(randomness.value * 100).toInt()}%'),
-                                  Slider(
-                                    activeColor: Colors.white,
-                                    inactiveColor: Colors.black,
-                                    thumbColor: Colors.white,
-                                    value: randomness.value,
-                                    onChanged: (newValue) {
-                                      randomness.value = newValue;
-                                    },
-                                  ),
+                                  const TextItem(text: 'Randomness'),
+                                  Row(
+                                    children: [
+                                      Slider(
+                                        activeColor: Colors.white,
+                                        inactiveColor: Colors.black,
+                                        thumbColor: Colors.white,
+                                        value: randomness.value,
+                                        onChanged: (newValue) {
+                                          randomness.value = newValue;
+                                        },
+                                      ),
+                                      TextItem(
+                                          text:
+                                              '${(randomness.value * 100).toInt()}%'),
+                                    ],
+                                  )
                                 ])),
                         SizedBox(
                           height: 20.h,
@@ -2063,7 +2072,7 @@ class _MyAppState extends State<MyApp> {
                         Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Obx(() => TextItem(text: 'Seed: ${seed.value}')),
+                              const TextItem(text: 'Seed'), //: ${seed.value}
                               ContainerTextField(
                                 seed: seed.value,
                                 onChanged: (String text) {
@@ -2098,20 +2107,24 @@ class _MyAppState extends State<MyApp> {
                                 mainAxisAlignment:
                                     MainAxisAlignment.spaceBetween,
                                 children: [
-                                  TextItem(
-                                      text: 'Tempo: ${tempo.value.toInt()}'),
-                                  Slider(
-                                    activeColor: Colors.white,
-                                    inactiveColor: Colors.black,
-                                    thumbColor: Colors.white,
-                                    min: 40,
-                                    max: 208,
-                                    value: tempo.value,
-                                    onChanged: (newValue) {
-                                      tempo.value = newValue;
-                                      isChangeTempo = true;
-                                    },
-                                  ),
+                                  const TextItem(text: 'Tempo'),
+                                  Row(
+                                    children: [
+                                      Slider(
+                                        activeColor: Colors.white,
+                                        inactiveColor: Colors.black,
+                                        thumbColor: Colors.white,
+                                        min: 40,
+                                        max: 208,
+                                        value: tempo.value,
+                                        onChanged: (newValue) {
+                                          tempo.value = newValue;
+                                          isChangeTempo = true;
+                                        },
+                                      ),
+                                      TextItem(text: '${tempo.value.toInt()}'),
+                                    ],
+                                  )
                                 ])),
                         SizedBox(
                           height: 20.h,
