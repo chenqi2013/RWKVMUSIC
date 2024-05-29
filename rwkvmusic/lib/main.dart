@@ -1530,7 +1530,7 @@ class _MyAppState extends State<MyApp> {
     controllerPiano.runJavaScript("resetTimingCallbacks()");
     controllerPiano.runJavaScript("triggerRestartBtnClick()");
 
-    controllerKeyboard.runJavaScript('resetPlay()');
+    controllerKeyboard.runJavaScript('clearAll()'); //resetPlay()
     // if (selectstate.value == 0 || isCreateGenerate.value) {
     //   debugPrint('loadFlutterAssetServer-filePathKeyboardAnimation-');
     //   controllerKeyboard.loadFlutterAssetServer(filePathKeyboardAnimation);
