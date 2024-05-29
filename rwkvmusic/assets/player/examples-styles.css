@@ -10,6 +10,7 @@
 html {
   overflow: hidden;
 }
+
 #paper {
   position: relative;
   top: 15px;
@@ -223,9 +224,11 @@ tr:nth-child(even) {
   /* color: rgba(255, 255, 255, 0.233); */
   color: #ffffff4f;
 }
+
 .abcjs-top-line {
   color: #ffffff4f;
 }
+
 .abcjs-bar {
   fill: #ffffff4f !important;
 }
@@ -302,9 +305,12 @@ tr:nth-child(even) {
 .abcjs-l7 {
   fill: white;
 }
+
 .abcjs-ending {
   fill: white;
+  color: white;
 }
+
 text {
   fill: white;
 }

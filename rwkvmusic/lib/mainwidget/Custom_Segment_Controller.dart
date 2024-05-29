@@ -65,7 +65,7 @@ class CustomSegmentControl11 extends StatelessWidget {
                     style: TextStyle(
                       color: selectedIndex.value == index
                           ? AppColor.color_ffffff
-                          : AppColor.color_FF757575,
+                          : AppColor.color_757575,
                       fontWeight: FontWeight.bold,
                       fontSize: 39.sp,
                     ),

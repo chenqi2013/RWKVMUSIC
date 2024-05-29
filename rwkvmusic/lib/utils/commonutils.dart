@@ -56,7 +56,7 @@ class CommonUtils {
       path = 'assets/fastmodel/RWKV-5-ABC-82M-v1-20230901-ctx1024-ncnn.bin';
     } else {
       // String currentPath = Directory.current.absolute.path;
-      path = p.join(path, 'RWKV-5-ABC-82M-v1-20230901-ctx1024-ncnn.bin');
+      path = p.join(path, 'RWKV-6-ABC-85M-v1-20240217-ctx1024-webrwkv.st');
     }
     debugPrint('getBinPath===$path');
     return path;

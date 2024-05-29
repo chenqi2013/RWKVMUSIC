@@ -28,7 +28,7 @@ class CustomSegment extends StatelessWidget {
         2: Text(
           'Create Mode',
           style: TextStyle(
-              color: AppColor.color_FF757575,
+              color: AppColor.color_757575,
               fontSize: 39.sp,
               fontWeight: FontWeight.w700),
         ),

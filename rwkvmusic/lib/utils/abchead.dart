@@ -35,23 +35,26 @@ class ABCHead {
   }
 
   static String base64AbcString(String event) {
+    // print('base64AbcString before11--$event');
     String result =
         event.replaceAll('setAbcString("', '').replaceAll('",false)', ''); //%%
-    // debugPrint('setAbcString replace==$result');
+    // print('base64AbcString before22--$result');
     String encodedString = base64.encode(utf8.encode(result));
     // debugPrint("Encoded setAbcString: $encodedString");
     String base64AbcString = "setAbcString('$encodedString',false)";
+    print("base64AbcString: $encodedString");
     return base64AbcString;
   }
 
   static String base64abctoEvents(String playAbcString) {
     String result = playAbcString
-        .replaceAll('setAbcString("%%', '')
+        .replaceAll('setAbcString("', '')
         .replaceAll('",false)', '');
-    print('replace==$result');
+    // print('replace==$result');
     String encodedString = base64.encode(utf8.encode(result));
-    print("Encoded string: $encodedString");
+    // print("Encoded string: $encodedString");
     String base64abctoEvents = "ABCtoEvents('$encodedString',false)";
+    print("base64abctoEvents: $encodedString");
     return base64abctoEvents;
   }
 }

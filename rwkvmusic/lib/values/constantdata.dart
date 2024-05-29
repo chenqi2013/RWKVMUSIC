@@ -59,6 +59,20 @@ List<String> instruments = [
   'guitar',
 ];
 
+List<String> noteLengths = [
+  '1/4',
+  '1/8',
+  '1/16',
+];
+
+List<String> timeSignatures = [
+  '2/4',
+  '3/4',
+  '4/4',
+  '3/8',
+  '6/8',
+];
+
 List<String> promptsAbc = [
   r'''
 L:1/4
