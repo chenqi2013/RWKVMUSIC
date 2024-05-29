@@ -1751,11 +1751,11 @@ class _MyAppState extends State<MyApp> {
                   height: 40.h,
                 ),
                 Center(
-                    child: Row(children: [
-                  Expanded(
-                      flex: 2,
-                      child: TextBtn(
-                        width: 555.w,
+                    child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                      TextBtn(
+                        width: 500.w,
                         height: 113.h,
                         onPressed: () async {
                           if (midiNotes.isEmpty) {
@@ -1821,22 +1821,19 @@ class _MyAppState extends State<MyApp> {
                           }
                         },
                         text: 'Export Midi File',
-                      )),
-                  const SizedBox(
-                    width: 10,
-                  ),
-                  Expanded(
-                    flex: 3,
-                    child: TextBtn(
-                      width: 555.w,
-                      height: 113.h,
-                      onPressed: () {
-                        showBleDeviceOverlay(context, false);
-                      },
-                      text: 'Scan BlueTooth Device',
-                    ),
-                  ),
-                ])),
+                      ),
+                      SizedBox(
+                        width: 30.w,
+                      ),
+                      TextBtn(
+                        width: 500.w,
+                        height: 113.h,
+                        onPressed: () {
+                          showBleDeviceOverlay(context, false);
+                        },
+                        text: 'Scan BlueTooth Device',
+                      ),
+                    ])),
                 SizedBox(
                   height: 20.h,
                 ),
@@ -2180,12 +2177,11 @@ class _MyAppState extends State<MyApp> {
                         SizedBox(
                           height: 40.h,
                         ),
-                        Center(
-                            child: Row(children: [
-                          Expanded(
-                              flex: 2,
-                              child: TextBtn(
-                                width: 555.w,
+                        Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              TextBtn(
+                                width: 500.w,
                                 height: 113.h,
                                 onPressed: () {
                                   if (midiNotes.isEmpty) {
@@ -2236,21 +2232,19 @@ class _MyAppState extends State<MyApp> {
                                   }
                                 },
                                 text: 'Export Midi File',
-                              )),
-                          const SizedBox(
-                            width: 10,
-                          ),
-                          Expanded(
-                              flex: 3,
-                              child: TextBtn(
-                                width: 555.w,
+                              ),
+                              SizedBox(
+                                width: 30.w,
+                              ),
+                              TextBtn(
+                                width: 500.w,
                                 height: 113.h,
                                 onPressed: () {
                                   showBleDeviceOverlay(context, false);
                                 },
                                 text: 'Scan BlueTooth Device',
-                              )),
-                        ])),
+                              ),
+                            ]),
                         const SizedBox(
                           height: 20,
                         ),
