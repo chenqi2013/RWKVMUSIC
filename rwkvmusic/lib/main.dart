@@ -1656,14 +1656,17 @@ class _MyAppState extends State<MyApp> {
                           TextItem(text: 'Randomness'),
                           Row(
                             children: [
-                              Slider(
-                                activeColor: Colors.white,
-                                inactiveColor: Colors.black,
-                                thumbColor: Colors.white,
-                                value: randomness.value,
-                                onChanged: (newValue) {
-                                  randomness.value = newValue;
-                                },
+                              SizedBox(
+                                width: 500.w,
+                                child: Slider(
+                                  activeColor: Colors.white,
+                                  inactiveColor: Colors.black,
+                                  thumbColor: Colors.white,
+                                  value: randomness.value,
+                                  onChanged: (newValue) {
+                                    randomness.value = newValue;
+                                  },
+                                ),
                               ),
                               TextItem(
                                   text: '${(randomness.value * 100).toInt()}%'),
@@ -2056,15 +2059,17 @@ class _MyAppState extends State<MyApp> {
                                   TextItem(text: 'Randomness'),
                                   Row(
                                     children: [
-                                      Slider(
-                                        activeColor: Colors.white,
-                                        inactiveColor: Colors.black,
-                                        thumbColor: Colors.white,
-                                        value: randomness.value,
-                                        onChanged: (newValue) {
-                                          randomness.value = newValue;
-                                        },
-                                      ),
+                                      SizedBox(
+                                          width: 500.w,
+                                          child: Slider(
+                                            activeColor: Colors.white,
+                                            inactiveColor: Colors.black,
+                                            thumbColor: Colors.white,
+                                            value: randomness.value,
+                                            onChanged: (newValue) {
+                                              randomness.value = newValue;
+                                            },
+                                          )),
                                       TextItem(
                                           text:
                                               '${(randomness.value * 100).toInt()}%'),
@@ -2115,18 +2120,20 @@ class _MyAppState extends State<MyApp> {
                                   TextItem(text: 'Tempo'),
                                   Row(
                                     children: [
-                                      Slider(
-                                        activeColor: Colors.white,
-                                        inactiveColor: Colors.black,
-                                        thumbColor: Colors.white,
-                                        min: 40,
-                                        max: 208,
-                                        value: tempo.value,
-                                        onChanged: (newValue) {
-                                          tempo.value = newValue;
-                                          isChangeTempo = true;
-                                        },
-                                      ),
+                                      SizedBox(
+                                          width: 500.w,
+                                          child: Slider(
+                                            activeColor: Colors.white,
+                                            inactiveColor: Colors.black,
+                                            thumbColor: Colors.white,
+                                            min: 40,
+                                            max: 208,
+                                            value: tempo.value,
+                                            onChanged: (newValue) {
+                                              tempo.value = newValue;
+                                              isChangeTempo = true;
+                                            },
+                                          )),
                                       TextItem(text: '${tempo.value.toInt()}'),
                                     ],
                                   )
