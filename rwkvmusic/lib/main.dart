@@ -135,6 +135,7 @@ late String presentPrompt;
 var createPrompt = '';
 String timeSingnatureStr = '4/4';
 OverlayEntry? overlayEntry;
+bool isShowOverlay = false;
 
 RxList<BleScanResult> bleList = <BleScanResult>[].obs;
 List bleListName = [];
@@ -1074,6 +1075,9 @@ class _MyAppState extends State<MyApp> {
                           ),
                           onPressed: () {
                             debugPrint('Settings');
+                            if (isShowOverlay) {
+                              closeOverlay();
+                            }
                             if (isWindowsOrMac) {
                               isVisibleWebview.value = !isVisibleWebview.value;
                               // setState(() {});
@@ -1549,6 +1553,9 @@ class _MyAppState extends State<MyApp> {
 
   void segmentChange(int index) {
     resetPianoAndKeyboard();
+    if (isShowOverlay) {
+      closeOverlay();
+    }
     if (index == 0) {
       //preset
       // controllerPiano.runJavaScript(
@@ -1621,7 +1628,7 @@ class _MyAppState extends State<MyApp> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const TextTitle(
+                    TextTitle(
                       text: 'Settings',
                     ),
                     InkWell(
@@ -1646,7 +1653,7 @@ class _MyAppState extends State<MyApp> {
                 Obx(() => Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          const TextItem(text: 'Randomness'),
+                          TextItem(text: 'Randomness'),
                           Row(
                             children: [
                               Slider(
@@ -1669,7 +1676,7 @@ class _MyAppState extends State<MyApp> {
                 Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const TextItem(text: 'Seed'), //: ${seed.value}
+                      TextItem(text: 'Seed'), //: ${seed.value}
                       ContainerTextField(
                         seed: seed.value,
                         onChanged: (String text) {
@@ -1707,7 +1714,7 @@ class _MyAppState extends State<MyApp> {
                   child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const TextItem(text: 'Auto Chord'),
+                        TextItem(text: 'Auto Chord'),
                         Obx(() => SwitchItem(
                               value: autoChord.value,
                               onChanged: (newValue) {
@@ -1723,7 +1730,7 @@ class _MyAppState extends State<MyApp> {
                   child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const TextItem(text: 'Infinite Generation'),
+                        TextItem(text: 'Infinite Generation'),
                         Obx(() => SwitchItem(
                               value: infiniteGeneration.value,
                               onChanged: (newValue) {
@@ -1837,7 +1844,7 @@ class _MyAppState extends State<MyApp> {
                 SizedBox(
                   height: 20.h,
                 ),
-                const Center(child: TextItem(text: 'Version: RWKV-6 1.2.0')),
+                Center(child: TextItem(text: 'Version: RWKV-6 1.2.0')),
               ],
             ),
           )),
@@ -1847,6 +1854,7 @@ class _MyAppState extends State<MyApp> {
       UniversalBle.stopScan();
       if (overlayEntry != null) {
         overlayEntry!.remove();
+        isShowOverlay = false;
       }
     });
   }
@@ -1883,7 +1891,7 @@ class _MyAppState extends State<MyApp> {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
-                            const TextTitle(
+                            TextTitle(
                               text: 'Settings',
                             ),
                             InkWell(
@@ -1910,7 +1918,7 @@ class _MyAppState extends State<MyApp> {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           textBaseline: TextBaseline.alphabetic, // 指定基线对齐的基线
                           children: [
-                            const TextItem(text: 'Time signature'),
+                            TextItem(text: 'Time signature'),
                             Obx(() => DropButtonList(
                                   key: const ValueKey('Time'),
                                   items: timeSignatures,
@@ -1997,7 +2005,7 @@ class _MyAppState extends State<MyApp> {
                           crossAxisAlignment: CrossAxisAlignment.baseline,
                           textBaseline: TextBaseline.alphabetic, // 指定基线对齐的基线
                           children: [
-                            const TextItem(text: 'Default note length'),
+                            TextItem(text: 'Default note length'),
                             Obx(() => DropButtonList(
                                   key: const ValueKey('Default'),
                                   items: noteLengths,
@@ -2045,7 +2053,7 @@ class _MyAppState extends State<MyApp> {
                                 mainAxisAlignment:
                                     MainAxisAlignment.spaceBetween,
                                 children: [
-                                  const TextItem(text: 'Randomness'),
+                                  TextItem(text: 'Randomness'),
                                   Row(
                                     children: [
                                       Slider(
@@ -2069,7 +2077,7 @@ class _MyAppState extends State<MyApp> {
                         Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              const TextItem(text: 'Seed'), //: ${seed.value}
+                              TextItem(text: 'Seed'), //: ${seed.value}
                               ContainerTextField(
                                 seed: seed.value,
                                 onChanged: (String text) {
@@ -2104,7 +2112,7 @@ class _MyAppState extends State<MyApp> {
                                 mainAxisAlignment:
                                     MainAxisAlignment.spaceBetween,
                                 children: [
-                                  const TextItem(text: 'Tempo'),
+                                  TextItem(text: 'Tempo'),
                                   Row(
                                     children: [
                                       Slider(
@@ -2130,7 +2138,7 @@ class _MyAppState extends State<MyApp> {
                           child: Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                const TextItem(text: 'Auto Chord'),
+                                TextItem(text: 'Auto Chord'),
                                 Obx(() => SwitchItem(
                                       value: autoChord.value,
                                       onChanged: (newValue) {
@@ -2146,7 +2154,7 @@ class _MyAppState extends State<MyApp> {
                           child: Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                const TextItem(text: 'Infinite Generation'),
+                                TextItem(text: 'Infinite Generation'),
                                 Obx(() => SwitchItem(
                                       value: infiniteGeneration.value,
                                       onChanged: (newValue) {
@@ -2248,8 +2256,7 @@ class _MyAppState extends State<MyApp> {
                         const SizedBox(
                           height: 20,
                         ),
-                        const Center(
-                            child: TextItem(text: 'Version: RWKV-6 1.2.0')),
+                        Center(child: TextItem(text: 'Version: RWKV-6 1.2.0')),
                         const SizedBox(
                           height: 10,
                         ),
@@ -2262,6 +2269,7 @@ class _MyAppState extends State<MyApp> {
       UniversalBle.stopScan();
       if (overlayEntry != null) {
         overlayEntry!.remove();
+        isShowOverlay = false;
       }
     });
   }
@@ -2273,33 +2281,88 @@ class _MyAppState extends State<MyApp> {
     showDialog(
       context: context,
       builder: (BuildContext buildcontext) {
-        return AlertDialog(
-          // backgroundColor: AppColor.color_44484A,
-          title: Text(title),
-          content: Text(msg),
-          actions: [
-            TextButton(
-              onPressed: () {
-                // 处理取消按钮点击事件
-                if (isWindowsOrMac) {
-                  // setState(() {
-                  isVisibleWebview.value = true;
-                  // });
-                }
-                Navigator.of(buildcontext).pop();
-              },
-              child: const Text("OK"),
-            ),
-            TextButton(
-              onPressed: () {
-                // 处理确定按钮点击事件
-                Navigator.of(buildcontext).pop();
-                showBleDeviceOverlay(buildcontext, true);
-              },
-              child: const Text("Bluetooth Connect"),
-            ),
-          ],
-        );
+        return Dialog(
+            backgroundColor: Colors.transparent,
+            child: Container(
+              padding: EdgeInsets.all(30.w),
+              width: isWindowsOrMac ? 1400.w : 510.w,
+              height: 580.h,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.all(Radius.circular(30.w)),
+                color: Colors.transparent,
+                image: const DecorationImage(
+                  image:
+                      AssetImage('assets/images/dialogbg.png'), // 替换为你的背景图片路径
+                  fit: BoxFit.cover,
+                ),
+              ),
+              child: Column(
+                children: [
+                  // backgroundColor: Colors.transparent,
+                  TextTitle(text: title),
+                  SizedBox(
+                    height: 30.h,
+                  ),
+                  TextItem(text: msg),
+
+                  SizedBox(
+                    height: 120.h,
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      TextBtn(
+                        width: 500.w,
+                        height: 113.h,
+                        onPressed: () {
+                          // 处理取消按钮点击事件
+                          if (isWindowsOrMac) {
+                            // setState(() {
+                            isVisibleWebview.value = true;
+                            // });
+                          }
+                          Navigator.of(buildcontext).pop();
+                        },
+                        text: 'OK',
+                      ),
+                      SizedBox(
+                        width: 40.w,
+                      ),
+                      // TextButton(
+                      //   onPressed: () {
+                      //     // 处理取消按钮点击事件
+                      //     if (isWindowsOrMac) {
+                      //       // setState(() {
+                      //       isVisibleWebview.value = true;
+                      //       // });
+                      //     }
+                      //     Navigator.of(buildcontext).pop();
+                      //   },
+                      //   child: const Text("OK"),
+                      // ),
+                      // TextButton(
+                      //   onPressed: () {
+                      //     // 处理确定按钮点击事件
+                      //     Navigator.of(buildcontext).pop();
+                      //     showBleDeviceOverlay(buildcontext, true);
+                      //   },
+                      //   child: const Text("Bluetooth Connect"),
+                      // ),
+                      TextBtn(
+                        width: 500.w,
+                        height: 113.h,
+                        onPressed: () {
+                          // 处理确定按钮点击事件
+                          Navigator.of(buildcontext).pop();
+                          showBleDeviceOverlay(buildcontext, true);
+                        },
+                        text: 'Bluetooth Connect',
+                      ),
+                    ],
+                  )
+                ],
+              ),
+            ));
       },
     );
   }
@@ -2312,6 +2375,9 @@ class _MyAppState extends State<MyApp> {
 
   void showPromptDialog(
       BuildContext context, String titleStr, List list, String type) {
+    if (isShowOverlay) {
+      closeOverlay();
+    }
     if (isWindowsOrMac) {
       isVisibleWebview.value = !isVisibleWebview.value;
       // setState(() {});
@@ -2660,6 +2726,7 @@ class _MyAppState extends State<MyApp> {
     Navigator.of(context).pop();
     if (overlayEntry != null) {
       overlayEntry!.remove();
+      isShowOverlay = false;
     }
   }
 
@@ -2690,48 +2757,117 @@ class _MyAppState extends State<MyApp> {
     overlayEntry = OverlayEntry(
       builder: (context) => Positioned(
         bottom: 0.0,
-        right: 50.0,
-        left: 50.0,
+        right: 0.0,
+        left: 0.0,
         child: Material(
-          color: Colors.transparent,
-          child: SizedBox(
-              height: 300.h,
-              width: 300.w,
-              child: Container(
-                padding: const EdgeInsets.all(10),
-                color: Colors.white,
-                child: Obx(() => ListView.builder(
-                      itemCount: bleList.length,
-                      itemBuilder: (context, index) {
-                        return ListTile(
-                          title: Text(bleList[index].name!),
-                          subtitle: Text(bleList[index].deviceId),
-                          onTap: () {
-                            debugPrint('stopScanstopScan');
-                            if (isWindowsOrMac) {
-                              isVisibleWebview.value = isVisible;
-                              // setState(() {});
-                            }
-                            UniversalBle.stopScan();
-                            debugPrint('isVisibleWebview.value = $isVisible');
-                            conectDevice(bleList[index]);
-                            overlayEntry!.remove();
-                          },
-                        );
-                      },
-                    )),
-              )),
-        ),
+            color: Colors.transparent,
+            child: Container(
+              height: !isVisible ? 600.h : 1300.h,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.all(Radius.circular(30.w)),
+                // color: Colors.transparent,
+                image: DecorationImage(
+                  image: AssetImage(
+                      'assets/images/${isVisible ? 'dialogbg.png' : 'backgroundbg.jpg'}'), // 替换为你的背景图片路径backgroundbg.jpg
+                  fit: BoxFit.cover,
+                ),
+              ),
+              padding: const EdgeInsets.all(10),
+              // color: Colors.white,
+              child: Column(
+                children: [
+                  if (isVisible)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 25),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          TextTitle(
+                            text: 'Bluetooth Connect',
+                          ),
+                          InkWell(
+                            child: Icon(
+                              Icons.close,
+                              size: 50.w,
+                            ),
+                            onTap: () {
+                              if (isVisible) {
+                                closeOverlay();
+                              } else {
+                                closeDialog();
+                              }
+                            },
+                          )
+                        ],
+                      ),
+                    ),
+                  const SizedBox(
+                    height: 10,
+                  ),
+                  Expanded(
+                      child: Obx(() => ListView.builder(
+                            itemCount: bleList.length,
+                            itemBuilder: (context, index) {
+                              return ListTile(
+                                title: Text(
+                                  bleList[index].name!,
+                                  style: TextStyle(
+                                    color: AppColor.color_999999,
+                                    fontSize: 45.sp,
+                                    fontWeight: FontWeight.w400,
+                                  ),
+                                ),
+                                subtitle: Text(
+                                  bleList[index].deviceId,
+                                  style: TextStyle(
+                                    color: AppColor.color_757575,
+                                    fontSize: 35.sp,
+                                    fontWeight: FontWeight.w300,
+                                  ),
+                                ),
+                                onTap: () {
+                                  debugPrint('stopScanstopScan');
+                                  if (isWindowsOrMac) {
+                                    isVisibleWebview.value = isVisible;
+                                    // setState(() {});
+                                  }
+                                  UniversalBle.stopScan();
+                                  debugPrint(
+                                      'isVisibleWebview.value = $isVisible');
+                                  conectDevice(bleList[index]);
+                                  overlayEntry!.remove();
+                                  isShowOverlay = false;
+                                },
+                              );
+                            },
+                          )))
+                ],
+              ),
+            )),
       ),
     );
 
     // 插入Overlay
     Overlay.of(context).insert(overlayEntry!);
-
+    isShowOverlay = true;
     // // 假设我们想在3秒后自动移除浮层
     // Future.delayed(const Duration(seconds: 3)).then((value) {
     //   overlayEntry.remove();
     // });
+  }
+
+  void closeOverlay() {
+    UniversalBle.stopScan();
+    if (isWindowsOrMac) {
+      // setState(() {
+      isVisibleWebview.value = true;
+      // });
+    }
+    if (overlayEntry != null) {
+      overlayEntry!.remove();
+      isShowOverlay = false;
+    }
   }
 
   void startScan() async {

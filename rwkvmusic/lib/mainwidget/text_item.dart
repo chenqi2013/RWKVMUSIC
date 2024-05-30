@@ -3,24 +3,33 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:rwkvmusic/style/color.dart';
 
 class TextItem extends StatelessWidget {
-  const TextItem({super.key, required this.text});
+  TextItem(
+      {super.key,
+      required this.text,
+      this.fontSize,
+      this.fontWeight,
+      this.linearColor});
   final String text;
+  double? fontSize;
+  FontWeight? fontWeight;
+  List<Color>? linearColor;
   @override
   Widget build(BuildContext context) {
     return Text(
       text,
       style: TextStyle(
-        fontSize: 45.sp,
-        fontWeight: FontWeight.w400,
+        fontSize: fontSize ?? 45.sp,
+        fontWeight: fontWeight ?? FontWeight.w400,
         // color: Colors.white,
         foreground: Paint()
-          ..shader = const LinearGradient(
+          ..shader = LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [
-              AppColor.color_ffffff,
-              AppColor.color_999999,
-            ],
+            colors: linearColor ??
+                [
+                  AppColor.color_ffffff,
+                  AppColor.color_999999,
+                ],
           ).createShader(Rect.zero),
         shadows: [
           BoxShadow(

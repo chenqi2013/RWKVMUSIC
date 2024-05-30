@@ -3,16 +3,19 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:rwkvmusic/style/color.dart';
 
 class TextTitle extends StatelessWidget {
-  const TextTitle({super.key, required this.text});
+  TextTitle({super.key, required this.text, this.fontSize, this.fontWeight});
   final String text;
+  double? fontSize;
+  FontWeight? fontWeight;
+  Color? color;
   @override
   Widget build(BuildContext context) {
     return Text(
       text,
       style: TextStyle(
-        fontSize: 60.sp,
-        fontWeight: FontWeight.w700,
-        color: AppColor.color_757575,
+        fontSize: fontSize ?? 60.sp,
+        fontWeight: fontWeight ?? FontWeight.w700,
+        color: color ?? AppColor.color_757575,
         shadows: [
           BoxShadow(
             color: Colors.white.withOpacity(.4),
