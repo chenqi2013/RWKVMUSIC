@@ -2286,13 +2286,13 @@ class _MyAppState extends State<MyApp> {
             child: Container(
               padding: EdgeInsets.all(30.w),
               width: isWindowsOrMac ? 1400.w : 510.w,
-              height: 580.h,
+              height: 630.h,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.all(Radius.circular(30.w)),
                 color: Colors.transparent,
                 image: const DecorationImage(
-                  image:
-                      AssetImage('assets/images/dialogbg.png'), // 替换为你的背景图片路径
+                  image: AssetImage(
+                      'assets/images/backgroundbg.jpg'), // 替换为你的背景图片路径
                   fit: BoxFit.cover,
                 ),
               ),
@@ -2306,7 +2306,7 @@ class _MyAppState extends State<MyApp> {
                   TextItem(text: msg),
 
                   SizedBox(
-                    height: 120.h,
+                    height: 100.h,
                   ),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,

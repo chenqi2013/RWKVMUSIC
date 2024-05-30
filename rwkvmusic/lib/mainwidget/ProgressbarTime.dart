@@ -32,7 +32,10 @@ Widget ProgressbarTime(RxDouble currentSliderValue, RxDouble totalTime,
             // 时间显示
             Text(
               formatDuration(Duration(seconds: totalTime.value ~/ 1000.0)),
-              style: const TextStyle(color: Colors.white),
+              style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w400,
+                  fontSize: 36.sp),
             ),
             // 播放进度条
             // SliderTheme(
@@ -64,7 +67,10 @@ Widget ProgressbarTime(RxDouble currentSliderValue, RxDouble totalTime,
               formatDuration(Duration(
                   seconds: (totalTime.value / 1000.0 * currentSliderValue.value)
                       .toInt())),
-              style: const TextStyle(color: Colors.white),
+              style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w400,
+                  fontSize: 36.sp),
             ),
 
             InkWell(
