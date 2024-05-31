@@ -174,6 +174,7 @@ var noteLengthList = ['1/4', '1/8', '1/16'];
 List<Note> notes = [];
 Isolate? userIsolate;
 var isCreateGenerate = false.obs;
+var promptSelectedIndex = 0.obs;
 
 Isolate? childSendPort;
 void testisolate22() async {
@@ -292,10 +293,17 @@ void fetchABCDataByIsolate() async {
   //   getABCDataByLocalModel(arr);
   // } else {
 // 创建 ReceivePort，以接收来自子线程的消息
+  String prompt = '';
+  if (selectstate.value == 0) {
+    prompt = promptsAbc[promptSelectedIndex.value];
+  } else {
+    prompt = "L:1/4\nM:$timeSingnatureStr\nK:C\n$createPrompt";
+  }
+  debugPrint('generate Prompt==$prompt');
   // 创建一个新的 Isolate
   userIsolate = await Isolate.spawn(getABCDataByLocalModel, [
     mainReceivePort.sendPort,
-    selectstate.value == 0 ? presentPrompt : createPrompt,
+    selectstate.value == 0 ? prompt : prompt,
     midiProgramValue,
     seed.value,
     randomness.value,
@@ -488,7 +496,6 @@ class _MyAppState extends State<MyApp> {
   int preTimestamp = 0;
   int preCount = 0;
   int listenCount = 0;
-  var promptSelectedIndex = 0.obs;
   var effectSelectedIndex = 0.obs;
   var keyboardSelectedIndex = 0.obs;
   var noteLengthSelectedIndex = 0.obs;
@@ -548,8 +555,11 @@ class _MyAppState extends State<MyApp> {
             //       "setAbcString(\"%%MIDI program 40\\nL:1/4\\nM:4/4\\nK:D\\n\\\"D\\\" A F F\",false)");
             // } else {
             presentPrompt = CommonUtils.escapeString(promptsAbc[index]);
+            int subindex = presentPrompt.indexOf('L:');
+            String subpresentPrompt = presentPrompt.substring(subindex);
+            debugPrint('load presentPrompt=$presentPrompt');
             finalabcStringPreset =
-                "setAbcString(\"${ABCHead.getABCWithInstrument(presentPrompt, midiProgramValue)}\",false)";
+                "setAbcString(\"${ABCHead.getABCWithInstrument(subpresentPrompt, midiProgramValue)}\",false)";
             finalabcStringPreset = ABCHead.appendTempoParam(
                 finalabcStringPreset, tempo.value.toInt());
             // String testabc =
@@ -2646,10 +2656,13 @@ class _MyAppState extends State<MyApp> {
                                   }
                                   if (type == STORAGE_PROMPTS_SELECT) {
                                     resetPianoAndKeyboard();
-                                    String abcstr = '';
+                                    int subindex = presentPrompt.indexOf('L:');
+                                    String subpresentPrompt =
+                                        presentPrompt.substring(subindex);
+                                    String abcstr = subpresentPrompt;
                                     if (selectstate.value == 0) {
                                       abcstr = ABCHead.getABCWithInstrument(
-                                          presentPrompt, midiProgramValue);
+                                          subpresentPrompt, midiProgramValue);
                                     } else {
                                       abcstr = ABCHead.getABCWithInstrument(
                                           createPrompt, midiProgramValue);
@@ -2659,6 +2672,7 @@ class _MyAppState extends State<MyApp> {
                                     if (selectstate.value == 0) {
                                       finalabcStringPreset =
                                           "setAbcString(\"$abcstr\",false)";
+
                                       controllerPiano
                                           .runJavaScript(finalabcStringPreset);
                                       debugPrint(
