@@ -149,6 +149,7 @@ RxInt timeSignature = 2.obs;
 RxInt defaultNoteLenght = 0.obs;
 RxDouble randomness = 0.7.obs;
 RxInt seed = 22416.obs;
+bool isUseCurrentTime = false;
 RxDouble tempo = 180.0.obs;
 bool isChangeTempo = false;
 RxBool autoChord = true.obs;
@@ -216,6 +217,16 @@ void fetchABCDataByIsolate() async {
     dllPath = await CommonUtils.getdllPath();
     binPath = await CommonUtils.getBinPath();
   }
+  if (seed.value == 22416) {
+    isUseCurrentTime = true;
+  } else {
+    isUseCurrentTime = false;
+  }
+  if (isUseCurrentTime) {
+    DateTime now = DateTime.now();
+    seed.value = now.millisecondsSinceEpoch;
+  }
+
   mainReceivePort = ReceivePort();
   // if (Platform.isIOS) {
   //   var arr = [
