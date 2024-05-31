@@ -297,7 +297,7 @@ void fetchABCDataByIsolate() async {
   if (selectstate.value == 0) {
     prompt = promptsAbc[promptSelectedIndex.value];
   } else {
-    prompt = "L:1/4\nM:$timeSingnatureStr\nK:C\n$createPrompt";
+    prompt = "L:1/4\nM:$timeSingnatureStr\nK:C\n$createPrompt \"A\"";
   }
   debugPrint('generate Prompt==$prompt');
   // 创建一个新的 Isolate
@@ -399,6 +399,10 @@ void getABCDataByLocalModel(var array) async {
     // print(millisecondsSinceEpoch1);
     int result = fastrwkv.rwkv_abcmodel_run_with_tokenizer_and_sampler(
         model, abcTokenizer, sampler, token, 1.0, 8, randomness);
+    if (eosId == result) {
+      debugPrint('getABCDataByLocalModel break22');
+      break;
+    }
     now = DateTime.now();
     int millisecondsSinceEpoch2 = now.millisecondsSinceEpoch;
     duration = duration + millisecondsSinceEpoch2 - millisecondsSinceEpoch1;
@@ -412,6 +416,7 @@ void getABCDataByLocalModel(var array) async {
     // }
     token = result;
     String resultstr = String.fromCharCode(result);
+    // debugPrint('resultstr==$resultstr,token==$result');
     // result :10=换行;47=/;41=);40=(;94=^;34=";32=空格
     if (result == 10) {
       //|| result == 0
@@ -455,11 +460,6 @@ void getABCDataByLocalModel(var array) async {
       sendPort.send(abcString);
       // }
     }
-
-    if (eosId == token) {
-      debugPrint('getABCDataByLocalModel break');
-      break;
-    }
   }
   isGenerating.value = false;
   // if (isIOS) {
@@ -468,7 +468,7 @@ void getABCDataByLocalModel(var array) async {
   sendPort.send(abcString.toString());
   // }
   sendPort.send('finish');
-  debugPrint('getABCDataByLocalModel all data=${abcString.toString()}');
+  debugPrint('getABCDataByLocalModel all data=${stringBuffer.toString()}');
 }
 
 class MyApp extends StatefulWidget {
