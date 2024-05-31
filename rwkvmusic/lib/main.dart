@@ -149,6 +149,7 @@ RxInt timeSignature = 2.obs;
 RxInt defaultNoteLenght = 0.obs;
 RxDouble randomness = 0.7.obs;
 RxInt seed = 22416.obs;
+bool isUseCurrentTime = false;
 RxDouble tempo = 180.0.obs;
 bool isChangeTempo = false;
 RxBool autoChord = true.obs;
@@ -173,6 +174,58 @@ var noteLengthList = ['1/4', '1/8', '1/16'];
 List<Note> notes = [];
 Isolate? userIsolate;
 var isCreateGenerate = false.obs;
+var promptSelectedIndex = 0.obs;
+
+Isolate? childSendPort;
+void testisolate22() async {
+  ReceivePort mainReceivePort = ReceivePort();
+  childSendPort =
+      await Isolate.spawn(isolateFunction, mainReceivePort.sendPort);
+  mainReceivePort.listen((message) {
+    if (message == 'pause') {
+      print('Received pause signal. Pausing child isolate.');
+      // childSendPort.send('pause');
+    } else if (message is SendPort) {
+      print('Received child isolate. SendPort');
+      SendPort sendport = message;
+      sendport.send('pause Child isolate');
+    }
+  });
+  // 等待一段时间，然后发送暂停信号给子Isolate
+  await Future.delayed(const Duration(seconds: 5));
+  mainReceivePort.sendPort.send('pause');
+}
+
+void isolateFunction(SendPort mainSendPort) {
+  ReceivePort childReceivePort = ReceivePort();
+  mainSendPort.send(childReceivePort.sendPort);
+
+  bool paused = false;
+
+  childReceivePort.listen((message) {
+    if (message == 'pause Child isolate') {
+      paused = !paused;
+      if (paused) {
+        print('Child isolate paused.');
+      } else {
+        print('Child isolate resumed.');
+      }
+    }
+  });
+
+  // 执行一个百万次的for循环
+  for (int i = 0; i < 10000; i++) {
+    if (paused) {
+      print('stop Executing task $i');
+      break;
+      // await Future.delayed(const Duration(milliseconds: 100)); // 等待100毫秒后再继续执行
+    } else {
+      // 执行任务
+      print('Executing task $i');
+    }
+  }
+  print('end Executing task');
+}
 
 void fetchABCDataByIsolate() async {
   String? dllPath;
@@ -216,6 +269,16 @@ void fetchABCDataByIsolate() async {
     dllPath = await CommonUtils.getdllPath();
     binPath = await CommonUtils.getBinPath();
   }
+  if (seed.value == 22416) {
+    isUseCurrentTime = true;
+  } else {
+    isUseCurrentTime = false;
+  }
+  if (isUseCurrentTime) {
+    DateTime now = DateTime.now();
+    seed.value = now.millisecondsSinceEpoch;
+  }
+
   mainReceivePort = ReceivePort();
   // if (Platform.isIOS) {
   //   var arr = [
@@ -230,10 +293,17 @@ void fetchABCDataByIsolate() async {
   //   getABCDataByLocalModel(arr);
   // } else {
 // 创建 ReceivePort，以接收来自子线程的消息
+  String prompt = '';
+  if (selectstate.value == 0) {
+    prompt = promptsAbc[promptSelectedIndex.value];
+  } else {
+    prompt = "L:1/4\nM:$timeSingnatureStr\nK:C\n$createPrompt \"A\"";
+  }
+  debugPrint('generate Prompt==$prompt');
   // 创建一个新的 Isolate
   userIsolate = await Isolate.spawn(getABCDataByLocalModel, [
     mainReceivePort.sendPort,
-    selectstate.value == 0 ? presentPrompt : createPrompt,
+    selectstate.value == 0 ? prompt : prompt,
     midiProgramValue,
     seed.value,
     randomness.value,
@@ -271,11 +341,12 @@ void getABCDataByLocalModel(var array) async {
   SendPort sendPort = array[0];
   String currentPrompt = array[1];
   currentPrompt = currentPrompt.replaceAll('\\"', '"');
-  // currentPrompt = 'L:1/8\nM:2/4\nK:none\n[K:C] "C" gg g>';
+  // currentPrompt = 'L:1/8\nM:4/4\nK:G\n D GB |:"G"';
   debugPrint('currentPrompt==$currentPrompt');
   int midiprogramvalue = array[2];
   int seed = array[3];
   double randomness = array[4];
+  randomness = 0;
   String dllPath = array[5];
   String binPath = array[6];
   int eosId = 3;
@@ -292,7 +363,7 @@ void getABCDataByLocalModel(var array) async {
   EventBus eventBus = EventBus();
 
   eventBus.on().listen((event) {
-    debugPrint('isolateReceivePort==$event');
+    debugPrint('isolateReceivePort22==$event');
     isStopGenerating = true;
     sendPort.send('finish');
   });
@@ -328,6 +399,10 @@ void getABCDataByLocalModel(var array) async {
     // print(millisecondsSinceEpoch1);
     int result = fastrwkv.rwkv_abcmodel_run_with_tokenizer_and_sampler(
         model, abcTokenizer, sampler, token, 1.0, 8, randomness);
+    if (eosId == result) {
+      debugPrint('getABCDataByLocalModel break22');
+      break;
+    }
     now = DateTime.now();
     int millisecondsSinceEpoch2 = now.millisecondsSinceEpoch;
     duration = duration + millisecondsSinceEpoch2 - millisecondsSinceEpoch1;
@@ -341,6 +416,7 @@ void getABCDataByLocalModel(var array) async {
     // }
     token = result;
     String resultstr = String.fromCharCode(result);
+    // debugPrint('resultstr==$resultstr,token==$result');
     // result :10=换行;47=/;41=);40=(;94=^;34=";32=空格
     if (result == 10) {
       //|| result == 0
@@ -384,11 +460,6 @@ void getABCDataByLocalModel(var array) async {
       sendPort.send(abcString);
       // }
     }
-
-    if (eosId == token) {
-      debugPrint('getABCDataByLocalModel break');
-      break;
-    }
   }
   isGenerating.value = false;
   // if (isIOS) {
@@ -397,7 +468,7 @@ void getABCDataByLocalModel(var array) async {
   sendPort.send(abcString.toString());
   // }
   sendPort.send('finish');
-  debugPrint('getABCDataByLocalModel all data=${abcString.toString()}');
+  debugPrint('getABCDataByLocalModel all data=${stringBuffer.toString()}');
 }
 
 class MyApp extends StatefulWidget {
@@ -425,7 +496,6 @@ class _MyAppState extends State<MyApp> {
   int preTimestamp = 0;
   int preCount = 0;
   int listenCount = 0;
-  var promptSelectedIndex = 0.obs;
   var effectSelectedIndex = 0.obs;
   var keyboardSelectedIndex = 0.obs;
   var noteLengthSelectedIndex = 0.obs;
@@ -485,8 +555,11 @@ class _MyAppState extends State<MyApp> {
             //       "setAbcString(\"%%MIDI program 40\\nL:1/4\\nM:4/4\\nK:D\\n\\\"D\\\" A F F\",false)");
             // } else {
             presentPrompt = CommonUtils.escapeString(promptsAbc[index]);
+            int subindex = presentPrompt.indexOf('L:');
+            String subpresentPrompt = presentPrompt.substring(subindex);
+            debugPrint('load presentPrompt=$presentPrompt');
             finalabcStringPreset =
-                "setAbcString(\"${ABCHead.getABCWithInstrument(presentPrompt, midiProgramValue)}\",false)";
+                "setAbcString(\"${ABCHead.getABCWithInstrument(subpresentPrompt, midiProgramValue)}\",false)";
             finalabcStringPreset = ABCHead.appendTempoParam(
                 finalabcStringPreset, tempo.value.toInt());
             // String testabc =
@@ -1074,6 +1147,8 @@ class _MyAppState extends State<MyApp> {
                             height: 61.h,
                           ),
                           onPressed: () {
+                            // testisolate22();
+                            // return;
                             debugPrint('Settings');
                             if (isShowOverlay) {
                               closeOverlay();
@@ -2581,10 +2656,13 @@ class _MyAppState extends State<MyApp> {
                                   }
                                   if (type == STORAGE_PROMPTS_SELECT) {
                                     resetPianoAndKeyboard();
-                                    String abcstr = '';
+                                    int subindex = presentPrompt.indexOf('L:');
+                                    String subpresentPrompt =
+                                        presentPrompt.substring(subindex);
+                                    String abcstr = subpresentPrompt;
                                     if (selectstate.value == 0) {
                                       abcstr = ABCHead.getABCWithInstrument(
-                                          presentPrompt, midiProgramValue);
+                                          subpresentPrompt, midiProgramValue);
                                     } else {
                                       abcstr = ABCHead.getABCWithInstrument(
                                           createPrompt, midiProgramValue);
@@ -2594,6 +2672,7 @@ class _MyAppState extends State<MyApp> {
                                     if (selectstate.value == 0) {
                                       finalabcStringPreset =
                                           "setAbcString(\"$abcstr\",false)";
+
                                       controllerPiano
                                           .runJavaScript(finalabcStringPreset);
                                       debugPrint(
