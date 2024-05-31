@@ -42,7 +42,7 @@ class ABCHead {
     String encodedString = base64.encode(utf8.encode(result));
     // debugPrint("Encoded setAbcString: $encodedString");
     String base64AbcString = "setAbcString('$encodedString',false)";
-    print("base64AbcString: $encodedString");
+    // print("base64AbcString: $encodedString");
     return base64AbcString;
   }
 

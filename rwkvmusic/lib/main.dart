@@ -175,6 +175,57 @@ List<Note> notes = [];
 Isolate? userIsolate;
 var isCreateGenerate = false.obs;
 
+Isolate? childSendPort;
+void testisolate22() async {
+  ReceivePort mainReceivePort = ReceivePort();
+  childSendPort =
+      await Isolate.spawn(isolateFunction, mainReceivePort.sendPort);
+  mainReceivePort.listen((message) {
+    if (message == 'pause') {
+      print('Received pause signal. Pausing child isolate.');
+      // childSendPort.send('pause');
+    } else if (message is SendPort) {
+      print('Received child isolate. SendPort');
+      SendPort sendport = message;
+      sendport.send('pause Child isolate');
+    }
+  });
+  // 等待一段时间，然后发送暂停信号给子Isolate
+  await Future.delayed(const Duration(seconds: 5));
+  mainReceivePort.sendPort.send('pause');
+}
+
+void isolateFunction(SendPort mainSendPort) {
+  ReceivePort childReceivePort = ReceivePort();
+  mainSendPort.send(childReceivePort.sendPort);
+
+  bool paused = false;
+
+  childReceivePort.listen((message) {
+    if (message == 'pause Child isolate') {
+      paused = !paused;
+      if (paused) {
+        print('Child isolate paused.');
+      } else {
+        print('Child isolate resumed.');
+      }
+    }
+  });
+
+  // 执行一个百万次的for循环
+  for (int i = 0; i < 10000; i++) {
+    if (paused) {
+      print('stop Executing task $i');
+      break;
+      // await Future.delayed(const Duration(milliseconds: 100)); // 等待100毫秒后再继续执行
+    } else {
+      // 执行任务
+      print('Executing task $i');
+    }
+  }
+  print('end Executing task');
+}
+
 void fetchABCDataByIsolate() async {
   String? dllPath;
   String? binPath;
@@ -282,11 +333,12 @@ void getABCDataByLocalModel(var array) async {
   SendPort sendPort = array[0];
   String currentPrompt = array[1];
   currentPrompt = currentPrompt.replaceAll('\\"', '"');
-  // currentPrompt = 'L:1/8\nM:2/4\nK:none\n[K:C] "C" gg g>';
+  // currentPrompt = 'L:1/8\nM:4/4\nK:G\n D GB |:"G"';
   debugPrint('currentPrompt==$currentPrompt');
   int midiprogramvalue = array[2];
   int seed = array[3];
   double randomness = array[4];
+  randomness = 0;
   String dllPath = array[5];
   String binPath = array[6];
   int eosId = 3;
@@ -303,7 +355,7 @@ void getABCDataByLocalModel(var array) async {
   EventBus eventBus = EventBus();
 
   eventBus.on().listen((event) {
-    debugPrint('isolateReceivePort==$event');
+    debugPrint('isolateReceivePort22==$event');
     isStopGenerating = true;
     sendPort.send('finish');
   });
@@ -1085,6 +1137,8 @@ class _MyAppState extends State<MyApp> {
                             height: 61.h,
                           ),
                           onPressed: () {
+                            // testisolate22();
+                            // return;
                             debugPrint('Settings');
                             if (isShowOverlay) {
                               closeOverlay();
