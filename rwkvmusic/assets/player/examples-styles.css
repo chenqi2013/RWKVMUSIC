@@ -154,6 +154,7 @@ tr:nth-child(even) {
 }
 
 .container {
+  overflow-y: scroll;
   height: 100vh;
   display: flex;
   /* justify-content: center; */
@@ -192,7 +193,8 @@ tr:nth-child(even) {
 @media (prefers-color-scheme: dark) {
   body {
     color: #ffffff;
-    background: #515355;
+    background: #3b3d3e;
+    /* background: #515355; */
   }
 
   .table-header td {
@@ -313,4 +315,13 @@ tr:nth-child(even) {
 
 text {
   fill: white;
+}
+
+::-webkit-scrollbar {
+  width: 0;  /* Remove scrollbar space */
+  background: transparent;  /* Optional: just make scrollbar invisible */
+}
+/* Optional: show position indicator in red */
+::-webkit-scrollbar-thumb {
+  background: #00000000;
 }

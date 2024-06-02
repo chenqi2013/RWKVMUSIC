@@ -149,7 +149,7 @@ RxInt timeSignature = 2.obs;
 RxInt defaultNoteLenght = 0.obs;
 RxDouble randomness = 0.7.obs;
 RxInt seed = 22416.obs;
-bool isUseCurrentTime = false;
+bool isUseCurrentTime = true;
 RxDouble tempo = 180.0.obs;
 bool isChangeTempo = false;
 RxBool autoChord = true.obs;
@@ -269,14 +269,15 @@ void fetchABCDataByIsolate() async {
     dllPath = await CommonUtils.getdllPath();
     binPath = await CommonUtils.getBinPath();
   }
-  if (seed.value == 22416) {
-    isUseCurrentTime = true;
-  } else {
-    isUseCurrentTime = false;
-  }
+  // if (seed.value == 22416) {
+  //   isUseCurrentTime = true;
+  // } else {
+  //   isUseCurrentTime = false;
+  // }
   if (isUseCurrentTime) {
     DateTime now = DateTime.now();
     seed.value = now.millisecondsSinceEpoch;
+    debugPrint('isUseCurrentTime');
   }
 
   mainReceivePort = ReceivePort();
@@ -342,11 +343,18 @@ void getABCDataByLocalModel(var array) async {
   String currentPrompt = array[1];
   currentPrompt = currentPrompt.replaceAll('\\"', '"');
   // currentPrompt = 'L:1/8\nM:4/4\nK:G\n D GB |:"G"';
+//   currentPrompt = r'''
+// L:1/4
+// M:4/4
+// K:C
+// ^G,^A,^C^D "A"''';
+
   debugPrint('currentPrompt==$currentPrompt');
   int midiprogramvalue = array[2];
   int seed = array[3];
   double randomness = array[4];
-  randomness = 0;
+  debugPrint('randomness==$randomness');
+  // randomness = 0;
   String dllPath = array[5];
   String binPath = array[6];
   int eosId = 3;
@@ -930,7 +938,7 @@ class _MyAppState extends State<MyApp> {
     return Scaffold(
         resizeToAvoidBottomInset: false,
         body: Container(
-          padding: EdgeInsets.symmetric(horizontal: 85.w, vertical: 70.h),
+          padding: EdgeInsets.symmetric(horizontal: 85.w, vertical: 30.h),
           decoration: const BoxDecoration(
             image: DecorationImage(
               image:
@@ -940,274 +948,277 @@ class _MyAppState extends State<MyApp> {
           ),
           child: Column(
             children: [
-              Container(
-                padding:
-                    const EdgeInsets.symmetric(vertical: 10, horizontal: 0),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    // AdvancedSegment(
+              Expanded(
+                child: Container(
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 0, horizontal: 0),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      // AdvancedSegment(
 
-                    //   // controller: _controller, // AdvancedSegmentController
-                    //   segments: const {
-                    //     // Map<String, String>
-                    //     'all': 'All',
-                    //     'primary': 'Primary',
-                    //     'secondary': 'Secondary',
-                    //     'tertiary': 'Tertiary',
-                    //   },
-                    //   activeStyle: const TextStyle(
-                    //     // TextStyle
-                    //     color: Colors.white,
-                    //     fontWeight: FontWeight.w600,
-                    //   ),
-                    //   inactiveStyle: const TextStyle(
-                    //     // TextStyle
-                    //     color: Colors.white54,
-                    //   ),
-                    //   backgroundColor: Colors.black26, // Color
-                    //   sliderColor: Colors.white, // Color
-                    //   sliderOffset: 2.0, // Double
-                    //   borderRadius: const BorderRadius.all(
-                    //       Radius.circular(8.0)), // BorderRadius
-                    //   itemPadding: const EdgeInsets.symmetric(
-                    //     // EdgeInsets
-                    //     horizontal: 15,
-                    //     vertical: 10,
-                    //   ),
-                    //   animationDuration:
-                    //       const Duration(milliseconds: 250), // Duration
-                    //   shadow: const <BoxShadow>[
-                    //     BoxShadow(
-                    //       color: Colors.black26,
-                    //       blurRadius: 8.0,
-                    //     ),
-                    //   ],
-                    // ),
+                      //   // controller: _controller, // AdvancedSegmentController
+                      //   segments: const {
+                      //     // Map<String, String>
+                      //     'all': 'All',
+                      //     'primary': 'Primary',
+                      //     'secondary': 'Secondary',
+                      //     'tertiary': 'Tertiary',
+                      //   },
+                      //   activeStyle: const TextStyle(
+                      //     // TextStyle
+                      //     color: Colors.white,
+                      //     fontWeight: FontWeight.w600,
+                      //   ),
+                      //   inactiveStyle: const TextStyle(
+                      //     // TextStyle
+                      //     color: Colors.white54,
+                      //   ),
+                      //   backgroundColor: Colors.black26, // Color
+                      //   sliderColor: Colors.white, // Color
+                      //   sliderOffset: 2.0, // Double
+                      //   borderRadius: const BorderRadius.all(
+                      //       Radius.circular(8.0)), // BorderRadius
+                      //   itemPadding: const EdgeInsets.symmetric(
+                      //     // EdgeInsets
+                      //     horizontal: 15,
+                      //     vertical: 10,
+                      //   ),
+                      //   animationDuration:
+                      //       const Duration(milliseconds: 250), // Duration
+                      //   shadow: const <BoxShadow>[
+                      //     BoxShadow(
+                      //       color: Colors.black26,
+                      //       blurRadius: 8.0,
+                      //     ),
+                      //   ],
+                      // ),
 
-                    SizedBox(
-                      width: 575.w,
-                      height: 123.h,
-                      child: CustomSegmentControl11(
-                        selectedIndex: selectstate,
-                        segments: const ['Prompt Mode', 'Create Mode'],
-                        callBack: (int newValue) {
-                          // 当选择改变时执行的操作
-                          debugPrint('选择了选项 $newValue');
-                          selectstate.value = newValue;
-                          segmentChange(newValue);
-                        },
+                      SizedBox(
+                        width: 575.w,
+                        height: 123.h,
+                        child: CustomSegmentControl11(
+                          selectedIndex: selectstate,
+                          segments: const ['Prompt Mode', 'Create Mode'],
+                          callBack: (int newValue) {
+                            // 当选择改变时执行的操作
+                            debugPrint('选择了选项 $newValue');
+                            selectstate.value = newValue;
+                            segmentChange(newValue);
+                          },
+                        ),
                       ),
-                    ),
-                    // CustomSegment(
-                    //   callBack: (int newValue) {
-                    //     // 当选择改变时执行的操作
-                    //     debugPrint('选择了选项 $newValue');
-                    //     selectstate.value = newValue;
-                    //     segmengChange(newValue);
-                    //   },
-                    // ),
+                      // CustomSegment(
+                      //   callBack: (int newValue) {
+                      //     // 当选择改变时执行的操作
+                      //     debugPrint('选择了选项 $newValue');
+                      //     selectstate.value = newValue;
+                      //     segmengChange(newValue);
+                      //   },
+                      // ),
 
-                    // Container(
-                    //   child: Obx(() {
-                    //     return CupertinoSegmentedControl(
-                    //       children: {
-                    //         0: Padding(
-                    //             padding: const EdgeInsets.symmetric(
-                    //                 vertical: 8, horizontal: 0),
-                    //             child: Text(
-                    //               'Preset Mode',
-                    //               style: TextStyle(
-                    //                 color: Colors.white,
-                    //                 fontSize: 14,
-                    //                 fontWeight: selectstate.value == 0
-                    //                     ? FontWeight.bold
-                    //                     : FontWeight.normal,
-                    //               ),
-                    //             )),
-                    //         1: Padding(
-                    //             padding: const EdgeInsets.symmetric(
-                    //                 vertical: 8, horizontal: 10),
-                    //             child: Text(
-                    //               'Creative Mode',
-                    //               style: TextStyle(
-                    //                 color: Colors.white,
-                    //                 fontSize: 14,
-                    //                 fontWeight: selectstate.value == 1
-                    //                     ? FontWeight.bold
-                    //                     : FontWeight.normal,
-                    //               ),
-                    //             )),
-                    //       },
-                    //       onValueChanged: (int newValue) {
-                    //         // 当选择改变时执行的操作
-                    //         debugPrint('选择了选项 $newValue');
-                    //         selectstate.value = newValue;
-                    //         segmengChange(newValue);
-                    //       },
-                    //       groupValue: selectstate.value, // 当前选中的选项值
-                    //       selectedColor: const Color(0xff44be1c),
-                    //       unselectedColor: Colors.transparent,
-                    //       borderColor: const Color(0xff6d6d6d),
-                    //     );
-                    //   }),
-                    // ),
-                    Row(
-                      children: [
-                        Obx(
-                          () => selectstate.value == 0
-                              ? CreatBottomBtn(
-                                  width: 253.w,
-                                  height: 123.h,
-                                  text: 'Prompt',
-                                  icon: SvgPicture.asset(
-                                    'assets/images/ic_arrowdown.svg',
-                                    width: 28.w,
-                                    height: 21.h,
+                      // Container(
+                      //   child: Obx(() {
+                      //     return CupertinoSegmentedControl(
+                      //       children: {
+                      //         0: Padding(
+                      //             padding: const EdgeInsets.symmetric(
+                      //                 vertical: 8, horizontal: 0),
+                      //             child: Text(
+                      //               'Preset Mode',
+                      //               style: TextStyle(
+                      //                 color: Colors.white,
+                      //                 fontSize: 14,
+                      //                 fontWeight: selectstate.value == 0
+                      //                     ? FontWeight.bold
+                      //                     : FontWeight.normal,
+                      //               ),
+                      //             )),
+                      //         1: Padding(
+                      //             padding: const EdgeInsets.symmetric(
+                      //                 vertical: 8, horizontal: 10),
+                      //             child: Text(
+                      //               'Creative Mode',
+                      //               style: TextStyle(
+                      //                 color: Colors.white,
+                      //                 fontSize: 14,
+                      //                 fontWeight: selectstate.value == 1
+                      //                     ? FontWeight.bold
+                      //                     : FontWeight.normal,
+                      //               ),
+                      //             )),
+                      //       },
+                      //       onValueChanged: (int newValue) {
+                      //         // 当选择改变时执行的操作
+                      //         debugPrint('选择了选项 $newValue');
+                      //         selectstate.value = newValue;
+                      //         segmengChange(newValue);
+                      //       },
+                      //       groupValue: selectstate.value, // 当前选中的选项值
+                      //       selectedColor: const Color(0xff44be1c),
+                      //       unselectedColor: Colors.transparent,
+                      //       borderColor: const Color(0xff6d6d6d),
+                      //     );
+                      //   }),
+                      // ),
+                      Row(
+                        children: [
+                          Obx(
+                            () => selectstate.value == 0
+                                ? CreatBottomBtn(
+                                    width: 253.w,
+                                    height: 123.h,
+                                    text: 'Prompt',
+                                    icon: SvgPicture.asset(
+                                      'assets/images/ic_arrowdown.svg',
+                                      width: 28.w,
+                                      height: 21.h,
+                                    ),
+                                    onPressed: () {
+                                      debugPrint("Promptss");
+                                      showPromptDialog(context, 'Prompts',
+                                          prompts, STORAGE_PROMPTS_SELECT);
+                                    },
+                                  )
+                                : CreatBottomBtn(
+                                    width: 372.w,
+                                    height: 123.h,
+                                    text: 'Soft keyboard',
+                                    icon: SvgPicture.asset(
+                                      'assets/images/ic_arrowdown.svg',
+                                      width: 28.w,
+                                      height: 21.h,
+                                    ),
+                                    onPressed: () {
+                                      debugPrint("Simulate keyboard");
+                                      showPromptDialog(
+                                          context,
+                                          'Keyboard Options',
+                                          keyboardOptions,
+                                          STORAGE_KEYBOARD_SELECT);
+                                    },
                                   ),
-                                  onPressed: () {
-                                    debugPrint("Promptss");
-                                    showPromptDialog(context, 'Prompts',
-                                        prompts, STORAGE_PROMPTS_SELECT);
-                                  },
-                                )
-                              : CreatBottomBtn(
-                                  width: 372.w,
-                                  height: 123.h,
-                                  text: 'Soft keyboard',
-                                  icon: SvgPicture.asset(
-                                    'assets/images/ic_arrowdown.svg',
-                                    width: 28.w,
-                                    height: 21.h,
-                                  ),
-                                  onPressed: () {
-                                    debugPrint("Simulate keyboard");
-                                    showPromptDialog(
-                                        context,
-                                        'Keyboard Options',
-                                        keyboardOptions,
-                                        STORAGE_KEYBOARD_SELECT);
-                                  },
-                                ),
-                        ),
-                        // Obx(
-                        //   () => selectstate.value == 0
-                        //       ? creatBottomBtn('Prompts', () {
-                        //           debugPrint("Promptss");
-                        //           showPromptDialog(context, 'Prompts', prompts,
-                        //               STORAGE_PROMPTS_SELECT);
-                        //         }, 'btn_prompts', 243.w, 123.h, 'ic_arrowdown',
-                        //           28.w, 21.h)
-                        //       : creatBottomBtn('Soft keyboard', () {
-                        //           debugPrint("Simulate keyboard");
-                        //           showPromptDialog(context, 'Keyboard Options',
-                        //               keyboardOptions, STORAGE_KEYBOARD_SELECT);
-                        //         }, 'btn_softkeyboard', 253.w, 123.h,
-                        //           'ic_arrowdown', 20.w, 30.h),
-                        // ),
-                        SizedBox(
-                          width: 55.w,
-                        ),
-                        CreatBottomBtn(
-                          width: selectstate.value == 0 ? 357.w : 358.w,
-                          height: 123.h,
-                          text: 'Instrument',
-                          icon: SvgPicture.asset(
-                            'assets/images/ic-${instruments[effectSelectedIndex.value]}.svg', //
-                            width: 61.w,
-                            height: 57.h,
                           ),
-                          onPressed: () {
-                            debugPrint("Sounds Effect");
-                            var list = soundEffect.keys.toList();
-                            showPromptDialog(context, 'Instrument', list,
-                                STORAGE_SOUNDSEFFECT_SELECT);
-                          },
-                        ),
-                        // creatBottomBtn('Instrument', () {
-                        //   debugPrint("Sounds Effect");
-                        //   showPromptDialog(
-                        //       context,
-                        //       'Instrument',
-                        //       soundEffect.keys.toList(),
-                        //       STORAGE_SOUNDSEFFECT_SELECT);
-                        // }, 'btn_instrument', 348.w, 123.h, 'ic-piano', 61.w,
-                        //     61.h),
-                        SizedBox(
-                          width: 55.w,
-                        ),
-                        CreatBottomBtn(
-                          width: 123.w,
-                          height: 123.h,
-                          text: '',
-                          icon: SvgPicture.asset(
-                            'assets/images/ic_setting.svg',
-                            width: 61.w,
-                            height: 61.h,
+                          // Obx(
+                          //   () => selectstate.value == 0
+                          //       ? creatBottomBtn('Prompts', () {
+                          //           debugPrint("Promptss");
+                          //           showPromptDialog(context, 'Prompts', prompts,
+                          //               STORAGE_PROMPTS_SELECT);
+                          //         }, 'btn_prompts', 243.w, 123.h, 'ic_arrowdown',
+                          //           28.w, 21.h)
+                          //       : creatBottomBtn('Soft keyboard', () {
+                          //           debugPrint("Simulate keyboard");
+                          //           showPromptDialog(context, 'Keyboard Options',
+                          //               keyboardOptions, STORAGE_KEYBOARD_SELECT);
+                          //         }, 'btn_softkeyboard', 253.w, 123.h,
+                          //           'ic_arrowdown', 20.w, 30.h),
+                          // ),
+                          SizedBox(
+                            width: 55.w,
                           ),
-                          onPressed: () {
-                            // testisolate22();
-                            // return;
-                            debugPrint('Settings');
-                            if (isShowOverlay) {
-                              closeOverlay();
-                            }
-                            if (isWindowsOrMac) {
-                              isVisibleWebview.value = !isVisibleWebview.value;
-                              // setState(() {});
-                            }
-                            // bottomsheetsetting();
-                            // return;
-                            // Get.to(FlutterBlueApp());
-                            // Get.to(const MIDIDeviceListPage());
-                            if (selectstate.value == 0) {
-                              showSettingDialog(context);
-                            } else {
-                              showCreateModelSettingDialog(context);
-                            }
-                          },
-                        ),
+                          CreatBottomBtn(
+                            width: selectstate.value == 0 ? 357.w : 358.w,
+                            height: 123.h,
+                            text: 'Instrument',
+                            icon: SvgPicture.asset(
+                              'assets/images/ic-${instruments[effectSelectedIndex.value]}.svg', //
+                              width: 61.w,
+                              height: 57.h,
+                            ),
+                            onPressed: () {
+                              debugPrint("Sounds Effect");
+                              var list = soundEffect.keys.toList();
+                              showPromptDialog(context, 'Instrument', list,
+                                  STORAGE_SOUNDSEFFECT_SELECT);
+                            },
+                          ),
+                          // creatBottomBtn('Instrument', () {
+                          //   debugPrint("Sounds Effect");
+                          //   showPromptDialog(
+                          //       context,
+                          //       'Instrument',
+                          //       soundEffect.keys.toList(),
+                          //       STORAGE_SOUNDSEFFECT_SELECT);
+                          // }, 'btn_instrument', 348.w, 123.h, 'ic-piano', 61.w,
+                          //     61.h),
+                          SizedBox(
+                            width: 55.w,
+                          ),
+                          CreatBottomBtn(
+                            width: 123.w,
+                            height: 123.h,
+                            text: '',
+                            icon: SvgPicture.asset(
+                              'assets/images/ic_setting.svg',
+                              width: 61.w,
+                              height: 61.h,
+                            ),
+                            onPressed: () {
+                              // testisolate22();
+                              // return;
+                              debugPrint('Settings');
+                              if (isShowOverlay) {
+                                closeOverlay();
+                              }
+                              if (isWindowsOrMac) {
+                                isVisibleWebview.value =
+                                    !isVisibleWebview.value;
+                                // setState(() {});
+                              }
+                              // bottomsheetsetting();
+                              // return;
+                              // Get.to(FlutterBlueApp());
+                              // Get.to(const MIDIDeviceListPage());
+                              if (selectstate.value == 0) {
+                                showSettingDialog(context);
+                              } else {
+                                showCreateModelSettingDialog(context);
+                              }
+                            },
+                          ),
 
-                        // creatBottomBtn('', () {
-                        //   debugPrint('Settings');
-                        //   if (isWindowsOrMac) {
-                        //     isVisibleWebview.value = !isVisibleWebview.value;
-                        //     setState(() {});
-                        //   }
-                        //   // Get.to(FlutterBlueApp());
-                        //   // Get.to(const MIDIDeviceListPage());
-                        //   if (selectstate.value == 0) {
-                        //     showSettingDialog(context);
-                        //   } else {
-                        //     showCreateModelSettingDialog(context);
-                        //   }
-                        // }, 'btn_setting', 123.w, 123.h, 'ic_setting', 61.w,
-                        //     57.h),
+                          // creatBottomBtn('', () {
+                          //   debugPrint('Settings');
+                          //   if (isWindowsOrMac) {
+                          //     isVisibleWebview.value = !isVisibleWebview.value;
+                          //     setState(() {});
+                          //   }
+                          //   // Get.to(FlutterBlueApp());
+                          //   // Get.to(const MIDIDeviceListPage());
+                          //   if (selectstate.value == 0) {
+                          //     showSettingDialog(context);
+                          //   } else {
+                          //     showCreateModelSettingDialog(context);
+                          //   }
+                          // }, 'btn_setting', 123.w, 123.h, 'ic_setting', 61.w,
+                          //     57.h),
 
-                        // createButtonImageWithText(
-                        //     'Settings',
-                        //     Image.asset(
-                        //       'assets/images/setting.jpg',
-                        //       fit: BoxFit.cover,
-                        //     ), () {
-                        //   debugPrint('Settings');
+                          // createButtonImageWithText(
+                          //     'Settings',
+                          //     Image.asset(
+                          //       'assets/images/setting.jpg',
+                          //       fit: BoxFit.cover,
+                          //     ), () {
+                          //   debugPrint('Settings');
 
-                        //   if (isWindowsOrMac) {
-                        //     isVisibleWebview.value = !isVisibleWebview.value;
-                        //     setState(() {});
-                        //   }
-                        //   // Get.to(FlutterBlueApp());
-                        //   // Get.to(const MIDIDeviceListPage());
-                        //   if (selectstate.value == 0) {
-                        //     showSettingDialog(context);
-                        //   } else {
-                        //     showCreateModelSettingDialog(context);
-                        //   }
-                        // }),
-                      ],
-                    ),
-                  ],
+                          //   if (isWindowsOrMac) {
+                          //     isVisibleWebview.value = !isVisibleWebview.value;
+                          //     setState(() {});
+                          //   }
+                          //   // Get.to(FlutterBlueApp());
+                          //   // Get.to(const MIDIDeviceListPage());
+                          //   if (selectstate.value == 0) {
+                          //     showSettingDialog(context);
+                          //   } else {
+                          //     showCreateModelSettingDialog(context);
+                          //   }
+                          // }),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
               ),
               SizedBox(
@@ -1226,11 +1237,11 @@ class _MyAppState extends State<MyApp> {
                         )),
                   )),
               SizedBox(
-                height: 33.h,
+                height: 20.h,
               ),
               Obx(
                 () => Flexible(
-                    flex: isWindowsOrMac ? 3 : 5,
+                    flex: isWindowsOrMac ? 6 : 5,
                     child: Visibility(
                       visible: isVisibleWebview.value,
                       // maintainSize: true, // 保持占位空间
@@ -2164,6 +2175,7 @@ class _MyAppState extends State<MyApp> {
                                   // 当文本字段内容变化时调用
                                   seed.value = int.parse(text);
                                   debugPrint('Current text: ');
+                                  isUseCurrentTime = false;
                                 },
                               ),
                               // SizedBox(
