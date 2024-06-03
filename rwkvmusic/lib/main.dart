@@ -45,6 +45,7 @@ import 'package:rwkvmusic/test/midi_devicelist_page.dart';
 import 'package:rwkvmusic/utils/abchead.dart';
 // import 'package:rwkvmusic/test/testwebviewuniversal.dart';
 import 'package:rwkvmusic/utils/audioplayer.dart';
+import 'package:rwkvmusic/utils/chord_util.dart';
 import 'package:rwkvmusic/utils/justaudioplayer.dart';
 import 'package:rwkvmusic/utils/midiconvertabc.dart';
 import 'package:rwkvmusic/utils/mididevicemanage.dart';
@@ -159,6 +160,8 @@ List midiNotes = [];
 // bool isNeedConvertMidiNotes = false;
 
 List virtualNotes = []; //虚拟键盘按键音符
+List<int> intNodes = []; //计算和弦需要使用
+
 var selectstate = 0.obs;
 late bool isWindowsOrMac;
 late WebViewControllerPlus controllerPiano;
@@ -788,11 +791,16 @@ class _MyAppState extends State<MyApp> {
     }
     // sbNoteCreate.write(noteName);
     virtualNotes.add(noteName);
+    intNodes.add(node);
     StringBuffer sbff = StringBuffer();
     for (String note in virtualNotes) {
       sbff.write(note);
     }
     createPrompt = sbff.toString();
+    // ChordUtil.getChord(intNodes.toString());
+    // ChordUtil.getResult();
+    // ChordUtil.checkContentIsSame();
+    // ChordUtil.findDifferent();
     String sb;
     if (isChangeTempo) {
       sb =
@@ -828,6 +836,7 @@ class _MyAppState extends State<MyApp> {
     }
     if (virtualNotes.isNotEmpty) {
       virtualNotes.removeLast();
+      intNodes.removeLast();
       if (virtualNotes.isEmpty) {
         finalabcStringCreate =
             "setAbcString(\"${ABCHead.getABCWithInstrument('L:1/4\nM:$timeSingnatureStr\nK:C\n|', midiProgramValue)}\",false)";
@@ -1661,6 +1670,7 @@ class _MyAppState extends State<MyApp> {
 
   void createModeDefault() {
     virtualNotes.clear();
+    intNodes.clear();
     //creative
     // String str1 =
     //     "setAbcString(\"%%MIDI program $midiProgramValue\\nL:1/4\\nM:4/4\\nK:C\\n|\",false)";
