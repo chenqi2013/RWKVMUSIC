@@ -510,7 +510,7 @@ class _MyAppState extends State<MyApp> {
   int listenCount = 0;
   var effectSelectedIndex = 0.obs;
   var keyboardSelectedIndex = 0.obs;
-  var noteLengthSelectedIndex = 0.obs;
+  var noteLengthSelectedIndex = 0.obs; //选中单个音符出现的弹框
   String? currentSoundEffect;
   // late StringBuffer sbNoteCreate = StringBuffer();
   late MidiDeviceManage deviceManage;
@@ -802,7 +802,7 @@ class _MyAppState extends State<MyApp> {
       debugPrint('chordStr=${chordList.length}');
     }
     String timeSignatureStr = timeSignatures[timeSignature.value];
-    String noteLengthStr = noteLengths[noteLengthSelectedIndex.value];
+    String noteLengthStr = noteLengths[defaultNoteLenght.value];
     debugPrint(
         'timeSignatureStr=$timeSignatureStr,noteLengthStr=$noteLengthStr');
     for (int i = 0; i < virtualNotes.length; i++) {
@@ -885,7 +885,7 @@ class _MyAppState extends State<MyApp> {
           debugPrint('chordStr=${chordList.length}');
         }
         String timeSignatureStr = timeSignatures[timeSignature.value];
-        String noteLengthStr = noteLengths[noteLengthSelectedIndex.value];
+        String noteLengthStr = noteLengths[defaultNoteLenght.value];
         debugPrint(
             'timeSignatureStr=$timeSignatureStr,noteLengthStr=$noteLengthStr');
         for (int i = 0; i < virtualNotes.length; i++) {
