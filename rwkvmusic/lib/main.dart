@@ -45,6 +45,7 @@ import 'package:rwkvmusic/test/midi_devicelist_page.dart';
 import 'package:rwkvmusic/utils/abchead.dart';
 // import 'package:rwkvmusic/test/testwebviewuniversal.dart';
 import 'package:rwkvmusic/utils/audioplayer.dart';
+import 'package:rwkvmusic/utils/chord_util.dart';
 import 'package:rwkvmusic/utils/justaudioplayer.dart';
 import 'package:rwkvmusic/utils/midiconvertabc.dart';
 import 'package:rwkvmusic/utils/mididevicemanage.dart';
@@ -159,6 +160,9 @@ List midiNotes = [];
 // bool isNeedConvertMidiNotes = false;
 
 List virtualNotes = []; //虚拟键盘按键音符
+List<int> intNodes = []; //计算和弦需要使用
+String prechord = '';
+
 var selectstate = 0.obs;
 late bool isWindowsOrMac;
 late WebViewControllerPlus controllerPiano;
@@ -298,7 +302,7 @@ void fetchABCDataByIsolate() async {
   if (selectstate.value == 0) {
     prompt = promptsAbc[promptSelectedIndex.value];
   } else {
-    prompt = "L:1/4\nM:$timeSingnatureStr\nK:C\n$createPrompt \"A\"";
+    prompt = "L:1/4\nM:$timeSingnatureStr\nK:C\n|$createPrompt";
   }
   debugPrint('generate Prompt==$prompt');
   // 创建一个新的 Isolate
@@ -771,7 +775,7 @@ class _MyAppState extends State<MyApp> {
     }
     createPrompt = sbff.toString();
     String sb =
-        "setAbcString(\"%%MIDI program $midiProgramValue\\nL:1/4\\nM:$timeSingnatureStr\\nK:C\\n|\\$createPrompt\",false)";
+        "setAbcString(\"%%MIDI program $midiProgramValue\\nL:1/4\\nM:$timeSingnatureStr\\nK:C\\n|$createPrompt\",false)";
     finalabcStringCreate = ABCHead.appendTempoParam(sb, tempo.value.toInt());
     debugPrint('curr=$finalabcStringCreate');
     controllerPiano.runJavaScript(finalabcStringCreate);
@@ -788,18 +792,45 @@ class _MyAppState extends State<MyApp> {
     }
     // sbNoteCreate.write(noteName);
     virtualNotes.add(noteName);
+    intNodes.add(node);
+
     StringBuffer sbff = StringBuffer();
-    for (String note in virtualNotes) {
+    List chordList = [];
+    if (timeSignature.value == 2) {
+      String chordStr = ChordUtil.getChord(intNodes.toString());
+      chordList = jsonDecode(chordStr);
+      debugPrint('chordStr=${chordList.length}');
+    }
+
+    // int result = 7 ~/ 2; // 3
+    for (int i = 0; i < virtualNotes.length; i++) {
+      String note = virtualNotes[i];
+      if (timeSignature.value == 2) {
+        if (i % 4 == 0) {
+          int chordLenght = i ~/ 4;
+          if (chordList.length > chordLenght) {
+            //插入竖线和和弦
+            if (i == 0) {
+              sbff.write('\\"${chordList[chordLenght]}\\" ');
+            } else {
+              sbff.write('|\\"${chordList[chordLenght]}\\" ');
+            }
+          }
+        }
+      }
       sbff.write(note);
     }
     createPrompt = sbff.toString();
+    // ChordUtil.getResult();
+    // ChordUtil.checkContentIsSame();
+    // ChordUtil.findDifferent();
     String sb;
     if (isChangeTempo) {
       sb =
-          "setAbcString(\"Q:${tempo.value.toInt()}\\nL:1/4\\nM:$timeSingnatureStr\\nK:C\\n|\\$createPrompt\",false)";
+          "setAbcString(\"Q:${tempo.value.toInt()}\\nL:1/4\\nM:$timeSingnatureStr\\nK:C\\n|$createPrompt\",false)";
     } else {
       sb =
-          "setAbcString(\"%%MIDI program $midiProgramValue\\nL:1/4\\nM:$timeSingnatureStr\\nK:C\\n|\\$createPrompt\",false)";
+          "setAbcString(\"%%MIDI program $midiProgramValue\\nL:1/4\\nM:$timeSingnatureStr\\nK:C\\n|$createPrompt\",false)";
     }
     finalabcStringCreate = ABCHead.appendTempoParam(sb, tempo.value.toInt());
     debugPrint('curr=$finalabcStringCreate');
@@ -828,6 +859,7 @@ class _MyAppState extends State<MyApp> {
     }
     if (virtualNotes.isNotEmpty) {
       virtualNotes.removeLast();
+      intNodes.removeLast();
       if (virtualNotes.isEmpty) {
         finalabcStringCreate =
             "setAbcString(\"${ABCHead.getABCWithInstrument('L:1/4\nM:$timeSingnatureStr\nK:C\n|', midiProgramValue)}\",false)";
@@ -842,7 +874,7 @@ class _MyAppState extends State<MyApp> {
           sbff.write(note);
         }
         String sb =
-            "setAbcString(\"%%MIDI program $midiProgramValue\\nL:1/4\\nM:$timeSingnatureStr\\nK:C\\n|\\${sbff.toString()}\",false)";
+            "setAbcString(\"%%MIDI program $midiProgramValue\\nL:1/4\\nM:$timeSingnatureStr\\nK:C\\n|${sbff.toString()}\",false)";
         debugPrint('curr=$sb');
         sb = ABCHead.appendTempoParam(sb, tempo.value.toInt());
         controllerPiano.runJavaScript(sb);
@@ -1661,6 +1693,7 @@ class _MyAppState extends State<MyApp> {
 
   void createModeDefault() {
     virtualNotes.clear();
+    intNodes.clear();
     //creative
     // String str1 =
     //     "setAbcString(\"%%MIDI program $midiProgramValue\\nL:1/4\\nM:4/4\\nK:C\\n|\",false)";
