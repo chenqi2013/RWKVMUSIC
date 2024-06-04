@@ -245,6 +245,10 @@ tr:nth-child(even) {
   filter: drop-shadow(0px 0px 1.5px rgba(186, 242, 70, 1)) !important;
 }
 
+path.abcjs-ledger {
+  fill: white;
+}
+
 /* 
 .abcjs-note {
   fill: white;
@@ -318,9 +322,12 @@ text {
 }
 
 ::-webkit-scrollbar {
-  width: 0;  /* Remove scrollbar space */
-  background: transparent;  /* Optional: just make scrollbar invisible */
+  width: 0;
+  /* Remove scrollbar space */
+  background: transparent;
+  /* Optional: just make scrollbar invisible */
 }
+
 /* Optional: show position indicator in red */
 ::-webkit-scrollbar-thumb {
   background: #00000000;
