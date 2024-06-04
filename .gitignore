@@ -32,3 +32,4 @@ rwkvmusic/lib/fastmodel/RWKV-6-ABC-85M-v1-20240217-ctx1024-Qualcomm-XElite.bin
 rwkvmusic/lib/fastmodel/libfaster_rwkvddebug.zip
 rwkvmusic/lib/fastmodel/libfaster_rwkvd.zip
 rwkvmusic/lib/fastmodel/RWKV-6-ABC-85M-v1-20240217-ctx1024-webrwkv.st
+rwkvmusic/lib/fastmodel/faster_rwkvd.dll
