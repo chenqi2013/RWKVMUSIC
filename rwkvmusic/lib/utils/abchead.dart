@@ -57,4 +57,41 @@ class ABCHead {
     print("base64abctoEvents: $encodedString");
     return base64abctoEvents;
   }
+
+  static int insertMeasureLinePosition(
+      String timeSignatures, String noteLengths) {
+    if (timeSignatures == '2/4' && noteLengths == '1/4') {
+      return 2;
+    } else if (timeSignatures == '2/4' && noteLengths == '1/8') {
+      return 4;
+    } else if (timeSignatures == '2/4' && noteLengths == '1/16') {
+      return 8;
+    } else if (timeSignatures == '3/4' && noteLengths == '1/4') {
+      return 3;
+    } else if (timeSignatures == '3/4' && noteLengths == '1/8') {
+      return 6;
+    } else if (timeSignatures == '3/4' && noteLengths == '1/16') {
+      return 12;
+    } else if (timeSignatures == '4/4' && noteLengths == '1/4') {
+      return 4;
+    } else if (timeSignatures == '4/4' && noteLengths == '1/8') {
+      return 8;
+    } else if (timeSignatures == '4/4' && noteLengths == '1/16') {
+      return 16;
+    } else if (timeSignatures == '3/8' && noteLengths == '1/4') {
+      return 1;
+    } else if (timeSignatures == '3/8' && noteLengths == '1/8') {
+      return 3;
+    } else if (timeSignatures == '3/8' && noteLengths == '1/16') {
+      return 6;
+    } else if (timeSignatures == '6/8' && noteLengths == '1/4') {
+      return 3;
+    } else if (timeSignatures == '6/8' && noteLengths == '1/8') {
+      return 6;
+    } else if (timeSignatures == '6/8' && noteLengths == '1/16') {
+      return 12;
+    }
+
+    return 4;
+  }
 }
