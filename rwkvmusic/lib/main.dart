@@ -801,7 +801,6 @@ class _MyAppState extends State<MyApp> {
       chordList = jsonDecode(chordStr);
       debugPrint('chordStr=${chordList.length}');
     }
-
     // int result = 7 ~/ 2; // 3
     for (int i = 0; i < virtualNotes.length; i++) {
       String note = virtualNotes[i];
@@ -870,7 +869,28 @@ class _MyAppState extends State<MyApp> {
         createPrompt = '';
       } else {
         StringBuffer sbff = StringBuffer();
-        for (String note in virtualNotes) {
+        List chordList = [];
+        if (timeSignature.value == 2) {
+          String chordStr = ChordUtil.getChord(intNodes.toString());
+          chordList = jsonDecode(chordStr);
+          debugPrint('chordStr=${chordList.length}');
+        }
+        // int result = 7 ~/ 2; // 3
+        for (int i = 0; i < virtualNotes.length; i++) {
+          String note = virtualNotes[i];
+          if (timeSignature.value == 2) {
+            if (i % 4 == 0) {
+              int chordLenght = i ~/ 4;
+              if (chordList.length > chordLenght) {
+                //插入竖线和和弦
+                if (i == 0) {
+                  sbff.write('\\"${chordList[chordLenght]}\\" ');
+                } else {
+                  sbff.write('|\\"${chordList[chordLenght]}\\" ');
+                }
+              }
+            }
+          }
           sbff.write(note);
         }
         String sb =

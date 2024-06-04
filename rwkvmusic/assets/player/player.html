@@ -131,13 +131,13 @@
             events.push([
               Math.round((x.tick * 125) / 180),
               "on" + detail,
-              x.noteNumber - 20,
+              x.noteNumber - 20 + 20,
             ]);
           else if (x.name == "Note off")
             events.push([
               Math.round((x.tick * 125) / 180),
               "off" + detail,
-              x.noteNumber - 20,
+              x.noteNumber - 20 + 20,
             ]);
         }
       }
