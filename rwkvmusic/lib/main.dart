@@ -174,7 +174,7 @@ ScrollController _controller = ScrollController();
 var tokens = ''.obs;
 var currentClickNoteInfo = [];
 
-var noteLengthList = ['1/4', '1/8', '1/16'];
+// var noteLengthList = ['1/4', '1/8', '1/16'];
 List<Note> notes = [];
 Isolate? userIsolate;
 var isCreateGenerate = false.obs;
@@ -675,7 +675,7 @@ class _MyAppState extends State<MyApp> {
             debugPrint('list===$currentClickNoteInfo');
             noteLengthSelectedIndex.value = NoteCaculate()
                 .getNoteLengthIndex(list[0], int.parse(list[list.length - 1]));
-            showPromptDialog(context, 'Change note length', noteLengthList,
+            showPromptDialog(context, 'Change note length', noteLengths,
                 'STORAGE_note_SELECT');
           }
         }
@@ -766,7 +766,7 @@ class _MyAppState extends State<MyApp> {
   void updateNote(int index, int noteLengthIndex, String note) {
     debugPrint('updateNote index=$index,note=$note');
     String newnote = NoteCaculate()
-        .calculateNewNoteByLength(note, noteLengthList[noteLengthIndex]);
+        .calculateNewNoteByLength(note, noteLengths[noteLengthIndex]);
     NoteCaculate().noteMap[index] = newnote;
     virtualNotes[index] = newnote;
     StringBuffer sbff = StringBuffer();
@@ -801,10 +801,13 @@ class _MyAppState extends State<MyApp> {
       chordList = jsonDecode(chordStr);
       debugPrint('chordStr=${chordList.length}');
     }
-    // int result = 7 ~/ 2; // 3
+    String timeSignatureStr = timeSignatures[timeSignature.value];
+    String noteLengthStr = noteLengths[noteLengthSelectedIndex.value];
+    debugPrint(
+        'timeSignatureStr=$timeSignatureStr,noteLengthStr=$noteLengthStr');
     for (int i = 0; i < virtualNotes.length; i++) {
       String note = virtualNotes[i];
-      if (timeSignature.value == 2) {
+      if (timeSignatureStr == '4/4' && noteLengthStr == '1/4') {
         if (i % 4 == 0) {
           int chordLenght = i ~/ 4;
           if (chordList.length > chordLenght) {
@@ -815,6 +818,12 @@ class _MyAppState extends State<MyApp> {
               sbff.write('|\\"${chordList[chordLenght]}\\" ');
             }
           }
+        }
+      } else {
+        int postion =
+            ABCHead.insertMeasureLinePosition(timeSignatureStr, noteLengthStr);
+        if (i % postion == 0 && i > 0) {
+          sbff.write('|');
         }
       }
       sbff.write(note);
@@ -875,10 +884,13 @@ class _MyAppState extends State<MyApp> {
           chordList = jsonDecode(chordStr);
           debugPrint('chordStr=${chordList.length}');
         }
-        // int result = 7 ~/ 2; // 3
+        String timeSignatureStr = timeSignatures[timeSignature.value];
+        String noteLengthStr = noteLengths[noteLengthSelectedIndex.value];
+        debugPrint(
+            'timeSignatureStr=$timeSignatureStr,noteLengthStr=$noteLengthStr');
         for (int i = 0; i < virtualNotes.length; i++) {
           String note = virtualNotes[i];
-          if (timeSignature.value == 2) {
+          if (timeSignatureStr == '4/4' && noteLengthStr == '1/4') {
             if (i % 4 == 0) {
               int chordLenght = i ~/ 4;
               if (chordList.length > chordLenght) {
@@ -889,6 +901,12 @@ class _MyAppState extends State<MyApp> {
                   sbff.write('|\\"${chordList[chordLenght]}\\" ');
                 }
               }
+            }
+          } else {
+            int postion = ABCHead.insertMeasureLinePosition(
+                timeSignatureStr, noteLengthStr);
+            if (i % postion == 0 && i > 0) {
+              sbff.write('|');
             }
           }
           sbff.write(note);
