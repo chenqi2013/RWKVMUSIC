@@ -451,6 +451,10 @@ void getABCDataByLocalModel(var array) async {
     String textstr = resultstr.replaceAll('\n', '').replaceAll('\r', '');
     stringBuffer.write(resultstr);
     textstr = CommonUtils.escapeString(stringBuffer.toString());
+    int subindex = currentPrompt.indexOf('L:');
+    String subpresentPrompt = currentPrompt.substring(subindex);
+    textstr = '$subpresentPrompt $textstr';
+    // debugPrint('subpresentPrompt=$subpresentPrompt');
     abcString =
         "setAbcString(\"${ABCHead.getABCWithInstrument(textstr, midiprogramvalue)}\",false)";
     abcString = ABCHead.appendTempoParam(abcString, tempo.value.toInt());
@@ -469,6 +473,7 @@ void getABCDataByLocalModel(var array) async {
       // if (isIOS) {
       //   controllerPiano.runJavaScript(abcString);
       // } else {
+      // debugPrint('abcString==$abcString');
       sendPort.send(abcString);
       // }
     }
@@ -709,26 +714,7 @@ class _MyAppState extends State<MyApp> {
         debugPrint('flutteronNoteOn onMessageReceived=${jsMessage.message}');
         String name =
             MidiToABCConverter().getNoteMp3Path(int.parse(jsMessage.message));
-        if (currentSoundEffect != null) {
-          String? mp3Folder = soundEffect[currentSoundEffect];
-          debugPrint('mp3Folder==$mp3Folder');
-          if (isWindowsOrMac) {
-            AudioPlayerManage().playAudio('player/soundfont/$mp3Folder/$name');
-          } else {
-            JustAudioPlayerManage()
-                .playAudio('player/soundfont/$mp3Folder/$name');
-          }
-          debugPrint('player/soundfont/$mp3Folder/$name');
-        } else {
-          debugPrint('mp3Folder==null');
-          if (isWindowsOrMac) {
-            AudioPlayerManage()
-                .playAudio('player/soundfont/acoustic_grand_piano-mp3/$name');
-          } else {
-            JustAudioPlayerManage()
-                .playAudio('player/soundfont/acoustic_grand_piano-mp3/$name');
-          }
-        }
+        playNoteMp3(name);
         updatePianoNote(int.parse(jsMessage.message));
       });
     controllerKeyboard.loadFlutterAssetServer(filePathKeyboardAnimation);
@@ -740,13 +726,13 @@ class _MyAppState extends State<MyApp> {
         // debugPrint('chenqi $event');
         tokens.value = ' -- ${event.toString()}';
       } else if (event == 'finish') {
-        // if (!isPlay.value) {
-        // Future.delayed(const Duration(milliseconds: 1000), () {
-        //   //改短了播放状态不对，曲谱没播放
-        //   // isPlay.value = false;
-        //   playOrPausePiano();
-        // });
-        // }
+        if (!isPlay.value) {
+          Future.delayed(const Duration(milliseconds: 1000), () {
+            //改短了播放状态不对，曲谱没播放
+            // isPlay.value = false;
+            playOrPausePiano();
+          });
+        }
       } else {
         // // debugPrint('abcset=$event');
 
@@ -761,6 +747,29 @@ class _MyAppState extends State<MyApp> {
         // controllerPiano.runJavaScript(event);
       }
     });
+  }
+
+  void playNoteMp3(String name) {
+    debugPrint('playNoteMp3playNoteMp3');
+    if (currentSoundEffect != null) {
+      String? mp3Folder = soundEffect[currentSoundEffect];
+      debugPrint('mp3Folder==$mp3Folder');
+      if (isWindowsOrMac) {
+        AudioPlayerManage().playAudio('player/soundfont/$mp3Folder/$name');
+      } else {
+        JustAudioPlayerManage().playAudio('player/soundfont/$mp3Folder/$name');
+      }
+      debugPrint('player/soundfont/$mp3Folder/$name');
+    } else {
+      debugPrint('mp3Folder==null');
+      if (isWindowsOrMac) {
+        AudioPlayerManage()
+            .playAudio('player/soundfont/acoustic_grand_piano-mp3/$name');
+      } else {
+        JustAudioPlayerManage()
+            .playAudio('player/soundfont/acoustic_grand_piano-mp3/$name');
+      }
+    }
   }
 
   void updateNote(int index, int noteLengthIndex, String note) {
@@ -3122,13 +3131,14 @@ class _MyAppState extends State<MyApp> {
               if ((result[0] as String).isNotEmpty) {
                 String path = convertABC.getNoteMp3Path(result[1]);
                 updatePianoNote(result[1]);
-                if (isWindowsOrMac) {
-                  AudioPlayerManage().playAudio(
-                      'player/soundfont/acoustic_grand_piano-mp3/$path');
-                } else {
-                  JustAudioPlayerManage().playAudio(
-                      'player/soundfont/acoustic_grand_piano-mp3/$path');
-                }
+                playNoteMp3(path);
+                // if (isWindowsOrMac) {
+                //   AudioPlayerManage().playAudio(
+                //       'player/soundfont/acoustic_grand_piano-mp3/$path');
+                // } else {
+                //   JustAudioPlayerManage().playAudio(
+                //       'player/soundfont/acoustic_grand_piano-mp3/$path');
+                // }
               }
             };
           }
