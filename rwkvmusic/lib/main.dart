@@ -726,6 +726,8 @@ class _MyAppState extends State<MyApp> {
         // debugPrint('chenqi $event');
         tokens.value = ' -- ${event.toString()}';
       } else if (event == 'finish') {
+        virtualNotes.clear();
+        intNodes.clear();
         if (!isPlay.value) {
           Future.delayed(const Duration(milliseconds: 1000), () {
             //改短了播放状态不对，曲谱没播放
@@ -865,6 +867,7 @@ class _MyAppState extends State<MyApp> {
   }
 
   void resetLastNote() {
+    debugPrint('resetLastNote');
     if (isCreateGenerate.value) {
       if (!isGenerating.value) {
         isCreateGenerate.value = false;
@@ -883,7 +886,8 @@ class _MyAppState extends State<MyApp> {
         finalabcStringCreate =
             ABCHead.appendTempoParam(finalabcStringCreate, tempo.value.toInt());
         debugPrint('str112==$finalabcStringCreate');
-        controllerPiano.runJavaScript(finalabcStringCreate);
+        controllerPiano
+            .runJavaScript(ABCHead.base64AbcString(finalabcStringCreate));
         createPrompt = '';
       } else {
         StringBuffer sbff = StringBuffer();
@@ -3123,6 +3127,9 @@ class _MyAppState extends State<MyApp> {
             // Get characteristic updates in `onValueChanged`
             UniversalBle.onValueChanged =
                 (String deviceId, String characteristicId, Uint8List value) {
+              if (selectstate.value == 0) {
+                return;
+              }
               Uint8List sublist = value.sublist(2);
               debugPrint(
                   'onValueChanged $deviceId, $characteristicId, $sublist');
