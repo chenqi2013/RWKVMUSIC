@@ -1305,10 +1305,10 @@ class _MyAppState extends State<MyApp> {
                 ),
               ),
               SizedBox(
-                height: 33.h,
+                height: isWindowsOrMac ? 33.h : 15.h,
               ),
               Obx(() => Flexible(
-                    flex: isWindowsOrMac ? 2 : 5,
+                    flex: isWindowsOrMac ? 2 : 2,
                     child: Visibility(
                         key: const ValueKey('ValueKey11'),
                         visible: isVisibleWebview.value,
@@ -1320,11 +1320,11 @@ class _MyAppState extends State<MyApp> {
                         )),
                   )),
               SizedBox(
-                height: 20.h,
+                height: isWindowsOrMac ? 33.h : 15.h,
               ),
               Obx(
                 () => Flexible(
-                    flex: isWindowsOrMac ? 6 : 5,
+                    flex: isWindowsOrMac ? 6 : 4,
                     child: Visibility(
                       visible: isVisibleWebview.value,
                       // maintainSize: true, // 保持占位空间
@@ -1340,13 +1340,16 @@ class _MyAppState extends State<MyApp> {
               // )),
               Obx(
                 () => Expanded(
-                  flex: isWindowsOrMac ? 1 : 2,
+                  flex: isWindowsOrMac ? 1 : 1,
                   child: Visibility(
                     visible: isVisibleWebview.value,
                     key: const ValueKey('ValueKey33'),
                     child: Container(
                       padding: EdgeInsets.only(
-                          left: 0, top: 40.h, right: 0, bottom: 2),
+                          left: 0,
+                          top: isWindowsOrMac ? 40.h : 28.h,
+                          right: 0,
+                          bottom: 2),
                       child: Obx(
                         () => Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -2953,88 +2956,103 @@ class _MyAppState extends State<MyApp> {
         left: 0.0,
         child: Material(
             color: Colors.transparent,
-            child: Container(
-              height: !isVisible ? 600.h : 1300.h,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.all(Radius.circular(30.w)),
-                // color: Colors.transparent,
-                image: DecorationImage(
-                  image: AssetImage(
-                      'assets/images/${isVisible ? 'dialogbg.png' : 'backgroundbg.jpg'}'), // 替换为你的背景图片路径backgroundbg.jpg
-                  fit: BoxFit.cover,
-                ),
-              ),
-              padding: const EdgeInsets.all(10),
-              // color: Colors.white,
-              child: Column(
-                children: [
-                  if (isVisible)
-                    Padding(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 16, vertical: 25),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          TextTitle(
-                            text: 'Bluetooth Connect',
-                          ),
-                          InkWell(
-                            child: Icon(
-                              Icons.close,
-                              size: 50.w,
-                            ),
-                            onTap: () {
-                              if (isVisible) {
-                                closeOverlay();
-                              } else {
-                                closeDialog();
-                              }
-                            },
-                          )
-                        ],
-                      ),
-                    ),
-                  const SizedBox(
-                    height: 10,
+            child: SafeArea(
+              child: Container(
+                height:
+                    !isVisible ? 600.h : 600.h, //!isVisible ? 600.h : 1300.h
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.all(Radius.circular(30.w)),
+                  // color: Colors.transparent,
+                  image: DecorationImage(
+                    image: AssetImage(
+                        'assets/images/${isVisible ? 'backgroundbg.jpg' : 'backgroundbg.jpg'}'), //isVisible ? 'dialogbg.png' : 'backgroundbg.jpg'
+                    fit: BoxFit.cover,
                   ),
-                  Expanded(
-                      child: Obx(() => ListView.builder(
-                            itemCount: bleList.length,
-                            itemBuilder: (context, index) {
-                              return ListTile(
-                                title: Text(
-                                  bleList[index].name!,
-                                  style: TextStyle(
-                                    color: AppColor.color_999999,
-                                    fontSize: 45.sp,
-                                    fontWeight: FontWeight.w400,
-                                  ),
-                                ),
-                                subtitle: Text(
-                                  bleList[index].deviceId,
-                                  style: TextStyle(
-                                    color: AppColor.color_757575,
-                                    fontSize: 35.sp,
-                                    fontWeight: FontWeight.w300,
-                                  ),
-                                ),
-                                onTap: () {
-                                  debugPrint('stopScanstopScan');
-                                  if (isWindowsOrMac) {
-                                    isVisibleWebview.value = isVisible;
-                                    // setState(() {});
-                                  }
-                                  UniversalBle.stopScan();
-                                  debugPrint(
-                                      'isVisibleWebview.value = $isVisible');
-                                  conectDevice(bleList[index]);
-                                  overlayEntry!.remove();
-                                  isShowOverlay = false;
-                                },
-                              );
-                            },
-                          )))
-                ],
+                ),
+                padding: const EdgeInsets.all(10),
+                // color: Colors.white,
+                child: Column(
+                  children: [
+                    if (isVisible)
+                      Padding(
+                        padding: EdgeInsets.symmetric(
+                            horizontal: isWindowsOrMac ? 26.w : 16.w,
+                            vertical: isWindowsOrMac ? 25.h : 12.h),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            TextTitle(
+                              text: 'Bluetooth Connect',
+                            ),
+                            InkWell(
+                              child: Icon(
+                                Icons.close,
+                                size: 50.w,
+                              ),
+                              onTap: () {
+                                if (isVisible) {
+                                  closeOverlay();
+                                } else {
+                                  closeDialog();
+                                }
+                              },
+                            )
+                          ],
+                        ),
+                      ),
+                    const SizedBox(
+                      height: 10,
+                    ),
+                    Expanded(
+                        child: Obx(() => ListView.builder(
+                              itemCount: bleList.length,
+                              itemBuilder: (context, index) {
+                                return InkWell(
+                                  onTap: () {
+                                    debugPrint('stopScanstopScan');
+                                    if (isWindowsOrMac) {
+                                      isVisibleWebview.value = isVisible;
+                                      // setState(() {});
+                                    }
+                                    UniversalBle.stopScan();
+                                    debugPrint(
+                                        'isVisibleWebview.value = $isVisible');
+                                    conectDevice(bleList[index]);
+                                    overlayEntry!.remove();
+                                    isShowOverlay = false;
+                                  },
+                                  child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          bleList[index].name!,
+                                          style: TextStyle(
+                                            color: AppColor.color_999999,
+                                            fontSize: 45.sp,
+                                            fontWeight: FontWeight.w400,
+                                          ),
+                                        ),
+                                        SizedBox(
+                                          height: 20.h,
+                                        ),
+                                        Text(
+                                          bleList[index].deviceId,
+                                          style: TextStyle(
+                                            color: AppColor.color_757575,
+                                            fontSize: 35.sp,
+                                            fontWeight: FontWeight.w300,
+                                          ),
+                                        ),
+                                        SizedBox(
+                                          height: 20.h,
+                                        ),
+                                      ]),
+                                );
+                              },
+                            )))
+                  ],
+                ),
               ),
             )),
       ),
