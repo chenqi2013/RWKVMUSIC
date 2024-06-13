@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:rwkvmusic/style/color.dart';
@@ -10,10 +12,11 @@ class TextTitle extends StatelessWidget {
   Color? color;
   @override
   Widget build(BuildContext context) {
+    bool isWindowsOrMac = Platform.isWindows || Platform.isMacOS;
     return Text(
       text,
       style: TextStyle(
-        fontSize: fontSize ?? 60.sp,
+        fontSize: fontSize ?? (isWindowsOrMac ? 60.sp : 50.sp),
         fontWeight: fontWeight ?? FontWeight.w700,
         color: color ?? AppColor.color_757575,
         shadows: [

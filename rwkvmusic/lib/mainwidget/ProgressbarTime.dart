@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -7,14 +9,15 @@ import 'package:rwkvmusic/style/color.dart';
 
 Widget ProgressbarTime(RxDouble currentSliderValue, RxDouble totalTime,
     VoidCallback onPressed, bool isPlay) {
+  bool isWindowsOrMac = Platform.isWindows || Platform.isMacOS;
   String imgName = isPlay ? 'ic_stop' : 'ic_play';
   return Container(
     padding: EdgeInsets.symmetric(horizontal: 15.w, vertical: 25.h),
-    width: 1163.w,
-    height: 113.h,
+    width: isWindowsOrMac ? 1163.w : 984.w,
+    height: isWindowsOrMac ? 113.h : 96.h,
     decoration: BoxDecoration(
       color: AppColor.color_2C2C2C,
-      borderRadius: BorderRadius.circular(14.h),
+      borderRadius: BorderRadius.circular(isWindowsOrMac ? 14.h : 12.h),
       boxShadow: [
         BoxShadow(
           color: Colors.white.withOpacity(.25),
@@ -39,15 +42,17 @@ Widget ProgressbarTime(RxDouble currentSliderValue, RxDouble totalTime,
     child: Row(mainAxisAlignment: MainAxisAlignment.spaceAround, children: [
       SvgPicture.asset(
         'assets/images/ic_music.svg',
-        width: 48.w,
-        height: 53.h,
+        width: isWindowsOrMac ? 48.w : 40.w,
+        height: isWindowsOrMac ? 53.h : 44.h,
         fit: BoxFit.cover,
       ),
       // 时间显示
       Text(
         formatDuration(Duration(seconds: totalTime.value ~/ 1000.0)),
         style: TextStyle(
-            color: Colors.white, fontWeight: FontWeight.w400, fontSize: 36.sp),
+            color: Colors.white,
+            fontWeight: FontWeight.w400,
+            fontSize: isWindowsOrMac ? 36.sp : 30.sp),
       ),
       // 播放进度条
       // SliderTheme(
@@ -62,7 +67,7 @@ Widget ProgressbarTime(RxDouble currentSliderValue, RxDouble totalTime,
       //   ),
       //   child:
       SizedBox(
-        width: 639.w,
+        width: isWindowsOrMac ? 639.w : 541.w,
         child: Slider(
           allowedInteraction: SliderInteraction.tapOnly,
           activeColor: Colors.white,
@@ -83,7 +88,9 @@ Widget ProgressbarTime(RxDouble currentSliderValue, RxDouble totalTime,
             seconds:
                 (totalTime.value / 1000.0 * currentSliderValue.value).toInt())),
         style: TextStyle(
-            color: Colors.white, fontWeight: FontWeight.w400, fontSize: 36.sp),
+            color: Colors.white,
+            fontWeight: FontWeight.w400,
+            fontSize: isWindowsOrMac ? 36.sp : 30.sp),
       ),
 
       InkWell(
@@ -93,8 +100,8 @@ Widget ProgressbarTime(RxDouble currentSliderValue, RxDouble totalTime,
           },
           child: SvgPicture.asset(
             'assets/images/$imgName.svg',
-            width: 50.w,
-            height: 56.h,
+            width: isWindowsOrMac ? 50.w : 42.w,
+            height: isWindowsOrMac ? 56.h : 48.h,
             fit: BoxFit.cover,
           )),
     ]),

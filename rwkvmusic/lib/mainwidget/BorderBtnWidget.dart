@@ -3,6 +3,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:rwkvmusic/main.dart';
 import 'package:rwkvmusic/style/color.dart';
 
 class CreatBottomBtn extends StatelessWidget {
@@ -66,12 +67,12 @@ class CreatBottomBtn extends StatelessWidget {
                     text,
                     style: TextStyle(
                         color: textColor ?? Colors.white,
-                        fontSize: 39.sp,
+                        fontSize: isWindowsOrMac ? 39.sp : 33.sp,
                         fontWeight: FontWeight.w700),
                   ),
                 if (text.isNotEmpty)
                   SizedBox(
-                    width: 35.w,
+                    width: isWindowsOrMac ? 35.w : 20.w,
                   ),
                 icon,
               ],
