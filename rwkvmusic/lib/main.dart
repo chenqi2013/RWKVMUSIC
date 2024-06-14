@@ -246,21 +246,23 @@ void fetchABCDataByIsolate() async {
         'RWKV-5-ABC-82M-v1-20230901-ctx1024-ncnn.param');
   }
   if (Platform.isIOS) {
-    String frameworkpath = await CommonUtils.frameworkpath();
-    if (!(await File(frameworkpath).exists())) {
-      dllPath = await CommonUtils.loadDllFromAssets('libfaster_rwkvddebug.zip');
-      CommonUtils.unzipfile(dllPath);
-      debugPrint('frameworkpath is not exists');
-    } else {
-      debugPrint('frameworkpath is exists');
-    }
-    dllPath = frameworkpath;
+    // String frameworkpath = await CommonUtils.frameworkpath();
+    // if (!(await File(frameworkpath).exists())) {
+    //   dllPath = await CommonUtils.loadDllFromAssets('libfaster_rwkvddebug.zip');
+    //   CommonUtils.unzipfile(dllPath);
+    //   debugPrint('frameworkpath is not exists');
+    // } else {
+    //   debugPrint('frameworkpath is exists');
+    // }
+    // dllPath = frameworkpath;
+    //ios 只要把.a放入工程目录并设置即可
+    dllPath = '';
     binPath = await CommonUtils.loadDllFromAssets(
-        'RWKV-5-ABC-82M-v1-20230901-ctx1024-ncnn.bin');
+        'RWKV-6-ABC-85M-v1-20240217-ctx1024-ncnn.bin');
     configPath = await CommonUtils.loadDllFromAssets(
-        'RWKV-5-ABC-82M-v1-20230901-ctx1024-ncnn.config');
+        'RWKV-6-ABC-85M-v1-20240217-ctx1024-ncnn.config');
     paramPath = await CommonUtils.loadDllFromAssets(
-        'RWKV-5-ABC-82M-v1-20230901-ctx1024-ncnn.param');
+        'RWKV-6-ABC-85M-v1-20240217-ctx1024-ncnn.param');
   } else if (Platform.isAndroid) {
     dllPath = await CommonUtils.loadDllFromAssets('libfaster_rwkvd.so');
     binPath = await CommonUtils.loadDllFromAssets(
@@ -384,8 +386,8 @@ void getABCDataByLocalModel(var array) async {
   Pointer<Char> promptChar = prompt.toNativeUtf8().cast<Char>();
   faster_rwkvd fastrwkv = faster_rwkvd(
       Platform.isIOS ? DynamicLibrary.process() : DynamicLibrary.open(dllPath));
-  // Pointer<Char> strategy = 'ncnn fp32'.toNativeUtf8().cast<Char>();
-  Pointer<Char> strategy = 'webgpu auto'.toNativeUtf8().cast<Char>();
+  Pointer<Char> strategy = 'ncnn fp32'.toNativeUtf8().cast<Char>(); //苹果ios
+  // Pointer<Char> strategy = 'webgpu auto'.toNativeUtf8().cast<Char>();
   // Pointer<Char> strategy = 'qnn auto'.toNativeUtf8().cast<Char>();
   Pointer<Void> model =
       fastrwkv.rwkv_model_create(binPath.toNativeUtf8().cast<Char>(), strategy);
@@ -395,7 +397,7 @@ void getABCDataByLocalModel(var array) async {
   StringBuffer stringBuffer = StringBuffer();
   int preTimestamp = 0;
   late String abcString;
-  fastrwkv.rwkv_model_clear_states(model);
+  // fastrwkv.rwkv_model_clear_states(model);
   // 默认的就按照pengbo的demo里面的temp=1.0 top_k=8, top_p=0.8?
   int token = fastrwkv.rwkv_abcmodel_run_prompt(model, abcTokenizer, sampler,
       promptChar, prompt.length, 1.0, 8, randomness);
