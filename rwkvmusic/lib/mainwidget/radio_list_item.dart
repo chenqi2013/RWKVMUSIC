@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:rwkvmusic/mainwidget/text_item.dart';
@@ -17,6 +19,7 @@ class RadioListItem extends StatelessWidget {
   final Function(int index) onChanged;
   @override
   Widget build(BuildContext context) {
+    bool isWindowsOrMac = Platform.isWindows || Platform.isMacOS;
     return InkWell(
       onTap: () {
         onChanged(index);
@@ -27,8 +30,8 @@ class RadioListItem extends StatelessWidget {
           children: [
             Image.asset(
               'assets/images/${isSelected ? 'radio_select' : 'radio_unselect'}.png',
-              width: 60.w,
-              height: 60.w,
+              width: isWindowsOrMac ? 60.w : 40.w,
+              height: isWindowsOrMac ? 60.w : 40.w,
             ),
             SizedBox(
               width: 30.w,

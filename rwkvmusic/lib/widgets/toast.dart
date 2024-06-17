@@ -14,6 +14,6 @@ Future<bool?> toastInfo({
     timeInSecForIosWeb: 1,
     backgroundColor: backgroundColor,
     textColor: textColor,
-    fontSize: 9.sp,
+    fontSize: 33.sp,
   );
 }

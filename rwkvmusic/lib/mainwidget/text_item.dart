@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:rwkvmusic/style/color.dart';
@@ -15,10 +17,11 @@ class TextItem extends StatelessWidget {
   List<Color>? linearColor;
   @override
   Widget build(BuildContext context) {
+    bool isWindowsOrMac = Platform.isWindows || Platform.isMacOS;
     return Text(
       text,
       style: TextStyle(
-        fontSize: fontSize ?? 45.sp,
+        fontSize: fontSize ?? (isWindowsOrMac ? 45.sp : 40.sp),
         fontWeight: fontWeight ?? FontWeight.w400,
         // color: Colors.white,
         foreground: Paint()

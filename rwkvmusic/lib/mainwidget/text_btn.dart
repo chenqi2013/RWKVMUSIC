@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
@@ -19,6 +20,7 @@ class TextBtn extends StatelessWidget {
   Color? textColor;
   @override
   Widget build(BuildContext context) {
+    bool isWindowsOrMac = Platform.isWindows || Platform.isMacOS;
     return InkWell(
         onTap: () {
           // 按钮被点击时执行的操作
@@ -59,7 +61,7 @@ class TextBtn extends StatelessWidget {
               text,
               style: TextStyle(
                   color: textColor ?? Colors.white,
-                  fontSize: 39.sp,
+                  fontSize: isWindowsOrMac ? 39.sp : 33.sp,
                   fontWeight: FontWeight.w700),
             ),
           ),

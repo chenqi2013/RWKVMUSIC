@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
@@ -15,6 +17,7 @@ class CheckBoxItem extends StatelessWidget {
   final Function(bool isSelected) onChanged;
   @override
   Widget build(BuildContext context) {
+    bool isWindowsOrMac = Platform.isWindows || Platform.isMacOS;
     return InkWell(
       onTap: () {
         isSelected = !isSelected;
@@ -26,8 +29,8 @@ class CheckBoxItem extends StatelessWidget {
           children: [
             SvgPicture.asset(
               'assets/images/${isSelected ? 'checkon' : 'checkoff'}.svg',
-              width: 60.w,
-              height: 60.w,
+              width: isWindowsOrMac ? 60.w : 40.w,
+              height: isWindowsOrMac ? 60.w : 40.w,
             ),
             SizedBox(
               width: 30.w,

@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
@@ -14,11 +16,12 @@ class CustomSegmentControl11 extends StatelessWidget {
   final Function(int) callBack;
   @override
   Widget build(BuildContext context) {
+    bool isWindowsOrMac = Platform.isWindows || Platform.isMacOS;
     return Container(
       // height: 50,
       decoration: BoxDecoration(
         color: AppColor.color_2C2C2C,
-        borderRadius: BorderRadius.circular(14.h),
+        borderRadius: BorderRadius.circular(isWindowsOrMac ? 14.h : 7.h),
         boxShadow: [
           BoxShadow(
             color: Colors.white.withOpacity(.25),
@@ -41,6 +44,7 @@ class CustomSegmentControl11 extends StatelessWidget {
         ],
       ),
       child: ListView.builder(
+        padding: const EdgeInsets.all(0), //手机端需要设置，否则会有边距
         scrollDirection: Axis.horizontal,
         itemCount: segments.length,
         itemBuilder: (BuildContext context, int index) {
@@ -53,12 +57,14 @@ class CustomSegmentControl11 extends StatelessWidget {
             },
             child: Obx(() => Container(
                   alignment: Alignment.center,
-                  padding: EdgeInsets.symmetric(horizontal: 20.w),
+                  padding: EdgeInsets.symmetric(
+                      horizontal: isWindowsOrMac ? 20.w : 20.w),
                   decoration: BoxDecoration(
                     color: selectedIndex.value == index
                         ? AppColor.color_494949
                         : Colors.transparent,
-                    borderRadius: BorderRadius.circular(10.w),
+                    borderRadius:
+                        BorderRadius.circular(isWindowsOrMac ? 10.w : 8.h),
                   ),
                   child: Text(
                     segments[index],
@@ -67,7 +73,7 @@ class CustomSegmentControl11 extends StatelessWidget {
                           ? AppColor.color_ffffff
                           : AppColor.color_757575,
                       fontWeight: FontWeight.bold,
-                      fontSize: 39.sp,
+                      fontSize: isWindowsOrMac ? 39.sp : 33.sp,
                     ),
                   ),
                 )),
