@@ -355,7 +355,6 @@ void getABCDataByLocalModel(var array) async {
 // M:4/4
 // K:C
 // ^G,^A,^C^D "A"''';
-
   debugPrint('currentPrompt==$currentPrompt');
   int midiprogramvalue = array[2];
   int seed = array[3];
@@ -387,9 +386,9 @@ void getABCDataByLocalModel(var array) async {
   Pointer<Char> promptChar = prompt.toNativeUtf8().cast<Char>();
   faster_rwkvd fastrwkv = faster_rwkvd(
       Platform.isIOS ? DynamicLibrary.process() : DynamicLibrary.open(dllPath));
-  Pointer<Char> strategy = 'ncnn fp32'.toNativeUtf8().cast<Char>(); //苹果ios
+  // Pointer<Char> strategy = 'ncnn fp32'.toNativeUtf8().cast<Char>();
   // Pointer<Char> strategy = 'webgpu auto'.toNativeUtf8().cast<Char>();
-  // Pointer<Char> strategy = 'qnn auto'.toNativeUtf8().cast<Char>();
+  Pointer<Char> strategy = 'qnn auto'.toNativeUtf8().cast<Char>();
   Pointer<Void> model =
       fastrwkv.rwkv_model_create(binPath.toNativeUtf8().cast<Char>(), strategy);
   Pointer<Void> abcTokenizer = fastrwkv.rwkv_ABCTokenizer_create();
@@ -2815,7 +2814,9 @@ class _MyAppState extends State<MyApp> {
                                         const Duration(milliseconds: 500), () {
                                       playOrPausePiano();
                                     });
-                                    // closeDialog();
+                                    if (isWindowsOrMac) {
+                                      closeDialog();
+                                    }
                                   } else if (type ==
                                       STORAGE_SOUNDSEFFECT_SELECT) {
                                     // if (isPlay.value == false) {
@@ -2857,7 +2858,9 @@ class _MyAppState extends State<MyApp> {
                                               : finalabcStringCreate,
                                           true);
                                     });
-                                    // closeDialog();
+                                    if (isWindowsOrMac) {
+                                      closeDialog();
+                                    }
                                   }
                                 },
                               ),
@@ -2924,6 +2927,7 @@ class _MyAppState extends State<MyApp> {
   }
 
   void closeDialog() {
+    isShowDialog = false;
     UniversalBle.stopScan();
     if (isWindowsOrMac) {
       // setState(() {
@@ -3081,6 +3085,7 @@ class _MyAppState extends State<MyApp> {
   }
 
   void closeOverlay() {
+    isShowDialog = false;
     UniversalBle.stopScan();
     if (isWindowsOrMac) {
       // setState(() {
