@@ -123,6 +123,7 @@ void main(List<String> args) async {
   ));
 }
 
+bool isShowDialog = false;
 RxBool isGenerating = false.obs;
 EventBus eventBus = EventBus();
 EventBus isolateEventBus = EventBus();
@@ -266,11 +267,11 @@ void fetchABCDataByIsolate() async {
   } else if (Platform.isAndroid) {
     dllPath = await CommonUtils.loadDllFromAssets('libfaster_rwkvd.so');
     binPath = await CommonUtils.loadDllFromAssets(
-        'RWKV-6-ABC-85M-v1-20240217-ctx1024-MTK-D9300.bin');
+        'RWKV-6-ABC-85M-v1-20240217-ctx1024-ncnn.bin');
     configPath = await CommonUtils.loadDllFromAssets(
-        'RWKV-6-ABC-85M-v1-20240217-ctx1024-MTK-D9300.config');
+        'RWKV-6-ABC-85M-v1-20240217-ctx1024-ncnn.config');
     paramPath = await CommonUtils.loadDllFromAssets(
-        'RWKV-5-ABC-82M-v1-20230901-ctx1024-ncnn.param');
+        'RWKV-6-ABC-85M-v1-20240217-ctx1024-ncnn.param');
   } else if (Platform.isWindows) {
     dllPath = await CommonUtils.getdllPath();
     binPath = await CommonUtils.getBinPath();
@@ -666,7 +667,7 @@ class _MyAppState extends State<MyApp> {
             controllerPiano.runJavaScript("setAbcString(\"$abcstr\",false)");
             controllerKeyboard.runJavaScript('resetPlay()');
             debugPrint(abcstr);
-            // Future.delayed(const Duration(microseconds: 300), () {
+            // Future.delayed(const Duration(milliseconds: 300), () {
             //   playOrPausePiano();
             // });
           }
@@ -675,6 +676,10 @@ class _MyAppState extends State<MyApp> {
       ..addJavaScriptChannel("flutteronClickNote",
           onMessageReceived: (JavaScriptMessage jsMessage) {
         debugPrint('flutteronClickNote onMessageReceived=${jsMessage.message}');
+        if (isShowDialog) {
+          debugPrint('isShowDialog return');
+          return;
+        }
         List list = jsMessage.message.split(',');
         if (int.parse(list[list.length - 1]) >= 0) {
           if (selectstate.value == 1 && isPlay.value == false) {
@@ -714,6 +719,10 @@ class _MyAppState extends State<MyApp> {
       ..addJavaScriptChannel("flutteronNoteOn",
           onMessageReceived: (JavaScriptMessage jsMessage) {
         debugPrint('flutteronNoteOn onMessageReceived=${jsMessage.message}');
+        if (isShowDialog) {
+          debugPrint('isShowDialog return');
+          return;
+        }
         String name =
             MidiToABCConverter().getNoteMp3Path(int.parse(jsMessage.message));
         playNoteMp3(name);
@@ -1773,11 +1782,12 @@ class _MyAppState extends State<MyApp> {
   // }
 
   void showSettingDialog(BuildContext context) {
+    isShowDialog = true;
     TextEditingController controller = TextEditingController(
         text: ''); // ${DateTime.now().microsecondsSinceEpoch}
     showDialog(
       // barrierColor: Colors.transparent,
-      barrierDismissible: isWindowsOrMac ? false : true,
+      barrierDismissible: isWindowsOrMac ? false : false,
       context: context,
       builder: (BuildContext context) {
         // 返回一个Dialog
@@ -1816,6 +1826,7 @@ class _MyAppState extends State<MyApp> {
                             size: 50.w,
                           ),
                           onTap: () {
+                            isShowDialog = false;
                             // if (isWindowsOrMac) {
                             //   isVisibleWebview.value = !isVisibleWebview.value;
                             //   setState(() {});
@@ -2044,10 +2055,11 @@ class _MyAppState extends State<MyApp> {
   }
 
   void showCreateModelSettingDialog(BuildContext context) {
+    isShowDialog = true;
     TextEditingController controller = TextEditingController(
         text: ''); // ${DateTime.now().microsecondsSinceEpoch}
     showDialog(
-      barrierDismissible: isWindowsOrMac ? false : true,
+      barrierDismissible: isWindowsOrMac ? false : false,
       context: context,
       builder: (BuildContext context) {
         // 返回一个Dialog
@@ -2088,6 +2100,7 @@ class _MyAppState extends State<MyApp> {
                                 size: 50.w,
                               ),
                               onTap: () {
+                                isShowDialog = false;
                                 // if (isWindowsOrMac) {
                                 //   isVisibleWebview.value = !isVisibleWebview.value;
                                 //   setState(() {});
@@ -2568,6 +2581,7 @@ class _MyAppState extends State<MyApp> {
 
   void showPromptDialog(
       BuildContext context, String titleStr, List list, String type) {
+    isShowDialog = true;
     if (isShowOverlay) {
       closeOverlay();
     }
@@ -2637,6 +2651,7 @@ class _MyAppState extends State<MyApp> {
                             //   setState(() {});
                             // }
                             // Navigator.of(context).pop();
+                            isShowDialog = false;
                             closeDialog();
                           },
                         )
@@ -2796,15 +2811,11 @@ class _MyAppState extends State<MyApp> {
                                       debugPrint(
                                           'finalabcStringCreate=$finalabcStringCreate');
                                     }
-                                    // Future.delayed(
-                                    //     const Duration(microseconds: 100), () {
-                                    //   playPianoAnimation(
-                                    //       selectstate.value == 0
-                                    //           ? finalabcStringPreset
-                                    //           : finalabcStringCreate,
-                                    //       true);
-                                    // });
-                                    closeDialog();
+                                    Future.delayed(
+                                        const Duration(milliseconds: 500), () {
+                                      playOrPausePiano();
+                                    });
+                                    // closeDialog();
                                   } else if (type ==
                                       STORAGE_SOUNDSEFFECT_SELECT) {
                                     // if (isPlay.value == false) {
@@ -2838,16 +2849,15 @@ class _MyAppState extends State<MyApp> {
                                           ABCHead.base64AbcString(
                                               finalabcStringCreate));
                                     }
-                                    // Future.delayed(
-                                    //     const Duration(microseconds: 100), () {
-                                    //   playPianoAnimation(
-                                    //       selectstate.value == 0
-                                    //           ? finalabcStringPreset
-                                    //           : finalabcStringCreate,
-                                    //       true);
-                                    // });
-                                    closeDialog();
-                                    setState(() {});
+                                    Future.delayed(
+                                        const Duration(milliseconds: 500), () {
+                                      playPianoAnimation(
+                                          selectstate.value == 0
+                                              ? finalabcStringPreset
+                                              : finalabcStringCreate,
+                                          true);
+                                    });
+                                    // closeDialog();
                                   }
                                 },
                               ),
@@ -2992,6 +3002,7 @@ class _MyAppState extends State<MyApp> {
                                 size: 50.w,
                               ),
                               onTap: () {
+                                isShowDialog = false;
                                 if (isVisible) {
                                   closeOverlay();
                                 } else {
