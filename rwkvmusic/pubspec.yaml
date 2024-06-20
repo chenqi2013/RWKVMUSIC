@@ -155,6 +155,7 @@ flutter:
     - assets/player/soundfont/violin-mp3/
     - assets/icons/
     - assets/piano/
+    - assets/piano/assets/
     - assets/doctor/pngList/
     - assets/doctor/static/css/
     - assets/doctor/static/js/

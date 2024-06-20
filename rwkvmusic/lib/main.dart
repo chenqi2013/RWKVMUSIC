@@ -180,6 +180,11 @@ List<Note> notes = [];
 Isolate? userIsolate;
 var isCreateGenerate = false.obs;
 var promptSelectedIndex = 0.obs;
+var keyboardSelectedIndex = 0.obs;
+
+int modelAddress = 0;
+int abcTokenizerAddress = 0;
+int samplerAddress = 0;
 
 Isolate? childSendPort;
 void testisolate22() async {
@@ -308,6 +313,14 @@ void fetchABCDataByIsolate() async {
     prompt = "L:1/4\nM:$timeSingnatureStr\nK:C\n|$createPrompt";
   }
   debugPrint('generate Prompt==$prompt');
+  var fastmodel = [];
+  if (modelAddress > 0) {
+    fastmodel = [modelAddress, abcTokenizerAddress, samplerAddress];
+  } else {
+    debugPrint(
+        'modelAddress==$modelAddress,abcTokenizerAddress==$abcTokenizerAddress');
+  }
+
   // 创建一个新的 Isolate
   userIsolate = await Isolate.spawn(getABCDataByLocalModel, [
     mainReceivePort.sendPort,
@@ -317,17 +330,24 @@ void fetchABCDataByIsolate() async {
     randomness.value,
     dllPath,
     binPath,
+    fastmodel,
   ]);
   // 监听来自子线线程的数据
   mainReceivePort.listen((data) {
     // debugPrint('Received data: $data');
     if (data is SendPort) {
       isolateSendPort = data;
+    } else if (data is List) {
+      debugPrint('Received lit data: $data');
+      modelAddress = data[0];
+      abcTokenizerAddress = data[1];
+      samplerAddress = data[2];
     } else if (data is EventBus) {
       isolateEventBus = data;
     } else if (data == "finish") {
       mainReceivePort.close(); // 操作完成后，关闭 ReceivePort
-      userIsolate!.kill();
+      userIsolate!.kill(priority: Isolate.immediate);
+      userIsolate = null;
       debugPrint('userIsolate!.kill()');
       isGenerating.value = false;
       eventBus.fire('finish');
@@ -363,6 +383,7 @@ void getABCDataByLocalModel(var array) async {
   // randomness = 0;
   String dllPath = array[5];
   String binPath = array[6];
+  var falstmodel = array[7];
   int eosId = 3;
   String prompt = currentPrompt;
   debugPrint('promptprompt==$prompt');
@@ -381,18 +402,31 @@ void getABCDataByLocalModel(var array) async {
     isStopGenerating = true;
     sendPort.send('finish');
   });
-  sendPort.send(isolateReceivePort.sendPort);
-  sendPort.send(eventBus);
+
+  Pointer<Void> model;
+  Pointer<Void> abcTokenizer;
+  Pointer<Void> sampler;
+
   Pointer<Char> promptChar = prompt.toNativeUtf8().cast<Char>();
   faster_rwkvd fastrwkv = faster_rwkvd(
       Platform.isIOS ? DynamicLibrary.process() : DynamicLibrary.open(dllPath));
-  // Pointer<Char> strategy = 'ncnn fp32'.toNativeUtf8().cast<Char>();
-  // Pointer<Char> strategy = 'webgpu auto'.toNativeUtf8().cast<Char>();
-  Pointer<Char> strategy = 'qnn auto'.toNativeUtf8().cast<Char>();
-  Pointer<Void> model =
-      fastrwkv.rwkv_model_create(binPath.toNativeUtf8().cast<Char>(), strategy);
-  Pointer<Void> abcTokenizer = fastrwkv.rwkv_ABCTokenizer_create();
-  Pointer<Void> sampler = fastrwkv.rwkv_sampler_create();
+  Pointer<Char> strategy = 'ncnn fp32'.toNativeUtf8().cast<Char>();
+  if (!falstmodel.isNotEmpty) {
+    model = fastrwkv.rwkv_model_create(
+        binPath.toNativeUtf8().cast<Char>(), strategy);
+    abcTokenizer = fastrwkv.rwkv_ABCTokenizer_create();
+    sampler = fastrwkv.rwkv_sampler_create();
+    debugPrint('fastrwkv.rwkv_model_create');
+  } else {
+    model = Pointer<Void>.fromAddress(falstmodel[0]);
+    abcTokenizer = Pointer<Void>.fromAddress(falstmodel[1]);
+    sampler = Pointer<Void>.fromAddress(falstmodel[2]);
+    debugPrint('not fastrwkv.rwkv_model_create');
+  }
+  sendPort.send(isolateReceivePort.sendPort);
+  sendPort.send(eventBus);
+  sendPort.send([model.address, abcTokenizer.address, sampler.address]);
+
   fastrwkv.rwkv_sampler_set_seed(sampler, seed);
   StringBuffer stringBuffer = StringBuffer();
   int preTimestamp = 0;
@@ -407,6 +441,8 @@ void getABCDataByLocalModel(var array) async {
     if (isStopGenerating) {
       debugPrint('stop getABCDataByLocalModel');
       break;
+    } else {
+      debugPrint('isGenerating $i');
     }
     DateTime now = DateTime.now();
     int millisecondsSinceEpoch1 = now.millisecondsSinceEpoch;
@@ -516,7 +552,6 @@ class _MyAppState extends State<MyApp> {
   int preCount = 0;
   int listenCount = 0;
   var effectSelectedIndex = 0.obs;
-  var keyboardSelectedIndex = 0.obs;
   var noteLengthSelectedIndex = 0.obs; //选中单个音符出现的弹框
   String? currentSoundEffect;
   // late StringBuffer sbNoteCreate = StringBuffer();
@@ -1442,6 +1477,14 @@ class _MyAppState extends State<MyApp> {
                                           // controllerKeyboard.loadRequest(
                                           //     Uri.parse(
                                           //         filePathKeyboardAnimation));
+                                        } else {
+                                          Future.delayed(
+                                              const Duration(seconds: 1), () {
+                                            controllerKeyboard
+                                                .runJavaScript('resetPlay()');
+                                            // controllerKeyboard.runJavaScript(
+                                            //     'clearAll()'); //resetPlay()
+                                          });
                                         }
                                       } else {
                                         // isolateSendPort.send('stop Generating');
@@ -2609,6 +2652,8 @@ class _MyAppState extends State<MyApp> {
     if (!isRememberPrompt.value) {
       // promptSelectedIndex.value = 0;
     }
+    debugPrint(
+        '11keyboardSelectedIndex=${keyboardSelectedIndex.value},promptSelectedIndex=${promptSelectedIndex.value}');
     showDialog(
         barrierDismissible: false,
         context: context,
@@ -2651,6 +2696,8 @@ class _MyAppState extends State<MyApp> {
                             // }
                             // Navigator.of(context).pop();
                             isShowDialog = false;
+                            debugPrint(
+                                'onChanged keyboardSelectedIndex close=${keyboardSelectedIndex.value}');
                             closeDialog();
                           },
                         )
@@ -2712,6 +2759,10 @@ class _MyAppState extends State<MyApp> {
                                     effectSelectedIndex.value = value;
                                   } else if (type == 'STORAGE_note_SELECT') {
                                     noteLengthSelectedIndex.value = value;
+                                  } else if (type == STORAGE_KEYBOARD_SELECT) {
+                                    keyboardSelectedIndex.value == value;
+                                    debugPrint(
+                                        'onChanged keyboardSelectedIndex=$value');
                                   }
                                   // isHideWebview.value = !isHideWebview.value;
                                   // setState(() {});
