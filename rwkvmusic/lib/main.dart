@@ -442,7 +442,7 @@ void getABCDataByLocalModel(var array) async {
       debugPrint('stop getABCDataByLocalModel');
       break;
     } else {
-      debugPrint('isGenerating $i');
+      // debugPrint('isGenerating $i');
     }
     DateTime now = DateTime.now();
     int millisecondsSinceEpoch1 = now.millisecondsSinceEpoch;
@@ -684,28 +684,29 @@ class _MyAppState extends State<MyApp> {
             'flutteronPlayFinish onMessageReceived=${jsMessage.message}');
         isPlay.value = false;
         isFinishABCEvent = false;
-        // isNeedRestart = true;
-        if (isAutoSwitch.value) {
-          //自动切换下一个prompt
-          promptSelectedIndex.value += 1;
-          // isHideWebview.value = !isHideWebview.value;
-          if (isRememberPrompt.value) {
-            ConfigStore.to.savePromptsSelect(promptSelectedIndex.value);
-          }
-          presentPrompt =
-              CommonUtils.escapeString(promptsAbc[promptSelectedIndex.value]);
-          if (selectstate.value == 0) {
-            String abcstr =
-                ABCHead.getABCWithInstrument(presentPrompt, midiProgramValue);
-            abcstr = ABCHead.appendTempoParam(abcstr, tempo.value.toInt());
-            controllerPiano.runJavaScript("setAbcString(\"$abcstr\",false)");
-            controllerKeyboard.runJavaScript('resetPlay()');
-            debugPrint(abcstr);
-            // Future.delayed(const Duration(milliseconds: 300), () {
-            //   playOrPausePiano();
-            // });
-          }
-        }
+
+        // // isNeedRestart = true;
+        // if (isAutoSwitch.value) {
+        //   //自动切换下一个prompt
+        //   promptSelectedIndex.value += 1;
+        //   // isHideWebview.value = !isHideWebview.value;
+        //   if (isRememberPrompt.value) {
+        //     ConfigStore.to.savePromptsSelect(promptSelectedIndex.value);
+        //   }
+        //   presentPrompt =
+        //       CommonUtils.escapeString(promptsAbc[promptSelectedIndex.value]);
+        //   if (selectstate.value == 0) {
+        //     String abcstr =
+        //         ABCHead.getABCWithInstrument(presentPrompt, midiProgramValue);
+        //     abcstr = ABCHead.appendTempoParam(abcstr, tempo.value.toInt());
+        //     controllerPiano.runJavaScript("setAbcString(\"$abcstr\",false)");
+        //     controllerKeyboard.runJavaScript('resetPlay()');
+        //     debugPrint(abcstr);
+        //     // Future.delayed(const Duration(milliseconds: 300), () {
+        //     //   playOrPausePiano();
+        //     // });
+        //   }
+        // }
       })
       ..addJavaScriptChannel("flutteronClickNote",
           onMessageReceived: (JavaScriptMessage jsMessage) {
@@ -1477,14 +1478,6 @@ class _MyAppState extends State<MyApp> {
                                           // controllerKeyboard.loadRequest(
                                           //     Uri.parse(
                                           //         filePathKeyboardAnimation));
-                                        } else {
-                                          Future.delayed(
-                                              const Duration(seconds: 1), () {
-                                            controllerKeyboard
-                                                .runJavaScript('resetPlay()');
-                                            // controllerKeyboard.runJavaScript(
-                                            //     'clearAll()'); //resetPlay()
-                                          });
                                         }
                                       } else {
                                         // isolateSendPort.send('stop Generating');
@@ -2863,6 +2856,12 @@ class _MyAppState extends State<MyApp> {
                                     }
                                     Future.delayed(
                                         const Duration(milliseconds: 500), () {
+                                      // if (!isWindowsOrMac) {
+                                      //   controllerKeyboard
+                                      //       .runJavaScript('clearAll()');
+                                      //   controllerKeyboard
+                                      //       .runJavaScript('resetPlay()');
+                                      // }
                                       playOrPausePiano();
                                     });
                                     if (isWindowsOrMac) {
@@ -2903,6 +2902,12 @@ class _MyAppState extends State<MyApp> {
                                     }
                                     Future.delayed(
                                         const Duration(milliseconds: 500), () {
+                                      // if (!isWindowsOrMac) {
+                                      //   controllerKeyboard
+                                      //       .runJavaScript('clearAll()');
+                                      //   controllerKeyboard
+                                      //       .runJavaScript('resetPlay()');
+                                      // }
                                       playPianoAnimation(
                                           selectstate.value == 0
                                               ? finalabcStringPreset
