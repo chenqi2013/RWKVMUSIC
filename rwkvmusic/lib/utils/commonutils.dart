@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 import 'package:archive/archive.dart';
+import 'package:device_info_plus/device_info_plus.dart';
 import 'package:path/path.dart' as p;
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter/material.dart';
@@ -145,5 +146,28 @@ class CommonUtils {
       // 处理错误
       debugPrint('请求发生错误: $error');
     });
+  }
+
+  static Future<String> getDeviceName() async {
+    DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
+    if (Platform.isAndroid) {
+      AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
+      print('Running on ${androidInfo.model}'); // e.g. "Moto G (4)"
+      return androidInfo.model;
+    } else if (Platform.isIOS) {
+      IosDeviceInfo iosInfo = await deviceInfo.iosInfo;
+      print('Running on ${iosInfo.utsname.machine}');
+      return iosInfo.utsname.machine;
+    }
+    print('getDeviceName=unknown');
+    return 'unknown';
+  }
+
+  static Future<String> getDeviceInfo() async {
+    final deviceInfoPlugin = DeviceInfoPlugin();
+    final deviceInfo = await deviceInfoPlugin.deviceInfo;
+    final allInfo = deviceInfo.data;
+    debugPrint('getDeviceInfo=${allInfo.toString()}');
+    return allInfo.toString();
   }
 }

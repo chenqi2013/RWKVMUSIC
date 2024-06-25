@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:rwkvmusic/main.dart';
 import 'package:rwkvmusic/style/color.dart';
 
 class ContainerLine extends StatelessWidget {
@@ -10,15 +11,16 @@ class ContainerLine extends StatelessWidget {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        border: Border.all(width: 2.w, color: AppColor.color_AFAFAF),
+        border: Border.all(
+            width: isWindowsOrMac ? 2.w : 0.5.w, color: AppColor.color_AFAFAF),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(.94),
             blurRadius: 0,
             spreadRadius: 0,
-            offset: const Offset(
+            offset: Offset(
               0.0,
-              2,
+              isWindowsOrMac ? 2.w : 0.5.w,
             ),
           ),
         ],

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
+import 'package:rwkvmusic/main.dart';
 import 'package:rwkvmusic/style/color.dart';
 
 class DropButtonList extends StatelessWidget {
@@ -75,7 +76,7 @@ class DropButtonList extends StatelessWidget {
           onChanged(items.indexOf(value));
         },
         buttonStyleData: ButtonStyleData(
-          height: 90.h,
+          height: isWindowsOrMac ? 90.h : 80.h,
           width: 185.w,
           padding: EdgeInsets.symmetric(vertical: 8.h, horizontal: 26.w),
           decoration: BoxDecoration(
@@ -112,7 +113,7 @@ class DropButtonList extends StatelessWidget {
           ),
         ),
         menuItemStyleData: MenuItemStyleData(
-          height: 90.h,
+          height: isWindowsOrMac ? 90.h : 60.h,
           padding: EdgeInsets.symmetric(vertical: 8.h, horizontal: 26.w),
         ),
       ),

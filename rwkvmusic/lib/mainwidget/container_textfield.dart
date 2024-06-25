@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'package:rwkvmusic/main.dart';
 import 'package:rwkvmusic/style/color.dart';
 import 'package:flutter/src/services/text_formatter.dart';
 
@@ -14,9 +15,10 @@ class ContainerTextField extends StatelessWidget {
     TextEditingController controller =
         TextEditingController(text: seed.toString());
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 15.w, vertical: 25.h),
+      padding: EdgeInsets.symmetric(
+          horizontal: 15.w, vertical: isWindowsOrMac ? 25.h : 0.1.h),
       width: 480.w,
-      height: 96.h,
+      height: isWindowsOrMac ? 96.h : 75.h,
       decoration: BoxDecoration(
         color: AppColor.color_2C2C2C,
         borderRadius: BorderRadius.circular(12.h),
@@ -41,28 +43,34 @@ class ContainerTextField extends StatelessWidget {
           ),
         ],
       ),
-      child: TextField(
-        style: TextStyle(
-            fontSize: 36.sp, // 字体大小
-            color: AppColor.color_757575, // 字体颜色
-            fontWeight: FontWeight.w400),
-        textAlign: TextAlign.right,
-        controller: controller,
-        keyboardType: TextInputType.number,
-        inputFormatters: <TextInputFormatter>[
-          FilteringTextInputFormatter.allow(RegExp(r'[0-9]')), // 只允许输入数字
-        ],
-        decoration: const InputDecoration(
-            // labelText: 'Please input seed value',
-            // hintText: 'Enter a number',
-            border: InputBorder.none),
-        onChanged: (text) {
-          // 当文本字段内容变化时调用
-          // seed.value = int.parse(text);
-          controller.text = text;
-          debugPrint('Current text: $text');
-          onChanged(text);
-        },
+      child: Center(
+        child: TextField(
+          style: TextStyle(
+              fontSize: 36.sp, // 字体大小
+              color: AppColor.color_757575, // 字体颜色
+              fontWeight: FontWeight.w400),
+          textAlign: TextAlign.right,
+          controller: controller,
+          keyboardType: TextInputType.number,
+          inputFormatters: <TextInputFormatter>[
+            FilteringTextInputFormatter.allow(RegExp(r'[0-9]')), // 只允许输入数字
+          ],
+          decoration: InputDecoration(
+            isDense: true,
+            contentPadding: EdgeInsets.symmetric(
+              horizontal: 6.w,
+              vertical: 6.h,
+            ),
+            border: InputBorder.none,
+          ),
+          onChanged: (text) {
+            // 当文本字段内容变化时调用
+            // seed.value = int.parse(text);
+            controller.text = text;
+            debugPrint('Current text: $text');
+            onChanged(text);
+          },
+        ),
       ),
     );
   }

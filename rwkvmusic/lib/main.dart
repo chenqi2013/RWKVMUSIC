@@ -1125,7 +1125,7 @@ class _MyAppState extends State<MyApp> {
                       // ),
 
                       SizedBox(
-                        width: isWindowsOrMac ? 596.w : 535.w,
+                        width: isWindowsOrMac ? 575.w : 535.w,
                         height: isWindowsOrMac ? 123.h : 104.h,
                         child: CustomSegmentControl11(
                           selectedIndex: selectstate,
@@ -1285,7 +1285,9 @@ class _MyAppState extends State<MyApp> {
                               height: isWindowsOrMac ? 61.h : 52.h,
                             ),
                             onPressed: () {
-                              // testisolate22();
+                              // CommonUtils.getDeviceInfo();
+                              // CommonUtils.getDeviceName();
+                              // // testisolate22();
                               // return;
                               debugPrint('Settings');
                               if (isShowOverlay) {
@@ -1841,7 +1843,7 @@ class _MyAppState extends State<MyApp> {
                   ),
                 ),
                 width: isWindowsOrMac ? 1400.w : 1200.w,
-                height: isWindowsOrMac ? 1000.h : 1000.h,
+                height: isWindowsOrMac ? 1000.h : 890.h,
                 padding: EdgeInsets.symmetric(
                     horizontal: isWindowsOrMac ? 60.w : 40.w,
                     vertical: isWindowsOrMac ? 40.h : 20.h),
@@ -1992,7 +1994,7 @@ class _MyAppState extends State<MyApp> {
                             children: [
                           TextBtn(
                             width: isWindowsOrMac ? 500.w : 500.w,
-                            height: isWindowsOrMac ? 113.h : 100.h,
+                            height: isWindowsOrMac ? 113.h : 80.h,
                             onPressed: () async {
                               if (midiNotes.isEmpty) {
                                 // String oriabcString = finalabcStringPreset
@@ -2064,7 +2066,7 @@ class _MyAppState extends State<MyApp> {
                           ),
                           TextBtn(
                             width: isWindowsOrMac ? 500.w : 500.w,
-                            height: isWindowsOrMac ? 113.h : 100.h,
+                            height: isWindowsOrMac ? 113.h : 80.h,
                             onPressed: () {
                               showBleDeviceOverlay(context, false);
                             },
@@ -2072,7 +2074,7 @@ class _MyAppState extends State<MyApp> {
                           ),
                         ])),
                     SizedBox(
-                      height: 20.h,
+                      height: isWindowsOrMac ? 60.h : 40.h,
                     ),
                     Center(child: TextItem(text: 'Version: RWKV-6 1.2.0')),
                   ],
@@ -2431,7 +2433,7 @@ class _MyAppState extends State<MyApp> {
                             children: [
                               TextBtn(
                                 width: isWindowsOrMac ? 500.w : 500.w,
-                                height: isWindowsOrMac ? 113.h : 100.h,
+                                height: isWindowsOrMac ? 113.h : 80.h,
                                 onPressed: () {
                                   if (midiNotes.isEmpty) {
                                     // String oriabcString = finalabcStringPreset
@@ -2487,15 +2489,15 @@ class _MyAppState extends State<MyApp> {
                               ),
                               TextBtn(
                                 width: isWindowsOrMac ? 500.w : 500.w,
-                                height: isWindowsOrMac ? 113.h : 100.h,
+                                height: isWindowsOrMac ? 113.h : 80.h,
                                 onPressed: () {
                                   showBleDeviceOverlay(context, false);
                                 },
                                 text: 'Scan BlueTooth Device',
                               ),
                             ]),
-                        const SizedBox(
-                          height: 20,
+                        SizedBox(
+                          height: isWindowsOrMac ? 60.h : 40.h,
                         ),
                         Center(child: TextItem(text: 'Version: RWKV-6 1.2.0')),
                         const SizedBox(
