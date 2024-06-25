@@ -1125,7 +1125,7 @@ class _MyAppState extends State<MyApp> {
                       // ),
 
                       SizedBox(
-                        width: isWindowsOrMac ? 575.w : 535.w,
+                        width: isWindowsOrMac ? 605.w : 535.w,
                         height: isWindowsOrMac ? 123.h : 104.h,
                         child: CustomSegmentControl11(
                           selectedIndex: selectstate,
