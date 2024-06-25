@@ -58,17 +58,18 @@ class CustomSegmentControl11 extends StatelessWidget {
             child: Obx(() => Container(
                   alignment: Alignment.center,
                   padding: EdgeInsets.symmetric(
-                      horizontal: isWindowsOrMac ? 20.w : 20.w),
+                      horizontal: isWindowsOrMac ? 25.w : 20.w),
                   decoration: BoxDecoration(
                     color: selectedIndex.value == index
                         ? AppColor.color_494949
                         : Colors.transparent,
                     borderRadius:
-                        BorderRadius.circular(isWindowsOrMac ? 10.w : 8.h),
+                        BorderRadius.circular(isWindowsOrMac ? 10.w : 8.w),
                   ),
                   child: Text(
                     segments[index],
                     style: TextStyle(
+                      // backgroundColor: Colors.red,
                       color: selectedIndex.value == index
                           ? AppColor.color_ffffff
                           : AppColor.color_757575,
