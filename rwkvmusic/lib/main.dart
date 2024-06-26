@@ -185,6 +185,7 @@ var keyboardSelectedIndex = 0.obs;
 int modelAddress = 0;
 int abcTokenizerAddress = 0;
 int samplerAddress = 0;
+bool isClicking = false;
 
 Isolate? childSendPort;
 void testisolate22() async {
@@ -351,7 +352,9 @@ void fetchABCDataByIsolate() async {
       debugPrint('userIsolate!.kill()');
       isGenerating.value = false;
       eventBus.fire('finish');
+      isClicking = false;
     } else if (data.toString().startsWith('tokens')) {
+      isClicking = false;
       eventBus.fire(data);
     } else {
       if (selectstate.value == 0) {
@@ -1453,6 +1456,11 @@ class _MyAppState extends State<MyApp> {
                                     ),
                                     onPressed: () {
                                       debugPrint('Generate');
+                                      if (isClicking) {
+                                        debugPrint('isClickingisClicking');
+                                        return;
+                                      }
+                                      isClicking = true;
                                       isGenerating.value = !isGenerating.value;
                                       if (isGenerating.value) {
                                         resetPianoAndKeyboard();
