@@ -687,7 +687,10 @@ class _MyAppState extends State<MyApp> {
             'flutteronPlayFinish onMessageReceived=${jsMessage.message}');
         isPlay.value = false;
         isFinishABCEvent = false;
-
+        if (!isWindowsOrMac) {
+          resetPianoAndKeyboard();
+          debugPrint('resetPianoAndKeyboard');
+        }
         // // isNeedRestart = true;
         // if (isAutoSwitch.value) {
         //   //自动切换下一个prompt
@@ -1764,6 +1767,8 @@ class _MyAppState extends State<MyApp> {
     controllerPiano.runJavaScript("triggerRestartBtnClick()");
 
     controllerKeyboard.runJavaScript('clearAll()'); //resetPlay()
+    controllerKeyboard.runJavaScript('resetPlay()');
+
     // if (selectstate.value == 0 || isCreateGenerate.value) {
     //   debugPrint('loadFlutterAssetServer-filePathKeyboardAnimation-');
     //   controllerKeyboard.loadFlutterAssetServer(filePathKeyboardAnimation);
@@ -1795,7 +1800,7 @@ class _MyAppState extends State<MyApp> {
       controllerPiano.runJavaScript("setPromptNoteNumberCount(3)");
       controllerKeyboard.loadFlutterAssetServer(filePathKeyboardAnimation);
       // controllerKeyboard.loadRequest(Uri.parse(filePathKeyboardAnimation));
-      controllerKeyboard.runJavaScript('resetPlay()');
+      // controllerKeyboard.runJavaScript('resetPlay()');
       // controllerKeyboard.runJavaScript('setPiano(55, 76)');
     } else {
       createModeDefault();
@@ -1818,7 +1823,7 @@ class _MyAppState extends State<MyApp> {
     controllerPiano.runJavaScript("setPromptNoteNumberCount(0)");
     controllerPiano.runJavaScript("setStyle()");
     controllerKeyboard.loadFlutterAssetServer(filePathKeyboard);
-    controllerKeyboard.runJavaScript('resetPlay()');
+    // controllerKeyboard.runJavaScript('resetPlay()');
     createPrompt = '';
   }
 
