@@ -1856,7 +1856,7 @@ class _MyAppState extends State<MyApp> {
                   ),
                 ),
                 width: isWindowsOrMac ? 1400.w : 1200.w,
-                height: isWindowsOrMac ? 1000.h : 890.h,
+                height: isWindowsOrMac ? 1000.h : 910.h,
                 padding: EdgeInsets.symmetric(
                     horizontal: isWindowsOrMac ? 60.w : 40.w,
                     vertical: isWindowsOrMac ? 40.h : 20.h),
