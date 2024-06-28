@@ -5,8 +5,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:rwkvmusic/style/color.dart';
 
-class CustomSegmentControl11 extends StatelessWidget {
-  CustomSegmentControl11(
+class CustomSegmentControl extends StatelessWidget {
+  CustomSegmentControl(
       {super.key,
       required this.callBack,
       required this.selectedIndex,

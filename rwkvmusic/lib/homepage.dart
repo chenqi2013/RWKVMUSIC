@@ -13,8 +13,8 @@ import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:rwkvmusic/main.dart';
-import 'package:rwkvmusic/mainwidget/Custom_Segment_Controller.dart';
-import 'package:rwkvmusic/mainwidget/progressbar_time.dart';
+import 'package:rwkvmusic/mainwidget/custom_segment_controller.dart';
+import 'package:rwkvmusic/mainwidget/play_progressbar.dart';
 import 'package:rwkvmusic/mainwidget/checkbox_item.dart';
 import 'package:rwkvmusic/mainwidget/container_line.dart';
 import 'package:rwkvmusic/mainwidget/container_textfield.dart';
@@ -86,11 +86,8 @@ class _HomePageState extends State<HomePage> {
     super.initState();
     midiProgramValue = ConfigStore.to.getMidiProgramSelect();
     isRememberPrompt.value = ConfigStore.to.getRemberPromptSelect();
-
     isRememberEffect.value = ConfigStore.to.getRemberEffectSelect();
-
     isAutoSwitch.value = ConfigStore.to.getAutoNextSelect();
-
     if (midiProgramValue == -1) {
       midiProgramValue = 0;
       debugPrint('set midiprogramvalue = 0');
@@ -103,7 +100,6 @@ class _HomePageState extends State<HomePage> {
     isWindowsOrMac = Platform.isWindows || Platform.isMacOS;
     stringBuffer = StringBuffer();
     deviceManage = MidiDeviceManage.getInstance();
-    // debugPrint('deviceManage22=$identityHashCode($deviceManage)');
     deviceManage.receiveCallback = (int data) {
       debugPrint('receiveCallback main =$data');
       updatePianoNote(data);
@@ -185,7 +181,6 @@ class _HomePageState extends State<HomePage> {
         controllerKeyboard.runJavaScript(jsstr);
         // controllerPiano.runJavaScript("startPlay()");
         // debugPrint('isFinishABCEvent == true,,,controllerPiano startPlay()');
-
         isFinishABCEvent = true;
         debugPrint('isFinishABCEvent == true,,,');
         // } else {
@@ -293,7 +288,6 @@ class _HomePageState extends State<HomePage> {
         intNodes.clear();
         if (!isPlay.value) {
           Future.delayed(const Duration(milliseconds: 1000), () {
-            //改短了播放状态不对，曲谱没播放
             // isPlay.value = false;
             playOrPausePiano();
           });
@@ -603,7 +597,7 @@ class _HomePageState extends State<HomePage> {
                       SizedBox(
                         width: isWindowsOrMac ? 605.w : 535.w,
                         height: isWindowsOrMac ? 123.h : 104.h,
-                        child: CustomSegmentControl11(
+                        child: CustomSegmentControl(
                           selectedIndex: selectstate,
                           segments: const ['Prompt Mode', 'Create Mode'],
                           callBack: (int newValue) {
@@ -782,10 +776,13 @@ class _HomePageState extends State<HomePage> {
                                 SizedBox(
                                   width: 40.w,
                                 ),
-                                Obx(() => ProgressbarTime(
-                                        playProgress, pianoAllTime, () {
+                                PlayProgressBar(
+                                    currentSliderValue: playProgress,
+                                    totalTime: pianoAllTime,
+                                    onPressed: () {
                                       playOrPausePiano();
-                                    }, isPlay.value)),
+                                    },
+                                    isPlay: isPlay.value),
                               ],
                             ),
                             Row(
