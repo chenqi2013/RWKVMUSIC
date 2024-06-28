@@ -170,4 +170,82 @@ class CommonUtils {
     debugPrint('getDeviceInfo=${allInfo.toString()}');
     return allInfo.toString();
   }
+
+  // void getABCDataByAPI() async {
+  //   var dic = {
+  //     "frequency_penalty": 0.4,
+  //     "max_tokens": 1000,
+  //     "model": "rwkv",
+  //     "presence_penalty": 0.4,
+  //     "prompt": "S:2",
+  //     "stream": true,
+  //     "temperature": 1.2,
+  //     "top_p": 0.5
+  //   };
+  //   httpClient = HttpClient();
+  //   HttpClientRequest request = await httpClient
+  //       .postUrl(Uri.parse('http://192.168.0.106:8000/completions'));
+  //   request.headers.contentType = ContentType
+  //       .json; //这个要设置，否则报错{"error":{"message":"当前分组 reverse-times 下对于模型  计费模式 [按次计费] 无可用渠道 (request id: 20240122102439864867952mIY4Ma3k)","type":"shell_api_error"}}
+  //   request.write(jsonEncode(dic));
+  //   // request.headers.add('Accept', 'text/event-stream');
+  //   HttpClientResponse response = await request.close();
+  //   subscription = response.listen((List<int> chunk) {
+  //     if (!isGenerating.value) {
+  //       subscription.cancel();
+  //       httpClient.close();
+  //       stringBuffer.clear();
+  //       stringBuffer = StringBuffer();
+  //       addCount = 0;
+  //       return;
+  //     } // 处理数据流的每个块
+  //     listenCount++;
+  //     String responseData = utf8.decode(chunk);
+  //     String textstr = CommonUtils.extractTextValue(responseData)!;
+  //     String tempStr = textstr;
+  //     debugPrint('responseData=$textstr');
+  //     stringBuffer.write(textstr);
+  //     textstr = CommonUtils.escapeString(stringBuffer.toString());
+  //     abcString =
+  //         "setAbcString(\"${ABCHead.getABCWithInstrument(textstr, midiProgramValue)}\",false)";
+  //     abcString = ABCHead.appendTempoParam(abcString, tempo.value.toInt());
+  //     debugPrint('abcstring result=$abcString');
+  //     // 方案一
+  //     if (isWindowsOrMac) {
+  //       int currentTimestamp = DateTime.now().millisecondsSinceEpoch;
+  //       int gap = currentTimestamp - preTimestamp;
+  //       if (gap > 400) {
+  //         //&& tempStr.trim().isEmpty
+  //         // debugPrint('runJavaScript');
+  //         preTimestamp = currentTimestamp;
+  //         controllerPiano.runJavaScript(abcString.toString());
+  //       }
+  //       return;
+  //     }
+
+  //     // // 方案二
+  //     // int currentCount = sb.length;
+  //     // int gap = currentCount - preCount;
+  //     // // debugdebugPrint('gap==$gap');
+  //     // if (gap >= 5) {
+  //     //   preCount = currentCount;
+  //     //   controllerPiano.runJavaScript(sb.toString());
+  //     // }
+
+  //     // 方案三
+  //     if (listenCount % 3 == 0) {
+  //       controllerPiano.runJavaScript(abcString.toString());
+  //     }
+  //   }, onDone: () {
+  //     // 数据流接收完成
+  //     debugPrint('请求完成');
+  //     httpClient.close();
+  //     isGenerating.value = false;
+  //     finalabcStringPreset = abcString.toString();
+  //   }, onError: (error) {
+  //     // 处理错误
+  //     debugPrint('请求发生错误: $error');
+  //     isGenerating.value = false;
+  //   });
+  // }
 }

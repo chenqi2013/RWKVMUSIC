@@ -1,14 +1,12 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:ui';
-// import 'dart:html';
 import 'dart:io';
 import 'package:filepicker_windows/filepicker_windows.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 // import 'package:flutter_inappwebview/flutter_inappwebview.dart';
-// import 'package:flutter_platform_alert/flutter_platform_alert.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 // import 'package:flutter_share/flutter_share.dart';
@@ -45,7 +43,6 @@ import 'package:rwkvmusic/values/constantdata.dart';
 import 'package:rwkvmusic/values/storage.dart';
 import 'package:rwkvmusic/values/values.dart';
 import 'package:rwkvmusic/widgets/toast.dart';
-// import 'package:share_plus/share_plus.dart';
 import 'package:universal_ble/universal_ble.dart';
 
 import 'mainwidget/border_bottom_btn.dart';
@@ -63,8 +60,6 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   late WebViewControllerPlus controllerKeyboard;
-  // String filePathKeyboardAnimation =
-  //     "http://192.168.3.14:3000"; //http://192.168.3.14:3000
   String filePathKeyboardAnimation = "assets/doctor/doctor.html";
   String filePathKeyboard = 'assets/piano/keyboard.html';
   String filePathPiano = 'assets/player/player.html';
@@ -83,7 +78,6 @@ class _HomePageState extends State<HomePage> {
   var effectSelectedIndex = 0.obs;
   var noteLengthSelectedIndex = 0.obs; //选中单个音符出现的弹框
   String? currentSoundEffect;
-  // late StringBuffer sbNoteCreate = StringBuffer();
   late MidiDeviceManage deviceManage;
   late String abcString;
   var isVisibleWebview = true.obs;
@@ -92,13 +86,9 @@ class _HomePageState extends State<HomePage> {
     super.initState();
     midiProgramValue = ConfigStore.to.getMidiProgramSelect();
     isRememberPrompt.value = ConfigStore.to.getRemberPromptSelect();
-    if (isRememberPrompt.value == false) {
-      //prompt 默认选择的一个
-    }
+
     isRememberEffect.value = ConfigStore.to.getRemberEffectSelect();
-    if (isRememberEffect.value == false) {
-      //effect 默认选择的一个
-    }
+
     isAutoSwitch.value = ConfigStore.to.getAutoNextSelect();
 
     if (midiProgramValue == -1) {
@@ -894,84 +884,6 @@ class _HomePageState extends State<HomePage> {
     // }
   }
 
-  void getABCDataByAPI() async {
-    var dic = {
-      "frequency_penalty": 0.4,
-      "max_tokens": 1000,
-      "model": "rwkv",
-      "presence_penalty": 0.4,
-      "prompt": "S:2",
-      "stream": true,
-      "temperature": 1.2,
-      "top_p": 0.5
-    };
-    httpClient = HttpClient();
-    HttpClientRequest request = await httpClient
-        .postUrl(Uri.parse('http://192.168.0.106:8000/completions'));
-    request.headers.contentType = ContentType
-        .json; //这个要设置，否则报错{"error":{"message":"当前分组 reverse-times 下对于模型  计费模式 [按次计费] 无可用渠道 (request id: 20240122102439864867952mIY4Ma3k)","type":"shell_api_error"}}
-    request.write(jsonEncode(dic));
-    // request.headers.add('Accept', 'text/event-stream');
-    HttpClientResponse response = await request.close();
-    subscription = response.listen((List<int> chunk) {
-      if (!isGenerating.value) {
-        subscription.cancel();
-        httpClient.close();
-        stringBuffer.clear();
-        stringBuffer = StringBuffer();
-        addCount = 0;
-        return;
-      } // 处理数据流的每个块
-      listenCount++;
-      String responseData = utf8.decode(chunk);
-      String textstr = CommonUtils.extractTextValue(responseData)!;
-      String tempStr = textstr;
-      debugPrint('responseData=$textstr');
-      stringBuffer.write(textstr);
-      textstr = CommonUtils.escapeString(stringBuffer.toString());
-      abcString =
-          "setAbcString(\"${ABCHead.getABCWithInstrument(textstr, midiProgramValue)}\",false)";
-      abcString = ABCHead.appendTempoParam(abcString, tempo.value.toInt());
-      debugPrint('abcstring result=$abcString');
-      // 方案一
-      if (isWindowsOrMac) {
-        int currentTimestamp = DateTime.now().millisecondsSinceEpoch;
-        int gap = currentTimestamp - preTimestamp;
-        if (gap > 400) {
-          //&& tempStr.trim().isEmpty
-          // debugPrint('runJavaScript');
-          preTimestamp = currentTimestamp;
-          controllerPiano.runJavaScript(abcString.toString());
-        }
-        return;
-      }
-
-      // // 方案二
-      // int currentCount = sb.length;
-      // int gap = currentCount - preCount;
-      // // debugdebugPrint('gap==$gap');
-      // if (gap >= 5) {
-      //   preCount = currentCount;
-      //   controllerPiano.runJavaScript(sb.toString());
-      // }
-
-      // 方案三
-      if (listenCount % 3 == 0) {
-        controllerPiano.runJavaScript(abcString.toString());
-      }
-    }, onDone: () {
-      // 数据流接收完成
-      debugPrint('请求完成');
-      httpClient.close();
-      isGenerating.value = false;
-      finalabcStringPreset = abcString.toString();
-    }, onError: (error) {
-      // 处理错误
-      debugPrint('请求发生错误: $error');
-      isGenerating.value = false;
-    });
-  }
-
   void resetPianoAndKeyboard() {
     // if (isPlay.value) {
     // playOrPausePiano();
@@ -1027,10 +939,7 @@ class _HomePageState extends State<HomePage> {
   void createModeDefault() {
     virtualNotes.clear();
     intNodes.clear();
-    //creative
-    // String str1 =
-    //     "setAbcString(\"%%MIDI program $midiProgramValue\\nL:1/4\\nM:4/4\\nK:C\\n|\",false)";
-    // debugPrint('str111==$str1');
+
     finalabcStringCreate =
         "setAbcString(\"${ABCHead.getABCWithInstrument(r'L:1/4\nM:4/4\nK:C\n|', midiProgramValue)}\",false)";
     finalabcStringCreate =
@@ -1057,190 +966,158 @@ class _HomePageState extends State<HomePage> {
         return Dialog(
           backgroundColor: Colors.transparent,
           child: SingleChildScrollView(
-              physics: const ClampingScrollPhysics(),
-              child: Container(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.all(Radius.circular(30.w)),
-                  color: Colors.transparent,
-                  image: const DecorationImage(
-                    image: AssetImage(
-                        'assets/images/backgroundbg.jpg'), // 替换为你的背景图片路径
-                    fit: BoxFit.cover,
-                  ),
+            physics: const ClampingScrollPhysics(),
+            child: Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.all(Radius.circular(30.w)),
+                color: Colors.transparent,
+                image: const DecorationImage(
+                  image: AssetImage(
+                      'assets/images/backgroundbg.jpg'), // 替换为你的背景图片路径
+                  fit: BoxFit.cover,
                 ),
-                width: isWindowsOrMac ? 1400.w : 1200.w,
-                height: isWindowsOrMac ? 1000.h : 910.h,
-                padding: EdgeInsets.symmetric(
-                    horizontal: isWindowsOrMac ? 60.w : 40.w,
-                    vertical: isWindowsOrMac ? 40.h : 20.h),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        TextTitle(
-                          text: 'Settings',
+              ),
+              width: isWindowsOrMac ? 1400.w : 1200.w,
+              height: isWindowsOrMac ? 1000.h : 910.h,
+              padding: EdgeInsets.symmetric(
+                  horizontal: isWindowsOrMac ? 60.w : 40.w,
+                  vertical: isWindowsOrMac ? 40.h : 20.h),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      TextTitle(
+                        text: 'Settings',
+                      ),
+                      InkWell(
+                        child: Icon(
+                          Icons.close,
+                          size: 50.w,
                         ),
-                        InkWell(
-                          child: Icon(
-                            Icons.close,
-                            size: 50.w,
-                          ),
-                          onTap: () {
-                            isShowDialog = false;
-                            // if (isWindowsOrMac) {
-                            //   isVisibleWebview.value = !isVisibleWebview.value;
-                            //   setState(() {});
-                            // }
-                            // Navigator.of(context).pop();
-                            closeDialog();
-                          },
-                        )
-                      ],
-                    ),
-                    const SizedBox(
-                      height: 10,
-                    ),
-                    Obx(() => Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              TextItem(text: 'Randomness'),
-                              Row(
-                                children: [
-                                  SizedBox(
-                                    width: 500.w,
-                                    child: Slider(
-                                      activeColor: Colors.white,
-                                      inactiveColor: Colors.black,
-                                      thumbColor: Colors.white,
-                                      value: randomness.value,
-                                      onChanged: (newValue) {
-                                        randomness.value = newValue;
-                                      },
-                                    ),
-                                  ),
-                                  TextItem(
-                                      text:
-                                          '${(randomness.value * 100).toInt()}%'),
-                                ],
-                              )
-                            ])),
-                    const SizedBox(
-                      height: 10,
-                    ),
-                    Row(
+                        onTap: () {
+                          isShowDialog = false;
+                          // if (isWindowsOrMac) {
+                          //   isVisibleWebview.value = !isVisibleWebview.value;
+                          //   setState(() {});
+                          // }
+                          // Navigator.of(context).pop();
+                          closeDialog();
+                        },
+                      )
+                    ],
+                  ),
+                  const SizedBox(
+                    height: 10,
+                  ),
+                  Obx(
+                    () => Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          TextItem(text: 'Seed'), //: ${seed.value}
-                          ContainerTextField(
-                            seed: seed.value,
-                            onChanged: (String text) {
-                              // 当文本字段内容变化时调用
-                              seed.value = int.parse(text);
-                              debugPrint('Current text: ');
-                            },
-                          ),
-                        ]),
-                    const SizedBox(
-                      height: 10,
-                    ),
-                    Center(
-                      child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            TextItem(text: 'Auto Chord'),
-                            Obx(() => SwitchItem(
-                                  value: autoChord.value,
-                                  onChanged: (newValue) {
-                                    autoChord.value = newValue;
-                                  },
-                                )),
-                          ]),
-                    ),
-                    SizedBox(
-                      height: 20.h,
-                    ),
-                    Center(
-                      child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            TextItem(text: 'Infinite Generation'),
-                            Obx(() => SwitchItem(
-                                  value: infiniteGeneration.value,
-                                  onChanged: (newValue) {
-                                    infiniteGeneration.value = newValue;
-                                  },
-                                )),
-                          ]),
-                    ),
-                    SizedBox(
-                      height: 20.h,
-                    ),
-                    // Row(children: [
-                    Obx(() => CheckBoxItem(
-                          title: 'Demo Mode$tokens',
-                          // visualDensity: VisualDensity.compact, // 去除空白间距
-                          isSelected: isAutoSwitch.value,
-                          onChanged: (bool? value) {
-                            isAutoSwitch.value = value!;
-                            ConfigStore.to.saveAutoNext(value);
-                          },
-                        )),
-                    // Obx(() => TextItem(text: 'Demo Mode$tokens')),
-                    // ]),
-                    SizedBox(
-                      height: 40.h,
-                    ),
-                    Center(
-                        child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
+                          TextItem(text: 'Randomness'),
+                          Row(
                             children: [
-                          TextBtn(
-                            width: isWindowsOrMac ? 500.w : 500.w,
-                            height: isWindowsOrMac ? 113.h : 80.h,
-                            onPressed: () async {
-                              if (midiNotes.isEmpty) {
-                                // String oriabcString = finalabcStringPreset
-                                //     .replaceAll('setAbcString', 'ABCtoEvents');
-                                // // abcString = r'ABCtoEvents("L:1/4\nM:4/4\nK:D\n\"D\" A F F")';
-                                // debugPrint(
-                                //     'playPianoAnimation ABCtoEvents==');
-                                // isNeedConvertMidiNotes = true;
-                                // controllerPiano.runJavaScript(oriabcString);
-                                playPianoAnimation(
-                                    selectstate.value == 0
-                                        ? finalabcStringPreset
-                                        : finalabcStringCreate,
-                                    true);
-                                Future.delayed(const Duration(seconds: 2),
-                                    () async {
-                                  debugPrint('Delayed action after 3 seconds');
-                                  // isNeedConvertMidiNotes = false;
-                                  if (isWindowsOrMac) {
-                                    final file = DirectoryPicker()
-                                      ..title = 'Select a directory';
-                                    final result = file.getDirectory();
-                                    if (result != null) {
-                                      debugPrint(
-                                          'Select a directory=${result.path}');
-                                    }
-                                    MidifileConvert.saveMidiFile(
-                                        midiNotes, result!.path);
-                                    Get.snackbar('提示', '文件保存成功',
-                                        colorText: Colors.black);
-                                    // toastInfo(msg: '文件保存成功');
-                                  } else {
-                                    //phone save file
-                                    Directory tempDir =
-                                        await getApplicationCacheDirectory();
-                                    String path = MidifileConvert.saveMidiFile(
-                                        midiNotes, tempDir.path);
-                                    shareFile(path);
-                                  }
-                                });
-                              } else {
+                              SizedBox(
+                                width: 500.w,
+                                child: Slider(
+                                  activeColor: Colors.white,
+                                  inactiveColor: Colors.black,
+                                  thumbColor: Colors.white,
+                                  value: randomness.value,
+                                  onChanged: (newValue) {
+                                    randomness.value = newValue;
+                                  },
+                                ),
+                              ),
+                              TextItem(
+                                  text: '${(randomness.value * 100).toInt()}%'),
+                            ],
+                          )
+                        ]),
+                  ),
+                  const SizedBox(
+                    height: 10,
+                  ),
+                  Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        TextItem(text: 'Seed'), //: ${seed.value}
+                        ContainerTextField(
+                          seed: seed.value,
+                          onChanged: (String text) {
+                            // 当文本字段内容变化时调用
+                            seed.value = int.parse(text);
+                            debugPrint('Current text: ');
+                          },
+                        ),
+                      ]),
+                  const SizedBox(
+                    height: 10,
+                  ),
+                  Center(
+                    child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          TextItem(text: 'Auto Chord'),
+                          Obx(() => SwitchItem(
+                                value: autoChord.value,
+                                onChanged: (newValue) {
+                                  autoChord.value = newValue;
+                                },
+                              )),
+                        ]),
+                  ),
+                  SizedBox(
+                    height: 20.h,
+                  ),
+                  Center(
+                    child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          TextItem(text: 'Infinite Generation'),
+                          Obx(() => SwitchItem(
+                                value: infiniteGeneration.value,
+                                onChanged: (newValue) {
+                                  infiniteGeneration.value = newValue;
+                                },
+                              )),
+                        ]),
+                  ),
+                  SizedBox(
+                    height: 20.h,
+                  ),
+                  Obx(() => CheckBoxItem(
+                        title: 'Demo Mode$tokens',
+                        // visualDensity: VisualDensity.compact, // 去除空白间距
+                        isSelected: isAutoSwitch.value,
+                        onChanged: (bool? value) {
+                          isAutoSwitch.value = value!;
+                          ConfigStore.to.saveAutoNext(value);
+                        },
+                      )),
+                  SizedBox(
+                    height: 40.h,
+                  ),
+                  Center(
+                      child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                        TextBtn(
+                          width: isWindowsOrMac ? 500.w : 500.w,
+                          height: isWindowsOrMac ? 113.h : 80.h,
+                          onPressed: () async {
+                            if (midiNotes.isEmpty) {
+                              playPianoAnimation(
+                                  selectstate.value == 0
+                                      ? finalabcStringPreset
+                                      : finalabcStringCreate,
+                                  true);
+                              Future.delayed(const Duration(seconds: 2),
+                                  () async {
+                                debugPrint('Delayed action after 3 seconds');
+                                // isNeedConvertMidiNotes = false;
                                 if (isWindowsOrMac) {
                                   final file = DirectoryPicker()
                                     ..title = 'Select a directory';
@@ -1255,36 +1132,60 @@ class _HomePageState extends State<HomePage> {
                                       colorText: Colors.black);
                                   // toastInfo(msg: '文件保存成功');
                                 } else {
-                                  // phone save file
+                                  //phone save file
                                   Directory tempDir =
                                       await getApplicationCacheDirectory();
                                   String path = MidifileConvert.saveMidiFile(
                                       midiNotes, tempDir.path);
                                   shareFile(path);
                                 }
+                              });
+                            } else {
+                              if (isWindowsOrMac) {
+                                final file = DirectoryPicker()
+                                  ..title = 'Select a directory';
+                                final result = file.getDirectory();
+                                if (result != null) {
+                                  debugPrint(
+                                      'Select a directory=${result.path}');
+                                }
+                                MidifileConvert.saveMidiFile(
+                                    midiNotes, result!.path);
+                                Get.snackbar('提示', '文件保存成功',
+                                    colorText: Colors.black);
+                                // toastInfo(msg: '文件保存成功');
+                              } else {
+                                // phone save file
+                                Directory tempDir =
+                                    await getApplicationCacheDirectory();
+                                String path = MidifileConvert.saveMidiFile(
+                                    midiNotes, tempDir.path);
+                                shareFile(path);
                               }
-                            },
-                            text: 'Export Midi File',
-                          ),
-                          SizedBox(
-                            width: 30.w,
-                          ),
-                          TextBtn(
-                            width: isWindowsOrMac ? 500.w : 500.w,
-                            height: isWindowsOrMac ? 113.h : 80.h,
-                            onPressed: () {
-                              showBleDeviceOverlay(context, false);
-                            },
-                            text: 'Scan BlueTooth Device',
-                          ),
-                        ])),
-                    SizedBox(
-                      height: isWindowsOrMac ? 60.h : 40.h,
-                    ),
-                    Center(child: TextItem(text: 'Version: RWKV-6 1.2.0')),
-                  ],
-                ),
-              )),
+                            }
+                          },
+                          text: 'Export Midi File',
+                        ),
+                        SizedBox(
+                          width: 30.w,
+                        ),
+                        TextBtn(
+                          width: isWindowsOrMac ? 500.w : 500.w,
+                          height: isWindowsOrMac ? 113.h : 80.h,
+                          onPressed: () {
+                            showBleDeviceOverlay(context, false);
+                          },
+                          text: 'Scan BlueTooth Device',
+                        ),
+                      ])),
+                  SizedBox(
+                    height: isWindowsOrMac ? 60.h : 40.h,
+                  ),
+                  Center(child: TextItem(text: 'Version: RWKV-6 1.2.0')),
+                ],
+              ),
+            ),
+          ),
         );
       },
     ).then((value) {
@@ -1347,7 +1248,6 @@ class _HomePageState extends State<HomePage> {
                                 //   isVisibleWebview.value = !isVisibleWebview.value;
                                 //   setState(() {});
                                 // }
-                                // Navigator.of(context).pop();
                                 closeDialog();
                               },
                             )
@@ -1434,31 +1334,32 @@ class _HomePageState extends State<HomePage> {
                                 },
                               ),
                             ]),
-                        Obx(() => Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  TextItem(text: 'Tempo'),
-                                  Row(
-                                    children: [
-                                      SizedBox(
-                                          width: 500.w,
-                                          child: Slider(
-                                            activeColor: Colors.white,
-                                            inactiveColor: Colors.black,
-                                            thumbColor: Colors.white,
-                                            min: 40,
-                                            max: 208,
-                                            value: tempo.value,
-                                            onChanged: (newValue) {
-                                              tempo.value = newValue;
-                                              isChangeTempo = true;
-                                            },
-                                          )),
-                                      TextItem(text: '${tempo.value.toInt()}'),
-                                    ],
-                                  )
-                                ])),
+                        Obx(
+                          () => Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                TextItem(text: 'Tempo'),
+                                Row(
+                                  children: [
+                                    SizedBox(
+                                        width: 500.w,
+                                        child: Slider(
+                                          activeColor: Colors.white,
+                                          inactiveColor: Colors.black,
+                                          thumbColor: Colors.white,
+                                          min: 40,
+                                          max: 208,
+                                          value: tempo.value,
+                                          onChanged: (newValue) {
+                                            tempo.value = newValue;
+                                            isChangeTempo = true;
+                                          },
+                                        )),
+                                    TextItem(text: '${tempo.value.toInt()}'),
+                                  ],
+                                )
+                              ]),
+                        ),
                         SizedBox(
                           height: 20.h,
                         ),
@@ -1467,12 +1368,14 @@ class _HomePageState extends State<HomePage> {
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 TextItem(text: 'Auto Chord'),
-                                Obx(() => SwitchItem(
-                                      value: autoChord.value,
-                                      onChanged: (newValue) {
-                                        autoChord.value = newValue;
-                                      },
-                                    )),
+                                Obx(
+                                  () => SwitchItem(
+                                    value: autoChord.value,
+                                    onChanged: (newValue) {
+                                      autoChord.value = newValue;
+                                    },
+                                  ),
+                                ),
                               ]),
                         ),
                         SizedBox(
@@ -1494,11 +1397,9 @@ class _HomePageState extends State<HomePage> {
                         SizedBox(
                           height: 20.h,
                         ),
-
                         SizedBox(
                           height: 20.h,
                         ),
-                        // Row(children: [
                         Obx(() => CheckBoxItem(
                               title: 'Demo Mode$tokens',
                               // visualDensity: VisualDensity.compact, // 去除空白间距
@@ -1508,8 +1409,6 @@ class _HomePageState extends State<HomePage> {
                                 ConfigStore.to.saveAutoNext(value);
                               },
                             )),
-                        //   const TextItem(text: 'Demo Mode'),
-                        // ]),
                         SizedBox(
                           height: 40.h,
                         ),
@@ -1758,7 +1657,6 @@ class _HomePageState extends State<HomePage> {
                         controller: controller,
                         itemCount: list.length,
                         itemBuilder: (BuildContext context, int index) {
-                          // ListTile(title: Text(list[index]));
                           if (type == STORAGE_PROMPTS_SELECT &&
                               isRememberPrompt.value) {
                             promptSelectedIndex.value =
@@ -1787,16 +1685,7 @@ class _HomePageState extends State<HomePage> {
                                             ? effectSelectedIndex.value == index
                                             : noteLengthSelectedIndex.value ==
                                                 index),
-                                // activeColor: AppColor.color_A1D632,
                                 title: list[index],
-                                // value: index,
-                                // groupValue: type == STORAGE_KEYBOARD_SELECT
-                                //     ? keyboardSelectedIndex.value
-                                //     : (type == STORAGE_PROMPTS_SELECT
-                                //         ? promptSelectedIndex.value
-                                //         : type == STORAGE_SOUNDSEFFECT_SELECT
-                                //             ? effectSelectedIndex.value
-                                //             : noteLengthSelectedIndex.value),
                                 onChanged: (value) {
                                   if (type == STORAGE_PROMPTS_SELECT) {
                                     promptSelectedIndex.value = value;
@@ -1867,7 +1756,6 @@ class _HomePageState extends State<HomePage> {
                                           }
                                         };
                                       }
-                                      // toastInfo(msg: 'Midi device connected');
                                     }
                                   } else if (type == 'STORAGE_note_SELECT') {
                                     print('STORAGE_note_SELECT');
@@ -1909,12 +1797,6 @@ class _HomePageState extends State<HomePage> {
                                     }
                                     Future.delayed(
                                         const Duration(milliseconds: 500), () {
-                                      // if (!isWindowsOrMac) {
-                                      //   controllerKeyboard
-                                      //       .runJavaScript('clearAll()');
-                                      //   controllerKeyboard
-                                      //       .runJavaScript('resetPlay()');
-                                      // }
                                       playOrPausePiano();
                                     });
                                     if (isWindowsOrMac) {
@@ -1922,13 +1804,6 @@ class _HomePageState extends State<HomePage> {
                                     }
                                   } else if (type ==
                                       STORAGE_SOUNDSEFFECT_SELECT) {
-                                    // if (isPlay.value == false) {
-                                    //   controllerPiano.runJavaScript("resetPage()");
-                                    //   if (selectstate.value == 0) {
-                                    //     controllerKeyboard.loadFlutterAssetServer(
-                                    //         filePathKeyboardAnimation);
-                                    //   }
-                                    // }
                                     resetPianoAndKeyboard();
                                     debugPrint(
                                         '选择midiProgramValue==$midiProgramValue');
@@ -1955,12 +1830,6 @@ class _HomePageState extends State<HomePage> {
                                     }
                                     Future.delayed(
                                         const Duration(milliseconds: 500), () {
-                                      // if (!isWindowsOrMac) {
-                                      //   controllerKeyboard
-                                      //       .runJavaScript('clearAll()');
-                                      //   controllerKeyboard
-                                      //       .runJavaScript('resetPlay()');
-                                      // }
                                       playPianoAnimation(
                                           selectstate.value == 0
                                               ? finalabcStringPreset
@@ -2070,7 +1939,6 @@ class _HomePageState extends State<HomePage> {
                     !isVisible ? 600.h : 600.h, //!isVisible ? 600.h : 1300.h
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.all(Radius.circular(30.w)),
-                  // color: Colors.transparent,
                   image: DecorationImage(
                     image: AssetImage(
                         'assets/images/${isVisible ? 'backgroundbg.jpg' : 'backgroundbg.jpg'}'), //isVisible ? 'dialogbg.png' : 'backgroundbg.jpg'
@@ -2078,7 +1946,6 @@ class _HomePageState extends State<HomePage> {
                   ),
                 ),
                 padding: const EdgeInsets.all(10),
-                // color: Colors.white,
                 child: Column(
                   children: [
                     if (isVisible)
@@ -2113,53 +1980,55 @@ class _HomePageState extends State<HomePage> {
                       height: 10,
                     ),
                     Expanded(
-                        child: Obx(() => ListView.builder(
-                              itemCount: bleList.length,
-                              itemBuilder: (context, index) {
-                                return InkWell(
-                                  onTap: () {
-                                    debugPrint('stopScanstopScan');
-                                    if (isWindowsOrMac) {
-                                      isVisibleWebview.value = isVisible;
-                                      // setState(() {});
-                                    }
-                                    UniversalBle.stopScan();
-                                    debugPrint(
-                                        'isVisibleWebview.value = $isVisible');
-                                    conectDevice(bleList[index]);
-                                    overlayEntry!.remove();
-                                    isShowOverlay = false;
-                                  },
-                                  child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          bleList[index].name!,
-                                          style: TextStyle(
-                                            color: AppColor.color_999999,
-                                            fontSize: 45.sp,
-                                            fontWeight: FontWeight.w400,
-                                          ),
-                                        ),
-                                        SizedBox(
-                                          height: 20.h,
-                                        ),
-                                        Text(
-                                          bleList[index].deviceId,
-                                          style: TextStyle(
-                                            color: AppColor.color_757575,
-                                            fontSize: 35.sp,
-                                            fontWeight: FontWeight.w300,
-                                          ),
-                                        ),
-                                        SizedBox(
-                                          height: 20.h,
-                                        ),
-                                      ]),
-                                );
+                      child: Obx(
+                        () => ListView.builder(
+                          itemCount: bleList.length,
+                          itemBuilder: (context, index) {
+                            return InkWell(
+                              onTap: () {
+                                debugPrint('stopScanstopScan');
+                                if (isWindowsOrMac) {
+                                  isVisibleWebview.value = isVisible;
+                                  // setState(() {});
+                                }
+                                UniversalBle.stopScan();
+                                debugPrint(
+                                    'isVisibleWebview.value = $isVisible');
+                                conectDevice(bleList[index]);
+                                overlayEntry!.remove();
+                                isShowOverlay = false;
                               },
-                            )))
+                              child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      bleList[index].name!,
+                                      style: TextStyle(
+                                        color: AppColor.color_999999,
+                                        fontSize: 45.sp,
+                                        fontWeight: FontWeight.w400,
+                                      ),
+                                    ),
+                                    SizedBox(
+                                      height: 20.h,
+                                    ),
+                                    Text(
+                                      bleList[index].deviceId,
+                                      style: TextStyle(
+                                        color: AppColor.color_757575,
+                                        fontSize: 35.sp,
+                                        fontWeight: FontWeight.w300,
+                                      ),
+                                    ),
+                                    SizedBox(
+                                      height: 20.h,
+                                    ),
+                                  ]),
+                            );
+                          },
+                        ),
+                      ),
+                    )
                   ],
                 ),
               ),
@@ -2170,10 +2039,6 @@ class _HomePageState extends State<HomePage> {
     // 插入Overlay
     Overlay.of(context).insert(overlayEntry!);
     isShowOverlay = true;
-    // // 假设我们想在3秒后自动移除浮层
-    // Future.delayed(const Duration(seconds: 3)).then((value) {
-    //   overlayEntry.remove();
-    // });
   }
 
   void closeOverlay() {
@@ -2211,7 +2076,6 @@ class _HomePageState extends State<HomePage> {
           // Get.snackbar('提示', '需要开启蓝牙扫描权限', colorText: Colors.red);
           return;
         }
-
         status = await Permission.bluetoothConnect.request();
         debugPrint('33Permission==$status');
         if (status != PermissionStatus.granted) {
@@ -2236,7 +2100,6 @@ class _HomePageState extends State<HomePage> {
         }
       }
     };
-
     UniversalBle.startScan();
   }
 
@@ -2294,23 +2157,5 @@ class _HomePageState extends State<HomePage> {
   Future<void> shareFile(String filepath) async {
     print('shareFile path=$filepath');
     ShareExtend.share(filepath, "file");
-  }
-
-  void bottomsheetsetting() {
-    // 弹出底部面板
-    showModalBottomSheet(
-      context: context,
-      builder: (BuildContext context) {
-        return Container(
-          width: MediaQuery.of(context).size.width,
-          height: 3100.h,
-          color: Colors.white,
-          child: const Text(
-            'This is a Bottom Sheet',
-            style: TextStyle(fontSize: 20),
-          ),
-        );
-      },
-    );
   }
 }
