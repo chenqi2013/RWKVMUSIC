@@ -649,21 +649,23 @@ class _HomePageState extends State<HomePage> {
                           SizedBox(
                             width: 55.w,
                           ),
-                          BorderBottomBtn(
-                            width: selectstate.value == 0 ? 357.w : 358.w,
-                            height: isWindowsOrMac ? 123.h : 96.h,
-                            text: 'Instrument',
-                            icon: SvgPicture.asset(
-                              'assets/images/ic-${instruments[effectSelectedIndex.value]}.svg', //
-                              width: isWindowsOrMac ? 61.w : 52.w,
-                              height: isWindowsOrMac ? 57.h : 48.h,
+                          Obx(
+                            () => BorderBottomBtn(
+                              width: selectstate.value == 0 ? 357.w : 358.w,
+                              height: isWindowsOrMac ? 123.h : 96.h,
+                              text: 'Instrument',
+                              icon: SvgPicture.asset(
+                                'assets/images/ic-${instruments[effectSelectedIndex.value]}.svg', //
+                                width: isWindowsOrMac ? 61.w : 52.w,
+                                height: isWindowsOrMac ? 57.h : 48.h,
+                              ),
+                              onPressed: () {
+                                debugPrint("Sounds Effect");
+                                var list = soundEffect.keys.toList();
+                                showPromptDialog(context, 'Instrument', list,
+                                    STORAGE_SOUNDSEFFECT_SELECT);
+                              },
                             ),
-                            onPressed: () {
-                              debugPrint("Sounds Effect");
-                              var list = soundEffect.keys.toList();
-                              showPromptDialog(context, 'Instrument', list,
-                                  STORAGE_SOUNDSEFFECT_SELECT);
-                            },
                           ),
                           SizedBox(
                             width: 55.w,
