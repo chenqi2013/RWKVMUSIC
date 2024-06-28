@@ -3,32 +3,24 @@ import 'dart:convert';
 import 'dart:ffi' hide Size;
 import 'dart:isolate';
 import 'dart:ui';
-import 'package:archive/archive_io.dart';
 import 'package:ffi/ffi.dart';
 // import 'dart:html';
 import 'dart:io';
-import 'dart:math';
-import 'package:audioplayers/audioplayers.dart';
 import 'package:filepicker_windows/filepicker_windows.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_advanced_segment/flutter_advanced_segment.dart';
-import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 // import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 // import 'package:flutter_platform_alert/flutter_platform_alert.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 // import 'package:flutter_share/flutter_share.dart';
 import 'package:get/get.dart';
-import 'package:group_radio_button/group_radio_button.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:rwkvmusic/gen/assets.gen.dart';
 import 'package:rwkvmusic/mainwidget/progressbar_time.dart';
 import 'package:rwkvmusic/mainwidget/checkbox_item.dart';
 import 'package:rwkvmusic/mainwidget/container_line.dart';
 import 'package:rwkvmusic/mainwidget/container_textfield.dart';
-import 'package:rwkvmusic/mainwidget/customsegment_controller.dart';
 import 'package:rwkvmusic/mainwidget/Custom_Segment_Controller.dart';
 import 'package:rwkvmusic/mainwidget/drop_button_down.dart';
 import 'package:rwkvmusic/mainwidget/radio_list_item.dart';
@@ -40,8 +32,6 @@ import 'package:rwkvmusic/services/storage.dart';
 import 'package:rwkvmusic/store/config.dart';
 import 'package:rwkvmusic/style/color.dart';
 import 'package:rwkvmusic/style/style.dart';
-import 'package:rwkvmusic/test/bletest.dart';
-import 'package:rwkvmusic/test/midi_devicelist_page.dart';
 import 'package:rwkvmusic/utils/abchead.dart';
 // import 'package:rwkvmusic/test/testwebviewuniversal.dart';
 import 'package:rwkvmusic/utils/audioplayer.dart';
@@ -54,7 +44,6 @@ import 'package:rwkvmusic/utils/midifile_convert.dart';
 import 'package:rwkvmusic/utils/note.dart';
 import 'package:rwkvmusic/utils/note_caculate.dart';
 import 'package:rwkvmusic/utils/notes_database.dart';
-import 'package:rwkvmusic/values/colors.dart';
 import 'package:rwkvmusic/values/constantdata.dart';
 import 'package:rwkvmusic/values/storage.dart';
 import 'package:rwkvmusic/values/values.dart';
@@ -65,23 +54,13 @@ import 'package:webview_win_floating/webview_plugin.dart';
 
 import 'faster_rwkvd.dart';
 import 'mainwidget/border_bottom_btn.dart';
-import 'mainwidget/btnimage_text.dart';
 import 'package:webview_flutter_plus/webview_flutter_plus.dart';
-import 'package:on_popup_window_widget/on_popup_window_widget.dart';
 import 'package:window_manager/window_manager.dart';
 // import 'package:flutter_gen_runner/flutter_gen_runner.dart';
 import 'package:event_bus/event_bus.dart';
 
-import 'package:flutter/services.dart' show rootBundle;
-import 'package:path_provider/path_provider.dart' as path_provider;
-import 'package:path/path.dart' as p;
-import 'dart:io';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:share_extend/share_extend.dart';
-// import 'package:snapping_sheet/snapping_sheet.dart';
-
-// import 'package:share_plus/share_plus.dart';
-// final controller = AdvancedSegmentController('all');
 
 void main(List<String> args) async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -187,57 +166,6 @@ int abcTokenizerAddress = 0;
 int samplerAddress = 0;
 bool isClicking = false;
 
-Isolate? childSendPort;
-void testisolate22() async {
-  ReceivePort mainReceivePort = ReceivePort();
-  childSendPort =
-      await Isolate.spawn(isolateFunction, mainReceivePort.sendPort);
-  mainReceivePort.listen((message) {
-    if (message == 'pause') {
-      print('Received pause signal. Pausing child isolate.');
-      // childSendPort.send('pause');
-    } else if (message is SendPort) {
-      print('Received child isolate. SendPort');
-      SendPort sendport = message;
-      sendport.send('pause Child isolate');
-    }
-  });
-  // 等待一段时间，然后发送暂停信号给子Isolate
-  await Future.delayed(const Duration(seconds: 5));
-  mainReceivePort.sendPort.send('pause');
-}
-
-void isolateFunction(SendPort mainSendPort) {
-  ReceivePort childReceivePort = ReceivePort();
-  mainSendPort.send(childReceivePort.sendPort);
-
-  bool paused = false;
-
-  childReceivePort.listen((message) {
-    if (message == 'pause Child isolate') {
-      paused = !paused;
-      if (paused) {
-        print('Child isolate paused.');
-      } else {
-        print('Child isolate resumed.');
-      }
-    }
-  });
-
-  // 执行一个百万次的for循环
-  for (int i = 0; i < 10000; i++) {
-    if (paused) {
-      print('stop Executing task $i');
-      break;
-      // await Future.delayed(const Duration(milliseconds: 100)); // 等待100毫秒后再继续执行
-    } else {
-      // 执行任务
-      print('Executing task $i');
-    }
-  }
-  print('end Executing task');
-}
-
 void fetchABCDataByIsolate() async {
   String? dllPath;
   String? binPath;
@@ -282,11 +210,7 @@ void fetchABCDataByIsolate() async {
     dllPath = await CommonUtils.getdllPath();
     binPath = await CommonUtils.getBinPath();
   }
-  // if (seed.value == 22416) {
-  //   isUseCurrentTime = true;
-  // } else {
-  //   isUseCurrentTime = false;
-  // }
+
   if (isUseCurrentTime) {
     DateTime now = DateTime.now();
     seed.value = now.millisecondsSinceEpoch;
@@ -294,19 +218,7 @@ void fetchABCDataByIsolate() async {
   }
 
   mainReceivePort = ReceivePort();
-  // if (Platform.isIOS) {
-  //   var arr = [
-  //     mainReceivePort.sendPort,
-  //     selectstate.value == 0 ? presentPrompt : createPrompt,
-  //     midiProgramValue,
-  //     seed.value,
-  //     randomness.value,
-  //     dllPath,
-  //     binPath,
-  //   ];
-  //   getABCDataByLocalModel(arr);
-  // } else {
-// 创建 ReceivePort，以接收来自子线程的消息
+
   String prompt = '';
   if (selectstate.value == 0) {
     prompt = promptsAbc[promptSelectedIndex.value];
@@ -322,7 +234,6 @@ void fetchABCDataByIsolate() async {
         'modelAddress==$modelAddress,abcTokenizerAddress==$abcTokenizerAddress');
   }
 
-  // 创建一个新的 Isolate
   userIsolate = await Isolate.spawn(getABCDataByLocalModel, [
     mainReceivePort.sendPort,
     selectstate.value == 0 ? prompt : prompt,
@@ -333,9 +244,8 @@ void fetchABCDataByIsolate() async {
     binPath,
     fastmodel,
   ]);
-  // 监听来自子线线程的数据
+
   mainReceivePort.listen((data) {
-    // debugPrint('Received data: $data');
     if (data is SendPort) {
       isolateSendPort = data;
     } else if (data is List) {
@@ -365,7 +275,6 @@ void fetchABCDataByIsolate() async {
       eventBus.fire(data);
     }
   });
-  // }
 }
 
 void getABCDataByLocalModel(var array) async {
@@ -435,7 +344,7 @@ void getABCDataByLocalModel(var array) async {
   int preTimestamp = 0;
   late String abcString;
   // fastrwkv.rwkv_model_clear_states(model);
-  // 默认的就按照pengbo的demo里面的temp=1.0 top_k=8, top_p=0.8?
+  // 默认的就按照temp=1.0 top_k=8, top_p=0.8?
   int token = fastrwkv.rwkv_abcmodel_run_prompt(model, abcTokenizer, sampler,
       promptChar, prompt.length, 1.0, 8, randomness);
   isGenerating.value = true;
@@ -483,11 +392,7 @@ void getABCDataByLocalModel(var array) async {
       debugPrint('continue responseData=$resultstr,resultint=$result');
       continue;
     }
-    // sb.write(resultstr);
-    // debugPrint('getABCDataByLocalModel=$resultstr');
-    // if (result == 10) {
-    //   continue;
-    // }
+
     // debugPrint('responseData=$resultstr,resultint=$result');
     String textstr = resultstr.replaceAll('\n', '').replaceAll('\r', '');
     stringBuffer.write(resultstr);
@@ -504,27 +409,13 @@ void getABCDataByLocalModel(var array) async {
     int currentTimestamp = DateTime.now().millisecondsSinceEpoch;
     int gap = currentTimestamp - preTimestamp;
     if (gap > 400) {
-      //&& resultstr.startsWith("|")
-      //&& tempStr.trim().isEmpty
-      // debugPrint('runJavaScript');
       preTimestamp = currentTimestamp;
-      // if (i < 250) {
-      //   continue;
-      // }
-      // if (isIOS) {
-      //   controllerPiano.runJavaScript(abcString);
-      // } else {
-      // debugPrint('abcString==$abcString');
       sendPort.send(abcString);
-      // }
     }
   }
   isGenerating.value = false;
-  // if (isIOS) {
-  //   controllerPiano.runJavaScript(abcString.toString());
-  // } else {
+
   sendPort.send(abcString.toString());
-  // }
   sendPort.send('finish');
   debugPrint('getABCDataByLocalModel all data=${stringBuffer.toString()}');
 }
@@ -607,10 +498,7 @@ class _MyAppState extends State<MyApp> {
             if (index < 0) {
               index = 0;
             }
-            // if (index < 0) {
-            //   controllerPiano.runJavaScript(
-            //       "setAbcString(\"%%MIDI program 40\\nL:1/4\\nM:4/4\\nK:D\\n\\\"D\\\" A F F\",false)");
-            // } else {
+
             presentPrompt = CommonUtils.escapeString(promptsAbc[index]);
             int subindex = presentPrompt.indexOf('L:');
             String subpresentPrompt = presentPrompt.substring(subindex);
@@ -619,10 +507,8 @@ class _MyAppState extends State<MyApp> {
                 "setAbcString(\"${ABCHead.getABCWithInstrument(subpresentPrompt, midiProgramValue)}\",false)";
             finalabcStringPreset = ABCHead.appendTempoParam(
                 finalabcStringPreset, tempo.value.toInt());
-            // String testabc =
-            //     'setAbcString("%%MIDI program 42\\n|AGAB|eBAG|AFED|EFGE|AGFE|DEFD|GFED|E2E2|EFGE|AGFE|DEFD|GFED|EFGE|AGFE|DEFD|GFED|E2E2|z2z2|z2z2|z2z2|z2z2|z2z2|z2z2|z2z2|z2z2|z2z2|z2z2|z2z2|z2z2|z2z2|z2z2|z2z2|z2z2|EditedByCGPdded|fdgf|edcd|edcG|dded|fdgf|eagf|edc2|3gag3fgfed|cdec|3gag3fgfed|ecAc|3gag3fgfed|cdec|fedc|dBAG|EGEG|EGAG|cGAG|EGAG|EGEG|EGAG|cGAG|EGAG|AcAc|AcdcBA|GBGB|GBcBAG|AcAc|AcdcBA|GBGB|GBcBAG|cefedc|gcac|gcac|gcBAG|AcBcdB|cedefd|efgGB|c3c|AcAc|fcAF|BdBd|gdBG|egeg|cgec|defGB|c3c|AFABc|f2f2|BGBcd|g2g2|afabc|dbca|BgGe|f3f|d",false)';
+
             controllerPiano.runJavaScript(finalabcStringPreset);
-            // }
             controllerPiano.runJavaScript("setPromptNoteNumberCount(3)");
             controllerPiano.runJavaScript("setStyle()");
           },
@@ -892,9 +778,7 @@ class _MyAppState extends State<MyApp> {
       sbff.write(note);
     }
     createPrompt = sbff.toString();
-    // ChordUtil.getResult();
-    // ChordUtil.checkContentIsSame();
-    // ChordUtil.findDifferent();
+
     String sb;
     if (isChangeTempo) {
       sb =
@@ -1091,45 +975,6 @@ class _MyAppState extends State<MyApp> {
                     crossAxisAlignment: CrossAxisAlignment.center,
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      // AdvancedSegment(
-
-                      //   // controller: _controller, // AdvancedSegmentController
-                      //   segments: const {
-                      //     // Map<String, String>
-                      //     'all': 'All',
-                      //     'primary': 'Primary',
-                      //     'secondary': 'Secondary',
-                      //     'tertiary': 'Tertiary',
-                      //   },
-                      //   activeStyle: const TextStyle(
-                      //     // TextStyle
-                      //     color: Colors.white,
-                      //     fontWeight: FontWeight.w600,
-                      //   ),
-                      //   inactiveStyle: const TextStyle(
-                      //     // TextStyle
-                      //     color: Colors.white54,
-                      //   ),
-                      //   backgroundColor: Colors.black26, // Color
-                      //   sliderColor: Colors.white, // Color
-                      //   sliderOffset: 2.0, // Double
-                      //   borderRadius: const BorderRadius.all(
-                      //       Radius.circular(8.0)), // BorderRadius
-                      //   itemPadding: const EdgeInsets.symmetric(
-                      //     // EdgeInsets
-                      //     horizontal: 15,
-                      //     vertical: 10,
-                      //   ),
-                      //   animationDuration:
-                      //       const Duration(milliseconds: 250), // Duration
-                      //   shadow: const <BoxShadow>[
-                      //     BoxShadow(
-                      //       color: Colors.black26,
-                      //       blurRadius: 8.0,
-                      //     ),
-                      //   ],
-                      // ),
-
                       SizedBox(
                         width: isWindowsOrMac ? 605.w : 535.w,
                         height: isWindowsOrMac ? 123.h : 104.h,
@@ -1144,59 +989,6 @@ class _MyAppState extends State<MyApp> {
                           },
                         ),
                       ),
-                      // CustomSegment(
-                      //   callBack: (int newValue) {
-                      //     // 当选择改变时执行的操作
-                      //     debugPrint('选择了选项 $newValue');
-                      //     selectstate.value = newValue;
-                      //     segmengChange(newValue);
-                      //   },
-                      // ),
-
-                      // Container(
-                      //   child: Obx(() {
-                      //     return CupertinoSegmentedControl(
-                      //       children: {
-                      //         0: Padding(
-                      //             padding: const EdgeInsets.symmetric(
-                      //                 vertical: 8, horizontal: 0),
-                      //             child: Text(
-                      //               'Preset Mode',
-                      //               style: TextStyle(
-                      //                 color: Colors.white,
-                      //                 fontSize: 14,
-                      //                 fontWeight: selectstate.value == 0
-                      //                     ? FontWeight.bold
-                      //                     : FontWeight.normal,
-                      //               ),
-                      //             )),
-                      //         1: Padding(
-                      //             padding: const EdgeInsets.symmetric(
-                      //                 vertical: 8, horizontal: 10),
-                      //             child: Text(
-                      //               'Creative Mode',
-                      //               style: TextStyle(
-                      //                 color: Colors.white,
-                      //                 fontSize: 14,
-                      //                 fontWeight: selectstate.value == 1
-                      //                     ? FontWeight.bold
-                      //                     : FontWeight.normal,
-                      //               ),
-                      //             )),
-                      //       },
-                      //       onValueChanged: (int newValue) {
-                      //         // 当选择改变时执行的操作
-                      //         debugPrint('选择了选项 $newValue');
-                      //         selectstate.value = newValue;
-                      //         segmengChange(newValue);
-                      //       },
-                      //       groupValue: selectstate.value, // 当前选中的选项值
-                      //       selectedColor: const Color(0xff44be1c),
-                      //       unselectedColor: Colors.transparent,
-                      //       borderColor: const Color(0xff6d6d6d),
-                      //     );
-                      //   }),
-                      // ),
                       Row(
                         children: [
                           Obx(
@@ -1235,21 +1027,6 @@ class _MyAppState extends State<MyApp> {
                                     },
                                   ),
                           ),
-                          // Obx(
-                          //   () => selectstate.value == 0
-                          //       ? creatBottomBtn('Prompts', () {
-                          //           debugPrint("Promptss");
-                          //           showPromptDialog(context, 'Prompts', prompts,
-                          //               STORAGE_PROMPTS_SELECT);
-                          //         }, 'btn_prompts', 243.w, 123.h, 'ic_arrowdown',
-                          //           28.w, 21.h)
-                          //       : creatBottomBtn('Soft keyboard', () {
-                          //           debugPrint("Simulate keyboard");
-                          //           showPromptDialog(context, 'Keyboard Options',
-                          //               keyboardOptions, STORAGE_KEYBOARD_SELECT);
-                          //         }, 'btn_softkeyboard', 253.w, 123.h,
-                          //           'ic_arrowdown', 20.w, 30.h),
-                          // ),
                           SizedBox(
                             width: 55.w,
                           ),
@@ -1269,15 +1046,6 @@ class _MyAppState extends State<MyApp> {
                                   STORAGE_SOUNDSEFFECT_SELECT);
                             },
                           ),
-                          // creatBottomBtn('Instrument', () {
-                          //   debugPrint("Sounds Effect");
-                          //   showPromptDialog(
-                          //       context,
-                          //       'Instrument',
-                          //       soundEffect.keys.toList(),
-                          //       STORAGE_SOUNDSEFFECT_SELECT);
-                          // }, 'btn_instrument', 348.w, 123.h, 'ic-piano', 61.w,
-                          //     61.h),
                           SizedBox(
                             width: 55.w,
                           ),
@@ -1291,10 +1059,6 @@ class _MyAppState extends State<MyApp> {
                               height: isWindowsOrMac ? 61.h : 52.h,
                             ),
                             onPressed: () {
-                              // CommonUtils.getDeviceInfo();
-                              // CommonUtils.getDeviceName();
-                              // // testisolate22();
-                              // return;
                               debugPrint('Settings');
                               if (isShowOverlay) {
                                 closeOverlay();
@@ -1304,10 +1068,7 @@ class _MyAppState extends State<MyApp> {
                                     !isVisibleWebview.value;
                                 // setState(() {});
                               }
-                              // bottomsheetsetting();
-                              // return;
-                              // Get.to(FlutterBlueApp());
-                              // Get.to(const MIDIDeviceListPage());
+
                               if (selectstate.value == 0) {
                                 showSettingDialog(context);
                               } else {
@@ -1315,43 +1076,6 @@ class _MyAppState extends State<MyApp> {
                               }
                             },
                           ),
-
-                          // creatBottomBtn('', () {
-                          //   debugPrint('Settings');
-                          //   if (isWindowsOrMac) {
-                          //     isVisibleWebview.value = !isVisibleWebview.value;
-                          //     setState(() {});
-                          //   }
-                          //   // Get.to(FlutterBlueApp());
-                          //   // Get.to(const MIDIDeviceListPage());
-                          //   if (selectstate.value == 0) {
-                          //     showSettingDialog(context);
-                          //   } else {
-                          //     showCreateModelSettingDialog(context);
-                          //   }
-                          // }, 'btn_setting', 123.w, 123.h, 'ic_setting', 61.w,
-                          //     57.h),
-
-                          // createButtonImageWithText(
-                          //     'Settings',
-                          //     Image.asset(
-                          //       'assets/images/setting.jpg',
-                          //       fit: BoxFit.cover,
-                          //     ), () {
-                          //   debugPrint('Settings');
-
-                          //   if (isWindowsOrMac) {
-                          //     isVisibleWebview.value = !isVisibleWebview.value;
-                          //     setState(() {});
-                          //   }
-                          //   // Get.to(FlutterBlueApp());
-                          //   // Get.to(const MIDIDeviceListPage());
-                          //   if (selectstate.value == 0) {
-                          //     showSettingDialog(context);
-                          //   } else {
-                          //     showCreateModelSettingDialog(context);
-                          //   }
-                          // }),
                         ],
                       ),
                     ],
@@ -1467,30 +1191,19 @@ class _MyAppState extends State<MyApp> {
                                       isGenerating.value = !isGenerating.value;
                                       if (isGenerating.value) {
                                         resetPianoAndKeyboard();
-                                        // playProgress.value = 0.0;
-                                        // pianoAllTime.value = 0.0;
-                                        // controllerPiano.runJavaScript(
-                                        //     "setAbcString(\"%%MIDI program 40\\nL:1/4\\nM:4/4\\nK:D\\n\\\"D\\\" A F F\",false)");
-                                        // controllerPiano.runJavaScript(
-                                        //     'resetTimingCallbacks()');
+
                                         // if (isWindowsOrMac) {
                                         fetchABCDataByIsolate();
                                         // } else {
                                         //   getABCDataByAPI();
                                         // }
-                                        // controllerKeyboard
-                                        //     .runJavaScript('resetPlay()');
-                                        // controllerPiano.runJavaScript(
-                                        //     'resetTimingCallbacks()');
+
                                         isFinishABCEvent = false;
                                         if (selectstate.value == 1) {
                                           isCreateGenerate.value = true;
                                           controllerKeyboard
                                               .loadFlutterAssetServer(
                                                   filePathKeyboardAnimation);
-                                          // controllerKeyboard.loadRequest(
-                                          //     Uri.parse(
-                                          //         filePathKeyboardAnimation));
                                         }
                                       } else {
                                         // isolateSendPort.send('stop Generating');
@@ -1498,97 +1211,6 @@ class _MyAppState extends State<MyApp> {
                                       }
                                     },
                                   ),
-                                  // creatBottomBtn('AI Compose', () {
-                                  //   {
-                                  //     debugPrint('Generate');
-                                  //     isGenerating.value = !isGenerating.value;
-                                  //     if (isGenerating.value) {
-                                  //       resetPlay();
-                                  //       // playProgress.value = 0.0;
-                                  //       // pianoAllTime.value = 0.0;
-                                  //       // controllerPiano.runJavaScript(
-                                  //       //     "setAbcString(\"%%MIDI program 40\\nL:1/4\\nM:4/4\\nK:D\\n\\\"D\\\" A F F\",false)");
-                                  //       // controllerPiano.runJavaScript(
-                                  //       //     'resetTimingCallbacks()');
-                                  //       // if (isWindowsOrMac) {
-                                  //       fetchABCDataByIsolate();
-                                  //       // } else {
-                                  //       //   getABCDataByAPI();
-                                  //       // }
-                                  //       // controllerKeyboard
-                                  //       //     .runJavaScript('resetPlay()');
-                                  //       // controllerPiano.runJavaScript(
-                                  //       //     'resetTimingCallbacks()');
-                                  //       isFinishABCEvent = false;
-                                  //       if (selectstate.value == 1) {
-                                  //         controllerKeyboard
-                                  //             .loadFlutterAssetServer(
-                                  //                 filePathKeyboardAnimation);
-                                  //         // controllerKeyboard.loadRequest(
-                                  //         //     Uri.parse(
-                                  //         //         filePathKeyboardAnimation));
-                                  //       }
-                                  //     } else {
-                                  //       // isolateSendPort.send('stop Generating');
-                                  //       isolateEventBus.fire("stop Generating");
-                                  //     }
-                                  //   }
-                                  // },
-                                  //     selectstate.value == 0
-                                  //         ? 'btn_generate'
-                                  //         : 'btn_create_generate',
-                                  //     656.w,
-                                  //     123.h,
-                                  //     'ic_generate',
-                                  //     68.w,
-                                  //     75.h),
-                                  // Obx(() => createButtonImageWithText(
-                                  //         !isGenerating.value
-                                  //             ? 'Generate'
-                                  //             : 'Stop',
-                                  //         !isGenerating.value
-                                  //             ? Image.asset(
-                                  //                 'assets/images/generate.jpg',
-                                  //                 fit: BoxFit.cover,
-                                  //               )
-                                  //             : Image.asset(
-                                  //                 'assets/images/stopgenerate.jpg'),
-                                  //         () {
-                                  //       debugPrint('Generate');
-                                  //       isGenerating.value =
-                                  //           !isGenerating.value;
-                                  //       if (isGenerating.value) {
-                                  //         resetPlay();
-                                  //         // playProgress.value = 0.0;
-                                  //         // pianoAllTime.value = 0.0;
-                                  //         // controllerPiano.runJavaScript(
-                                  //         //     "setAbcString(\"%%MIDI program 40\\nL:1/4\\nM:4/4\\nK:D\\n\\\"D\\\" A F F\",false)");
-                                  //         // controllerPiano.runJavaScript(
-                                  //         //     'resetTimingCallbacks()');
-                                  //         // if (isWindowsOrMac) {
-                                  //         fetchABCDataByIsolate();
-                                  //         // } else {
-                                  //         //   getABCDataByAPI();
-                                  //         // }
-                                  //         // controllerKeyboard
-                                  //         //     .runJavaScript('resetPlay()');
-                                  //         // controllerPiano.runJavaScript(
-                                  //         //     'resetTimingCallbacks()');
-                                  //         isFinishABCEvent = false;
-                                  //         if (selectstate.value == 1) {
-                                  //           controllerKeyboard
-                                  //               .loadFlutterAssetServer(
-                                  //                   filePathKeyboardAnimation);
-                                  //           // controllerKeyboard.loadRequest(
-                                  //           //     Uri.parse(
-                                  //           //         filePathKeyboardAnimation));
-                                  //         }
-                                  //       } else {
-                                  //         // isolateSendPort.send('stop Generating');
-                                  //         isolateEventBus
-                                  //             .fire("stop Generating");
-                                  //       }
-                                  //     })),
                                 ),
                                 if (selectstate.value == 1)
                                   SizedBox(
@@ -1613,46 +1235,6 @@ class _MyAppState extends State<MyApp> {
                                         },
                                       ),
                                     )),
-                                // Obx(() => Visibility(
-                                //       visible: selectstate.value == 1,
-                                //       child: creatBottomBtn('Undo', () {
-                                //         debugPrint('Undo');
-                                //         resetLastNote();
-                                //       }, 'btn_undo', 48.w, 123.h, 'ic_undo',
-                                //           61.w, 61.h),
-                                //     )),
-                                // Obx(() => Visibility(
-                                //     visible: selectstate.value == 1,
-                                //     child: createButtonImageWithText(
-                                //         'Undo',
-                                //         Image.asset(
-                                //           'assets/images/undo.jpg',
-                                //           fit: BoxFit.cover,
-                                //         ), () {
-                                //       debugPrint('Undo');
-                                //       resetLastNote();
-                                //     }))),
-                                // SizedBox(
-                                //   width: isWindowsOrMac ? 10 : 20,
-                                // ),
-                                // Obx(() {
-                                //   return createButtonImageWithText(
-                                //       !isPlay.value ? 'Play' : 'Pause',
-                                //       !isPlay.value
-                                //           ? Image.asset(
-                                //               'assets/images/play.jpg',
-                                //               fit: BoxFit.cover,
-                                //             )
-                                //           : Image.asset(
-                                //               'assets/images/pause.jpg',
-                                //               fit: BoxFit.cover,
-                                //             ), () {
-                                //     playOrPausePiano();
-                                //   });
-                                // }),
-                                // SizedBox(
-                                //   width: isWindowsOrMac ? 10 : 20,
-                                // ),
                               ],
                             ),
                           ],
@@ -1827,10 +1409,6 @@ class _MyAppState extends State<MyApp> {
     createPrompt = '';
   }
 
-  // Widget getLogoImage() {
-  //   return Assets.images.logo.image();
-  // }
-
   void showSettingDialog(BuildContext context) {
     isShowDialog = true;
     TextEditingController controller = TextEditingController(
@@ -1929,27 +1507,6 @@ class _MyAppState extends State<MyApp> {
                               debugPrint('Current text: ');
                             },
                           ),
-                          // SizedBox(
-                          //   width: 200,
-                          //   height: 40,
-                          //   child: TextField(
-                          //     controller: controller,
-                          //     keyboardType: TextInputType.number,
-                          //     inputFormatters: <TextInputFormatter>[
-                          //       FilteringTextInputFormatter.allow(
-                          //           RegExp(r'[0-9]')), // 只允许输入数字
-                          //     ],
-                          //     decoration: const InputDecoration(
-                          //         labelText: 'Please input seed value',
-                          //         hintText: 'Enter a number',
-                          //         border: OutlineInputBorder()),
-                          //     onChanged: (text) {
-                          //       // 当文本字段内容变化时调用
-                          //       seed.value = int.parse(text);
-                          //       debugPrint('Current text: ');
-                          //     },
-                          //   ),
-                          // ),
                         ]),
                     const SizedBox(
                       height: 10,
@@ -2180,72 +1737,6 @@ class _MyAppState extends State<MyApp> {
                                     updateTimeSignature();
                                   },
                                 )),
-                            // SizedBox(
-                            //     width: 80, // 设置RadioListTile的宽度
-                            //     height: 30,
-                            //     child: RadioButton(
-                            //       description: "2/4",
-                            //       value: 0,
-                            //       groupValue: timeSignature.value,
-                            //       onChanged: (value) {
-                            //         timeSignature.value = value!;
-                            //         timeSingnatureStr = '2/4';
-                            //         updateTimeSignature();
-                            //       },
-                            //     )),
-                            // SizedBox(
-                            //     width: 80, // 设置RadioListTile的宽度
-                            //     height: 30,
-                            //     child: RadioButton(
-                            //       description: "3/4",
-                            //       value: 1,
-                            //       groupValue: timeSignature.value,
-                            //       onChanged: (value) {
-                            //         timeSignature.value = value!;
-                            //         timeSingnatureStr = '3/4';
-                            //         updateTimeSignature();
-                            //       },
-                            //     )),
-                            // SizedBox(
-                            //     width: 80, // 设置RadioListTile的宽度
-                            //     height: 30,
-                            //     child: RadioButton(
-                            //       description: "4/4",
-                            //       value: 2,
-                            //       groupValue: timeSignature.value,
-                            //       onChanged: (value) {
-                            //         timeSignature.value = value!;
-                            //         timeSingnatureStr = '4/4';
-                            //         updateTimeSignature();
-                            //       },
-                            //     )),
-                            // SizedBox(
-                            //     width: 80, // 设置RadioListTile的宽度
-                            //     height: 30,
-                            //     child: RadioButton(
-                            //       description: "3/8",
-                            //       value: 3,
-                            //       groupValue: timeSignature.value,
-                            //       onChanged: (value) {
-                            //         timeSignature.value = value!;
-                            //         timeSingnatureStr = '3/8';
-                            //         updateTimeSignature();
-                            //       },
-                            //     )),
-                            // SizedBox(
-                            //     width: 80, // 设置RadioListTile的宽度
-                            //     height: 30,
-                            //     child: RadioButton(
-                            //       description: "6/8",
-                            //       value: 4,
-                            //       groupValue: timeSignature.value,
-                            //       onChanged: (value) {
-                            //         timeSignature.value = value!;
-                            //         timeSingnatureStr = '6/8';
-                            //         updateTimeSignature();
-                            //       },
-                            //     )),
-                            // const Spacer(),
                           ],
                         ),
                         SizedBox(
@@ -2265,39 +1756,6 @@ class _MyAppState extends State<MyApp> {
                                     defaultNoteLenght.value = index;
                                   },
                                 )),
-                            // SizedBox(
-                            //     width: 80,
-                            //     height: 30,
-                            //     child: RadioButton(
-                            //       description: "1/4",
-                            //       value: 0,
-                            //       groupValue: defaultNoteLenght.value,
-                            //       onChanged: (value) {
-                            //         defaultNoteLenght.value = value!;
-                            //       },
-                            //     )),
-                            // SizedBox(
-                            //     width: 80,
-                            //     height: 30,
-                            //     child: RadioButton(
-                            //       description: "1/8",
-                            //       value: 1,
-                            //       groupValue: defaultNoteLenght.value,
-                            //       onChanged: (value) {
-                            //         defaultNoteLenght.value = value!;
-                            //       },
-                            //     )),
-                            // SizedBox(
-                            //     width: 80,
-                            //     height: 30,
-                            //     child: RadioButton(
-                            //       description: "1/16",
-                            //       value: 2,
-                            //       groupValue: defaultNoteLenght.value,
-                            //       onChanged: (value) {
-                            //         defaultNoteLenght.value = value!;
-                            //       },
-                            //     )),
                           ],
                         ),
                         Obx(() => Row(
@@ -2340,27 +1798,6 @@ class _MyAppState extends State<MyApp> {
                                   isUseCurrentTime = false;
                                 },
                               ),
-                              // SizedBox(
-                              //     height: 40,
-                              //     width: 200,
-                              //     child: TextField(
-                              //       controller: controller,
-                              //       keyboardType: TextInputType.number,
-                              //       inputFormatters: <TextInputFormatter>[
-                              //         FilteringTextInputFormatter.allow(
-                              //             RegExp(r'[0-9]')), // 只允许输入数字
-                              //       ],
-                              //       decoration: const InputDecoration(
-                              //           labelText:
-                              //               'Please input seed value',
-                              //           hintText: 'Enter a number',
-                              //           border: OutlineInputBorder()),
-                              //       onChanged: (text) {
-                              //         // 当文本字段内容变化时调用
-                              //         seed.value = int.parse(text);
-                              //         debugPrint('Current text: ');
-                              //       },
-                              //     )),
                             ]),
                         Obx(() => Row(
                                 mainAxisAlignment:
@@ -2584,26 +2021,6 @@ class _MyAppState extends State<MyApp> {
                       SizedBox(
                         width: 40.w,
                       ),
-                      // TextButton(
-                      //   onPressed: () {
-                      //     // 处理取消按钮点击事件
-                      //     if (isWindowsOrMac) {
-                      //       // setState(() {
-                      //       isVisibleWebview.value = true;
-                      //       // });
-                      //     }
-                      //     Navigator.of(buildcontext).pop();
-                      //   },
-                      //   child: const Text("OK"),
-                      // ),
-                      // TextButton(
-                      //   onPressed: () {
-                      //     // 处理确定按钮点击事件
-                      //     Navigator.of(buildcontext).pop();
-                      //     showBleDeviceOverlay(buildcontext, true);
-                      //   },
-                      //   child: const Text("Bluetooth Connect"),
-                      // ),
                       TextBtn(
                         width: 500.w,
                         height: 113.h,
@@ -2639,20 +2056,6 @@ class _MyAppState extends State<MyApp> {
       isVisibleWebview.value = !isVisibleWebview.value;
       // setState(() {});
     }
-    // if (!isWindows) {
-    //   FlutterPlatformAlert.showAlert(
-    //     windowTitle: 'This is title',
-    //     text: 'This is body',
-    //     // positiveButtonTitle: "Positive",
-    //     // negativeButtonTitle: "Negative",
-    //     // neutralButtonTitle: "Neutral",
-    //     options: PlatformAlertOptions(
-    //       windows: WindowsAlertOptions(
-    //         additionalWindowTitle: 'Window title',
-    //         showAsLinks: true,
-    //       ),
-    //     ),
-    //   );
     // } else {
     if (!isRememberEffect.value) {
       // effectSelectedIndex.value = 0;
@@ -2967,23 +2370,6 @@ class _MyAppState extends State<MyApp> {
                           },
                         ),
                       ),
-                    // if (type == STORAGE_PROMPTS_SELECT)
-                    //   Obx(
-                    //     () => ListTile(
-                    //       leading: Checkbox(
-                    //         value: isAutoSwitch.value,
-                    //         onChanged: (bool? value) {
-                    //           isAutoSwitch.value = value!;
-                    //           ConfigStore.to.saveAutoNext(value);
-                    //         },
-                    //       ),
-                    //       title: Transform.translate(
-                    //         offset: const Offset(-20, 0), // 向左移动文本以减少间距
-                    //         child: const Text('Auto Switch Next Prompt'),
-                    //       ),
-                    //       onTap: () {},
-                    //     ),
-                    //   ),
                   ],
                 ),
               )));
@@ -3256,20 +2642,10 @@ class _MyAppState extends State<MyApp> {
                 String path = convertABC.getNoteMp3Path(result[1]);
                 updatePianoNote(result[1]);
                 playNoteMp3(path);
-                // if (isWindowsOrMac) {
-                //   AudioPlayerManage().playAudio(
-                //       'player/soundfont/acoustic_grand_piano-mp3/$path');
-                // } else {
-                //   JustAudioPlayerManage().playAudio(
-                //       'player/soundfont/acoustic_grand_piano-mp3/$path');
-                // }
               }
             };
           }
         }
-        // Future.delayed(const Duration(seconds: 3)).then((value) {
-        //   closeDialog();
-        // });
       } else if (state == BleConnectionState.disconnected) {
         if (isWindowsOrMac) {
           Get.snackbar(device.name!, '连接失败', colorText: Colors.red);
@@ -3283,17 +2659,6 @@ class _MyAppState extends State<MyApp> {
   Future<void> shareFile(String filepath) async {
     print('shareFile path=$filepath');
     ShareExtend.share(filepath, "file");
-
-    // ShareExtend.share("share text", "text",
-    //     sharePanelTitle: "share text title", subject: "share text subject");
-
-    // Share.share('check out my website https://example.com');
-    // return;
-    // await FlutterShare.shareFile(
-    //   title: '分享',
-    //   text: 'midi文件分享',
-    //   filePath: filepath,
-    // );
   }
 
   void bottomsheetsetting() {
