@@ -24,11 +24,11 @@ import 'package:get/get.dart';
 import 'package:group_radio_button/group_radio_button.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:rwkvmusic/gen/assets.gen.dart';
-import 'package:rwkvmusic/mainwidget/ProgressbarTime.dart';
+import 'package:rwkvmusic/mainwidget/progressbar_time.dart';
 import 'package:rwkvmusic/mainwidget/checkbox_item.dart';
 import 'package:rwkvmusic/mainwidget/container_line.dart';
 import 'package:rwkvmusic/mainwidget/container_textfield.dart';
-import 'package:rwkvmusic/mainwidget/customsegmentcontroller.dart';
+import 'package:rwkvmusic/mainwidget/customsegment_controller.dart';
 import 'package:rwkvmusic/mainwidget/Custom_Segment_Controller.dart';
 import 'package:rwkvmusic/mainwidget/drop_button_down.dart';
 import 'package:rwkvmusic/mainwidget/radio_list_item.dart';
@@ -47,12 +47,12 @@ import 'package:rwkvmusic/utils/abchead.dart';
 import 'package:rwkvmusic/utils/audioplayer.dart';
 import 'package:rwkvmusic/utils/chord_util.dart';
 import 'package:rwkvmusic/utils/justaudioplayer.dart';
-import 'package:rwkvmusic/utils/midiconvertabc.dart';
-import 'package:rwkvmusic/utils/mididevicemanage.dart';
-import 'package:rwkvmusic/utils/commonutils.dart';
-import 'package:rwkvmusic/utils/midifileconvert.dart';
+import 'package:rwkvmusic/utils/midiconvert_abc.dart';
+import 'package:rwkvmusic/utils/mididevice_manage.dart';
+import 'package:rwkvmusic/utils/common_utils.dart';
+import 'package:rwkvmusic/utils/midifile_convert.dart';
 import 'package:rwkvmusic/utils/note.dart';
-import 'package:rwkvmusic/utils/notecaculate.dart';
+import 'package:rwkvmusic/utils/note_caculate.dart';
 import 'package:rwkvmusic/utils/notes_database.dart';
 import 'package:rwkvmusic/values/colors.dart';
 import 'package:rwkvmusic/values/constantdata.dart';
@@ -64,8 +64,8 @@ import 'package:universal_ble/universal_ble.dart';
 import 'package:webview_win_floating/webview_plugin.dart';
 
 import 'faster_rwkvd.dart';
-import 'mainwidget/BorderBtnWidget.dart';
-import 'mainwidget/BtnImageTextWidget.dart';
+import 'mainwidget/border_bottom_btn.dart';
+import 'mainwidget/btnimage_text.dart';
 import 'package:webview_flutter_plus/webview_flutter_plus.dart';
 import 'package:on_popup_window_widget/on_popup_window_widget.dart';
 import 'package:window_manager/window_manager.dart';
@@ -1201,7 +1201,7 @@ class _MyAppState extends State<MyApp> {
                         children: [
                           Obx(
                             () => selectstate.value == 0
-                                ? CreatBottomBtn(
+                                ? BorderBottomBtn(
                                     width: 253.w,
                                     height: isWindowsOrMac ? 123.h : 96.h,
                                     text: 'Prompt',
@@ -1216,7 +1216,7 @@ class _MyAppState extends State<MyApp> {
                                           prompts, STORAGE_PROMPTS_SELECT);
                                     },
                                   )
-                                : CreatBottomBtn(
+                                : BorderBottomBtn(
                                     width: 372.w,
                                     height: isWindowsOrMac ? 123.h : 96.h,
                                     text: 'Soft keyboard',
@@ -1253,7 +1253,7 @@ class _MyAppState extends State<MyApp> {
                           SizedBox(
                             width: 55.w,
                           ),
-                          CreatBottomBtn(
+                          BorderBottomBtn(
                             width: selectstate.value == 0 ? 357.w : 358.w,
                             height: isWindowsOrMac ? 123.h : 96.h,
                             text: 'Instrument',
@@ -1281,7 +1281,7 @@ class _MyAppState extends State<MyApp> {
                           SizedBox(
                             width: 55.w,
                           ),
-                          CreatBottomBtn(
+                          BorderBottomBtn(
                             width: isWindowsOrMac ? 123.h : 96.h,
                             height: isWindowsOrMac ? 123.h : 96.h,
                             text: '',
@@ -1443,7 +1443,7 @@ class _MyAppState extends State<MyApp> {
                               mainAxisAlignment: MainAxisAlignment.end,
                               children: [
                                 Obx(
-                                  () => CreatBottomBtn(
+                                  () => BorderBottomBtn(
                                     textColor: AppColor.color_A1D632,
                                     width: selectstate.value == 0
                                         ? (isWindowsOrMac ? 666.w : 555.w)
@@ -1596,7 +1596,7 @@ class _MyAppState extends State<MyApp> {
                                   ),
                                 Obx(() => Visibility(
                                       visible: selectstate.value == 1,
-                                      child: CreatBottomBtn(
+                                      child: BorderBottomBtn(
                                         width: isWindowsOrMac ? 257.w : 200.w,
                                         height: isWindowsOrMac ? 123.h : 96.h,
                                         text: !isCreateGenerate.value

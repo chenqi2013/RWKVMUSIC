@@ -6,15 +6,15 @@ import 'package:flutter/services.dart';
 import 'package:flutter_midi_command/flutter_midi_command.dart';
 import 'package:get/get.dart';
 import 'package:rwkvmusic/utils/audioplayer.dart';
-import 'package:rwkvmusic/utils/midiconvertabc.dart';
-import 'package:rwkvmusic/utils/mididevicemanage.dart';
+import 'package:rwkvmusic/utils/midiconvert_abc.dart';
+import 'package:rwkvmusic/utils/mididevice_manage.dart';
 
 // import 'controller.dart';
 
 void main() => runApp(const MIDIDeviceListPage());
 
 class MIDIDeviceListPage extends StatefulWidget {
-  const MIDIDeviceListPage({Key? key}) : super(key: key);
+  const MIDIDeviceListPage({super.key});
 
   @override
   MIDIDeviceListPageState createState() => MIDIDeviceListPageState();
@@ -64,7 +64,7 @@ class MIDIDeviceListPageState extends State<MIDIDeviceListPage> {
                       await deviceManage.midiCommand!.devices;
                   allDives.clear();
                   if (list!.isNotEmpty) {
-                    allDives.addAll(list!);
+                    allDives.addAll(list);
                   }
                 },
                 icon: const Icon(Icons.refresh));

@@ -6,8 +6,8 @@ import 'package:flutter_svg/svg.dart';
 import 'package:rwkvmusic/main.dart';
 import 'package:rwkvmusic/style/color.dart';
 
-class CreatBottomBtn extends StatelessWidget {
-  CreatBottomBtn(
+class BorderBottomBtn extends StatelessWidget {
+  BorderBottomBtn(
       {super.key,
       required this.width,
       required this.height,
