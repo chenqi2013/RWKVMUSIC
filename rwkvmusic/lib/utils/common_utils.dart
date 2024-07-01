@@ -63,6 +63,17 @@ class CommonUtils {
     return path;
   }
 
+  static Future<String> getCachePath() async {
+    String tempDirPath = '';
+    try {
+      Directory tempDir = await getApplicationCacheDirectory();
+      tempDirPath = tempDir.path;
+    } catch (e) {
+      print('Error getCachePath: $e');
+    }
+    return tempDirPath;
+  }
+
   static Future<String> loadDllFromAssets(String dllFileName) async {
     try {
       Directory tempDir = await getApplicationCacheDirectory();

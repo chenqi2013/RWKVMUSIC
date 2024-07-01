@@ -1,5 +1,6 @@
 import 'dart:ffi' hide Size;
 import 'dart:isolate';
+import 'dart:math';
 import 'dart:ui';
 import 'package:ffi/ffi.dart';
 // import 'dart:html';
@@ -137,6 +138,7 @@ int modelAddress = 0;
 int abcTokenizerAddress = 0;
 int samplerAddress = 0;
 bool isClicking = false;
+bool isgaotong = true; //是否高通
 
 void fetchABCDataByIsolate() async {
   String? dllPath;
@@ -172,12 +174,81 @@ void fetchABCDataByIsolate() async {
         'RWKV-6-ABC-85M-v1-20240217-ctx1024-ncnn.param');
   } else if (Platform.isAndroid) {
     dllPath = await CommonUtils.loadDllFromAssets('libfaster_rwkvd.so');
-    binPath = await CommonUtils.loadDllFromAssets(
-        'RWKV-6-ABC-85M-v1-20240217-ctx1024-ncnn.bin');
-    configPath = await CommonUtils.loadDllFromAssets(
-        'RWKV-6-ABC-85M-v1-20240217-ctx1024-ncnn.config');
-    paramPath = await CommonUtils.loadDllFromAssets(
-        'RWKV-6-ABC-85M-v1-20240217-ctx1024-ncnn.param');
+    if (isgaotong) {
+      String sopath = await CommonUtils.loadDllFromAssets(
+          'libRWKV-6-ABC-85M-v1-20240217-ctx1024-QNN.so');
+      if (!File(sopath).existsSync()) {
+        debugPrint('file not exists1');
+      }
+      String cachePath = await CommonUtils.getCachePath();
+      binPath = "$sopath:$cachePath";
+      debugPrint('binpath==$binPath');
+      String filepath =
+          await CommonUtils.loadDllFromAssets('libQnnDspV66Skel.so');
+      if (!File(filepath).existsSync()) {
+        debugPrint('file not exists12');
+      }
+      filepath = await CommonUtils.loadDllFromAssets('libQnnHtp.so');
+      if (!File(filepath).existsSync()) {
+        debugPrint('file not exists13');
+      }
+      filepath =
+          await CommonUtils.loadDllFromAssets('libQnnHtpNetRunExtensions.so');
+      if (!File(filepath).existsSync()) {
+        debugPrint('file not exists14');
+      }
+      filepath = await CommonUtils.loadDllFromAssets('libQnnHtpPrepare.so');
+      if (!File(filepath).existsSync()) {
+        debugPrint('file not exists15');
+      }
+      filepath = await CommonUtils.loadDllFromAssets('libQnnHtpV68Skel.so');
+      if (!File(filepath).existsSync()) {
+        debugPrint('file not exists16');
+      }
+      filepath = await CommonUtils.loadDllFromAssets('libQnnHtpV68Stub.so');
+      if (!File(filepath).existsSync()) {
+        debugPrint('file not exists17');
+      }
+      filepath = await CommonUtils.loadDllFromAssets('libQnnHtpV69Skel.so');
+      if (!File(filepath).existsSync()) {
+        debugPrint('file not exists18');
+      }
+      filepath = await CommonUtils.loadDllFromAssets('libQnnHtpV69Stub.so');
+      if (!File(filepath).existsSync()) {
+        debugPrint('file not exists19');
+      }
+      filepath = await CommonUtils.loadDllFromAssets('libQnnHtpV73Skel.so');
+      if (!File(filepath).existsSync()) {
+        debugPrint('file not exists110');
+      }
+      filepath = await CommonUtils.loadDllFromAssets('libQnnHtpV73Stub.so');
+      if (!File(filepath).existsSync()) {
+        debugPrint('file not exists111');
+      }
+      filepath = await CommonUtils.loadDllFromAssets('libQnnHtpV75Skel.so');
+      if (!File(filepath).existsSync()) {
+        debugPrint('file not exists112');
+      }
+      filepath = await CommonUtils.loadDllFromAssets('libQnnHtpV75Stub.so');
+      if (!File(filepath).existsSync()) {
+        debugPrint('file not exists113');
+      }
+      filepath = await CommonUtils.loadDllFromAssets('libQnnSystem.so');
+      if (!File(filepath).existsSync()) {
+        debugPrint('file not exists114');
+      }
+      configPath = await CommonUtils.loadDllFromAssets(
+          'libRWKV-6-ABC-85M-v1-20240217-ctx1024-QNN.config');
+      paramPath = await CommonUtils.loadDllFromAssets(
+          'RWKV-6-ABC-85M-v1-20240217-ctx1024-ncnn.param');
+    } else {
+      binPath = await CommonUtils.loadDllFromAssets(
+          'RWKV-6-ABC-85M-v1-20240217-ctx1024-ncnn.bin');
+      configPath = await CommonUtils.loadDllFromAssets(
+          'RWKV-6-ABC-85M-v1-20240217-ctx1024-ncnn.config');
+      paramPath = await CommonUtils.loadDllFromAssets(
+          'RWKV-6-ABC-85M-v1-20240217-ctx1024-ncnn.param');
+    }
   } else if (Platform.isWindows) {
     dllPath = await CommonUtils.getdllPath();
     binPath = await CommonUtils.getBinPath();
@@ -295,6 +366,9 @@ void getABCDataByLocalModel(var array) async {
   faster_rwkvd fastrwkv = faster_rwkvd(
       Platform.isIOS ? DynamicLibrary.process() : DynamicLibrary.open(dllPath));
   Pointer<Char> strategy = 'ncnn fp32'.toNativeUtf8().cast<Char>();
+  if (isgaotong) {
+    strategy = 'qnn auto'.toNativeUtf8().cast<Char>();
+  }
   if (!falstmodel.isNotEmpty) {
     model = fastrwkv.rwkv_model_create(
         binPath.toNativeUtf8().cast<Char>(), strategy);
