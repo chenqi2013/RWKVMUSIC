@@ -573,6 +573,9 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    if (isOnlyLoadFastModel && modelAddress == 0) {
+      fetchABCDataByIsolate();
+    }
     return Scaffold(
         resizeToAvoidBottomInset: false,
         body: Container(
@@ -807,8 +810,9 @@ class _HomePageState extends State<HomePage> {
                                     ),
                                     onPressed: () {
                                       debugPrint('Generate');
-                                      if (isClicking) {
-                                        debugPrint('isClickingisClicking');
+                                      if (isClicking || isOnlyLoadFastModel) {
+                                        debugPrint(
+                                            'isClicking || isOnlyLoadFastModel');
                                         return;
                                       }
                                       isClicking = true;

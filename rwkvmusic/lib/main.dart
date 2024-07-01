@@ -97,7 +97,7 @@ String? connectDeviceId;
 
 MidiToABCConverter convertABC = MidiToABCConverter();
 
-late int midiProgramValue;
+int midiProgramValue = 0;
 
 RxInt timeSignature = 2.obs;
 RxInt defaultNoteLenght = 0.obs;
@@ -139,6 +139,7 @@ int abcTokenizerAddress = 0;
 int samplerAddress = 0;
 bool isClicking = false;
 bool isgaotong = true; //是否高通
+bool isOnlyLoadFastModel = true; //提前模型初始化，加快生成速度
 
 void fetchABCDataByIsolate() async {
   String? dllPath;
@@ -299,6 +300,7 @@ void fetchABCDataByIsolate() async {
     dllPath,
     binPath,
     fastmodel,
+    isOnlyLoadFastModel,
   ]);
 
   mainReceivePort.listen((data) {
@@ -309,6 +311,13 @@ void fetchABCDataByIsolate() async {
       modelAddress = data[0];
       abcTokenizerAddress = data[1];
       samplerAddress = data[2];
+      if (isOnlyLoadFastModel) {
+        isOnlyLoadFastModel = false;
+        mainReceivePort.close(); // 操作完成后，关闭 ReceivePort
+        userIsolate!.kill(priority: Isolate.immediate);
+        userIsolate = null;
+        debugPrint('userIsolate!.kill()');
+      }
     } else if (data is EventBus) {
       isolateEventBus = data;
     } else if (data == "finish") {
@@ -352,6 +361,7 @@ void getABCDataByLocalModel(var array) async {
   String dllPath = array[5];
   String binPath = array[6];
   var falstmodel = array[7];
+  var isOnlyLoadFastModeltmep = array[8];
   int eosId = 3;
   String prompt = currentPrompt;
   debugPrint('promptprompt==$prompt');
@@ -399,7 +409,9 @@ void getABCDataByLocalModel(var array) async {
   sendPort.send(isolateReceivePort.sendPort);
   sendPort.send(eventBus);
   sendPort.send([model.address, abcTokenizer.address, sampler.address]);
-
+  if (isOnlyLoadFastModeltmep) {
+    return;
+  }
   fastrwkv.rwkv_sampler_set_seed(sampler, seed);
   StringBuffer stringBuffer = StringBuffer();
   int preTimestamp = 0;
