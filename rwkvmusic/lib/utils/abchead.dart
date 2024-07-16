@@ -25,13 +25,18 @@ class ABCHead {
   }
 
   static String appendTempoParam(String abc, int tempo) {
-    // String tempoConfig = "Q:$tempo";
-    // if (abc.contains("Q:")) {
-    //   return abc.replaceAll(RegExp(r"Q:\d+"), tempoConfig);
-    // } else {
-    return abc;
-    // return "$tempoConfig\n$abc";
-    // }
+    String tempoConfig = "Q:$tempo";
+    String result = '';
+    if (abc.contains("Q:")) {
+      result = abc.replaceAll(RegExp(r"Q:\d+"), tempoConfig);
+    } else {
+      // return abc;
+      // result = "$tempoConfig\\n$abc";
+      result =
+          abc.replaceAll('%%MIDI program', '$tempoConfig\\n%%MIDI program');
+    }
+    // print('appendTempoParam=$result');
+    return result;
   }
 
   static String base64AbcString(String event) {

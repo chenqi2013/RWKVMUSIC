@@ -138,7 +138,7 @@ int modelAddress = 0;
 int abcTokenizerAddress = 0;
 int samplerAddress = 0;
 bool isClicking = false;
-ModelType currentModelType = ModelType.qnn;
+ModelType currentModelType = ModelType.ncnn;
 bool isOnlyLoadFastModel = true; //提前模型初始化，加快生成速度
 
 void fetchABCDataByIsolate() async {
@@ -256,6 +256,7 @@ void fetchABCDataByIsolate() async {
     binPath,
     fastmodel,
     isOnlyLoadFastModel,
+    tempo.value
   ]);
 
   mainReceivePort.listen((data) {
@@ -317,6 +318,7 @@ void getABCDataByLocalModel(var array) async {
   String binPath = array[6];
   var falstmodel = array[7];
   var isOnlyLoadFastModeltmep = array[8];
+  double tempo = array[9];
   int eosId = 3;
   String prompt = currentPrompt;
   debugPrint('promptprompt==$prompt');
@@ -434,7 +436,7 @@ void getABCDataByLocalModel(var array) async {
     // debugPrint('subpresentPrompt=$subpresentPrompt');
     abcString =
         "setAbcString(\"${ABCHead.getABCWithInstrument(textstr, midiprogramvalue)}\",false)";
-    abcString = ABCHead.appendTempoParam(abcString, tempo.value.toInt());
+    abcString = ABCHead.appendTempoParam(abcString, tempo.toInt());
     // debugPrint('abcString==$abcString');
     // 方案一
     int currentTimestamp = DateTime.now().millisecondsSinceEpoch;
