@@ -306,9 +306,9 @@ class _HomePageState extends State<HomePage> {
         // controllerPiano.runJavaScript(event);
       }
     });
-    // if (isOnlyLoadFastModel && modelAddress == 0) {
-    //   fetchABCDataByIsolate();
-    // }
+    if (isOnlyLoadFastModel && modelAddress == 0) {
+      fetchABCDataByIsolate();
+    }
   }
 
   void playNoteMp3(String name) {
