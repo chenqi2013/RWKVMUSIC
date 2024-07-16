@@ -1,3 +1,26 @@
+/// 当前使用的模型类型
+enum ModelType {
+  ncnn, //iOS手机只有这个ncnn
+  qnn, //pc端包括ncnn和qnn
+  mtk, // android手机包括三者
+}
+
+var qnnSoList = [
+  'libQnnDspV66Skel.so',
+  'libQnnHtp.so',
+  'libQnnHtpNetRunExtensions.so',
+  'libQnnHtpPrepare.so',
+  'libQnnHtpV68Skel.so',
+  'libQnnHtpV68Stub.so',
+  'libQnnHtpV69Skel.so',
+  'libQnnHtpV69Skel.so',
+  'libQnnHtpV73Skel.so',
+  'libQnnHtpV73Stub.so',
+  'libQnnHtpV75Skel.so',
+  'libQnnHtpV75Stub.so',
+  'libQnnSystem.so',
+];
+
 List<String> keyboardOptions = [
   'Simulate keyboard',
   'Midi keyboard',

@@ -37,19 +37,19 @@ class _MainPageState extends State<MainPage> {
       ..setNavigationDelegate(
         NavigationDelegate(
           onPageStarted: (url) {
-            _controler.onLoaded((msg) {
-              _controler.getWebViewHeight().then((value) {
-                var height = int.parse(value.toString()).toDouble();
-                if (height != _height) {
-                  if (kDebugMode) {
-                    print("Height is: $value");
-                  }
-                  setState(() {
-                    _height = height;
-                  });
-                }
-              });
-            });
+            // _controler.onLoaded((msg) {
+            //   _controler.getWebViewHeight().then((value) {
+            //     var height = int.parse(value.toString()).toDouble();
+            //     if (height != _height) {
+            //       if (kDebugMode) {
+            //         print("Height is: $value");
+            //       }
+            //       setState(() {
+            //         _height = height;
+            //       });
+            //     }
+            //   });
+            // });
           },
         ),
       )

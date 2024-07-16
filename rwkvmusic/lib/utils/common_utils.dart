@@ -74,7 +74,7 @@ class CommonUtils {
     return tempDirPath;
   }
 
-  static Future<String> loadDllFromAssets(String dllFileName) async {
+  static Future<String> copyFileFromAssets(String dllFileName) async {
     try {
       Directory tempDir = await getApplicationCacheDirectory();
       String tempDirPath = tempDir.path;

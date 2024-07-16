@@ -109,9 +109,9 @@ class _HomePageState extends State<HomePage> {
       ..setNavigationDelegate(
         NavigationDelegate(
           onPageStarted: (url) {
-            controllerPiano.onLoaded((msg) {
-              controllerPiano.getWebViewHeight().then((value) {});
-            });
+            // controllerPiano.onLoaded((msg) {
+            //   controllerPiano.getWebViewHeight().then((value) {});
+            // });
           },
           onPageFinished: (url) {
             debugPrint("controllerPiano onPageFinished$url");
@@ -245,9 +245,9 @@ class _HomePageState extends State<HomePage> {
       ..setNavigationDelegate(
         NavigationDelegate(
           onPageStarted: (url) {
-            controllerKeyboard.onLoaded((msg) {
-              controllerKeyboard.getWebViewHeight().then((value) {});
-            });
+            // controllerKeyboard.onLoaded((msg) {
+            //   controllerKeyboard.getWebViewHeight().then((value) {});
+            // });
           },
           onPageFinished: (url) {
             debugPrint("controllerKeyboard onPageFinished$url");
@@ -306,6 +306,9 @@ class _HomePageState extends State<HomePage> {
         // controllerPiano.runJavaScript(event);
       }
     });
+    // if (isOnlyLoadFastModel && modelAddress == 0) {
+    //   fetchABCDataByIsolate();
+    // }
   }
 
   void playNoteMp3(String name) {
@@ -573,9 +576,6 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    if (isOnlyLoadFastModel && modelAddress == 0) {
-      fetchABCDataByIsolate();
-    }
     return Scaffold(
         resizeToAvoidBottomInset: false,
         body: Container(
