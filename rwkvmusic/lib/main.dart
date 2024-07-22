@@ -301,13 +301,19 @@ void fetchABCDataByIsolate() async {
 void getABCDataByLocalModel(var array) async {
   SendPort sendPort = array[0];
   String currentPrompt = array[1];
-  currentPrompt = currentPrompt.replaceAll('\\"', '"');
+  // currentPrompt = currentPrompt.replaceAll('\\"', '"');
   // currentPrompt = 'L:1/8\nM:4/4\nK:G\n D GB |:"G"';
 //   currentPrompt = r'''
 // L:1/4
 // M:4/4
 // K:C
 // ^G,^A,^C^D "A"''';
+// |"F" cBFD''';
+//   currentPrompt = r'''
+// L:1/4
+// M:4/4
+// Q:90
+// z z z "D" A/ B/ |"Bm" d3/2 e/ ^f/ ^c/ B/4 ^c/4 B/4 A/4 |"G" B3 d/ e/ |"D" ^f3/2 a/ b/ d/ e/4 ^f/4 g/ |"D" ^f3 ^f/ a/ |"Bm" b3/2 a/ b |''';
   debugPrint('currentPrompt==$currentPrompt');
   int midiprogramvalue = array[2];
   int seed = array[3];
@@ -347,6 +353,9 @@ void getABCDataByLocalModel(var array) async {
   faster_rwkvd fastrwkv = faster_rwkvd(
       Platform.isIOS ? DynamicLibrary.process() : DynamicLibrary.open(dllPath));
   Pointer<Char> strategy = 'ncnn fp32'.toNativeUtf8().cast<Char>();
+  // Pointer<Char> strategy = 'webgpu auto'
+  //     .toNativeUtf8()
+  //     .cast<Char>(); //ncnn fp32    webgpu auto  (通用pc上和ios上可以webgpu auto)
   if (currentModelType == ModelType.qnn) {
     strategy = 'qnn auto'.toNativeUtf8().cast<Char>();
   } else if (currentModelType == ModelType.mtk) {
@@ -376,10 +385,12 @@ void getABCDataByLocalModel(var array) async {
   StringBuffer stringBuffer = StringBuffer();
   int preTimestamp = 0;
   late String abcString;
-  // fastrwkv.rwkv_model_clear_states(model);
+  fastrwkv.rwkv_model_clear_states(model);
   // 默认的就按照temp=1.0 top_k=8, top_p=0.8?
   int token = fastrwkv.rwkv_abcmodel_run_prompt(model, abcTokenizer, sampler,
       promptChar, prompt.length, 1.0, 8, randomness);
+  String firstResultstr = String.fromCharCode(token);
+  stringBuffer.write(firstResultstr);
   isGenerating.value = true;
   int duration = 0;
   for (int i = 0; i < 1024; i++) {
