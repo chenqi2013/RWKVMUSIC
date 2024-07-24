@@ -20,6 +20,7 @@ class TimeChanging extends StatelessWidget {
     return Dialog(
       backgroundColor: kC,
       child: ClipRRect(
+        borderRadius: 12.r,
         child: BackdropFilter(
           filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
           child: C(

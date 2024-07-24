@@ -17,6 +17,11 @@
       var countofnotes = 0;
       var isGenerateAbc = false;
 
+      let selectedChord = {
+        chord: "",
+        index: -1,
+      };
+
       function getElementSize() {
         // 获取ID为container的元素
         const container = document.getElementById("container");
@@ -55,16 +60,36 @@
           render_options: {
             scale: 1,
             clickListener: function (abcElem, tuneNumber, classes, dragIndex) {
-              console.log("dateNote", abcElem);
+
               // 获取 data-index 属性
               const svgElement = abcElem.abselem.elemset[0];
               const dataIndex = svgElement.getAttribute("data-index");
               if (dataIndex !== null) {
-                //触发flutter点击节点事件
-                console.log("Data Index:", dataIndex);
-                console.log("tuneNumber", abcElem.pitches[0].name);
-                flutteronClickNote.postMessage(abcElem.pitches[0].name + "," + dataIndex);
-                // index，可以进一步处理
+
+                //延时，等待和弦的点击事件
+                //已经是屎了，无所谓了
+                function delay(time) {
+                  return new Promise((resolve) => setTimeout(resolve, time));
+                }
+                delay(100).then(() => {
+                  if (dataIndex == selectedChord.index) {
+                    //点的是和弦
+                    console.log("点击了和弦")
+                    console.log(selectedChord.chord)
+                    console.log(dataIndex)
+                    flutterOnClickChord.postMessage(selectedChord.chord + "," + dataIndex);
+                    selectedChord.chord = "";
+                    selectedChord.index = -1;
+                  } else {
+                    //点的是音符
+                    console.log("点击了音符")
+                    console.log("Data Index:", dataIndex);
+                    console.log("tuneNumber", abcElem.pitches[0].name);
+                    flutteronClickNote.postMessage(abcElem.pitches[0].name + "," + dataIndex);
+                    selectedChord.chord = "";
+                    selectedChord.index = -1;
+                  }
+                });
               } else {
                 console.error("Data Index not found.");
               }
@@ -72,7 +97,6 @@
               var timeSignatureEle = document.getElementsByClassName(
                 "abcjs-time-signature"
               );
-              console.log("timeSignatureEle", timeSignatureEle);
               for (let i = 0; i < timeSignatureEle.length; i++) {
                 timeSignatureEle[i].classList.remove("abcjs-note_selected");
               }
@@ -458,13 +482,18 @@
           // });
 
           // 添加排号点击事件
-          var timeSignatureEle = document.getElementsByClassName("abcjs-time-signature");
+          var timeSignatureEle = document.getElementsByClassName(
+            "abcjs-time-signature"
+          );
           let timeSignatureNum = "";
 
           timeSignatureEle[0].addEventListener("click", function (e) {
             // 清空之前的时间签名数字
             timeSignatureNum = "";
 
+            // 取消选中的和弦
+            selectedChord.chord = "";
+            selectedChord.index = -1;
             // 取消其它节点的选中高亮，但不包括当前点击的元素
             let preSelectedElm = document.getElementsByClassName(
               "abcjs-note_selected"
@@ -493,8 +522,17 @@
             console.log("timeSignatureNum", timeSignatureNum);
             // flutteronClickNote.postMessage(timeSignatureNum + "," + "-1");
             flutterOnClickTime.postMessage("");
-
           });
+
+          //添加和弦点击事件
+          var chordEle = document.getElementsByTagName("text");
+          for (let i = 0; i < chordEle.length; i++) {
+            chordEle[i].addEventListener("click", function (e) {
+              selectedChord.chord = chordEle[i].textContent;
+              selectedChord.index =
+                chordEle[i].parentElement.getAttribute("data-index");
+            });
+          }
 
           //取消末尾node的高亮
           let selectedG = document.getElementsByClassName(
@@ -503,7 +541,6 @@
           for (let i = 0; i < selectedG.length; i++) {
             selectedG[i].classList.remove("abcjs-note_selected");
           }
-          console.log(11111111111, selectedG);
 
           scrollToLastGElement();
         });

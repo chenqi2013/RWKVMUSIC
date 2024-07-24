@@ -116,6 +116,7 @@ List virtualNotes = []; //虚拟键盘按键音符
 List<int> intNodes = []; //计算和弦需要使用
 String prechord = '';
 
+/// prompt mode or create mode
 var selectstate = 0.obs;
 late bool isWindowsOrMac;
 
