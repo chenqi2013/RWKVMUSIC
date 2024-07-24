@@ -28,3 +28,6 @@ const String STORAGE_RememberPrompt_SELECT = 'STORAGE_RememberPrompt_SELECT';
 const String STORAGE_RememberEffect_SELECT = 'STORAGE_RememberEffect_SELECT';
 
 const String STORAGE_AutoNext_SELECT = 'STORAGE_AutoNext_SELECT';
+
+/// 选择音符
+const STORAGE_note_SELECT = "STORAGE_note_SELECT";

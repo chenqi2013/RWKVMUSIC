@@ -1,844 +1,926 @@
 <!DOCTYPE html>
 <html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="x-ua-compatible" content="ie=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" type="text/css" href="examples-styles.css" />
+    <link rel="stylesheet" type="text/css" href="abcjs-audio.css" />
+    <script src="abcjs-basic.js" type="text/javascript"></script>
+    <script src="midiplayer.js" type="text/javascript"></script>
+    <script src="index.js" type="text/javascript"></script>
 
-<head>
-  <meta charset="utf-8" />
-  <meta http-equiv="x-ua-compatible" content="ie=edge" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <link rel="stylesheet" type="text/css" href="examples-styles.css" />
-  <link rel="stylesheet" type="text/css" href="abcjs-audio.css" />
-  <script src="abcjs-basic.js" type="text/javascript"></script>
-  <script src="midiplayer.js" type="text/javascript"></script>
-  <script src="index.js" type="text/javascript"></script>
+    <script type="text/javascript">
+      var abcjsEditor;
+      var timingCallbacks;
+      const Player = new MidiPlayer.Player();
+      var countofnotes = 0;
+      var isGenerateAbc = false;
 
-  <script type="text/javascript">
-    var abcjsEditor;
-    var timingCallbacks;
-    const Player = new MidiPlayer.Player();
-    var countofnotes = 0;
-    var isGenerateAbc = false;
+      function getElementSize() {
+        // 获取ID为container的元素
+        const container = document.getElementById("container");
 
+        // 检查元素是否存在
+        if (container) {
+          // 获取元素的宽高
+          const rect = container.getBoundingClientRect();
+          const width = rect.width;
+          const height = rect.height;
 
-    function getElementSize() {
-      // 获取ID为container的元素
-      const container = document.getElementById("container");
-
-      // 检查元素是否存在
-      if (container) {
-        // 获取元素的宽高
-        const rect = container.getBoundingClientRect();
-        const width = rect.width;
-        const height = rect.height;
-
-        // 返回宽高
-        return { width, height };
-      } else {
-        console.log("cant get element container");
-        // 如果元素不存在，返回null
-        return null;
-      }
-    }
-    window.onload = function () {
-      console.log("window.onload");
-      const windowsSize = getElementSize();
-      console.log(windowsSize);
-      let svgScale = 1;
-      if (windowsSize) {
-        if (windowsSize.height < 130) {
-          console.log("windowsSize.height < 130");
-          svgScale = 0.7;
+          // 返回宽高
+          return { width, height };
         } else {
-          svgScale = 1.3
+          console.log("cant get element container");
+          // 如果元素不存在，返回null
+          return null;
         }
       }
-
-      abcjsEditor = new ABCJS.Editor("abc", {
-        canvas_id: "paper",
-        render_options: { scale: svgScale },
-        warnings_id: "warnings",
-        synth: {
-          el: "#audio",
-          options: {
-            displayLoop: false,
-            displayRestart: true,
-            displayPlay: true,
-            displayProgress: true,
-            displayWarp: false,
-          },
-        },
-        abcjsParams: {
-          add_classes: true,
-          afterParsing: afterParsing,
-        },
-        selectionChangeCallback: selectionChangeCallback,
-      });
-
-      document
-        .querySelector(".abcjs-midi-start")
-        .addEventListener("click", startTimer);
-
-      setAbcString(
-        "TDoxLzQKTTo0LzQKSzpECiJEIiBBIEYgRiBBIEYgRiBGIEEgRiBBIEEgRiBGIEY=",
-        false
-      );
-
-      function delay(time) {
-        return new Promise((resolve) => setTimeout(resolve, time));
-      }
-      delay(800).then(() => {
-        handleScrollIntoCenter()
-      });
-    };
-
-    function afterParsing(tune, tuneNumber, abcString) {
-      if (self.isGenerateAbc != true) {
-        var a = countNotesInEditor(tune);
-        console.log("afterParsing:" + a);
-        countofnotes = a;
-
-        //  if(typeof controller !== "undefined"){
-        //       controller.onCountPromptNoteNumber(a);
-        //   } else {
-        //       alert("Running outside Android app");
-        //   }
-        flutteronCountPromptNoteNumber.postMessage(a);
-      }
-    }
-
-    function setPromptNoteNumberCount(count) {
-      self.countofnotes = count;
-    }
-
-    function clickListener(
-      abcElem,
-      tuneNumber,
-      classes,
-      analysis,
-      drag,
-      mouseEvent
-    ) {
-      var lastClicked = abcElem.midiPitches;
-      if (!lastClicked) return;
-
-      ABCJS.synth
-        .playEvent(
-          lastClicked,
-          abcElem.midiGraceNotePitches,
-          abcjsEditor.millisecondsPerMeasure()
-        )
-        .then(function (response) {
-          console.log("note played");
-        })
-        .catch(function (error) {
-          console.log("error playing note", error);
-        });
-    }
-
-    function selectionChangeCallback(start, end) {
-      if (abcjsEditor) {
-        var el = abcjsEditor.tunes[0].getElementFromChar(start);
-      }
-    }
-
-    function ABCtoEvents(base64Input) {
-      console.log("=========ABCtoEvents===========");
-      console.log("接收到的数据", base64Input);
-      var x = atob(base64Input);
-      x = x.replace(/\\(?!n)/g, "");
-      // 替换 \n 为真实的换行符
-      x = x.replace(/\\n/g, "\n");
-      // 在字符串的最前面加一个 % ，如果最前面没有 %
-      //if (x[0] !== "%") {
-      // x = "%" + x;
-      //}
-      // 去掉 !| ，其中 ! 和 | 之间可能会有多个空格
-      x = x.replace(/!\s*\|/g, "");
-      console.log("清理后的数据", x);
-      console.log("================================");
-      let speedRate = 1
-      speedRate = x.match(/Q:(\d+)/)
-      console.log(';;;;;;;;;;;;;;;;;')
-      console.log('speedRate', speedRate)
-      midi_data = ABCJS.synth.getMidiFile(x, {
-        chordsOff: false,
-        midiOutputType: "binary",
-      })[0];
-      Player.loadArrayBuffer(midi_data);
-      midi_events = Player.events;
-      var events = [];
-      for (var i in midi_events) {
-        for (var x of midi_events[i]) {
-          detail = i == 1 ? "" : "-chord";
-          if (x.name == "Note on")
-            // output 125bpm, real 180bpm
-            events.push([
-              Math.round((x.tick * 125) / speedRate[1]),
-              "on" + detail,
-              x.noteNumber - 20 + 20,
-            ]);
-          else if (x.name == "Note off")
-            events.push([
-              Math.round((x.tick * 125) / speedRate[1]),
-              "off" + detail,
-              x.noteNumber - 20 + 20,
-            ]);
-        }
-      }
-      events.sort(function (a, b) {
-        if (a[0] != b[0]) return a[0] - b[0];
-        else return a[1].length - b[1].length;
-      });
-      var cnt = {};
-      for (var i = 1; i <= 88; i++) cnt[i] = 0;
-      var to_remove = [];
-      for (var i in events) {
-        var x = events[i];
-        if (x[1].includes("on")) {
-          if (cnt[x[2]] > 0) to_remove.push(i);
-          cnt[x[2]] += 1;
-        } else if (x[1].includes("off")) {
-          if (cnt[x[2]] > 1) to_remove.push(i);
-          cnt[x[2]] -= 1;
-        }
-      }
-      to_remove.sort((a, b) => b - a);
-      for (var i of to_remove) {
-        // console.log(events[i])
-        events.splice(i, 1);
-      }
-      var eventJson = JSON.stringify(events);
-      console.log("转码后：" + eventJson);
-
-      // if(typeof controller !== "undefined"){
-      //     controller.onEvents("" + eventJson + "");
-      // } else {
-      //     alert("Running outside Android app");
-      // }
-      flutteronEvents.postMessage("" + eventJson + "");
-      return eventJson;
-    }
-
-    //现在改为接收base64编码的ABC谱
-    function ABCtoEvents2(base64Input) {
-      // 解码 Base64 字符串为原始的 ABC 记谱字符串
-      var abcNotation = atob(base64Input);
-
-      // 获取 MIDI 文件
-      var midi_data = ABCJS.synth.getMidiFile(abcNotation, {
-        chordsOff: false,
-        midiOutputType: "binary",
-      })[0];
-
-      // 加载 MIDI 数据到 Player
-      Player.loadArrayBuffer(midi_data);
-      var midi_events = Player.events;
-      var events = [];
-
-      // 处理 MIDI 事件
-      for (var i in midi_events) {
-        for (var x of midi_events[i]) {
-          var detail = i == 1 ? "" : "-chord";
-          if (x.name == "Note on") {
-            // 输出 125bpm，实际 180bpm
-            events.push([
-              Math.round((x.tick * 125) / 180),
-              "on" + detail,
-              x.noteNumber - 20,
-            ]);
-          } else if (x.name == "Note off") {
-            events.push([
-              Math.round((x.tick * 125) / 180),
-              "off" + detail,
-              x.noteNumber - 20,
-            ]);
+      window.onload = function () {
+        console.log("window.onload");
+        const windowsSize = getElementSize();
+        console.log(windowsSize);
+        let svgScale = 1;
+        if (windowsSize) {
+          if (windowsSize.height < 130) {
+            console.log("windowsSize.height < 130");
+            svgScale = 0.7;
+          } else {
+            svgScale = 1.3;
           }
         }
-      }
 
-      // 对事件进行排序
-      events.sort(function (a, b) {
-        if (a[0] != b[0]) return a[0] - b[0];
-        else return a[1].length - b[1].length;
-      });
-
-      // 移除重复的 Note on/off 事件
-      var cnt = {};
-      for (var i = 1; i <= 88; i++) cnt[i] = 0;
-      var to_remove = [];
-      for (var i in events) {
-        var x = events[i];
-        if (x[1].includes("on")) {
-          if (cnt[x[2]] > 0) to_remove.push(i);
-          cnt[x[2]] += 1;
-        } else if (x[1].includes("off")) {
-          if (cnt[x[2]] > 1) to_remove.push(i);
-          cnt[x[2]] -= 1;
-        }
-      }
-      to_remove.sort((a, b) => b - a);
-      for (var i of to_remove) {
-        events.splice(i, 1);
-      }
-
-      // 转换事件数组为 JSON 字符串
-      var eventJson = JSON.stringify(events);
-      console.log("转码后：", eventJson);
-
-      // 返回 JSON 字符串
-      return eventJson;
-    }
-
-    function setStyle() {
-      const start = 0;
-      const end = countofnotes - 1;
-      if (countofnotes < 1) {
-        return;
-      }
-
-      var paper = document.querySelector("#paper");
-
-      for (let i = start; i <= end; i++) {
-        var elems = paper.querySelectorAll('[data-index="' + i + '"]');
-        var index = 0,
-          length = elems.length;
-
-        for (; index < length; index++) {
-          //elems[index].style.opacity = 0.5;
-          elems[index].setAttribute("fill", "rgb(33,150,243)");
-          //elems[index].setAttribute("stroke","pink");
-        }
-      }
-    }
-
-    function getMidiData(abcString) {
-      midi_data = ABCJS.synth.getMidiFile(abcString, {
-        chordsOff: false,
-        midiOutputType: "binary",
-      })[0];
-      Player.loadArrayBuffer(midi_data);
-      console.log("midi_data=" + midi_data);
-    }
-
-    var synthForPlay;
-    function playAbc(abcString) {
-      if (synthForPlay == null) {
-        synthForPlay = new ABCJS.synth.CreateSynth();
-      } else {
-        synthForPlay.stop();
-      }
-      var myContext = new AudioContext();
-      var visualOptions = { responsive: "resize" };
-
-      var visualObj = ABCJS.renderAbc("paper", abcString, visualOptions)[0];
-      synthForPlay
-        .init({
-          audioContext: myContext,
-          visualObj: visualObj,
-        })
-        .then(function (results) {
-          synthForPlay.prime().then((response) => {
-            console.log(response.status);
-            synthForPlay.start();
-          });
-        })
-        .catch(function (reason) {
-          console.log(reason);
-        });
-    }
-
-    function countNotesInEditor(tunes) {
-      countofnotes = 0;
-      try {
-        var elems = tunes.lines[0].staff[0].voices[0];
-        var index = 0,
-          length = elems.length;
-        for (; index < length; index++) {
-          if (elems[index].el_type == "note") {
-            countofnotes = countofnotes + 1;
-          }
-        }
-      } catch (e) {
-        console.log(e);
-      }
-      return countofnotes;
-    }
-
-    function setAbcString(output, isGenerateAbc) {
-      console.log("=============setAbcString==============");
-      console.log("原始数据", output);
-      console.log("isGenerateAbc", isGenerateAbc);
-      // 判断 output 是否包含 "MIDI program"
-      if (!output.includes("MIDI program")) {
-        try {
-          // 如果不包含，假设是 Base64 编码并尝试解码
-          output = atob(output);
-          console.log("Base64 解码成功:", output);
-        } catch (e) {
-          console.error("Base64 解码失败:", e);
-        }
-      }
-
-      output = output.replace(/\\(?!n)/g, "");
-      // 替换 \n 为真实的换行符
-      output = output.replace(/\\n/g, "\n");
-      // 在字符串的最前面加一个 % ，如果最前面没有 %
-      // if (output[0] !== "%") {
-      //   output = "%" + output;
-      // }
-
-      // 去掉 !| ，其中 ! 和 | 之间可能会有多个空格
-      output = output.replace(/!\s*\|/g, "");
-      console.log("清理后" + output);
-
-      console.log("===========================");
-      self.isGenerateAbc = isGenerateAbc;
-      const textarea = document.getElementById("abc");
-      textarea.value = output;
-      var event = new Event("change");
-      textarea.dispatchEvent(event);
-
-      function delay(time) {
-        return new Promise((resolve) => setTimeout(resolve, time));
-      }
-      delay(0).then(() => {
-        // const paper = document.getElementById("paper");
-        // var pElements = paper.querySelectorAll("g");
-        // pElements[pElements.length - 1].scrollIntoView({
-        //   behavior: "smooth",
-        //   block: "nearest",
-        //   inline: "center",
-        // });
-        scrollToLastGElement()
-      });
-      delay(200).then(() => {
-        // const paper = document.getElementById("paper");
-        // var pElements = paper.querySelectorAll("g");
-        // pElements[pElements.length - 1].scrollIntoView({
-        //   behavior: "smooth",
-        //   block: "nearest",
-        //   inline: "center",
-        // });
-        scrollToLastGElement()
-      });
-      delay(400).then(() => {
-        // const paper = document.getElementById("paper");
-        // var pElements = paper.querySelectorAll("g");
-        // pElements[pElements.length - 1].scrollIntoView({
-        //   behavior: "smooth",
-        //   block: "nearest",
-        //   inline: "center",
-        // });
-        scrollToLastGElement()
-      });
-    }
-
-    function resetTimingCallbacks() {
-      self.timingCallbacks = null;
-
-      if (synthForPlay) {
-        synthForPlay.stop(); // 停止当前的音频播放
-        console.log("synth stop");
-      }
-    }
-
-    function triggerButtonClick() {
-      console.log("triggerButtonClick");
-      //const playBtn = document.getElementById("btnPlay");
-
-      //playBtn.click();
-      var button = document.getElementById("btnPlay");
-      var rect = button.getBoundingClientRect();
-      var x = rect.left + rect.width / 2;
-      var y = rect.top + rect.height / 2;
-      var event = new MouseEvent("click", {
-        view: window,
-        bubbles: true,
-        cancelable: true,
-        clientX: x,
-        clientY: y,
-      });
-      button.dispatchEvent(event);
-    }
-
-    function triggerRestartBtnClick() {
-      console.log("triggerRestartBtnClick");
-      //const playBtn = document.getElementById("btnPlay");
-
-      //playBtn.click();
-      var button = document.getElementById("btnRestart");
-      var rect = button.getBoundingClientRect();
-      var x = rect.left + rect.width / 2;
-      var y = rect.top + rect.height / 2;
-      var event = new MouseEvent("click", {
-        view: window,
-        bubbles: true,
-        cancelable: true,
-        clientX: x,
-        clientY: y,
-      });
-      button.dispatchEvent(event);
-    }
-
-    function setPlayButtonDisable(disable) {
-      document.getElementById("btnPlay").disabled = disable;
-    }
-
-    function CursorControl(rootSelector) {
-      var self = this;
-
-      // This demonstrates two methods of indicating where the music is.
-      // 1) An element is created that is moved along for each note.
-      // 2) The currently being played note is given a class so that it can be transformed.
-      self.cursor = null; // This is the svg element that will move with the music.
-      self.rootSelector = rootSelector; // This is the same selector as the renderAbc call uses.
-
-      self.onStart = function () {
-        // This is called when the timer starts so we know the svg has been drawn by now.
-        // Create the cursor and add it to the sheet music's svg.
-        var svg = document.querySelector(self.rootSelector + " svg");
-        self.cursor = document.createElementNS(
-          "http://www.w3.org/2000/svg",
-          "line"
-        );
-        self.cursor.setAttribute("class", "abcjs-cursor");
-        self.cursor.setAttributeNS(null, "x1", 0);
-        self.cursor.setAttributeNS(null, "y1", 0);
-        self.cursor.setAttributeNS(null, "x2", 0);
-        self.cursor.setAttributeNS(null, "y2", 0);
-        svg.appendChild(self.cursor);
-      };
-
-      self.removeSelection = function () {
-        // Unselect any previously selected notes.
-        var lastSelection = document.querySelectorAll(
-          self.rootSelector + " .abcjs-highlight"
-        );
-        for (var k = 0; k < lastSelection.length; k++)
-          lastSelection[k].classList.remove("abcjs-highlight");
-      };
-
-      self.onEvent = function (ev) {
-        // This is called every time a note or a rest is reached and contains the coordinates of it.
-        if (ev.measureStart && ev.left === null) return; // this was the second part of a tie across a measure line. Just ignore it.
-
-        self.removeSelection();
-
-        // Select the currently selected notes.
-        for (var i = 0; i < ev.elements.length; i++) {
-          var note = ev.elements[i];
-          for (var j = 0; j < note.length; j++) {
-            note[j].classList.add("abcjs-highlight");
-
-            //This is for safari scrollintoview
-
-            // Extract the data-index attribute value
-            var dataIndex = note[j].getAttribute("data-index");
-            if (dataIndex) {
-              // Extract the numeric part from the data-index attribute
-              var numericValue = dataIndex.match(/\d+/);
-              if (numericValue) {
-                console.log(numericValue[0]);
-                scrollIntoSelectedNode(numericValue[0]);
+        abcjsEditor = new ABCJS.Editor("abc", {
+          canvas_id: "paper",
+          render_options: {
+            scale: 1,
+            clickListener: function (abcElem, tuneNumber, classes, dragIndex) {
+              console.log("dateNote", abcElem);
+              // 获取 data-index 属性
+              const svgElement = abcElem.abselem.elemset[0];
+              const dataIndex = svgElement.getAttribute("data-index");
+              if (dataIndex !== null) {
+                //触发flutter点击节点事件
+                console.log("Data Index:", dataIndex);
+                console.log("tuneNumber", abcElem.pitches[0].name);
+                flutteronClickNote.postMessage(abcElem.pitches[0].name + "," + dataIndex);
+                // index，可以进一步处理
               } else {
-                console.log(
-                  "No numeric value found in data-index attribute."
-                );
+                console.error("Data Index not found.");
               }
-            } else {
-              console.log("data-index attribute not found.");
+
+              var timeSignatureEle = document.getElementsByClassName(
+                "abcjs-time-signature"
+              );
+              console.log("timeSignatureEle", timeSignatureEle);
+              for (let i = 0; i < timeSignatureEle.length; i++) {
+                timeSignatureEle[i].classList.remove("abcjs-note_selected");
+              }
+            },
+          },
+          warnings_id: "warnings",
+          synth: {
+            el: "#audio",
+            options: {
+              displayLoop: false,
+              displayRestart: true,
+              displayPlay: true,
+              displayProgress: true,
+              displayWarp: false,
+            },
+          },
+          abcjsParams: {
+            add_classes: true,
+            afterParsing: afterParsing,
+          },
+          selectionChangeCallback: selectionChangeCallback,
+        });
+
+        document
+          .querySelector(".abcjs-midi-start")
+          .addEventListener("click", startTimer);
+
+        setAbcString(
+          "TDoxLzQKTTo0LzQKSzpECiJEIiBBIEYgRiBBIEYgRiBGIEEgRiBBIEEgRiBGIEY=",
+          false
+        );
+
+        function delay(time) {
+          return new Promise((resolve) => setTimeout(resolve, time));
+        }
+        delay(800).then(() => {
+          handleScrollIntoCenter();
+        });
+      };
+
+      function afterParsing(tune, tuneNumber, abcString) {
+        if (self.isGenerateAbc != true) {
+          var a = countNotesInEditor(tune);
+          console.log("afterParsing:" + a);
+          countofnotes = a;
+
+          //  if(typeof controller !== "undefined"){
+          //       controller.onCountPromptNoteNumber(a);
+          //   } else {
+          //       alert("Running outside Android app");
+          //   }
+          flutteronCountPromptNoteNumber.postMessage(a);
+        }
+      }
+
+      function setPromptNoteNumberCount(count) {
+        self.countofnotes = count;
+      }
+
+      function clickListener(
+        abcElem,
+        tuneNumber,
+        classes,
+        analysis,
+        drag,
+        mouseEvent
+      ) {
+        var lastClicked = abcElem.midiPitches;
+        if (!lastClicked) return;
+
+        ABCJS.synth
+          .playEvent(
+            lastClicked,
+            abcElem.midiGraceNotePitches,
+            abcjsEditor.millisecondsPerMeasure()
+          )
+          .then(function (response) {
+            console.log("note played");
+          })
+          .catch(function (error) {
+            console.log("error playing note", error);
+          });
+      }
+
+      function selectionChangeCallback(start, end) {
+        if (abcjsEditor) {
+          var el = abcjsEditor.tunes[0].getElementFromChar(start);
+        }
+      }
+
+      function ABCtoEvents(base64Input) {
+        console.log("=========ABCtoEvents===========");
+        console.log("接收到的数据", base64Input);
+        var x = atob(base64Input);
+        x = x.replace(/\\(?!n)/g, "");
+        // 替换 \n 为真实的换行符
+        x = x.replace(/\\n/g, "\n");
+        // 在字符串的最前面加一个 % ，如果最前面没有 %
+        //if (x[0] !== "%") {
+        // x = "%" + x;
+        //}
+        // 去掉 !| ，其中 ! 和 | 之间可能会有多个空格
+        x = x.replace(/!\s*\|/g, "");
+        console.log("清理后的数据", x);
+        console.log("================================");
+        let speedRate = 1;
+        speedRate = x.match(/Q:(\d+)/);
+        console.log(";;;;;;;;;;;;;;;;;");
+        console.log("speedRate", speedRate);
+        midi_data = ABCJS.synth.getMidiFile(x, {
+          chordsOff: false,
+          midiOutputType: "binary",
+        })[0];
+        Player.loadArrayBuffer(midi_data);
+        midi_events = Player.events;
+        var events = [];
+        for (var i in midi_events) {
+          for (var x of midi_events[i]) {
+            detail = i == 1 ? "" : "-chord";
+            if (x.name == "Note on")
+              // output 125bpm, real 180bpm
+              events.push([
+                Math.round((x.tick * 125) / speedRate[1]),
+                "on" + detail,
+                x.noteNumber - 20 + 20,
+              ]);
+            else if (x.name == "Note off")
+              events.push([
+                Math.round((x.tick * 125) / speedRate[1]),
+                "off" + detail,
+                x.noteNumber - 20 + 20,
+              ]);
+          }
+        }
+        events.sort(function (a, b) {
+          if (a[0] != b[0]) return a[0] - b[0];
+          else return a[1].length - b[1].length;
+        });
+        var cnt = {};
+        for (var i = 1; i <= 88; i++) cnt[i] = 0;
+        var to_remove = [];
+        for (var i in events) {
+          var x = events[i];
+          if (x[1].includes("on")) {
+            if (cnt[x[2]] > 0) to_remove.push(i);
+            cnt[x[2]] += 1;
+          } else if (x[1].includes("off")) {
+            if (cnt[x[2]] > 1) to_remove.push(i);
+            cnt[x[2]] -= 1;
+          }
+        }
+        to_remove.sort((a, b) => b - a);
+        for (var i of to_remove) {
+          // console.log(events[i])
+          events.splice(i, 1);
+        }
+        var eventJson = JSON.stringify(events);
+        console.log("转码后：" + eventJson);
+
+        // if(typeof controller !== "undefined"){
+        //     controller.onEvents("" + eventJson + "");
+        // } else {
+        //     alert("Running outside Android app");
+        // }
+        flutteronEvents.postMessage("" + eventJson + "");
+
+        return eventJson;
+      }
+
+      //现在改为接收base64编码的ABC谱
+      function ABCtoEvents2(base64Input) {
+        // 解码 Base64 字符串为原始的 ABC 记谱字符串
+        var abcNotation = atob(base64Input);
+
+        // 获取 MIDI 文件
+        var midi_data = ABCJS.synth.getMidiFile(abcNotation, {
+          chordsOff: false,
+          midiOutputType: "binary",
+        })[0];
+
+        // 加载 MIDI 数据到 Player
+        Player.loadArrayBuffer(midi_data);
+        var midi_events = Player.events;
+        var events = [];
+
+        // 处理 MIDI 事件
+        for (var i in midi_events) {
+          for (var x of midi_events[i]) {
+            var detail = i == 1 ? "" : "-chord";
+            if (x.name == "Note on") {
+              // 输出 125bpm，实际 180bpm
+              events.push([
+                Math.round((x.tick * 125) / 180),
+                "on" + detail,
+                x.noteNumber - 20,
+              ]);
+            } else if (x.name == "Note off") {
+              events.push([
+                Math.round((x.tick * 125) / 180),
+                "off" + detail,
+                x.noteNumber - 20,
+              ]);
             }
           }
+        }
 
-          //This is for chrome scrollintoview
-          // note[0].scrollIntoView({
-          //   // behavior: "smooth",
-          //   block: "nearest",
-          //   inline: "center",
-          // });
-          // note[note.length - 1].scrollIntoView({
+        // 对事件进行排序
+        events.sort(function (a, b) {
+          if (a[0] != b[0]) return a[0] - b[0];
+          else return a[1].length - b[1].length;
+        });
+
+        // 移除重复的 Note on/off 事件
+        var cnt = {};
+        for (var i = 1; i <= 88; i++) cnt[i] = 0;
+        var to_remove = [];
+        for (var i in events) {
+          var x = events[i];
+          if (x[1].includes("on")) {
+            if (cnt[x[2]] > 0) to_remove.push(i);
+            cnt[x[2]] += 1;
+          } else if (x[1].includes("off")) {
+            if (cnt[x[2]] > 1) to_remove.push(i);
+            cnt[x[2]] -= 1;
+          }
+        }
+        to_remove.sort((a, b) => b - a);
+        for (var i of to_remove) {
+          events.splice(i, 1);
+        }
+
+        // 转换事件数组为 JSON 字符串
+        var eventJson = JSON.stringify(events);
+        console.log("转码后：", eventJson);
+
+        // 返回 JSON 字符串
+        return eventJson;
+      }
+
+      function setStyle() {
+        const start = 0;
+        const end = countofnotes - 1;
+        if (countofnotes < 1) {
+          return;
+        }
+
+        var paper = document.querySelector("#paper");
+
+        for (let i = start; i <= end; i++) {
+          var elems = paper.querySelectorAll('[data-index="' + i + '"]');
+          var index = 0,
+            length = elems.length;
+
+          for (; index < length; index++) {
+            //elems[index].style.opacity = 0.5;
+            elems[index].setAttribute("fill", "rgb(33,150,243)");
+            //elems[index].setAttribute("stroke","pink");
+          }
+        }
+      }
+
+      function getMidiData(abcString) {
+        midi_data = ABCJS.synth.getMidiFile(abcString, {
+          chordsOff: false,
+          midiOutputType: "binary",
+        })[0];
+        Player.loadArrayBuffer(midi_data);
+        console.log("midi_data=" + midi_data);
+      }
+
+      var synthForPlay;
+      function playAbc(abcString) {
+        if (synthForPlay == null) {
+          synthForPlay = new ABCJS.synth.CreateSynth();
+        } else {
+          synthForPlay.stop();
+        }
+        var myContext = new AudioContext();
+        var visualOptions = { responsive: "resize" };
+
+        var visualObj = ABCJS.renderAbc("paper", abcString, visualOptions, {
+          clickListener: function (abcElem) {
+            console.log("ioioioioioioioioio");
+          },
+        })[0];
+        synthForPlay
+          .init({
+            audioContext: myContext,
+            visualObj: visualObj,
+          })
+          .then(function (results) {
+            synthForPlay.prime().then((response) => {
+              console.log(response.status);
+              synthForPlay.start();
+            });
+          })
+          .catch(function (reason) {
+            console.log(reason);
+          });
+      }
+
+      function countNotesInEditor(tunes) {
+        countofnotes = 0;
+        try {
+          var elems = tunes.lines[0].staff[0].voices[0];
+          var index = 0,
+            length = elems.length;
+          for (; index < length; index++) {
+            if (elems[index].el_type == "note") {
+              countofnotes = countofnotes + 1;
+            }
+          }
+        } catch (e) {
+          console.log(e);
+        }
+        return countofnotes;
+      }
+
+      function setAbcString(output, isGenerateAbc) {
+        console.log("=============setAbcString==============");
+        console.log("原始数据", output);
+        console.log("isGenerateAbc", isGenerateAbc);
+        // 判断 output 是否包含 "MIDI program"
+        if (!output.includes("MIDI program")) {
+          try {
+            // 如果不包含，假设是 Base64 编码并尝试解码
+            output = atob(output);
+            console.log("Base64 解码成功:", output);
+          } catch (e) {
+            console.error("Base64 解码失败:", e);
+          }
+        }
+
+        output = output.replace(/\\(?!n)/g, "");
+        // 替换 \n 为真实的换行符
+        output = output.replace(/\\n/g, "\n");
+        // 在字符串的最前面加一个 % ，如果最前面没有 %
+        // if (output[0] !== "%") {
+        //   output = "%" + output;
+        // }
+
+        // 去掉 !| ，其中 ! 和 | 之间可能会有多个空格
+        output = output.replace(/!\s*\|/g, "");
+        console.log("清理后" + output);
+
+        console.log("===========================");
+        self.isGenerateAbc = isGenerateAbc;
+        const textarea = document.getElementById("abc");
+        textarea.value = output;
+        var event = new Event("change");
+        textarea.dispatchEvent(event);
+
+        function delay(time) {
+          return new Promise((resolve) => setTimeout(resolve, time));
+        }
+        delay(0).then(() => {
+          // const paper = document.getElementById("paper");
+          // var pElements = paper.querySelectorAll("g");
+          // pElements[pElements.length - 1].scrollIntoView({
           //   behavior: "smooth",
           //   block: "nearest",
           //   inline: "center",
           // });
-        }
+          scrollToLastGElement();
+        });
+        delay(200).then(() => {
+          // const paper = document.getElementById("paper");
+          // var pElements = paper.querySelectorAll("g");
+          // pElements[pElements.length - 1].scrollIntoView({
+          //   behavior: "smooth",
+          //   block: "nearest",
+          //   inline: "center",
+          // });
+          scrollToLastGElement();
+        });
+        delay(400).then(() => {
+          // const paper = document.getElementById("paper");
+          // var pElements = paper.querySelectorAll("g");
+          // pElements[pElements.length - 1].scrollIntoView({
+          //   behavior: "smooth",
+          //   block: "nearest",
+          //   inline: "center",
+          // });
 
-        // Move the cursor to the location of the current note.
-        if (self.cursor) {
-          self.cursor.setAttribute("x1", ev.left - 2);
-          self.cursor.setAttribute("x2", ev.left - 2);
-          self.cursor.setAttribute("y1", ev.top);
-          self.cursor.setAttribute("y2", ev.top + ev.height);
-        }
+          // 添加排号点击事件
+          var timeSignatureEle = document.getElementsByClassName("abcjs-time-signature");
+          let timeSignatureNum = "";
 
-        if (ev.measureStart) {
-          var elements = document.querySelectorAll(
-            ".abcjs-mm" + ev.measureNumber
+          timeSignatureEle[0].addEventListener("click", function (e) {
+            // 清空之前的时间签名数字
+            timeSignatureNum = "";
+
+            // 取消其它节点的选中高亮，但不包括当前点击的元素
+            let preSelectedElm = document.getElementsByClassName(
+              "abcjs-note_selected"
+            );
+            for (let j = 0; j < preSelectedElm.length; j++) {
+              if (
+                !preSelectedElm[j].classList.contains("abcjs-time-signature") ||
+                preSelectedElm[j] !== e.currentTarget
+              ) {
+                preSelectedElm[j].classList.remove("abcjs-note_selected");
+              }
+            }
+
+            // 当前时间签名元素添加高亮
+            e.currentTarget.classList.add("abcjs-note_selected");
+
+            // 获取子元素属性值并拼接成字符串
+            let childrenElements = e.currentTarget.children;
+            for (let k = 0; k < childrenElements.length; k++) {
+              if (childrenElements[k].attributes[0]) {
+                // 确保属性存在
+                timeSignatureNum += childrenElements[k].attributes[0]?.value;
+              }
+            }
+
+            console.log("timeSignatureNum", timeSignatureNum);
+            // flutteronClickNote.postMessage(timeSignatureNum + "," + "-1");
+            flutterOnClickTime.postMessage("");
+
+          });
+
+          //取消末尾node的高亮
+          let selectedG = document.getElementsByClassName(
+            "abcjs-note_selected"
           );
+          for (let i = 0; i < selectedG.length; i++) {
+            selectedG[i].classList.remove("abcjs-note_selected");
+          }
+          console.log(11111111111, selectedG);
+
+          scrollToLastGElement();
+        });
+      }
+
+      function resetTimingCallbacks() {
+        self.timingCallbacks = null;
+
+        if (synthForPlay) {
+          synthForPlay.stop(); // 停止当前的音频播放
+          console.log("synth stop");
+        }
+      }
+
+      function triggerButtonClick() {
+        console.log("triggerButtonClick");
+        //const playBtn = document.getElementById("btnPlay");
+
+        //playBtn.click();
+        var button = document.getElementById("btnPlay");
+        var rect = button.getBoundingClientRect();
+        var x = rect.left + rect.width / 2;
+        var y = rect.top + rect.height / 2;
+        var event = new MouseEvent("click", {
+          view: window,
+          bubbles: true,
+          cancelable: true,
+          clientX: x,
+          clientY: y,
+        });
+        button.dispatchEvent(event);
+      }
+
+      function triggerRestartBtnClick() {
+        console.log("triggerRestartBtnClick");
+        //const playBtn = document.getElementById("btnPlay");
+
+        //playBtn.click();
+        var button = document.getElementById("btnRestart");
+        var rect = button.getBoundingClientRect();
+        var x = rect.left + rect.width / 2;
+        var y = rect.top + rect.height / 2;
+        var event = new MouseEvent("click", {
+          view: window,
+          bubbles: true,
+          cancelable: true,
+          clientX: x,
+          clientY: y,
+        });
+        button.dispatchEvent(event);
+      }
+
+      function setPlayButtonDisable(disable) {
+        document.getElementById("btnPlay").disabled = disable;
+      }
+
+      function CursorControl(rootSelector) {
+        var self = this;
+
+        // This demonstrates two methods of indicating where the music is.
+        // 1) An element is created that is moved along for each note.
+        // 2) The currently being played note is given a class so that it can be transformed.
+        self.cursor = null; // This is the svg element that will move with the music.
+        self.rootSelector = rootSelector; // This is the same selector as the renderAbc call uses.
+
+        self.onStart = function () {
+          // This is called when the timer starts so we know the svg has been drawn by now.
+          // Create the cursor and add it to the sheet music's svg.
+          var svg = document.querySelector(self.rootSelector + " svg");
+          self.cursor = document.createElementNS(
+            "http://www.w3.org/2000/svg",
+            "line"
+          );
+          self.cursor.setAttribute("class", "abcjs-cursor");
+          self.cursor.setAttributeNS(null, "x1", 0);
+          self.cursor.setAttributeNS(null, "y1", 0);
+          self.cursor.setAttributeNS(null, "x2", 0);
+          self.cursor.setAttributeNS(null, "y2", 0);
+          svg.appendChild(self.cursor);
+        };
+
+        self.removeSelection = function () {
+          // Unselect any previously selected notes.
+          var lastSelection = document.querySelectorAll(
+            self.rootSelector + " .abcjs-highlight"
+          );
+          for (var k = 0; k < lastSelection.length; k++)
+            lastSelection[k].classList.remove("abcjs-highlight");
+        };
+
+        self.onEvent = function (ev) {
+          // This is called every time a note or a rest is reached and contains the coordinates of it.
+          if (ev.measureStart && ev.left === null) return; // this was the second part of a tie across a measure line. Just ignore it.
+
+          self.removeSelection();
+
+          // Select the currently selected notes.
+          for (var i = 0; i < ev.elements.length; i++) {
+            var note = ev.elements[i];
+            for (var j = 0; j < note.length; j++) {
+              note[j].classList.add("abcjs-highlight");
+
+              //This is for safari scrollintoview
+
+              // Extract the data-index attribute value
+              var dataIndex = note[j].getAttribute("data-index");
+              if (dataIndex) {
+                // Extract the numeric part from the data-index attribute
+                var numericValue = dataIndex.match(/\d+/);
+                if (numericValue) {
+                  console.log(numericValue[0]);
+                  scrollIntoSelectedNode(numericValue[0]);
+                } else {
+                  console.log(
+                    "No numeric value found in data-index attribute."
+                  );
+                }
+              } else {
+                console.log("data-index attribute not found.");
+              }
+            }
+
+            //This is for chrome scrollintoview
+            // note[0].scrollIntoView({
+            //   // behavior: "smooth",
+            //   block: "nearest",
+            //   inline: "center",
+            // });
+            // note[note.length - 1].scrollIntoView({
+            //   behavior: "smooth",
+            //   block: "nearest",
+            //   inline: "center",
+            // });
+          }
+
+          // Move the cursor to the location of the current note.
+          if (self.cursor) {
+            self.cursor.setAttribute("x1", ev.left - 2);
+            self.cursor.setAttribute("x2", ev.left - 2);
+            self.cursor.setAttribute("y1", ev.top);
+            self.cursor.setAttribute("y2", ev.top + ev.height);
+          }
+
+          if (ev.measureStart) {
+            var elements = document.querySelectorAll(
+              ".abcjs-mm" + ev.measureNumber
+            );
+            for (var j = 0; j < elements.length; j++) {
+              const element = elements[j];
+              if (!element.classList.contains("abcjs-bar"))
+                element.classList.add("hide-note");
+            }
+          }
+        };
+        self.onFinished = function () {
+          self.removeSelection();
+          timingCallbacks = null;
+
+          if (self.cursor) {
+            self.cursor.setAttribute("x1", 0);
+            self.cursor.setAttribute("x2", 0);
+            self.cursor.setAttribute("y1", 0);
+            self.cursor.setAttribute("y2", 0);
+          }
+
+          var elements = document.querySelectorAll(".hide-note");
           for (var j = 0; j < elements.length; j++) {
             const element = elements[j];
-            if (!element.classList.contains("abcjs-bar"))
-              element.classList.add("hide-note");
+            element.classList.remove("hide-note");
           }
-        }
-      };
-      self.onFinished = function () {
-        self.removeSelection();
-        timingCallbacks = null;
 
-        if (self.cursor) {
-          self.cursor.setAttribute("x1", 0);
-          self.cursor.setAttribute("x2", 0);
-          self.cursor.setAttribute("y1", 0);
-          self.cursor.setAttribute("y2", 0);
-        }
+          // if(typeof controller !== "undefined"){
+          //     controller.onPlayFinish();
+          // } else {
+          //     alert("Running outside Android app");
+          // }
+          console.log("flutteronPlayFinish");
+          flutteronPlayFinish.postMessage("true");
+        };
+      }
 
-        var elements = document.querySelectorAll(".hide-note");
-        for (var j = 0; j < elements.length; j++) {
-          const element = elements[j];
-          element.classList.remove("hide-note");
-        }
+      var cursorControl = new CursorControl("#paper");
 
+      function onEvent(ev) {
+        if (ev) cursorControl.onEvent(ev);
+        else cursorControl.onFinished();
+      }
+
+      function onStartPlay(isUserClick, duration) {
+        console.log(
+          "onStartPlay isUserClick=" + isUserClick + " duration=" + duration
+        );
         // if(typeof controller !== "undefined"){
-        //     controller.onPlayFinish();
+        // controller.onStartPlay(isUserClick, duration);
         // } else {
         //     alert("Running outside Android app");
         // }
-        console.log("flutteronPlayFinish");
-        flutteronPlayFinish.postMessage("true");
-      };
-    }
+        flutteronStartPlay.postMessage(isUserClick + "," + duration);
+      }
 
-    var cursorControl = new CursorControl("#paper");
+      function onPausePlay() {
+        // if(typeof controller !== "undefined"){
+        //     controller.onPausePlay();
+        // } else {
+        // alert("Running outside Android app");
+        // }
+        flutteronPausePlay.postMessage("true");
+      }
 
-    function onEvent(ev) {
-      if (ev) cursorControl.onEvent(ev);
-      else cursorControl.onFinished();
-    }
+      function onResumePlay() {
+        // if(typeof controller !== "undefined"){
+        //     controller.onResumePlay();
+        // } else {
+        //     alert("Running outside Android app");
+        // }
+        flutteronResumePlay.postMessage("true");
+      }
 
-    function onStartPlay(isUserClick, duration) {
-      console.log(
-        "onStartPlay isUserClick=" + isUserClick + " duration=" + duration
-      );
-      // if(typeof controller !== "undefined"){
-      // controller.onStartPlay(isUserClick, duration);
-      // } else {
-      //     alert("Running outside Android app");
-      // }
-      flutteronStartPlay.postMessage(isUserClick + "," + duration);
-    }
-
-    function onPausePlay() {
-      // if(typeof controller !== "undefined"){
-      //     controller.onPausePlay();
-      // } else {
-      // alert("Running outside Android app");
-      // }
-      flutteronPausePlay.postMessage("true");
-    }
-
-    function onResumePlay() {
-      // if(typeof controller !== "undefined"){
-      //     controller.onResumePlay();
-      // } else {
-      //     alert("Running outside Android app");
-      // }
-      flutteronResumePlay.postMessage("true");
-    }
-
-    function startTimer(event) {
-      if (timingCallbacks == null) {
-        cursorControl.onStart();
-        timingCallbacks = new ABCJS.TimingCallbacks(abcjsEditor.tunes[0], {
-          eventCallback: onEvent,
-        });
-        timingCallbacks.start();
-        onStartPlay(event.isTrusted, timingCallbacks.lastMoment);
-      } else {
-        if (timingCallbacks.isPaused == true) {
-          timingCallbacks.start();
-          console.log("resume play");
-          onResumePlay();
-        } else if (timingCallbacks.isRunning == true) {
-          timingCallbacks.pause();
-          console.log("pausePlay");
-          onPausePlay();
-        } else {
+      function startTimer(event) {
+        if (timingCallbacks == null) {
+          cursorControl.onStart();
+          timingCallbacks = new ABCJS.TimingCallbacks(abcjsEditor.tunes[0], {
+            eventCallback: onEvent,
+          });
           timingCallbacks.start();
           onStartPlay(event.isTrusted, timingCallbacks.lastMoment);
+        } else {
+          if (timingCallbacks.isPaused == true) {
+            timingCallbacks.start();
+            console.log("resume play");
+            onResumePlay();
+          } else if (timingCallbacks.isRunning == true) {
+            timingCallbacks.pause();
+            console.log("pausePlay");
+            onPausePlay();
+          } else {
+            timingCallbacks.start();
+            onStartPlay(event.isTrusted, timingCallbacks.lastMoment);
+          }
         }
       }
-    }
 
-    function startPlay() {
-      scrollIntoFirstNode('1')
-      console.log("startPlay");
-      var evt = document.createEvent("CustomEvent");
-      evt.isTrusted = true;
-      triggerButtonClick();
-    }
-
-    function pausePlay() {
-      if (timingCallbacks != null && timingCallbacks.isRunning == true) {
-        console.log("pausePlay");
+      function startPlay() {
+        scrollIntoFirstNode("1");
+        console.log("startPlay");
+        var evt = document.createEvent("CustomEvent");
+        evt.isTrusted = true;
         triggerButtonClick();
       }
-    }
 
-    function exportMidiFile(abcString, fileName) {
-      var midi = ABCJS.synth.getMidiFile(abcString, {
-        midiOutputType: "binary",
-        fileName: fileName,
-      });
-      console.log("saveMidiFile midi=" + midi);
-      return midi.toString();
-    }
+      function pausePlay() {
+        if (timingCallbacks != null && timingCallbacks.isRunning == true) {
+          console.log("pausePlay");
+          triggerButtonClick();
+        }
+      }
 
-    function resetPage() {
-      // 重新加载当前页面
-      location.reload();
-    }
+      function exportMidiFile(abcString, fileName) {
+        var midi = ABCJS.synth.getMidiFile(abcString, {
+          midiOutputType: "binary",
+          fileName: fileName,
+        });
+        console.log("saveMidiFile midi=" + midi);
+        return midi.toString();
+      }
 
-    function restartPlay() {
-      resetTimingCallbacks();
-      startPlay();
-      triggerRestartBtnClick();
-    }
+      function resetPage() {
+        // 重新加载当前页面
+        location.reload();
+      }
 
-    //适配safari的scrollIntoView
-    function scrollIntoSelectedNode(nodeIndex) {
-      var paper = document.querySelector("#paper");
-      var elems = paper.querySelectorAll('[data-index="' + nodeIndex + '"]');
+      function restartPlay() {
+        resetTimingCallbacks();
+        startPlay();
+        triggerRestartBtnClick();
+      }
 
-      if (elems.length > 0) {
-        // 获取到元素的位置信息
-        var rect = elems[0].getBoundingClientRect();
-        var paperRect = paper.getBoundingClientRect();
+      //适配safari的scrollIntoView
+      function scrollIntoSelectedNode(nodeIndex) {
+        var paper = document.querySelector("#paper");
+        var elems = paper.querySelectorAll('[data-index="' + nodeIndex + '"]');
 
-        // 计算滚动位置
-        var scrollLeft =
-          rect.left -
-          paperRect.left +
-          paper.scrollLeft -
-          (paper.clientWidth - rect.width) / 2;
-        var scrollTop =
-          rect.top -
-          paperRect.top +
-          paper.scrollTop -
-          (paper.clientHeight - rect.height) / 2;
+        if (elems.length > 0) {
+          // 获取到元素的位置信息
+          var rect = elems[0].getBoundingClientRect();
+          var paperRect = paper.getBoundingClientRect();
 
-        // 平滑滚动
-        paper.scrollTo({
-          left: scrollLeft,
-          // top: scrollTop,
+          // 计算滚动位置
+          var scrollLeft =
+            rect.left -
+            paperRect.left +
+            paper.scrollLeft -
+            (paper.clientWidth - rect.width) / 2;
+          var scrollTop =
+            rect.top -
+            paperRect.top +
+            paper.scrollTop -
+            (paper.clientHeight - rect.height) / 2;
+
+          // 平滑滚动
+          paper.scrollTo({
+            left: scrollLeft,
+            // top: scrollTop,
+            behavior: "smooth",
+          });
+
+          console.log("scrollIntoSelectedNode " + nodeIndex);
+        } else {
+          console.log("No elements found with the given data-index.");
+        }
+      }
+
+      //适配safari的scrollIntoView/ 滚动到最后
+      function scrollToLastGElement() {
+        var paper = document.querySelector("#paper");
+        var gElements = paper.querySelectorAll("g");
+
+        if (gElements.length > 0) {
+          var lastGElement = gElements[gElements.length - 1];
+          var rect = lastGElement.getBoundingClientRect();
+          var paperRect = paper.getBoundingClientRect();
+
+          var scrollLeft =
+            rect.left -
+            paperRect.left +
+            paper.scrollLeft -
+            (paper.clientWidth - rect.width) / 2;
+          var scrollTop =
+            rect.top -
+            paperRect.top +
+            paper.scrollTop -
+            (paper.clientHeight - rect.height) / 2;
+
+          paper.scrollTo({
+            left: scrollLeft,
+            // top: scrollTop,
+            behavior: "smooth",
+          });
+
+          console.log("scrollToLastGElement");
+        } else {
+          console.log("No <g> elements found.");
+          // alert("No <g> elements found.");
+        }
+      }
+      //适配safari的scrollIntoView/ 滚动到最前
+      function scrollIntoFirstNode(nodeIndex) {
+        var paper = document.querySelector("#paper");
+        var elems = paper.querySelectorAll('[data-index="' + nodeIndex + '"]');
+
+        if (elems.length > 0) {
+          // 获取到元素的位置信息
+          var rect = elems[0].getBoundingClientRect();
+          var paperRect = paper.getBoundingClientRect();
+
+          // 计算滚动位置
+          var scrollLeft =
+            rect.left -
+            paperRect.left +
+            paper.scrollLeft -
+            (paper.clientWidth - rect.width) / 2;
+          var scrollTop =
+            rect.top -
+            paperRect.top +
+            paper.scrollTop -
+            (paper.clientHeight - rect.height) / 2;
+
+          // 平滑滚动
+          paper.scrollTo({
+            left: scrollLeft,
+            // top: scrollTop,
+            // behavior: "smooth",
+          });
+
+          console.log("scrollIntoSelectedNode " + nodeIndex);
+        } else {
+          console.log("No elements found with the given data-index.");
+        }
+      }
+
+      function handleScrollIntoCenter() {
+        var elem = document.getElementById("paper");
+        elem.scrollIntoView({
           behavior: "smooth",
+          block: "center",
+          inline: "center",
         });
-
-        console.log("scrollIntoSelectedNode " + nodeIndex);
-      } else {
-        console.log("No elements found with the given data-index.");
       }
-    }
+      window.setAbcString = setAbcString;
+      window.triggerButtonClick = triggerButtonClick;
+      window.ABCtoEvents = ABCtoEvents;
+      window.countNotesInEditor = countNotesInEditor;
+      window.setStyle = setStyle;
+      window.resetTimingCallbacks = resetTimingCallbacks;
+      window.setPromptNoteNumberCount = setPromptNoteNumberCount;
+      window.startPlay = startPlay;
+      window.pausePlay = pausePlay;
+      window.resetPage = resetPage;
+      window.playAbc = playAbc;
+      window.triggerRestartBtnClick = triggerRestartBtnClick;
+      window.restartPlay = restartPlay;
+    </script>
+  </head>
 
-    //适配safari的scrollIntoView/ 滚动到最后
-    function scrollToLastGElement() {
-      var paper = document.querySelector("#paper");
-      var gElements = paper.querySelectorAll("g");
-
-      if (gElements.length > 0) {
-        var lastGElement = gElements[gElements.length - 1];
-        var rect = lastGElement.getBoundingClientRect();
-        var paperRect = paper.getBoundingClientRect();
-
-        var scrollLeft =
-          rect.left -
-          paperRect.left +
-          paper.scrollLeft -
-          (paper.clientWidth - rect.width) / 2;
-        var scrollTop =
-          rect.top -
-          paperRect.top +
-          paper.scrollTop -
-          (paper.clientHeight - rect.height) / 2;
-
-        paper.scrollTo({
-          left: scrollLeft,
-          // top: scrollTop,
-          behavior: "smooth",
-        });
-
-        console.log("scrollToLastGElement");
-      } else {
-        console.log("No <g> elements found.");
-        // alert("No <g> elements found.");
-      }
-    }
-    //适配safari的scrollIntoView/ 滚动到最前
-    function scrollIntoFirstNode(nodeIndex) {
-      var paper = document.querySelector("#paper");
-      var elems = paper.querySelectorAll('[data-index="' + nodeIndex + '"]');
-
-      if (elems.length > 0) {
-        // 获取到元素的位置信息
-        var rect = elems[0].getBoundingClientRect();
-        var paperRect = paper.getBoundingClientRect();
-
-        // 计算滚动位置
-        var scrollLeft =
-          rect.left -
-          paperRect.left +
-          paper.scrollLeft -
-          (paper.clientWidth - rect.width) / 2;
-        var scrollTop =
-          rect.top -
-          paperRect.top +
-          paper.scrollTop -
-          (paper.clientHeight - rect.height) / 2;
-
-        // 平滑滚动
-        paper.scrollTo({
-          left: scrollLeft,
-          // top: scrollTop,
-          // behavior: "smooth",
-        });
-
-        console.log("scrollIntoSelectedNode " + nodeIndex);
-      } else {
-        console.log("No elements found with the given data-index.");
-      }
-    }
-
-    function handleScrollIntoCenter() {
-      var elem = document.getElementById("paper");
-      elem.scrollIntoView({
-        behavior: "smooth",
-        block: "center",
-        inline: "center"
-      })
-    }
-    window.setAbcString = setAbcString;
-    window.triggerButtonClick = triggerButtonClick;
-    window.ABCtoEvents = ABCtoEvents;
-    window.countNotesInEditor = countNotesInEditor;
-    window.setStyle = setStyle;
-    window.resetTimingCallbacks = resetTimingCallbacks;
-    window.setPromptNoteNumberCount = setPromptNoteNumberCount;
-    window.startPlay = startPlay;
-    window.pausePlay = pausePlay;
-    window.resetPage = resetPage;
-    window.playAbc = playAbc;
-    window.triggerRestartBtnClick = triggerRestartBtnClick;
-    window.restartPlay = restartPlay;
-  </script>
-</head>
-
-<body>
-  <div class="container" id='container'>
-    <div id="audio"></div>
-    <div id="paper"></div>
-    <div id="warnings" style="display: none"></div>
-    <textarea id="abc" style="display: none" cols="80" rows="15" spellcheck="false">
+  <body>
+    <div class="container" id="container">
+      <div id="audio"></div>
+      <div id="paper"></div>
+      <div id="warnings" style="display: none"></div>
+      <textarea
+        id="abc"
+        style="display: none"
+        cols="80"
+        rows="15"
+        spellcheck="false"
+      >
       </textarea>
-  </div>
-</body>
-
+    </div>
+  </body>
 </html>

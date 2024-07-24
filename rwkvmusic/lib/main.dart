@@ -118,6 +118,8 @@ String prechord = '';
 
 var selectstate = 0.obs;
 late bool isWindowsOrMac;
+
+/// 五线谱 webview 控制器
 late WebViewControllerPlus controllerPiano;
 var isRememberPrompt = false.obs;
 var isRememberEffect = false.obs;
