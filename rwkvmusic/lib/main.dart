@@ -130,7 +130,12 @@ ScrollController controller = ScrollController();
 var tokens = ''.obs;
 var currentClickNoteInfo = [];
 
-// var noteLengthList = ['1/4', '1/8', '1/16'];
+/// @wangce
+Rx<String?> selectedNoteValue = null.obs;
+
+/// @wangce
+Rx<int?> selectedNoteIndex = null.obs;
+
 List<Note> notes = [];
 Isolate? userIsolate;
 var isCreateGenerate = false.obs;

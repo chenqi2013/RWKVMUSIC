@@ -119,7 +119,7 @@ List<String> instruments = [
   'guitar',
 ];
 
-List<String> noteLengths = [
+List<String> kNoteLengths = [
   '1/4',
   '1/8',
   '1/16',

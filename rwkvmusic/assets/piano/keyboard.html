@@ -168,6 +168,25 @@
       .offset {
         margin: 0 0 0 -1rem;
       }
+
+      /* 针对Webkit浏览器（如Chrome, Safari） */
+      ::-webkit-scrollbar {
+        width: 12px; /* 滚动条的宽度 */
+        height: 12px; /* 滚动条的高度（用于水平滚动条） */
+      }
+
+      ::-webkit-scrollbar-track {
+        background: #f1f1f100; /* 滚动条轨道背景色 */
+      }
+
+      ::-webkit-scrollbar-thumb {
+        background: #888; /* 滚动块背景色 */
+        border-radius: 6px; /* 圆角效果 */
+      }
+
+      ::-webkit-scrollbar-thumb:hover {
+        background: #555; /* 当鼠标悬停在滚动块上时的颜色变化 */
+      }
     </style>
   </head>
 

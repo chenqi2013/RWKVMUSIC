@@ -71,7 +71,9 @@ class _HomePageState extends State<HomePage> {
   int preCount = 0;
   int listenCount = 0;
   var effectSelectedIndex = 0.obs;
-  var noteLengthSelectedIndex = 0.obs; //选中单个音符出现的弹框
+
+  /// 选中单个音符出现的弹框
+  var noteLengthSelectedIndex = 0.obs;
   String? currentSoundEffect;
   late MidiDeviceManage deviceManage;
   late String abcString;
@@ -248,6 +250,7 @@ class _HomePageState extends State<HomePage> {
           onMessageReceived: (JavaScriptMessage jsMessage) {
         debugPrint('flutteronNoteOff onMessageReceived=${jsMessage.message}');
       })
+      // @wangce 按下 webview 中的琴键
       ..addJavaScriptChannel("flutteronNoteOn",
           onMessageReceived: (JavaScriptMessage jsMessage) {
         debugPrint('flutteronNoteOn onMessageReceived=${jsMessage.message}');
@@ -302,23 +305,34 @@ class _HomePageState extends State<HomePage> {
       debugPrint('isShowDialog return');
       return;
     }
-    List list = jsMessage.message.split(',');
+
+    final list = jsMessage.message.split(',');
 
     if (int.parse(list[list.length - 1]) < 0) return;
 
-    if (selectstate.value == 1 && isPlay.value == false) {
-      if (kDebugMode) print("💬 $list");
-      currentClickNoteInfo = [list[0], list[list.length - 1]];
-      debugPrint('list===$currentClickNoteInfo');
-      noteLengthSelectedIndex.value = NoteCaculate()
-          .getNoteLengthIndex(list[0], int.parse(list[list.length - 1]));
-      showPromptDialog(
-        context,
-        'Change note length',
-        noteLengths,
-        STORAGE_note_SELECT,
-      );
-    }
+    final _selectstate = selectstate.value;
+    final _isPlay = isPlay.value;
+    if (_selectstate != 1 || _isPlay) return;
+
+    if (kDebugMode) print("💬 $list");
+
+    final noteValue = list[0];
+    selectedNoteValue.value = noteValue;
+
+    final noteIndex = list[list.length - 1];
+    selectedNoteIndex.value = int.tryParse(noteIndex);
+
+    currentClickNoteInfo = [noteValue, noteIndex];
+    noteLengthSelectedIndex.value = NoteCaculator().getNoteLengthIndex(
+      noteValue,
+      int.parse(noteIndex),
+    );
+    // showPromptDialog(
+    //   context,
+    //   'Change note length',
+    //   noteLengths,
+    //   STORAGE_note_SELECT,
+    // );
   }
 
   void _onReceiveChordClick(JavaScriptMessage jsMessage) async {
@@ -373,12 +387,19 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  void updateNote(int index, int noteLengthIndex, String note) {
-    debugPrint('updateNote index=$index,note=$note');
-    String newnote = NoteCaculate()
-        .calculateNewNoteByLength(note, noteLengths[noteLengthIndex]);
-    NoteCaculate().noteMap[index] = newnote;
-    virtualNotes[index] = newnote;
+  /// 通过执行 JS 更新琴谱
+  ///
+  /// @wangce
+  void updateNote(
+    int noteIndex,
+    int noteLengthIndex,
+    String note,
+  ) async {
+    debugPrint('updateNote index=$noteIndex,note=$note');
+    String newnote = NoteCaculator()
+        .calculateNewNoteByLength(note, kNoteLengths[noteLengthIndex]);
+    NoteCaculator().noteMap[noteIndex] = newnote;
+    virtualNotes[noteIndex] = newnote;
     StringBuffer sbff = StringBuffer();
     for (String note in virtualNotes) {
       sbff.write(note);
@@ -388,10 +409,13 @@ class _HomePageState extends State<HomePage> {
         "setAbcString(\"%%MIDI program $midiProgramValue\\nL:1/4\\nM:$timeSingnatureStr\\nK:C\\n|$createPrompt\",false)";
     finalabcStringCreate = ABCHead.appendTempoParam(sb, tempo.value.toInt());
     debugPrint('curr=$finalabcStringCreate');
-    controllerPiano.runJavaScript(finalabcStringCreate);
+    await controllerPiano.runJavaScript(finalabcStringCreate);
     // createPrompt = sbff.toString();
   }
 
+  /// @wangce 插入音符
+  ///
+  /// 1. 通过按下虚拟键盘触发
   void updatePianoNote(int node) {
     String noteName = MidiToABCConverter().getNoteName(node);
     if (defaultNoteLenght.value == 0) {
@@ -412,7 +436,7 @@ class _HomePageState extends State<HomePage> {
       debugPrint('chordStr=${chordList.length}');
     }
     String timeSignatureStr = timeSignatures[timeSignature.value];
-    String noteLengthStr = noteLengths[defaultNoteLenght.value];
+    String noteLengthStr = kNoteLengths[defaultNoteLenght.value];
     debugPrint(
         'timeSignatureStr=$timeSignatureStr,noteLengthStr=$noteLengthStr');
     for (int i = 0; i < virtualNotes.length; i++) {
@@ -495,7 +519,7 @@ class _HomePageState extends State<HomePage> {
           debugPrint('chordStr=${chordList.length}');
         }
         String timeSignatureStr = timeSignatures[timeSignature.value];
-        String noteLengthStr = noteLengths[defaultNoteLenght.value];
+        String noteLengthStr = kNoteLengths[defaultNoteLenght.value];
         debugPrint(
             'timeSignatureStr=$timeSignatureStr,noteLengthStr=$noteLengthStr');
         for (int i = 0; i < virtualNotes.length; i++) {
@@ -1342,7 +1366,7 @@ class _HomePageState extends State<HomePage> {
                             TextItem(text: 'Default note length'),
                             Obx(() => DropButtonList(
                                   key: const ValueKey('Default'),
-                                  items: noteLengths,
+                                  items: kNoteLengths,
                                   index: defaultNoteLenght.value,
                                   onChanged: (index) {
                                     defaultNoteLenght.value = index;
@@ -1635,34 +1659,6 @@ class _HomePageState extends State<HomePage> {
     const double rowHeight = 40.0; // Assuming the height of each row is 56.0
     controller.animateTo(rowIndex * rowHeight,
         duration: const Duration(milliseconds: 100), curve: Curves.easeInOut);
-  }
-
-  void _showChangeNoteDialog() async {
-    final _selectstate = selectstate.value;
-    final _isPlay = isPlay.value;
-    if (_selectstate != 1 || _isPlay) return;
-    isShowDialog = true;
-    if (isShowOverlay) {
-      closeOverlay();
-    }
-    if (isWindowsOrMac) {
-      isVisibleWebview.value = !isVisibleWebview.value;
-    }
-    final r = await showDialog<int>(
-        context: context,
-        builder: (BuildContext context) {
-          return const ChangeNote();
-        });
-
-    isShowDialog = false;
-    if (kDebugMode) print("💬 $r");
-    if (r == null) return;
-
-    timeSignature.value = r;
-    timeSingnatureStr = timeSignatures[r];
-    updateTimeSignature();
-
-    // TODO: change abc
   }
 
   void _showTimeChangingDialog() async {

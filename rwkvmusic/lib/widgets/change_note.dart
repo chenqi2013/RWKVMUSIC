@@ -1,10 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:halo/halo.dart';
 
+enum _Key {
+  whole,
+  half,
+  quarter,
+  eighth,
+  sixteenth,
+  thirtySecond,
+  dottodNote,
+  wholeZ,
+  halfZ,
+  quarterZ,
+  eighthZ,
+  sixteenthZ,
+  randomGroove,
+  delete,
+}
+
 class ChangeNote extends StatelessWidget {
   const ChangeNote({super.key});
 
-  void _onTapAtIndex(BuildContext context, int index) async {
+  void _onTapAtIndex(BuildContext context, _Key key) async {
     // TODO: implementation
   }
 
@@ -14,44 +31,36 @@ class ChangeNote extends StatelessWidget {
     return ClipRRect(
       borderRadius: 8.r,
       child: C(
-        decoration: BD(
-          color: Color(0xFF222222),
-        ),
-        height: 60,
-        width: screenWidth,
-        child: ListView.builder(
-          padding: EI.o(l: 4),
-          scrollDirection: Axis.horizontal,
-          itemCount: 12,
-          itemBuilder: (context, index) {
-            return SB(
-              height: 60,
-              width: 60,
-              child: Center(
-                child: GD(
+          decoration: BD(
+            color: Color(0xFF222222),
+          ),
+          height: 60,
+          width: screenWidth,
+          child: Ro(
+            children: [
+              5.w,
+              ..._Key.values.indexMap((index, k) {
+                return GD(
                   onTap: () {
-                    _onTapAtIndex(context, index);
+                    _onTapAtIndex(context, k);
                   },
                   child: C(
-                    decoration: BD(
-                      color: kW,
-                      borderRadius: 4.r,
-                    ),
-                    height: 48,
-                    width: 54,
+                    height: 50,
+                    width: 50,
+                    decoration: BD(color: kW, borderRadius: 4.r),
                     child: Center(
-                      child: T(
-                        "♩",
-                        s: TS(s: 32),
-                      ),
-                    ),
+                        child: T(
+                      k.name,
+                      s: TS(s: 8),
+                    )),
                   ),
-                ),
+                );
+              }).widgetJoin(
+                (_) => 4.w,
               ),
-            );
-          },
-        ),
-      ),
+              5.w,
+            ],
+          )),
     );
   }
 }
