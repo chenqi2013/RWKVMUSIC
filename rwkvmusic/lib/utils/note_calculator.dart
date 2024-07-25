@@ -1,16 +1,14 @@
 import 'package:flutter/foundation.dart';
 
-class NoteCaculator {
-  static final NoteCaculator _instance = NoteCaculator._internal();
+class NoteCalculator {
+  static final NoteCalculator _instance = NoteCalculator._internal();
 
-  factory NoteCaculator() => _instance;
+  factory NoteCalculator() => _instance;
 
-  NoteCaculator._internal() {
+  NoteCalculator._internal() {
     if (kDebugMode) print('_internal');
   }
 
-  /// 
-  ///
   /// 默认 1/4
   ///
   /// 如果没有在 noteMap 中就是 1/4

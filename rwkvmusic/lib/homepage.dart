@@ -30,7 +30,7 @@ import 'package:rwkvmusic/utils/midiconvert_abc.dart';
 import 'package:rwkvmusic/utils/mididevice_manage.dart';
 import 'package:rwkvmusic/utils/common_utils.dart';
 import 'package:rwkvmusic/utils/note.dart';
-import 'package:rwkvmusic/utils/note_caculate.dart';
+import 'package:rwkvmusic/utils/note_calculator.dart';
 import 'package:rwkvmusic/utils/notes_database.dart';
 import 'package:rwkvmusic/values/values.dart';
 import 'package:rwkvmusic/widgets/change_note.dart';
@@ -320,7 +320,7 @@ class _HomePageState extends State<HomePage> {
     final noteIndex = list[list.length - 1];
 
     currentClickNoteInfo = [noteValue, noteIndex];
-    noteLengthSelectedIndex.value = NoteCaculator().getNoteLengthIndex(
+    noteLengthSelectedIndex.value = NoteCalculator().getNoteLengthIndex(
       noteValue,
       int.parse(noteIndex),
     );
@@ -401,13 +401,14 @@ class _HomePageState extends State<HomePage> {
     String note,
   ) async {
     debugPrint('updateNote index=$noteIndex,note=$note');
-    String newnote = NoteCaculator()
+    String newnote = NoteCalculator()
         .calculateNewNoteByLength(note, kNoteLengths[noteLengthIndex]);
-    NoteCaculator().noteMap[noteIndex] = newnote;
+    NoteCalculator().noteMap[noteIndex] = newnote;
     virtualNotes[noteIndex] = newnote;
     StringBuffer sbff = StringBuffer();
     for (String note in virtualNotes) {
       sbff.write(note);
+      sbff.write(" ");
     }
     createPrompt = sbff.toString();
     String sb =
@@ -466,6 +467,7 @@ class _HomePageState extends State<HomePage> {
         }
       }
       sbff.write(note);
+      sbff.write(" ");
     }
     createPrompt = sbff.toString();
 
