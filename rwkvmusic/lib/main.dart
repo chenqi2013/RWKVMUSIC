@@ -84,7 +84,7 @@ late SendPort isolateSendPort;
 bool isFinishABCEvent = false;
 late String finalabcStringPreset;
 
-/// 最近一次更新的 abc string
+/// 在 create 模式xAI最新的
 late String finalabcStringCreate;
 
 // late bool isNeedRestart; //曲谱及键盘动画需要重新开始

@@ -345,7 +345,7 @@ class _HomePageState extends State<HomePage> {
     final message = jsMessage.message;
     if (kDebugMode) print("💬 $message");
 
-    RegExp regExp = RegExp(r'\|\\"[ABCDEFGdim#7]+\\"');
+    final regExp = RegExp(r'\|\\"[ABCDEFGdim#7]+\\"');
     final matches = regExp.allMatches(finalabcStringCreate).toList();
     if (matches.isEmpty) return;
     final index = int.parse(message.split(",").last) ~/ 4;
