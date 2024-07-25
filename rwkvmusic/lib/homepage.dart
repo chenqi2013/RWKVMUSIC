@@ -1017,11 +1017,11 @@ class _HomePageState extends State<HomePage> {
       // controllerKeyboard.runJavaScript('resetPlay()');
       // controllerKeyboard.runJavaScript('setPiano(55, 76)');
     } else {
-      createModeDefault();
+      resetToDefaulValueInCreateMode();
     }
   }
 
-  void createModeDefault() {
+  void resetToDefaulValueInCreateMode() {
     virtualNotes.clear();
     intNodes.clear();
 
