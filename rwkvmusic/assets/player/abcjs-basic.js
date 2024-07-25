@@ -14510,7 +14510,7 @@
             var instrumentCache = soundsCache[instrument];
             if (!instrumentCache[name]) instrumentCache[name] = new Promise(function (resolve, reject) {
               var xhr = new XMLHttpRequest();
-              var noteUrl = "soundfont/" + instrument + "-mp3/" + name + ".mp3";
+              var noteUrl = "/assets/player/soundfont/" + instrument + "-mp3/" + name + ".mp3";
               console.log(noteUrl)
               xhr.open("GET", noteUrl, true);
               xhr.responseType = "arraybuffer";
