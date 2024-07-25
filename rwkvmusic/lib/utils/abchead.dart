@@ -1,5 +1,7 @@
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
+
 class ABCHead {
   static const String headContent = "L:1/4\n"
       "M:4/4\n"
@@ -59,7 +61,8 @@ class ABCHead {
     String encodedString = base64.encode(utf8.encode(result));
     // print("Encoded string: $encodedString");
     String base64abctoEvents = "ABCtoEvents('$encodedString',false)";
-    print("base64abctoEvents: $encodedString");
+    if (kDebugMode) print("base64abctoEvents: $encodedString");
+
     return base64abctoEvents;
   }
 

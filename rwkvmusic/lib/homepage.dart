@@ -1,17 +1,12 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:ui';
 import 'dart:io';
-import 'package:filepicker_windows/filepicker_windows.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-// import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
-// import 'package:flutter_share/flutter_share.dart';
 import 'package:get/get.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:rwkvmusic/main.dart';
 import 'package:rwkvmusic/mainwidget/custom_segment_controller.dart';
 import 'package:rwkvmusic/mainwidget/play_progressbar.dart';
@@ -28,20 +23,19 @@ import 'package:rwkvmusic/store/config.dart';
 import 'package:rwkvmusic/style/color.dart';
 import 'package:rwkvmusic/style/style.dart';
 import 'package:rwkvmusic/utils/abchead.dart';
-// import 'package:rwkvmusic/test/testwebviewuniversal.dart';
 import 'package:rwkvmusic/utils/audioplayer.dart';
 import 'package:rwkvmusic/utils/chord_util.dart';
 import 'package:rwkvmusic/utils/justaudioplayer.dart';
 import 'package:rwkvmusic/utils/midiconvert_abc.dart';
 import 'package:rwkvmusic/utils/mididevice_manage.dart';
 import 'package:rwkvmusic/utils/common_utils.dart';
-import 'package:rwkvmusic/utils/midifile_convert.dart';
 import 'package:rwkvmusic/utils/note.dart';
 import 'package:rwkvmusic/utils/note_caculate.dart';
 import 'package:rwkvmusic/utils/notes_database.dart';
-import 'package:rwkvmusic/values/constantdata.dart';
-import 'package:rwkvmusic/values/storage.dart';
 import 'package:rwkvmusic/values/values.dart';
+import 'package:rwkvmusic/widgets/change_note.dart';
+import 'package:rwkvmusic/widgets/chord_editing.dart';
+import 'package:rwkvmusic/widgets/time_changing.dart';
 import 'package:rwkvmusic/widgets/toast.dart';
 import 'package:universal_ble/universal_ble.dart';
 
@@ -59,6 +53,7 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  /// 键盘 webview 控制器
   late WebViewControllerPlus controllerKeyboard;
   String filePathKeyboardAnimation = "assets/doctor/doctor.html";
   String filePathKeyboard = 'assets/piano/keyboard.html';
@@ -221,24 +216,14 @@ class _HomePageState extends State<HomePage> {
         // }
       })
       ..addJavaScriptChannel("flutteronClickNote",
-          onMessageReceived: (JavaScriptMessage jsMessage) {
-        debugPrint('flutteronClickNote onMessageReceived=${jsMessage.message}');
-        if (isShowDialog) {
-          debugPrint('isShowDialog return');
-          return;
-        }
-        List list = jsMessage.message.split(',');
-        if (int.parse(list[list.length - 1]) >= 0) {
-          if (selectstate.value == 1 && isPlay.value == false) {
-            currentClickNoteInfo = [list[0], list[list.length - 1]];
-            debugPrint('list===$currentClickNoteInfo');
-            noteLengthSelectedIndex.value = NoteCaculate()
-                .getNoteLengthIndex(list[0], int.parse(list[list.length - 1]));
-            showPromptDialog(context, 'Change note length', noteLengths,
-                'STORAGE_note_SELECT');
-          }
-        }
-      });
+          onMessageReceived: _onReceiveFlutteronClickNote)
+      ..addJavaScriptChannel("flutterOnClickTime",
+          onMessageReceived: (JavaScriptMessage javaScriptMessage) {
+        _showTimeChangingDialog();
+      })
+      ..addJavaScriptChannel("flutterOnClickChord",
+          onMessageReceived: _onReceiveChordClick);
+    ;
 
     controllerKeyboard = WebViewControllerPlus()
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
@@ -254,7 +239,7 @@ class _HomePageState extends State<HomePage> {
             controllerKeyboard.runJavaScript('resetPlay()');
             controllerKeyboard.runJavaScript('setPiano(55, 76)');
             if (selectstate.value == 1) {
-              controllerKeyboard.runJavaScript('setPiano(55, 76)');
+              controllerKeyboard.runJavaScript('setPiano(21, 108)');
             }
           },
         ),
@@ -309,6 +294,60 @@ class _HomePageState extends State<HomePage> {
     if (isOnlyLoadFastModel && modelAddress == 0) {
       fetchABCDataByIsolate();
     }
+  }
+
+  void _onReceiveFlutteronClickNote(JavaScriptMessage jsMessage) {
+    debugPrint('flutteronClickNote onMessageReceived=${jsMessage.message}');
+    if (isShowDialog) {
+      debugPrint('isShowDialog return');
+      return;
+    }
+    List list = jsMessage.message.split(',');
+
+    if (int.parse(list[list.length - 1]) < 0) return;
+
+    if (selectstate.value == 1 && isPlay.value == false) {
+      if (kDebugMode) print("💬 $list");
+      currentClickNoteInfo = [list[0], list[list.length - 1]];
+      debugPrint('list===$currentClickNoteInfo');
+      noteLengthSelectedIndex.value = NoteCaculate()
+          .getNoteLengthIndex(list[0], int.parse(list[list.length - 1]));
+      showPromptDialog(
+        context,
+        'Change note length',
+        noteLengths,
+        STORAGE_note_SELECT,
+      );
+    }
+  }
+
+  void _onReceiveChordClick(JavaScriptMessage jsMessage) async {
+    final _selectstate = selectstate.value;
+    final _isPlay = isPlay.value;
+    if (_selectstate != 1 || _isPlay) return;
+
+    isShowDialog = true;
+    if (isShowOverlay) closeOverlay();
+    if (isWindowsOrMac) isVisibleWebview.value = !isVisibleWebview.value;
+
+    final message = jsMessage.message;
+    if (kDebugMode) print("💬 $message");
+
+    final r = await showDialog<int>(
+        context: context,
+        builder: (BuildContext context) {
+          return const ChordEditing();
+        });
+
+    isShowDialog = false;
+    if (kDebugMode) print("💬 $r");
+    if (r == null) return;
+
+    timeSignature.value = r;
+    timeSingnatureStr = timeSignatures[r];
+    updateTimeSignature();
+
+    // TODO: change abc
   }
 
   void playNoteMp3(String name) {
@@ -723,9 +762,19 @@ class _HomePageState extends State<HomePage> {
                           controller: controllerPiano,
                         )),
                   )),
-              SizedBox(
-                height: isWindowsOrMac ? 33.h : 15.h,
-              ),
+              Obx(() {
+                return Visibility(
+                  visible: selectstate.value == 1,
+                  child: SizedBox(height: isWindowsOrMac ? 33.h : 15.h),
+                );
+              }),
+              Obx(() {
+                return Visibility(
+                  visible: selectstate.value == 1,
+                  child: ChangeNote(),
+                );
+              }),
+              SizedBox(height: isWindowsOrMac ? 33.h : 15.h),
               Obx(
                 () => Flexible(
                     flex: isWindowsOrMac ? 6 : 4,
@@ -735,8 +784,11 @@ class _HomePageState extends State<HomePage> {
                       // maintainAnimation: true, // 保持动画
                       // maintainState: true,
                       key: const ValueKey('ValueKey22'),
-                      child: WebViewWidget(
-                        controller: controllerKeyboard,
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(9),
+                        child: WebViewWidget(
+                          controller: controllerKeyboard,
+                        ),
                       ),
                     )),
               ),
@@ -1585,6 +1637,60 @@ class _HomePageState extends State<HomePage> {
         duration: const Duration(milliseconds: 100), curve: Curves.easeInOut);
   }
 
+  void _showChangeNoteDialog() async {
+    final _selectstate = selectstate.value;
+    final _isPlay = isPlay.value;
+    if (_selectstate != 1 || _isPlay) return;
+    isShowDialog = true;
+    if (isShowOverlay) {
+      closeOverlay();
+    }
+    if (isWindowsOrMac) {
+      isVisibleWebview.value = !isVisibleWebview.value;
+    }
+    final r = await showDialog<int>(
+        context: context,
+        builder: (BuildContext context) {
+          return const ChangeNote();
+        });
+
+    isShowDialog = false;
+    if (kDebugMode) print("💬 $r");
+    if (r == null) return;
+
+    timeSignature.value = r;
+    timeSingnatureStr = timeSignatures[r];
+    updateTimeSignature();
+
+    // TODO: change abc
+  }
+
+  void _showTimeChangingDialog() async {
+    final _selectstate = selectstate.value;
+    final _isPlay = isPlay.value;
+    if (_selectstate != 1 || _isPlay) return;
+    isShowDialog = true;
+    if (isShowOverlay) {
+      closeOverlay();
+    }
+    if (isWindowsOrMac) {
+      isVisibleWebview.value = !isVisibleWebview.value;
+    }
+    final index = await showDialog<int>(
+        context: context,
+        builder: (BuildContext context) {
+          return const TimeChanging();
+        });
+
+    isShowDialog = false;
+    if (kDebugMode) print("💬 $index");
+    if (index == null) return;
+
+    timeSignature.value = index;
+    timeSingnatureStr = timeSignatures[index];
+    updateTimeSignature();
+  }
+
   void showPromptDialog(
       BuildContext context, String titleStr, List list, String type) {
     isShowDialog = true;
@@ -1692,12 +1798,13 @@ class _HomePageState extends State<HomePage> {
                                                 index),
                                 title: list[index],
                                 onChanged: (value) {
+                                  if (kDebugMode) print("💬 $type");
                                   if (type == STORAGE_PROMPTS_SELECT) {
                                     promptSelectedIndex.value = value;
                                   } else if (type ==
                                       STORAGE_SOUNDSEFFECT_SELECT) {
                                     effectSelectedIndex.value = value;
-                                  } else if (type == 'STORAGE_note_SELECT') {
+                                  } else if (type == STORAGE_note_SELECT) {
                                     noteLengthSelectedIndex.value = value;
                                   } else if (type == STORAGE_KEYBOARD_SELECT) {
                                     keyboardSelectedIndex.value == value;
@@ -1762,8 +1869,7 @@ class _HomePageState extends State<HomePage> {
                                         };
                                       }
                                     }
-                                  } else if (type == 'STORAGE_note_SELECT') {
-                                    print('STORAGE_note_SELECT');
+                                  } else if (type == STORAGE_note_SELECT) {
                                     updateNote(
                                         int.parse(currentClickNoteInfo[1]),
                                         index,
