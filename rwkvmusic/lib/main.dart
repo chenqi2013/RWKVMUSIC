@@ -83,7 +83,10 @@ late ReceivePort mainReceivePort;
 late SendPort isolateSendPort;
 bool isFinishABCEvent = false;
 late String finalabcStringPreset;
+
+/// 最近一次更新的 abc string
 late String finalabcStringCreate;
+
 // late bool isNeedRestart; //曲谱及键盘动画需要重新开始
 late String presentPrompt;
 var createPrompt = '';
@@ -129,12 +132,6 @@ var isAutoSwitch = false.obs;
 ScrollController controller = ScrollController();
 var tokens = ''.obs;
 var currentClickNoteInfo = [];
-
-/// @wangce
-Rx<String?> selectedNoteValue = null.obs;
-
-/// @wangce
-Rx<int?> selectedNoteIndex = null.obs;
 
 List<Note> notes = [];
 Isolate? userIsolate;

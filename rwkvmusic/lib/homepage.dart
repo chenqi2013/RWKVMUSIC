@@ -317,24 +317,22 @@ class _HomePageState extends State<HomePage> {
     if (kDebugMode) print("💬 $list");
 
     final noteValue = list[0];
-    selectedNoteValue.value = noteValue;
-
     final noteIndex = list[list.length - 1];
-    selectedNoteIndex.value = int.tryParse(noteIndex);
 
     currentClickNoteInfo = [noteValue, noteIndex];
     noteLengthSelectedIndex.value = NoteCaculator().getNoteLengthIndex(
       noteValue,
       int.parse(noteIndex),
     );
-    // showPromptDialog(
-    //   context,
-    //   'Change note length',
-    //   noteLengths,
-    //   STORAGE_note_SELECT,
-    // );
+    showPromptDialog(
+      context,
+      'Change note length',
+      kNoteLengths,
+      STORAGE_note_SELECT,
+    );
   }
 
+  /// @wangce 和弦点击
   void _onReceiveChordClick(JavaScriptMessage jsMessage) async {
     final _selectstate = selectstate.value;
     final _isPlay = isPlay.value;
@@ -347,21 +345,30 @@ class _HomePageState extends State<HomePage> {
     final message = jsMessage.message;
     if (kDebugMode) print("💬 $message");
 
-    final r = await showDialog<int>(
+    RegExp regExp = RegExp(r'\|\\"[ABCDEFGdim#7]+\\"');
+    final matches = regExp.allMatches(finalabcStringCreate).toList();
+    if (matches.isEmpty) return;
+    final index = int.parse(message.split(",").last) ~/ 4;
+    final m = matches[index];
+    final text = finalabcStringCreate.substring(m.start + 3, m.end - 2);
+    final r = calculateRootAndType(text);
+    selectedChordRoot.value = r.$1;
+    selectedChordType.value = r.$2;
+
+    final ok = await showDialog(
         context: context,
         builder: (BuildContext context) {
           return const ChordEditing();
         });
 
     isShowDialog = false;
-    if (kDebugMode) print("💬 $r");
-    if (r == null) return;
+    if (ok == null) return;
 
-    timeSignature.value = r;
-    timeSingnatureStr = timeSignatures[r];
-    updateTimeSignature();
-
-    // TODO: change abc
+    final newChord = selectedChordRoot.value.abcNotationValue +
+        selectedChordType.value.abcNotationValue;
+    finalabcStringCreate =
+        finalabcStringCreate.replaceRange(m.start + 3, m.end - 2, newChord);
+    await controllerPiano.runJavaScript(finalabcStringCreate);
   }
 
   void playNoteMp3(String name) {
@@ -387,9 +394,7 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  /// 通过执行 JS 更新琴谱
-  ///
-  /// @wangce
+  /// @wangce 通过执行 JS 更新琴谱
   void updateNote(
     int noteIndex,
     int noteLengthIndex,
@@ -416,7 +421,7 @@ class _HomePageState extends State<HomePage> {
   /// @wangce 插入音符
   ///
   /// 1. 通过按下虚拟键盘触发
-  void updatePianoNote(int node) {
+  void updatePianoNote(int node) async {
     String noteName = MidiToABCConverter().getNoteName(node);
     if (defaultNoteLenght.value == 0) {
     } else if (defaultNoteLenght.value == 1) {
@@ -474,8 +479,7 @@ class _HomePageState extends State<HomePage> {
     }
     finalabcStringCreate = ABCHead.appendTempoParam(sb, tempo.value.toInt());
     debugPrint('curr=$finalabcStringCreate');
-    controllerPiano.runJavaScript(finalabcStringCreate);
-    // createPrompt = finalabcStringCreate;
+    await controllerPiano.runJavaScript(finalabcStringCreate);
   }
 
   void updateTimeSignature() {

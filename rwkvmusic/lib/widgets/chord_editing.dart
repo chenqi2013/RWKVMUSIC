@@ -1,16 +1,121 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:halo/halo.dart';
-import 'package:rwkvmusic/values/constantdata.dart';
 
 const _kHeight = 40.0;
+
+final selectedChordIndex = (-1).obs;
+final selectedChordRoot = ChordRoot.C.obs;
+final selectedChordType = ChordType.major.obs;
+
+enum ChordRoot {
+  C,
+  cSharp,
+  D,
+  dSharp,
+  E,
+  F,
+  fSharp,
+  G,
+  gSharp,
+  A,
+  aSharp,
+  B,
+}
+
+extension ChordRootValue on ChordRoot {
+  String get abcNotationValue {
+    switch (this) {
+      case ChordRoot.C:
+        return "C";
+      case ChordRoot.cSharp:
+        return "C#";
+      case ChordRoot.D:
+        return "D";
+      case ChordRoot.dSharp:
+        return "D#";
+      case ChordRoot.E:
+        return "E";
+      case ChordRoot.F:
+        return "F";
+      case ChordRoot.fSharp:
+        return "F#";
+      case ChordRoot.G:
+        return "G";
+      case ChordRoot.gSharp:
+        return "G#";
+      case ChordRoot.A:
+        return "A";
+      case ChordRoot.aSharp:
+        return "A#";
+      case ChordRoot.B:
+        return "B";
+    }
+  }
+}
+
+enum ChordType {
+  major,
+  minor,
+  dim,
+  dominant7,
+}
+
+extension ChordTypeValue on ChordType {
+  String get abcNotationValue {
+    switch (this) {
+      case ChordType.major:
+        return "";
+      case ChordType.minor:
+        return "m";
+      case ChordType.dim:
+        return "dim";
+      case ChordType.dominant7:
+        return "7";
+    }
+  }
+
+  String get displayValue {
+    switch (this) {
+      case ChordType.major:
+        return "Major";
+      case ChordType.minor:
+        return "minor";
+      case ChordType.dim:
+        return "dim";
+      case ChordType.dominant7:
+        return "Dominant7";
+    }
+  }
+}
+
+(ChordRoot, ChordType) calculateRootAndType(String m) {
+  ChordRoot root = ChordRoot.C;
+  ChordType type = ChordType.major;
+  for (final rootV in ChordRoot.values) {
+    if (m.startsWith(rootV.abcNotationValue)) root = rootV;
+  }
+  for (final typeV in ChordType.values) {
+    if (m.endsWith(typeV.abcNotationValue)) type = typeV;
+  }
+  return (root, type);
+}
 
 class ChordEditing extends StatelessWidget {
   const ChordEditing({super.key});
 
-  void _onTapAtIndex(BuildContext context, int index) async {
-    Navigator.of(context).pop(index);
+  void _onTapRoot(BuildContext context, int index) {
+    selectedChordRoot.value = ChordRoot.values[index];
+  }
+
+  void _onTapType(BuildContext context, int index) {
+    selectedChordType.value = ChordType.values[index];
+  }
+
+  void _onTapOK(BuildContext context) async {
+    Navigator.of(context).pop("ok");
   }
 
   @override
@@ -47,10 +152,26 @@ class ChordEditing extends StatelessWidget {
                         child: ListView.builder(
                           padding: EI.o(b: 4),
                           itemBuilder: (context, index) {
-                            final name = kChordRoot[index];
-                            return _Item(t: name);
+                            return Obx(
+                              () {
+                                final root = ChordRoot.values[index];
+                                final name = root.abcNotationValue;
+                                final _selectedChordRoot =
+                                    selectedChordRoot.value;
+                                final highlighted = _selectedChordRoot == root;
+                                return GD(
+                                  onTap: () {
+                                    _onTapRoot(context, index);
+                                  },
+                                  child: _Item(
+                                    t: name,
+                                    highlighted: highlighted,
+                                  ),
+                                );
+                              },
+                            );
                           },
-                          itemCount: kChordRoot.length,
+                          itemCount: ChordRoot.values.length,
                         ),
                       ),
                       4.w,
@@ -61,23 +182,73 @@ class ChordEditing extends StatelessWidget {
                               child: ListView.builder(
                                 padding: EI.o(b: 4),
                                 itemBuilder: (context, index) {
-                                  final name = kChordType[index];
-                                  return _Item(t: name);
+                                  return Obx(
+                                    () {
+                                      final type = ChordType.values[index];
+                                      final name = type.displayValue;
+                                      final _selectedChordType =
+                                          selectedChordType.value;
+                                      final highlighted =
+                                          _selectedChordType == type;
+                                      return GD(
+                                        onTap: () {
+                                          _onTapType(context, index);
+                                        },
+                                        child: _Item(
+                                          t: name,
+                                          highlighted: highlighted,
+                                        ),
+                                      );
+                                    },
+                                  );
                                 },
-                                itemCount: kChordType.length,
+                                itemCount: ChordType.values.length,
                               ),
                             ),
-                            C(
-                              decoration: BD(
-                                color: kCB.wo(0.5),
-                                borderRadius: 2.r,
-                              ),
-                              height: _kHeight,
-                              child: Center(
-                                  child: Icon(
-                                Icons.check,
-                                color: kW,
-                              )),
+                            Ro(
+                              children: [
+                                Exp(
+                                  flex: 3,
+                                  child: GD(
+                                    onTap: () {
+                                      _onTapOK(context);
+                                    },
+                                    child: C(
+                                      decoration: BD(
+                                        color: kCB.wo(0.5),
+                                        borderRadius: 2.r,
+                                      ),
+                                      height: _kHeight,
+                                      child: Center(
+                                          child: Icon(
+                                        Icons.check,
+                                        color: kW,
+                                      )),
+                                    ),
+                                  ),
+                                ),
+                                4.w,
+                                Exp(
+                                  flex: 2,
+                                  child: GD(
+                                    onTap: () {
+                                      Navigator.of(context).pop();
+                                    },
+                                    child: C(
+                                      decoration: BD(
+                                        color: kW.wo(0.5),
+                                        borderRadius: 2.r,
+                                      ),
+                                      height: _kHeight,
+                                      child: Center(
+                                          child: Icon(
+                                        Icons.close,
+                                        color: kW,
+                                      )),
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
                             6.h,
                           ],
@@ -98,14 +269,16 @@ class ChordEditing extends StatelessWidget {
 
 class _Item extends StatelessWidget {
   final String t;
+  final bool highlighted;
 
-  const _Item({required this.t});
+  const _Item({required this.t, required this.highlighted});
   @override
   Widget build(BuildContext context) {
     return C(
       margin: EI.s(v: 2),
       height: _kHeight,
-      decoration: BD(color: kW.wo(0.1), borderRadius: 2.r),
+      decoration:
+          BD(color: highlighted ? kCB.wo(0.5) : kW.wo(0.1), borderRadius: 2.r),
       child: Center(
         child: T(
           t,
