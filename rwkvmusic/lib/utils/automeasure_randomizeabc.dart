@@ -151,6 +151,18 @@ String formatBars(Map<String, String> header, List<List<String>> bars) {
   return formattedAbc.trim();
 }
 
+String formatBars_1(Map<String, String> header, List<List<String>> bars) {
+  String formattedAbc =
+      'L:${header['L']}\nM:${header['M']}\nK:${header['K']}\n';
+  for (int i = 0; i < bars.length; i++) {
+    formattedAbc += bars[i].join(' ');
+    if (i < bars.length - 1) {
+      formattedAbc += ' |';
+    }
+  }
+  return formattedAbc.trim();
+}
+
 String splitMeasureAbc(String abcNotation) {
   var result = parseAbc(abcNotation);
   var header = result[0];
@@ -158,6 +170,15 @@ String splitMeasureAbc(String abcNotation) {
   Fraction barLength = calculateBarLength(header['M'], header['L']);
   List<List<String>> bars = divideIntoBars(notes, barLength);
   return formatBars(header, bars);
+}
+
+String splitMeasureAbc_end(String abcNotation) {
+  var result = parseAbc(abcNotation);
+  var header = result[0];
+  List<String> notes = result[1];
+  Fraction barLength = calculateBarLength(header['M'], header['L']);
+  List<List<String>> bars = divideIntoBars(notes, barLength);
+  return formatBars_1(header, bars);
 }
 
 String formatNotes(Map<String, String> header, List<String> notes) {
