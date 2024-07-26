@@ -179,6 +179,24 @@ class SelectedNote {
     if (duration == 0.03125) {
       return 5;
     }
+    if (duration == 1 * 1.5) {
+      return 0 + 6;
+    }
+    if (duration == 0.5 * 1.5) {
+      return 1 + 6;
+    }
+    if (duration == 0.25 * 1.5) {
+      return 2 + 6;
+    }
+    if (duration == 0.125 * 1.5) {
+      return 3 + 6;
+    }
+    if (duration == 0.0625 * 1.5) {
+      return 4 + 6;
+    }
+    if (duration == 0.03125 * 1.5) {
+      return 5 + 6;
+    }
 
     return 2;
   }

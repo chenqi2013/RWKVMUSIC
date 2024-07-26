@@ -301,7 +301,9 @@ class _HomePageState extends State<HomePage> {
     final json = jsonDecode(jsMessage.message);
 
     String name = json["name"];
+    if (kDebugMode) print("💬 $name");
     if (name.contains("rest")) name = "z";
+    if (name.contains("dots.dot")) name = "z";
     final duration = json["duration"] as num;
 
     selectedNote = SelectedNote()
@@ -370,6 +372,68 @@ class _HomePageState extends State<HomePage> {
             .playAudio('player/soundfont/acoustic_grand_piano-mp3/$name');
       }
     }
+  }
+
+  void _updateDottod() async {
+    final selected = selectedNote;
+    if (selected == null) return;
+    final note = selected.name;
+    final noteIndex = selected.index;
+    String newNote = "";
+    final noteLengthIndex = selected.noteLengthIndex;
+    switch (noteLengthIndex) {
+      case 0:
+        newNote = "${note}6";
+        break;
+      case 1:
+        newNote = "${note}3";
+        break;
+      case 2:
+        newNote = "${note}3/2";
+        break;
+      case 3:
+        newNote = "${note}3/4";
+        break;
+      case 4:
+        newNote = "${note}3/8";
+        break;
+      case 5:
+        newNote = "${note}3/16";
+        break;
+      case 6:
+        newNote = "${note}4";
+        break;
+      case 7:
+        newNote = "${note}2";
+        break;
+      case 8:
+        newNote = note;
+        break;
+      case 9:
+        newNote = "${note}1/2";
+        break;
+      case 10:
+        newNote = "${note}1/4";
+        break;
+      case 11:
+        newNote = "${note}1/8";
+        break;
+    }
+    NoteCalculator().noteMap[noteIndex] = newNote;
+    virtualNotes[noteIndex] = newNote;
+    if (kDebugMode) print("💬 $newNote");
+    StringBuffer sbff = StringBuffer();
+    for (String note in virtualNotes) {
+      sbff.write(note);
+      sbff.write(" ");
+    }
+    createPrompt = sbff.toString();
+    String sb =
+        "setAbcString(\"%%MIDI program $midiProgramValue\\nL:1/4\\nM:$timeSingnatureStr\\nK:C\\n|$createPrompt\",false)";
+    finalabcStringCreate = ABCHead.appendTempoParam(sb, tempo.value.toInt());
+    debugPrint('curr=$finalabcStringCreate');
+    await controllerPiano.runJavaScript(finalabcStringCreate);
+    selectedNote = null;
   }
 
   /// @wangce 通过执行 JS 更新琴谱
@@ -948,6 +1012,7 @@ class _HomePageState extends State<HomePage> {
                           _updateNote(noteLengthIndex: 5);
                           break;
                         case ChangeNoteKey.dottodNote:
+                          _updateDottod();
                           break;
                         case ChangeNoteKey.wholeZ:
                           _inserOrUpdatetRest(0);
