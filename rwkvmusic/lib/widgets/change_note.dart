@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:get/get_connect/http/src/request/request.dart';
 import 'package:halo/halo.dart';
 
-enum _Key {
+enum ChangeNoteKey {
   whole,
   half,
   quarter,
@@ -19,11 +20,14 @@ enum _Key {
 }
 
 class ChangeNote extends StatelessWidget {
-  const ChangeNote({super.key});
+  final void Function(BuildContext context, ChangeNoteKey key) onTapAtIndex;
+  final void Function(BuildContext context, ChangeNoteKey key) onLongPress;
 
-  void _onTapAtIndex(BuildContext context, _Key key) async {
-    // TODO: @wangce implementation
-  }
+  const ChangeNote({
+    super.key,
+    required this.onTapAtIndex,
+    required this.onLongPress,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -39,10 +43,13 @@ class ChangeNote extends StatelessWidget {
           child: Ro(
             children: [
               5.w,
-              ..._Key.values.indexMap((index, k) {
+              ...ChangeNoteKey.values.indexMap((index, k) {
                 return GD(
                   onTap: () {
-                    _onTapAtIndex(context, k);
+                    onTapAtIndex(context, k);
+                  },
+                  onLongPress: () {
+                    onLongPress(context, k);
                   },
                   child: C(
                     height: 50,

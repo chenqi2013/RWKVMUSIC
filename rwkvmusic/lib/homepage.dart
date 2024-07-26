@@ -401,8 +401,10 @@ class _HomePageState extends State<HomePage> {
     String note,
   ) async {
     debugPrint('updateNote index=$noteIndex,note=$note');
-    String newnote = NoteCalculator()
-        .calculateNewNoteByLength(note, kNoteLengths[noteLengthIndex]);
+    String newnote = NoteCalculator().calculateNewNoteByLength(
+      note,
+      kNoteLengths[noteLengthIndex],
+    );
     NoteCalculator().noteMap[noteIndex] = newnote;
     virtualNotes[noteIndex] = newnote;
     StringBuffer sbff = StringBuffer();
@@ -417,6 +419,138 @@ class _HomePageState extends State<HomePage> {
     debugPrint('curr=$finalabcStringCreate');
     await controllerPiano.runJavaScript(finalabcStringCreate);
     // createPrompt = sbff.toString();
+  }
+
+  void _updateNote(int noteLengthIndex) async {
+    final note = currentClickNoteInfo[0];
+    final noteIndex = int.parse(currentClickNoteInfo[1]);
+    String newNote = "";
+    switch (noteLengthIndex) {
+      case 0:
+        newNote = "${note}4";
+        break;
+      case 1:
+        newNote = "${note}2";
+        break;
+      case 2:
+        newNote = note;
+        break;
+      case 3:
+        newNote = "$note/2";
+        break;
+      case 4:
+        newNote = "$note/4";
+        break;
+      case 5:
+        newNote = "$note/8";
+        break;
+    }
+    NoteCalculator().noteMap[noteIndex] = newNote;
+    virtualNotes[noteIndex] = newNote;
+    StringBuffer sbff = StringBuffer();
+    for (String note in virtualNotes) {
+      sbff.write(note);
+      sbff.write(" ");
+    }
+    createPrompt = sbff.toString();
+    String sb =
+        "setAbcString(\"%%MIDI program $midiProgramValue\\nL:1/4\\nM:$timeSingnatureStr\\nK:C\\n|$createPrompt\",false)";
+    finalabcStringCreate = ABCHead.appendTempoParam(sb, tempo.value.toInt());
+    debugPrint('curr=$finalabcStringCreate');
+    await controllerPiano.runJavaScript(finalabcStringCreate);
+    // createPrompt = sbff.toString();
+  }
+
+  /// @wangce 插入休止符
+  void _insertRest(int lengthIndex) async {
+    const node = 24;
+    String noteName = "z";
+    switch (lengthIndex) {
+      case 0:
+        noteName = "${noteName}4";
+        break;
+      case 1:
+        noteName = "${noteName}2";
+        break;
+      case 2:
+        noteName = noteName;
+        break;
+      case 3:
+        noteName = "$noteName/2";
+        break;
+      case 4:
+        noteName = "$noteName/4";
+        break;
+    }
+    // sbNoteCreate.write(noteName);
+    virtualNotes.add(noteName);
+    intNodes.add(node);
+
+    StringBuffer sbff = StringBuffer();
+    List chordList = [];
+    if (timeSignature.value == 2) {
+      String chordStr = ChordUtil.getChord(intNodes.toString());
+      chordList = jsonDecode(chordStr);
+      debugPrint('chordStr=${chordList.length}');
+    }
+    String timeSignatureStr = timeSignatures[timeSignature.value];
+    String noteLengthStr = "";
+    switch (lengthIndex) {
+      case 0:
+        noteLengthStr = "1/1";
+        break;
+      case 1:
+        noteLengthStr = "1/2";
+        break;
+      case 2:
+        noteLengthStr = "1/4";
+        break;
+      case 3:
+        noteLengthStr = "1/8";
+        break;
+      case 4:
+        noteLengthStr = "1/16";
+        break;
+    }
+    debugPrint(
+        'timeSignatureStr=$timeSignatureStr,noteLengthStr=$noteLengthStr');
+    for (int i = 0; i < virtualNotes.length; i++) {
+      String note = virtualNotes[i];
+      if (timeSignatureStr == '4/4' && noteLengthStr == '1/4') {
+        if (i % 4 == 0) {
+          int chordLenght = i ~/ 4;
+          if (chordList.length > chordLenght) {
+            //插入竖线和和弦
+            if (i == 0) {
+              sbff.write('\\"${chordList[chordLenght]}\\" ');
+            } else {
+              sbff.write('|\\"${chordList[chordLenght]}\\" ');
+            }
+          }
+        }
+      } else {
+        int postion =
+            ABCHead.insertMeasureLinePosition(timeSignatureStr, noteLengthStr);
+        if (i % postion == 0 && i > 0) {
+          sbff.write('|');
+        }
+      }
+      sbff.write(note);
+      sbff.write(" ");
+    }
+    createPrompt = sbff.toString();
+
+    String sb;
+    if (isChangeTempo) {
+      sb =
+          "setAbcString(\"Q:${tempo.value.toInt()}\\nL:1/4\\nM:$timeSingnatureStr\\nK:C\\n|$createPrompt\",false)";
+    } else {
+      sb =
+          "setAbcString(\"%%MIDI program $midiProgramValue\\nL:1/4\\nM:$timeSingnatureStr\\nK:C\\n|$createPrompt\",false)";
+    }
+    finalabcStringCreate = ABCHead.appendTempoParam(sb, tempo.value.toInt());
+    debugPrint('curr=$finalabcStringCreate');
+    await controllerPiano.runJavaScript(finalabcStringCreate);
   }
 
   /// @wangce 插入音符
@@ -493,6 +627,11 @@ class _HomePageState extends State<HomePage> {
     controllerPiano.runJavaScript(sb);
   }
 
+  void _delete() {
+    // TODO: @wangce selected
+    resetLastNote();
+  }
+
   void resetLastNote() {
     debugPrint('resetLastNote');
     if (isCreateGenerate.value) {
@@ -504,60 +643,62 @@ class _HomePageState extends State<HomePage> {
       }
       return;
     }
-    if (virtualNotes.isNotEmpty) {
-      virtualNotes.removeLast();
-      intNodes.removeLast();
-      if (virtualNotes.isEmpty) {
-        finalabcStringCreate =
-            "setAbcString(\"${ABCHead.getABCWithInstrument('L:1/4\nM:$timeSingnatureStr\nK:C\n|', midiProgramValue)}\",false)";
-        finalabcStringCreate =
-            ABCHead.appendTempoParam(finalabcStringCreate, tempo.value.toInt());
-        debugPrint('str112==$finalabcStringCreate');
-        controllerPiano
-            .runJavaScript(ABCHead.base64AbcString(finalabcStringCreate));
-        createPrompt = '';
-      } else {
-        StringBuffer sbff = StringBuffer();
-        List chordList = [];
-        if (timeSignature.value == 2) {
-          String chordStr = ChordUtil.getChord(intNodes.toString());
-          chordList = jsonDecode(chordStr);
-          debugPrint('chordStr=${chordList.length}');
-        }
-        String timeSignatureStr = timeSignatures[timeSignature.value];
-        String noteLengthStr = kNoteLengths[defaultNoteLenght.value];
-        debugPrint(
-            'timeSignatureStr=$timeSignatureStr,noteLengthStr=$noteLengthStr');
-        for (int i = 0; i < virtualNotes.length; i++) {
-          String note = virtualNotes[i];
-          if (timeSignatureStr == '4/4' && noteLengthStr == '1/4') {
-            if (i % 4 == 0) {
-              int chordLenght = i ~/ 4;
-              if (chordList.length > chordLenght) {
-                //插入竖线和和弦
-                if (i == 0) {
-                  sbff.write('\\"${chordList[chordLenght]}\\" ');
-                } else {
-                  sbff.write('|\\"${chordList[chordLenght]}\\" ');
-                }
+
+    if (virtualNotes.isEmpty) return;
+
+    virtualNotes.removeLast();
+    intNodes.removeLast();
+
+    if (virtualNotes.isEmpty) {
+      finalabcStringCreate =
+          "setAbcString(\"${ABCHead.getABCWithInstrument('L:1/4\nM:$timeSingnatureStr\nK:C\n|', midiProgramValue)}\",false)";
+      finalabcStringCreate =
+          ABCHead.appendTempoParam(finalabcStringCreate, tempo.value.toInt());
+      debugPrint('str112==$finalabcStringCreate');
+      controllerPiano
+          .runJavaScript(ABCHead.base64AbcString(finalabcStringCreate));
+      createPrompt = '';
+    } else {
+      StringBuffer sbff = StringBuffer();
+      List chordList = [];
+      if (timeSignature.value == 2) {
+        String chordStr = ChordUtil.getChord(intNodes.toString());
+        chordList = jsonDecode(chordStr);
+        debugPrint('chordStr=${chordList.length}');
+      }
+      String timeSignatureStr = timeSignatures[timeSignature.value];
+      String noteLengthStr = kNoteLengths[defaultNoteLenght.value];
+      debugPrint(
+          'timeSignatureStr=$timeSignatureStr,noteLengthStr=$noteLengthStr');
+      for (int i = 0; i < virtualNotes.length; i++) {
+        String note = virtualNotes[i];
+        if (timeSignatureStr == '4/4' && noteLengthStr == '1/4') {
+          if (i % 4 == 0) {
+            int chordLenght = i ~/ 4;
+            if (chordList.length > chordLenght) {
+              //插入竖线和和弦
+              if (i == 0) {
+                sbff.write('\\"${chordList[chordLenght]}\\" ');
+              } else {
+                sbff.write('|\\"${chordList[chordLenght]}\\" ');
               }
             }
-          } else {
-            int postion = ABCHead.insertMeasureLinePosition(
-                timeSignatureStr, noteLengthStr);
-            if (i % postion == 0 && i > 0) {
-              sbff.write('|');
-            }
           }
-          sbff.write(note);
+        } else {
+          int postion = ABCHead.insertMeasureLinePosition(
+              timeSignatureStr, noteLengthStr);
+          if (i % postion == 0 && i > 0) {
+            sbff.write('|');
+          }
         }
-        String sb =
-            "setAbcString(\"%%MIDI program $midiProgramValue\\nL:1/4\\nM:$timeSingnatureStr\\nK:C\\n|${sbff.toString()}\",false)";
-        debugPrint('curr=$sb');
-        sb = ABCHead.appendTempoParam(sb, tempo.value.toInt());
-        controllerPiano.runJavaScript(sb);
-        createPrompt = sbff.toString();
+        sbff.write(note);
       }
+      String sb =
+          "setAbcString(\"%%MIDI program $midiProgramValue\\nL:1/4\\nM:$timeSingnatureStr\\nK:C\\n|${sbff.toString()}\",false)";
+      debugPrint('curr=$sb');
+      sb = ABCHead.appendTempoParam(sb, tempo.value.toInt());
+      controllerPiano.runJavaScript(sb);
+      createPrompt = sbff.toString();
     }
   }
 
@@ -801,7 +942,56 @@ class _HomePageState extends State<HomePage> {
               Obx(() {
                 return Visibility(
                   visible: selectstate.value == 1,
-                  child: ChangeNote(),
+                  child: ChangeNote(
+                    onTapAtIndex: (context, key) {
+                      switch (key) {
+                        case ChangeNoteKey.whole:
+                          _updateNote(0);
+                          break;
+                        case ChangeNoteKey.half:
+                          _updateNote(1);
+                          break;
+                        case ChangeNoteKey.quarter:
+                          _updateNote(2);
+                          break;
+                        case ChangeNoteKey.eighth:
+                          _updateNote(3);
+                          break;
+                        case ChangeNoteKey.sixteenth:
+                          _updateNote(4);
+                          break;
+                        case ChangeNoteKey.thirtySecond:
+                          _updateNote(5);
+                          break;
+                        case ChangeNoteKey.dottodNote:
+                          break;
+                        case ChangeNoteKey.wholeZ:
+                          _insertRest(0);
+                          break;
+                        case ChangeNoteKey.halfZ:
+                          _insertRest(1);
+                          break;
+                        case ChangeNoteKey.quarterZ:
+                          _insertRest(2);
+                          break;
+                        case ChangeNoteKey.eighthZ:
+                          _insertRest(3);
+                          break;
+                        case ChangeNoteKey.sixteenthZ:
+                          _insertRest(4);
+                          break;
+                        case ChangeNoteKey.randomGroove:
+                          break;
+                        case ChangeNoteKey.delete:
+                          _delete();
+                          break;
+                      }
+                    },
+                    onLongPress: (BuildContext context, ChangeNoteKey key) {
+                      if (key != ChangeNoteKey.delete) return;
+                      resetToDefaulValueInCreateMode();
+                    },
+                  ),
                 );
               }),
               SizedBox(height: isWindowsOrMac ? 33.h : 15.h),

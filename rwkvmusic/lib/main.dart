@@ -1,12 +1,9 @@
 import 'dart:ffi' hide Size;
 import 'dart:isolate';
-import 'dart:math';
-import 'dart:ui';
 import 'package:ffi/ffi.dart';
 // import 'dart:html';
 import 'dart:io';
 import 'package:flutter/services.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 // import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 // import 'package:flutter_platform_alert/flutter_platform_alert.dart';
@@ -131,6 +128,8 @@ var isAutoSwitch = false.obs;
 
 ScrollController controller = ScrollController();
 var tokens = ''.obs;
+
+/// 当前已经被选中的音符
 var currentClickNoteInfo = [];
 
 List<Note> notes = [];
