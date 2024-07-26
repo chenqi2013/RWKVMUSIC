@@ -55,17 +55,37 @@
           }
         }
 
+        function safeStringify(obj, replacer = null, spaces = 2) {
+          let cache = [];
+          const retVal = JSON.stringify(
+            obj,
+            (key, value) =>
+              typeof value === "object" && value !== null
+                ? cache.includes(value)
+                  ? undefined // Duplicate reference found, discard key
+                  : cache.push(value) && value // Store value in our collection
+                : value,
+            spaces
+          );
+          cache = null; // Enable garbage collection
+          return retVal;
+        }
+
         abcjsEditor = new ABCJS.Editor("abc", {
           canvas_id: "paper",
           render_options: {
             scale: 1,
-            clickListener: function (abcElem, tuneNumber, classes, dragIndex) {
-
+            clickListener: function (
+              abcElem,
+              tuneNumber,
+              classes,
+              dragIndex,
+              analysis
+            ) {
               // 获取 data-index 属性
               const svgElement = abcElem.abselem.elemset[0];
               const dataIndex = svgElement.getAttribute("data-index");
               if (dataIndex !== null) {
-
                 //延时，等待和弦的点击事件
                 //已经是屎了，无所谓了
                 function delay(time) {
@@ -74,18 +94,34 @@
                 delay(100).then(() => {
                   if (dataIndex == selectedChord.index) {
                     //点的是和弦
-                    console.log("点击了和弦")
-                    console.log(selectedChord.chord)
-                    console.log(dataIndex)
-                    flutterOnClickChord.postMessage(selectedChord.chord + "," + dataIndex);
+                    console.log("点击了和弦");
+                    console.log(selectedChord.chord);
+                    console.log(dataIndex);
+                    alert(
+                      "点击了和弦： " + selectedChord.chord + "," + dataIndex
+                    );
+
                     selectedChord.chord = "";
                     selectedChord.index = -1;
                   } else {
                     //点的是音符
-                    console.log("点击了音符")
-                    console.log("Data Index:", dataIndex);
-                    console.log("tuneNumber", abcElem.pitches[0].name);
-                    flutteronClickNote.postMessage(abcElem.pitches[0].name + "," + dataIndex);
+                    console.log("点击了音符");
+                    let onClickParam = {
+                      name: "",
+                      index: dataIndex,
+                      duration: abcElem.duration,
+                      notation: tempRawAbcString,
+                    };
+                    // console.log(safeStringify(abcElem));
+                    if (abcElem.pitches) {
+                      onClickParam.name = abcElem.pitches[0].name;
+                      flutteronClickNote.postMessage(JSON.stringify(onClickParam));
+                    } else {
+                      onClickParam.name = abcElem.abselem.children[0].name,
+                      flutteronClickNote.postMessage(JSON.stringify(onClickParam));
+                    }
+                    console.log(onClickParam);
+
                     selectedChord.chord = "";
                     selectedChord.index = -1;
                   }
@@ -415,7 +451,9 @@
         return countofnotes;
       }
 
+      let tempRawAbcString = "";
       function setAbcString(output, isGenerateAbc) {
+        tempRawAbcString = output;
         console.log("=============setAbcString==============");
         console.log("原始数据", output);
         console.log("isGenerateAbc", isGenerateAbc);

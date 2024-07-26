@@ -129,8 +129,60 @@ var isAutoSwitch = false.obs;
 ScrollController controller = ScrollController();
 var tokens = ''.obs;
 
-/// 当前已经被选中的音符
-var currentClickNoteInfo = [];
+// TODO: @wangce 何时置空
+SelectedNote? selectedNote;
+
+class SelectedNote {
+  String name = "";
+  int index = -1;
+  num duration = 0.0;
+
+  String get notation {
+    if (duration == 1) {
+      return "${name}4";
+    }
+    if (duration == 0.5) {
+      return "${name}2";
+    }
+    if (duration == 0.25) {
+      return name;
+    }
+    if (duration == 0.125) {
+      return "$name/2";
+    }
+    if (duration == 0.0625) {
+      return "$name/4";
+    }
+    if (duration == 0.03125) {
+      return "$name/8";
+    }
+
+    return name;
+  }
+
+  int get noteLengthIndex {
+    if (duration == 1) {
+      return 0;
+    }
+    if (duration == 0.5) {
+      return 1;
+    }
+    if (duration == 0.25) {
+      return 2;
+    }
+    if (duration == 0.125) {
+      return 3;
+    }
+    if (duration == 0.0625) {
+      return 4;
+    }
+    if (duration == 0.03125) {
+      return 5;
+    }
+
+    return 2;
+  }
+}
 
 List<Note> notes = [];
 Isolate? userIsolate;

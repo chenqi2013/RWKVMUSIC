@@ -24,6 +24,7 @@ import 'package:rwkvmusic/style/color.dart';
 import 'package:rwkvmusic/style/style.dart';
 import 'package:rwkvmusic/utils/abchead.dart';
 import 'package:rwkvmusic/utils/audioplayer.dart';
+import 'package:rwkvmusic/utils/automeasure_randomizeabc.dart';
 import 'package:rwkvmusic/utils/chord_util.dart';
 import 'package:rwkvmusic/utils/justaudioplayer.dart';
 import 'package:rwkvmusic/utils/midiconvert_abc.dart';
@@ -72,8 +73,6 @@ class _HomePageState extends State<HomePage> {
   int listenCount = 0;
   var effectSelectedIndex = 0.obs;
 
-  /// 选中单个音符出现的弹框
-  var noteLengthSelectedIndex = 0.obs;
   String? currentSoundEffect;
   late MidiDeviceManage deviceManage;
   late String abcString;
@@ -225,7 +224,6 @@ class _HomePageState extends State<HomePage> {
       })
       ..addJavaScriptChannel("flutterOnClickChord",
           onMessageReceived: _onReceiveChordClick);
-    ;
 
     controllerKeyboard = WebViewControllerPlus()
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
@@ -300,36 +298,16 @@ class _HomePageState extends State<HomePage> {
   }
 
   void _onReceiveFlutteronClickNote(JavaScriptMessage jsMessage) {
-    debugPrint('flutteronClickNote onMessageReceived=${jsMessage.message}');
-    if (isShowDialog) {
-      debugPrint('isShowDialog return');
-      return;
-    }
+    final json = jsonDecode(jsMessage.message);
 
-    final list = jsMessage.message.split(',');
+    String name = json["name"];
+    if (name.contains("rest")) name = "z";
+    final duration = json["duration"] as num;
 
-    if (int.parse(list[list.length - 1]) < 0) return;
-
-    final _selectstate = selectstate.value;
-    final _isPlay = isPlay.value;
-    if (_selectstate != 1 || _isPlay) return;
-
-    if (kDebugMode) print("💬 $list");
-
-    final noteValue = list[0];
-    final noteIndex = list[list.length - 1];
-
-    currentClickNoteInfo = [noteValue, noteIndex];
-    noteLengthSelectedIndex.value = NoteCalculator().getNoteLengthIndex(
-      noteValue,
-      int.parse(noteIndex),
-    );
-    showPromptDialog(
-      context,
-      'Change note length',
-      kNoteLengths,
-      STORAGE_note_SELECT,
-    );
+    selectedNote = SelectedNote()
+      ..name = name
+      ..index = int.parse(json["index"])
+      ..duration = duration;
   }
 
   /// @wangce 和弦点击
@@ -395,36 +373,20 @@ class _HomePageState extends State<HomePage> {
   }
 
   /// @wangce 通过执行 JS 更新琴谱
-  void updateNote(
-    int noteIndex,
-    int noteLengthIndex,
-    String note,
-  ) async {
-    debugPrint('updateNote index=$noteIndex,note=$note');
-    String newnote = NoteCalculator().calculateNewNoteByLength(
-      note,
-      kNoteLengths[noteLengthIndex],
-    );
-    NoteCalculator().noteMap[noteIndex] = newnote;
-    virtualNotes[noteIndex] = newnote;
-    StringBuffer sbff = StringBuffer();
-    for (String note in virtualNotes) {
-      sbff.write(note);
-      sbff.write(" ");
+  void _updateNote({int? noteLengthIndex, String? noteSymbol}) async {
+    final selected = selectedNote;
+    if (selected == null) {
+      if (virtualNotes.isEmpty) return;
+      selectedNote = SelectedNote()
+        ..index = virtualNotes.length - 1
+        ..name = noteSymbol ?? (virtualNotes.last as String).substring(0, 1);
+      _updateNote(noteLengthIndex: noteLengthIndex);
+      return;
     }
-    createPrompt = sbff.toString();
-    String sb =
-        "setAbcString(\"%%MIDI program $midiProgramValue\\nL:1/4\\nM:$timeSingnatureStr\\nK:C\\n|$createPrompt\",false)";
-    finalabcStringCreate = ABCHead.appendTempoParam(sb, tempo.value.toInt());
-    debugPrint('curr=$finalabcStringCreate');
-    await controllerPiano.runJavaScript(finalabcStringCreate);
-    // createPrompt = sbff.toString();
-  }
-
-  void _updateNote(int noteLengthIndex) async {
-    final note = currentClickNoteInfo[0];
-    final noteIndex = int.parse(currentClickNoteInfo[1]);
+    final note = noteSymbol ?? selected.name;
+    final noteIndex = selected.index;
     String newNote = "";
+    noteLengthIndex ??= selected.noteLengthIndex;
     switch (noteLengthIndex) {
       case 0:
         newNote = "${note}4";
@@ -447,6 +409,7 @@ class _HomePageState extends State<HomePage> {
     }
     NoteCalculator().noteMap[noteIndex] = newNote;
     virtualNotes[noteIndex] = newNote;
+    if (kDebugMode) print("💬 $newNote");
     StringBuffer sbff = StringBuffer();
     for (String note in virtualNotes) {
       sbff.write(note);
@@ -458,11 +421,15 @@ class _HomePageState extends State<HomePage> {
     finalabcStringCreate = ABCHead.appendTempoParam(sb, tempo.value.toInt());
     debugPrint('curr=$finalabcStringCreate');
     await controllerPiano.runJavaScript(finalabcStringCreate);
-    // createPrompt = sbff.toString();
+    selectedNote = null;
   }
 
   /// @wangce 插入休止符
-  void _insertRest(int lengthIndex) async {
+  void _inserOrUpdatetRest(int lengthIndex) async {
+    if (selectedNote != null) {
+      _updateNote(noteLengthIndex: lengthIndex, noteSymbol: "z");
+      return;
+    }
     const node = 24;
     String noteName = "z";
     switch (lengthIndex) {
@@ -482,7 +449,6 @@ class _HomePageState extends State<HomePage> {
         noteName = "$noteName/4";
         break;
     }
-    // sbNoteCreate.write(noteName);
     virtualNotes.add(noteName);
     intNodes.add(node);
 
@@ -551,6 +517,7 @@ class _HomePageState extends State<HomePage> {
     finalabcStringCreate = ABCHead.appendTempoParam(sb, tempo.value.toInt());
     debugPrint('curr=$finalabcStringCreate');
     await controllerPiano.runJavaScript(finalabcStringCreate);
+    selectedNote = null;
   }
 
   /// @wangce 插入音符
@@ -558,6 +525,14 @@ class _HomePageState extends State<HomePage> {
   /// 1. 通过按下虚拟键盘触发
   void updatePianoNote(int node) async {
     String noteName = MidiToABCConverter().getNoteName(node);
+
+    final selected = selectedNote;
+    if (selected != null) {
+      _updateNote(noteSymbol: noteName);
+      selectedNote = null;
+      return;
+    }
+
     if (defaultNoteLenght.value == 0) {
     } else if (defaultNoteLenght.value == 1) {
       noteName = "$noteName/2";
@@ -630,6 +605,11 @@ class _HomePageState extends State<HomePage> {
   void _delete() {
     // TODO: @wangce selected
     resetLastNote();
+  }
+
+  void _randomizeAbc() async {
+    // TODO: @wangce 问问陈琪怎么调用
+    finalabcStringCreate = randomizeAbc(finalabcStringCreate);
   }
 
   void resetLastNote() {
@@ -946,41 +926,42 @@ class _HomePageState extends State<HomePage> {
                     onTapAtIndex: (context, key) {
                       switch (key) {
                         case ChangeNoteKey.whole:
-                          _updateNote(0);
+                          _updateNote(noteLengthIndex: 0);
                           break;
                         case ChangeNoteKey.half:
-                          _updateNote(1);
+                          _updateNote(noteLengthIndex: 1);
                           break;
                         case ChangeNoteKey.quarter:
-                          _updateNote(2);
+                          _updateNote(noteLengthIndex: 2);
                           break;
                         case ChangeNoteKey.eighth:
-                          _updateNote(3);
+                          _updateNote(noteLengthIndex: 3);
                           break;
                         case ChangeNoteKey.sixteenth:
-                          _updateNote(4);
+                          _updateNote(noteLengthIndex: 4);
                           break;
                         case ChangeNoteKey.thirtySecond:
-                          _updateNote(5);
+                          _updateNote(noteLengthIndex: 5);
                           break;
                         case ChangeNoteKey.dottodNote:
                           break;
                         case ChangeNoteKey.wholeZ:
-                          _insertRest(0);
+                          _inserOrUpdatetRest(0);
                           break;
                         case ChangeNoteKey.halfZ:
-                          _insertRest(1);
+                          _inserOrUpdatetRest(1);
                           break;
                         case ChangeNoteKey.quarterZ:
-                          _insertRest(2);
+                          _inserOrUpdatetRest(2);
                           break;
                         case ChangeNoteKey.eighthZ:
-                          _insertRest(3);
+                          _inserOrUpdatetRest(3);
                           break;
                         case ChangeNoteKey.sixteenthZ:
-                          _insertRest(4);
+                          _inserOrUpdatetRest(4);
                           break;
                         case ChangeNoteKey.randomGroove:
+                          _randomizeAbc();
                           break;
                         case ChangeNoteKey.delete:
                           _delete();
@@ -1986,8 +1967,7 @@ class _HomePageState extends State<HomePage> {
                                         ? promptSelectedIndex.value == index
                                         : type == STORAGE_SOUNDSEFFECT_SELECT
                                             ? effectSelectedIndex.value == index
-                                            : noteLengthSelectedIndex.value ==
-                                                index),
+                                            : 0 == index),
                                 title: list[index],
                                 onChanged: (value) {
                                   if (kDebugMode) print("💬 $type");
@@ -1997,7 +1977,6 @@ class _HomePageState extends State<HomePage> {
                                       STORAGE_SOUNDSEFFECT_SELECT) {
                                     effectSelectedIndex.value = value;
                                   } else if (type == STORAGE_note_SELECT) {
-                                    noteLengthSelectedIndex.value = value;
                                   } else if (type == STORAGE_KEYBOARD_SELECT) {
                                     keyboardSelectedIndex.value == value;
                                     debugPrint(
@@ -2061,12 +2040,7 @@ class _HomePageState extends State<HomePage> {
                                         };
                                       }
                                     }
-                                  } else if (type == STORAGE_note_SELECT) {
-                                    updateNote(
-                                        int.parse(currentClickNoteInfo[1]),
-                                        index,
-                                        currentClickNoteInfo[0].toString());
-                                  }
+                                  } else if (type == STORAGE_note_SELECT) {}
                                   if (type == STORAGE_PROMPTS_SELECT) {
                                     resetPianoAndKeyboard();
                                     int subindex = presentPrompt.indexOf('L:');
