@@ -1,12 +1,33 @@
 import 'package:flutter/material.dart';
+import 'package:get/get_connect/http/src/request/request.dart';
 import 'package:halo/halo.dart';
 
-class ChangeNote extends StatelessWidget {
-  const ChangeNote({super.key});
+enum ChangeNoteKey {
+  whole,
+  half,
+  quarter,
+  eighth,
+  sixteenth,
+  thirtySecond,
+  dottodNote,
+  wholeZ,
+  halfZ,
+  quarterZ,
+  eighthZ,
+  sixteenthZ,
+  randomGroove,
+  delete,
+}
 
-  void _onTapAtIndex(BuildContext context, int index) async {
-    // TODO: implementation
-  }
+class ChangeNote extends StatelessWidget {
+  final void Function(BuildContext context, ChangeNoteKey key) onTapAtIndex;
+  final void Function(BuildContext context, ChangeNoteKey key) onLongPress;
+
+  const ChangeNote({
+    super.key,
+    required this.onTapAtIndex,
+    required this.onLongPress,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -14,44 +35,39 @@ class ChangeNote extends StatelessWidget {
     return ClipRRect(
       borderRadius: 8.r,
       child: C(
-        decoration: BD(
-          color: Color(0xFF222222),
-        ),
-        height: 60,
-        width: screenWidth,
-        child: ListView.builder(
-          padding: EI.o(l: 4),
-          scrollDirection: Axis.horizontal,
-          itemCount: 12,
-          itemBuilder: (context, index) {
-            return SB(
-              height: 60,
-              width: 60,
-              child: Center(
-                child: GD(
+          decoration: BD(
+            color: Color(0xFF222222),
+          ),
+          height: 60,
+          width: screenWidth,
+          child: Ro(
+            children: [
+              5.w,
+              ...ChangeNoteKey.values.indexMap((index, k) {
+                return GD(
                   onTap: () {
-                    _onTapAtIndex(context, index);
+                    onTapAtIndex(context, k);
+                  },
+                  onLongPress: () {
+                    onLongPress(context, k);
                   },
                   child: C(
-                    decoration: BD(
-                      color: kW,
-                      borderRadius: 4.r,
-                    ),
-                    height: 48,
-                    width: 54,
+                    height: 50,
+                    width: 50,
+                    decoration: BD(color: kW, borderRadius: 4.r),
                     child: Center(
-                      child: T(
-                        "♩",
-                        s: TS(s: 32),
-                      ),
-                    ),
+                        child: T(
+                      k.name,
+                      s: TS(s: 8),
+                    )),
                   ),
-                ),
+                );
+              }).widgetJoin(
+                (_) => 4.w,
               ),
-            );
-          },
-        ),
-      ),
+              5.w,
+            ],
+          )),
     );
   }
 }

@@ -21,28 +21,6 @@ var qnnSoList = [
   'libQnnSystem.so',
 ];
 
-const kChordRoot = [
-  "C",
-  "C#",
-  "D",
-  "D#",
-  "E",
-  "F",
-  "F#",
-  "G",
-  "G#",
-  "A",
-  "A#",
-  "B",
-];
-
-const kChordType = [
-  "Major",
-  "minor",
-  "dim",
-  "Dominant7",
-];
-
 const kNoteState = [
   "4",
   "2",
@@ -119,7 +97,7 @@ List<String> instruments = [
   'guitar',
 ];
 
-List<String> noteLengths = [
+List<String> kNoteLengths = [
   '1/4',
   '1/8',
   '1/16',

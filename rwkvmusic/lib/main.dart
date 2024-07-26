@@ -1,12 +1,9 @@
 import 'dart:ffi' hide Size;
 import 'dart:isolate';
-import 'dart:math';
-import 'dart:ui';
 import 'package:ffi/ffi.dart';
 // import 'dart:html';
 import 'dart:io';
 import 'package:flutter/services.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 // import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 // import 'package:flutter_platform_alert/flutter_platform_alert.dart';
@@ -83,7 +80,10 @@ late ReceivePort mainReceivePort;
 late SendPort isolateSendPort;
 bool isFinishABCEvent = false;
 late String finalabcStringPreset;
+
+/// 在 create 模式xAI最新的
 late String finalabcStringCreate;
+
 // late bool isNeedRestart; //曲谱及键盘动画需要重新开始
 late String presentPrompt;
 var createPrompt = '';
@@ -128,9 +128,62 @@ var isAutoSwitch = false.obs;
 
 ScrollController controller = ScrollController();
 var tokens = ''.obs;
-var currentClickNoteInfo = [];
 
-// var noteLengthList = ['1/4', '1/8', '1/16'];
+// TODO: @wangce 何时置空
+SelectedNote? selectedNote;
+
+class SelectedNote {
+  String name = "";
+  int index = -1;
+  num duration = 0.0;
+
+  String get notation {
+    if (duration == 1) {
+      return "${name}4";
+    }
+    if (duration == 0.5) {
+      return "${name}2";
+    }
+    if (duration == 0.25) {
+      return name;
+    }
+    if (duration == 0.125) {
+      return "$name/2";
+    }
+    if (duration == 0.0625) {
+      return "$name/4";
+    }
+    if (duration == 0.03125) {
+      return "$name/8";
+    }
+
+    return name;
+  }
+
+  int get noteLengthIndex {
+    if (duration == 1) {
+      return 0;
+    }
+    if (duration == 0.5) {
+      return 1;
+    }
+    if (duration == 0.25) {
+      return 2;
+    }
+    if (duration == 0.125) {
+      return 3;
+    }
+    if (duration == 0.0625) {
+      return 4;
+    }
+    if (duration == 0.03125) {
+      return 5;
+    }
+
+    return 2;
+  }
+}
+
 List<Note> notes = [];
 Isolate? userIsolate;
 var isCreateGenerate = false.obs;
