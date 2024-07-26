@@ -94,12 +94,16 @@
                 delay(100).then(() => {
                   if (dataIndex == selectedChord.index) {
                     //点的是和弦
-                    console.log("点击了和弦");
-                    console.log(selectedChord.chord);
-                    console.log(dataIndex);
-                    alert(
-                      "点击了和弦： " + selectedChord.chord + "," + dataIndex
-                    );
+
+
+                    let onClickParam = {
+                      name: selectedChord.chord,
+                      index: dataIndex,
+                      duration: abcElem.duration,
+                      notation: tempRawAbcString,
+                    };
+                    console.log(onClickParam);
+                    flutterOnClickChord.postMessage(JSON.stringify(onClickParam));
 
                     selectedChord.chord = "";
                     selectedChord.index = -1;

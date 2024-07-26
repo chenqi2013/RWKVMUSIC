@@ -320,13 +320,13 @@ class _HomePageState extends State<HomePage> {
     if (isShowOverlay) closeOverlay();
     if (isWindowsOrMac) isVisibleWebview.value = !isVisibleWebview.value;
 
-    final message = jsMessage.message;
-    if (kDebugMode) print("💬 $message");
+    final json = jsonDecode(jsMessage.message);
+    if (kDebugMode) print("💬 $json");
 
     final regExp = RegExp(r'\|\\"[ABCDEFGdim#7]+\\"');
     final matches = regExp.allMatches(finalabcStringCreate).toList();
     if (matches.isEmpty) return;
-    final index = int.parse(message.split(",").last) ~/ 4;
+    final index = int.parse(json["index"]) ~/ 4;
     final m = matches[index];
     final text = finalabcStringCreate.substring(m.start + 3, m.end - 2);
     final r = calculateRootAndType(text);
@@ -608,8 +608,12 @@ class _HomePageState extends State<HomePage> {
   }
 
   void _randomizeAbc() async {
-    // TODO: @wangce 问问陈琪怎么调用
-    finalabcStringCreate = randomizeAbc(finalabcStringCreate);
+    createPrompt = randomizeAbc(createPrompt).replaceAll("\n", "\\n");
+    if (kDebugMode) print("💬 ");
+    String sb =
+        "setAbcString(\"%%MIDI program $midiProgramValue\\n$createPrompt\",false)";
+    await controllerPiano.runJavaScript(sb);
+    selectedNote = null;
   }
 
   void resetLastNote() {
