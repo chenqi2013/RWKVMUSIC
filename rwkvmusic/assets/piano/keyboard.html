@@ -348,6 +348,11 @@
         }
       };
       setPiano(21, 108);
+      const key65 = document.querySelector('.key[data-midikey="65"]');
+      console.log(key65);
+      key65.scrollIntoView({ behavior: "smooth", block: "center" , inline: "center"});
+      // const keyboardEle = document.getElementById("keyboard");
+
     </script>
   </body>
 </html>
