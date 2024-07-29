@@ -9,6 +9,68 @@
 
 import 'package:flutter/widgets.dart';
 
+class $AssetsDoctorGen {
+  const $AssetsDoctorGen();
+
+  /// File path: assets/doctor/asset-manifest.json
+  String get assetManifest => 'assets/doctor/asset-manifest.json';
+
+  /// File path: assets/doctor/bg.jpg
+  AssetGenImage get bg => const AssetGenImage('assets/doctor/bg.jpg');
+
+  /// File path: assets/doctor/doctor.html
+  String get doctor => 'assets/doctor/doctor.html';
+
+  /// File path: assets/doctor/favicon.ico
+  String get favicon => 'assets/doctor/favicon.ico';
+
+  /// File path: assets/doctor/index.html
+  String get index => 'assets/doctor/index.html';
+
+  /// File path: assets/doctor/manifest.json
+  String get manifest => 'assets/doctor/manifest.json';
+
+  /// Directory path: assets/doctor/pngList
+  $AssetsDoctorPngListGen get pngList => const $AssetsDoctorPngListGen();
+
+  /// File path: assets/doctor/robots.txt
+  String get robots => 'assets/doctor/robots.txt';
+
+  /// Directory path: assets/doctor/static
+  $AssetsDoctorStaticGen get static => const $AssetsDoctorStaticGen();
+
+  /// List of all assets
+  List<dynamic> get values =>
+      [assetManifest, bg, doctor, favicon, index, manifest, robots];
+}
+
+class $AssetsFastmodelGen {
+  const $AssetsFastmodelGen();
+
+  /// File path: assets/fastmodel/RWKV-6-ABC-85M-v1-20240217-ctx1024-ncnn.bin
+  String get rWKV6ABC85MV120240217Ctx1024NcnnBin =>
+      'assets/fastmodel/RWKV-6-ABC-85M-v1-20240217-ctx1024-ncnn.bin';
+
+  /// File path: assets/fastmodel/RWKV-6-ABC-85M-v1-20240217-ctx1024-ncnn.config
+  String get rWKV6ABC85MV120240217Ctx1024NcnnConfig =>
+      'assets/fastmodel/RWKV-6-ABC-85M-v1-20240217-ctx1024-ncnn.config';
+
+  /// File path: assets/fastmodel/RWKV-6-ABC-85M-v1-20240217-ctx1024-ncnn.param
+  String get rWKV6ABC85MV120240217Ctx1024NcnnParam =>
+      'assets/fastmodel/RWKV-6-ABC-85M-v1-20240217-ctx1024-ncnn.param';
+
+  /// File path: assets/fastmodel/libfaster_rwkvd.so
+  String get libfasterRwkvd => 'assets/fastmodel/libfaster_rwkvd.so';
+
+  /// List of all assets
+  List<String> get values => [
+        rWKV6ABC85MV120240217Ctx1024NcnnBin,
+        rWKV6ABC85MV120240217Ctx1024NcnnConfig,
+        rWKV6ABC85MV120240217Ctx1024NcnnParam,
+        libfasterRwkvd
+      ];
+}
+
 class $AssetsFontsGen {
   const $AssetsFontsGen();
 
@@ -50,6 +112,49 @@ class $AssetsImagesGen {
   AssetGenImage get accountHeader =>
       const AssetGenImage('assets/images/account_header.png');
 
+  /// File path: assets/images/backgroundbg.jpg
+  AssetGenImage get backgroundbg =>
+      const AssetGenImage('assets/images/backgroundbg.jpg');
+
+  /// File path: assets/images/bodystop.svg
+  String get bodystop => 'assets/images/bodystop.svg';
+
+  /// File path: assets/images/btn_create_generate.svg
+  String get btnCreateGenerate => 'assets/images/btn_create_generate.svg';
+
+  /// File path: assets/images/btn_generate.svg
+  String get btnGenerate => 'assets/images/btn_generate.svg';
+
+  /// File path: assets/images/btn_instrument.svg
+  String get btnInstrument => 'assets/images/btn_instrument.svg';
+
+  /// File path: assets/images/btn_prompts.svg
+  String get btnPrompts => 'assets/images/btn_prompts.svg';
+
+  /// File path: assets/images/btn_setting.svg
+  String get btnSetting => 'assets/images/btn_setting.svg';
+
+  /// File path: assets/images/btn_softkeyboard.svg
+  String get btnSoftkeyboard => 'assets/images/btn_softkeyboard.svg';
+
+  /// File path: assets/images/btn_undo.svg
+  String get btnUndo => 'assets/images/btn_undo.svg';
+
+  /// File path: assets/images/btnbg.svg
+  String get btnbg => 'assets/images/btnbg.svg';
+
+  /// File path: assets/images/btnlongpng.png
+  AssetGenImage get btnlongpng =>
+      const AssetGenImage('assets/images/btnlongpng.png');
+
+  /// File path: assets/images/btnshortpng.png
+  AssetGenImage get btnshortpng =>
+      const AssetGenImage('assets/images/btnshortpng.png');
+
+  /// Directory path: assets/images/change_node
+  $AssetsImagesChangeNodeGen get changeNode =>
+      const $AssetsImagesChangeNodeGen();
+
   /// File path: assets/images/channel-bbc.png
   AssetGenImage get channelBbc =>
       const AssetGenImage('assets/images/channel-bbc.png');
@@ -74,6 +179,23 @@ class $AssetsImagesGen {
   AssetGenImage get channelRt =>
       const AssetGenImage('assets/images/channel-rt.png');
 
+  /// File path: assets/images/checkbox_unselect.png
+  AssetGenImage get checkboxUnselect =>
+      const AssetGenImage('assets/images/checkbox_unselect.png');
+
+  /// File path: assets/images/checkoff.svg
+  String get checkoff => 'assets/images/checkoff.svg';
+
+  /// File path: assets/images/checkon.svg
+  String get checkon => 'assets/images/checkon.svg';
+
+  /// File path: assets/images/dialogbg.png
+  AssetGenImage get dialogbg =>
+      const AssetGenImage('assets/images/dialogbg.png');
+
+  /// File path: assets/images/dropdown_arrow.svg
+  String get dropdownArrow => 'assets/images/dropdown_arrow.svg';
+
   /// File path: assets/images/feature-1.png
   AssetGenImage get feature1 =>
       const AssetGenImage('assets/images/feature-1.png');
@@ -85,6 +207,50 @@ class $AssetsImagesGen {
   /// File path: assets/images/feature-3.png
   AssetGenImage get feature3 =>
       const AssetGenImage('assets/images/feature-3.png');
+
+  /// File path: assets/images/generate.jpg
+  AssetGenImage get generate =>
+      const AssetGenImage('assets/images/generate.jpg');
+
+  /// File path: assets/images/generate11.jpg
+  AssetGenImage get generate11 =>
+      const AssetGenImage('assets/images/generate11.jpg');
+
+  /// File path: assets/images/ic-cello.svg
+  String get icCello => 'assets/images/ic-cello.svg';
+
+  /// File path: assets/images/ic-guitar.svg
+  String get icGuitar => 'assets/images/ic-guitar.svg';
+
+  /// File path: assets/images/ic-ocarina.svg
+  String get icOcarina => 'assets/images/ic-ocarina.svg';
+
+  /// File path: assets/images/ic-piano.svg
+  String get icPiano => 'assets/images/ic-piano.svg';
+
+  /// File path: assets/images/ic-violin.svg
+  String get icViolin => 'assets/images/ic-violin.svg';
+
+  /// File path: assets/images/ic_arrowdown.svg
+  String get icArrowdown => 'assets/images/ic_arrowdown.svg';
+
+  /// File path: assets/images/ic_generate.svg
+  String get icGenerate => 'assets/images/ic_generate.svg';
+
+  /// File path: assets/images/ic_music.svg
+  String get icMusic => 'assets/images/ic_music.svg';
+
+  /// File path: assets/images/ic_play.svg
+  String get icPlay => 'assets/images/ic_play.svg';
+
+  /// File path: assets/images/ic_setting.svg
+  String get icSetting => 'assets/images/ic_setting.svg';
+
+  /// File path: assets/images/ic_stop.svg
+  String get icStop => 'assets/images/ic_stop.svg';
+
+  /// File path: assets/images/ic_undo.svg
+  String get icUndo => 'assets/images/ic_undo.svg';
 
   /// File path: assets/images/icons-facebook.png
   AssetGenImage get iconsFacebook =>
@@ -101,22 +267,119 @@ class $AssetsImagesGen {
   /// File path: assets/images/logo.png
   AssetGenImage get logo => const AssetGenImage('assets/images/logo.png');
 
+  /// File path: assets/images/music.jpg
+  AssetGenImage get music => const AssetGenImage('assets/images/music.jpg');
+
+  /// File path: assets/images/pause.jpg
+  AssetGenImage get pause => const AssetGenImage('assets/images/pause.jpg');
+
+  /// File path: assets/images/play.jpg
+  AssetGenImage get play => const AssetGenImage('assets/images/play.jpg');
+
+  /// File path: assets/images/playerbg.svg
+  String get playerbg => 'assets/images/playerbg.svg';
+
+  /// File path: assets/images/radio_select.png
+  AssetGenImage get radioSelect =>
+      const AssetGenImage('assets/images/radio_select.png');
+
+  /// File path: assets/images/radio_unselect.png
+  AssetGenImage get radioUnselect =>
+      const AssetGenImage('assets/images/radio_unselect.png');
+
+  /// File path: assets/images/setting.jpg
+  AssetGenImage get setting => const AssetGenImage('assets/images/setting.jpg');
+
+  /// File path: assets/images/settingbg.png
+  AssetGenImage get settingbg =>
+      const AssetGenImage('assets/images/settingbg.png');
+
+  /// File path: assets/images/stopgenerate.jpg
+  AssetGenImage get stopgenerate =>
+      const AssetGenImage('assets/images/stopgenerate.jpg');
+
+  /// File path: assets/images/switch_off.png
+  AssetGenImage get switchOff =>
+      const AssetGenImage('assets/images/switch_off.png');
+
+  /// File path: assets/images/switch_on.png
+  AssetGenImage get switchOn =>
+      const AssetGenImage('assets/images/switch_on.png');
+
+  /// File path: assets/images/switchoff.svg
+  String get switchoff => 'assets/images/switchoff.svg';
+
+  /// File path: assets/images/switchon.svg
+  String get switchon => 'assets/images/switchon.svg';
+
+  /// File path: assets/images/title_logo.svg
+  String get titleLogo => 'assets/images/title_logo.svg';
+
+  /// File path: assets/images/undo.jpg
+  AssetGenImage get undo => const AssetGenImage('assets/images/undo.jpg');
+
   /// List of all assets
-  List<AssetGenImage> get values => [
+  List<dynamic> get values => [
         accountHeader,
+        backgroundbg,
+        bodystop,
+        btnCreateGenerate,
+        btnGenerate,
+        btnInstrument,
+        btnPrompts,
+        btnSetting,
+        btnSoftkeyboard,
+        btnUndo,
+        btnbg,
+        btnlongpng,
+        btnshortpng,
         channelBbc,
         channelBloomberg,
         channelCnn,
         channelFox,
         channelNbc,
         channelRt,
+        checkboxUnselect,
+        checkoff,
+        checkon,
+        dialogbg,
+        dropdownArrow,
         feature1,
         feature2,
         feature3,
+        generate,
+        generate11,
+        icCello,
+        icGuitar,
+        icOcarina,
+        icPiano,
+        icViolin,
+        icArrowdown,
+        icGenerate,
+        icMusic,
+        icPlay,
+        icSetting,
+        icStop,
+        icUndo,
         iconsFacebook,
         iconsGoogle,
         iconsTwitter,
-        logo
+        logo,
+        music,
+        pause,
+        play,
+        playerbg,
+        radioSelect,
+        radioUnselect,
+        setting,
+        settingbg,
+        stopgenerate,
+        switchOff,
+        switchOn,
+        switchoff,
+        switchon,
+        titleLogo,
+        undo
       ];
 }
 
@@ -125,6 +388,9 @@ class $AssetsPianoGen {
 
   /// File path: assets/piano/application.d617c.js
   String get applicationD617c => 'assets/piano/application.d617c.js';
+
+  /// Directory path: assets/piano/assets
+  $AssetsPianoAssetsGen get assets => const $AssetsPianoAssetsGen();
 
   /// File path: assets/piano/import-map.46d64.json
   String get importMap46d64 => 'assets/piano/import-map.46d64.json';
@@ -189,8 +455,18 @@ class $AssetsPlayerGen {
   String get midiplayer => 'assets/player/midiplayer.js';
 
   /// File path: assets/player/player.html
-  String get player => 'assets/player/player.html';
+  String get playerHtml => 'assets/player/player.html';
 
+  /// File path: assets/player/player_副本.html
+  String get playerHtml_ => 'assets/player/player_副本.html';
+
+  /// File path: assets/player/player11.html
+  String get player11 => 'assets/player/player11.html';
+
+  /// File path: assets/player/player22.html
+  String get player22 => 'assets/player/player22.html';
+
+  /// Directory path: assets/player/soundfont
   $AssetsPlayerSoundfontGen get soundfont => const $AssetsPlayerSoundfontGen();
 
   /// List of all assets
@@ -202,7 +478,10 @@ class $AssetsPlayerGen {
         examplesStyles,
         index,
         midiplayer,
-        player
+        playerHtml,
+        playerHtml_,
+        player11,
+        player22
       ];
 }
 
@@ -216,19 +495,475 @@ class $AssetsPromptsGen {
   List<String> get values => [prompts];
 }
 
+class $AssetsDoctorPngListGen {
+  const $AssetsDoctorPngListGen();
+
+  /// File path: assets/doctor/pngList/2_00000.png
+  AssetGenImage get a200000 =>
+      const AssetGenImage('assets/doctor/pngList/2_00000.png');
+
+  /// File path: assets/doctor/pngList/2_00001.png
+  AssetGenImage get a200001 =>
+      const AssetGenImage('assets/doctor/pngList/2_00001.png');
+
+  /// File path: assets/doctor/pngList/2_00002.png
+  AssetGenImage get a200002 =>
+      const AssetGenImage('assets/doctor/pngList/2_00002.png');
+
+  /// File path: assets/doctor/pngList/2_00003.png
+  AssetGenImage get a200003 =>
+      const AssetGenImage('assets/doctor/pngList/2_00003.png');
+
+  /// File path: assets/doctor/pngList/2_00004.png
+  AssetGenImage get a200004 =>
+      const AssetGenImage('assets/doctor/pngList/2_00004.png');
+
+  /// File path: assets/doctor/pngList/2_00005.png
+  AssetGenImage get a200005 =>
+      const AssetGenImage('assets/doctor/pngList/2_00005.png');
+
+  /// File path: assets/doctor/pngList/2_00006.png
+  AssetGenImage get a200006 =>
+      const AssetGenImage('assets/doctor/pngList/2_00006.png');
+
+  /// File path: assets/doctor/pngList/2_00007.png
+  AssetGenImage get a200007 =>
+      const AssetGenImage('assets/doctor/pngList/2_00007.png');
+
+  /// File path: assets/doctor/pngList/2_00008.png
+  AssetGenImage get a200008 =>
+      const AssetGenImage('assets/doctor/pngList/2_00008.png');
+
+  /// File path: assets/doctor/pngList/2_00009.png
+  AssetGenImage get a200009 =>
+      const AssetGenImage('assets/doctor/pngList/2_00009.png');
+
+  /// File path: assets/doctor/pngList/2_00010.png
+  AssetGenImage get a200010 =>
+      const AssetGenImage('assets/doctor/pngList/2_00010.png');
+
+  /// File path: assets/doctor/pngList/2_00011.png
+  AssetGenImage get a200011 =>
+      const AssetGenImage('assets/doctor/pngList/2_00011.png');
+
+  /// File path: assets/doctor/pngList/2_00012.png
+  AssetGenImage get a200012 =>
+      const AssetGenImage('assets/doctor/pngList/2_00012.png');
+
+  /// File path: assets/doctor/pngList/2_00013.png
+  AssetGenImage get a200013 =>
+      const AssetGenImage('assets/doctor/pngList/2_00013.png');
+
+  /// File path: assets/doctor/pngList/2_00014.png
+  AssetGenImage get a200014 =>
+      const AssetGenImage('assets/doctor/pngList/2_00014.png');
+
+  /// File path: assets/doctor/pngList/2_00015.png
+  AssetGenImage get a200015 =>
+      const AssetGenImage('assets/doctor/pngList/2_00015.png');
+
+  /// File path: assets/doctor/pngList/2_00016.png
+  AssetGenImage get a200016 =>
+      const AssetGenImage('assets/doctor/pngList/2_00016.png');
+
+  /// File path: assets/doctor/pngList/2_00017.png
+  AssetGenImage get a200017 =>
+      const AssetGenImage('assets/doctor/pngList/2_00017.png');
+
+  /// File path: assets/doctor/pngList/2_00018.png
+  AssetGenImage get a200018 =>
+      const AssetGenImage('assets/doctor/pngList/2_00018.png');
+
+  /// File path: assets/doctor/pngList/2_00019.png
+  AssetGenImage get a200019 =>
+      const AssetGenImage('assets/doctor/pngList/2_00019.png');
+
+  /// File path: assets/doctor/pngList/2_00020.png
+  AssetGenImage get a200020 =>
+      const AssetGenImage('assets/doctor/pngList/2_00020.png');
+
+  /// File path: assets/doctor/pngList/2_00021.png
+  AssetGenImage get a200021 =>
+      const AssetGenImage('assets/doctor/pngList/2_00021.png');
+
+  /// File path: assets/doctor/pngList/2_00022.png
+  AssetGenImage get a200022 =>
+      const AssetGenImage('assets/doctor/pngList/2_00022.png');
+
+  /// File path: assets/doctor/pngList/2_00023.png
+  AssetGenImage get a200023 =>
+      const AssetGenImage('assets/doctor/pngList/2_00023.png');
+
+  /// File path: assets/doctor/pngList/2_00024.png
+  AssetGenImage get a200024 =>
+      const AssetGenImage('assets/doctor/pngList/2_00024.png');
+
+  /// File path: assets/doctor/pngList/2_00025.png
+  AssetGenImage get a200025 =>
+      const AssetGenImage('assets/doctor/pngList/2_00025.png');
+
+  /// File path: assets/doctor/pngList/2_00026.png
+  AssetGenImage get a200026 =>
+      const AssetGenImage('assets/doctor/pngList/2_00026.png');
+
+  /// File path: assets/doctor/pngList/2_00027.png
+  AssetGenImage get a200027 =>
+      const AssetGenImage('assets/doctor/pngList/2_00027.png');
+
+  /// File path: assets/doctor/pngList/2_00028.png
+  AssetGenImage get a200028 =>
+      const AssetGenImage('assets/doctor/pngList/2_00028.png');
+
+  /// File path: assets/doctor/pngList/2_00029.png
+  AssetGenImage get a200029 =>
+      const AssetGenImage('assets/doctor/pngList/2_00029.png');
+
+  /// File path: assets/doctor/pngList/3_00000.png
+  AssetGenImage get a300000 =>
+      const AssetGenImage('assets/doctor/pngList/3_00000.png');
+
+  /// File path: assets/doctor/pngList/3_00001.png
+  AssetGenImage get a300001 =>
+      const AssetGenImage('assets/doctor/pngList/3_00001.png');
+
+  /// File path: assets/doctor/pngList/3_00002.png
+  AssetGenImage get a300002 =>
+      const AssetGenImage('assets/doctor/pngList/3_00002.png');
+
+  /// File path: assets/doctor/pngList/3_00003.png
+  AssetGenImage get a300003 =>
+      const AssetGenImage('assets/doctor/pngList/3_00003.png');
+
+  /// File path: assets/doctor/pngList/3_00004.png
+  AssetGenImage get a300004 =>
+      const AssetGenImage('assets/doctor/pngList/3_00004.png');
+
+  /// File path: assets/doctor/pngList/3_00005.png
+  AssetGenImage get a300005 =>
+      const AssetGenImage('assets/doctor/pngList/3_00005.png');
+
+  /// File path: assets/doctor/pngList/3_00006.png
+  AssetGenImage get a300006 =>
+      const AssetGenImage('assets/doctor/pngList/3_00006.png');
+
+  /// File path: assets/doctor/pngList/3_00007.png
+  AssetGenImage get a300007 =>
+      const AssetGenImage('assets/doctor/pngList/3_00007.png');
+
+  /// File path: assets/doctor/pngList/3_00008.png
+  AssetGenImage get a300008 =>
+      const AssetGenImage('assets/doctor/pngList/3_00008.png');
+
+  /// File path: assets/doctor/pngList/3_00009.png
+  AssetGenImage get a300009 =>
+      const AssetGenImage('assets/doctor/pngList/3_00009.png');
+
+  /// File path: assets/doctor/pngList/3_00010.png
+  AssetGenImage get a300010 =>
+      const AssetGenImage('assets/doctor/pngList/3_00010.png');
+
+  /// File path: assets/doctor/pngList/3_00011.png
+  AssetGenImage get a300011 =>
+      const AssetGenImage('assets/doctor/pngList/3_00011.png');
+
+  /// File path: assets/doctor/pngList/3_00012.png
+  AssetGenImage get a300012 =>
+      const AssetGenImage('assets/doctor/pngList/3_00012.png');
+
+  /// File path: assets/doctor/pngList/3_00013.png
+  AssetGenImage get a300013 =>
+      const AssetGenImage('assets/doctor/pngList/3_00013.png');
+
+  /// File path: assets/doctor/pngList/3_00014.png
+  AssetGenImage get a300014 =>
+      const AssetGenImage('assets/doctor/pngList/3_00014.png');
+
+  /// File path: assets/doctor/pngList/3_00015.png
+  AssetGenImage get a300015 =>
+      const AssetGenImage('assets/doctor/pngList/3_00015.png');
+
+  /// File path: assets/doctor/pngList/3_00016.png
+  AssetGenImage get a300016 =>
+      const AssetGenImage('assets/doctor/pngList/3_00016.png');
+
+  /// File path: assets/doctor/pngList/3_00017.png
+  AssetGenImage get a300017 =>
+      const AssetGenImage('assets/doctor/pngList/3_00017.png');
+
+  /// File path: assets/doctor/pngList/3_00018.png
+  AssetGenImage get a300018 =>
+      const AssetGenImage('assets/doctor/pngList/3_00018.png');
+
+  /// File path: assets/doctor/pngList/3_00019.png
+  AssetGenImage get a300019 =>
+      const AssetGenImage('assets/doctor/pngList/3_00019.png');
+
+  /// File path: assets/doctor/pngList/3_00020.png
+  AssetGenImage get a300020 =>
+      const AssetGenImage('assets/doctor/pngList/3_00020.png');
+
+  /// File path: assets/doctor/pngList/3_00021.png
+  AssetGenImage get a300021 =>
+      const AssetGenImage('assets/doctor/pngList/3_00021.png');
+
+  /// File path: assets/doctor/pngList/3_00022.png
+  AssetGenImage get a300022 =>
+      const AssetGenImage('assets/doctor/pngList/3_00022.png');
+
+  /// File path: assets/doctor/pngList/3_00023.png
+  AssetGenImage get a300023 =>
+      const AssetGenImage('assets/doctor/pngList/3_00023.png');
+
+  /// File path: assets/doctor/pngList/3_00024.png
+  AssetGenImage get a300024 =>
+      const AssetGenImage('assets/doctor/pngList/3_00024.png');
+
+  /// File path: assets/doctor/pngList/3_00025.png
+  AssetGenImage get a300025 =>
+      const AssetGenImage('assets/doctor/pngList/3_00025.png');
+
+  /// File path: assets/doctor/pngList/3_00026.png
+  AssetGenImage get a300026 =>
+      const AssetGenImage('assets/doctor/pngList/3_00026.png');
+
+  /// File path: assets/doctor/pngList/3_00027.png
+  AssetGenImage get a300027 =>
+      const AssetGenImage('assets/doctor/pngList/3_00027.png');
+
+  /// File path: assets/doctor/pngList/3_00028.png
+  AssetGenImage get a300028 =>
+      const AssetGenImage('assets/doctor/pngList/3_00028.png');
+
+  /// File path: assets/doctor/pngList/3_00029.png
+  AssetGenImage get a300029 =>
+      const AssetGenImage('assets/doctor/pngList/3_00029.png');
+
+  /// File path: assets/doctor/pngList/blackKey.png
+  AssetGenImage get blackKey =>
+      const AssetGenImage('assets/doctor/pngList/blackKey.png');
+
+  /// File path: assets/doctor/pngList/blackKeyPressed.png
+  AssetGenImage get blackKeyPressed =>
+      const AssetGenImage('assets/doctor/pngList/blackKeyPressed.png');
+
+  /// File path: assets/doctor/pngList/whiteKey.png
+  AssetGenImage get whiteKeyPng =>
+      const AssetGenImage('assets/doctor/pngList/whiteKey.png');
+
+  /// File path: assets/doctor/pngList/whiteKey.svg
+  String get whiteKeySvg => 'assets/doctor/pngList/whiteKey.svg';
+
+  /// File path: assets/doctor/pngList/whiteKeyPressed.png
+  AssetGenImage get whiteKeyPressedPng =>
+      const AssetGenImage('assets/doctor/pngList/whiteKeyPressed.png');
+
+  /// File path: assets/doctor/pngList/whiteKeyPressed.svg
+  String get whiteKeyPressedSvg => 'assets/doctor/pngList/whiteKeyPressed.svg';
+
+  /// List of all assets
+  List<dynamic> get values => [
+        a200000,
+        a200001,
+        a200002,
+        a200003,
+        a200004,
+        a200005,
+        a200006,
+        a200007,
+        a200008,
+        a200009,
+        a200010,
+        a200011,
+        a200012,
+        a200013,
+        a200014,
+        a200015,
+        a200016,
+        a200017,
+        a200018,
+        a200019,
+        a200020,
+        a200021,
+        a200022,
+        a200023,
+        a200024,
+        a200025,
+        a200026,
+        a200027,
+        a200028,
+        a200029,
+        a300000,
+        a300001,
+        a300002,
+        a300003,
+        a300004,
+        a300005,
+        a300006,
+        a300007,
+        a300008,
+        a300009,
+        a300010,
+        a300011,
+        a300012,
+        a300013,
+        a300014,
+        a300015,
+        a300016,
+        a300017,
+        a300018,
+        a300019,
+        a300020,
+        a300021,
+        a300022,
+        a300023,
+        a300024,
+        a300025,
+        a300026,
+        a300027,
+        a300028,
+        a300029,
+        blackKey,
+        blackKeyPressed,
+        whiteKeyPng,
+        whiteKeySvg,
+        whiteKeyPressedPng,
+        whiteKeyPressedSvg
+      ];
+}
+
+class $AssetsDoctorStaticGen {
+  const $AssetsDoctorStaticGen();
+
+  /// Directory path: assets/doctor/static/css
+  $AssetsDoctorStaticCssGen get css => const $AssetsDoctorStaticCssGen();
+
+  /// Directory path: assets/doctor/static/js
+  $AssetsDoctorStaticJsGen get js => const $AssetsDoctorStaticJsGen();
+}
+
+class $AssetsImagesChangeNodeGen {
+  const $AssetsImagesChangeNodeGen();
+
+  /// File path: assets/images/change_node/eighth.svg
+  String get eighth => 'assets/images/change_node/eighth.svg';
+
+  /// File path: assets/images/change_node/eighthZ.svg
+  String get eighthZ => 'assets/images/change_node/eighthZ.svg';
+
+  /// File path: assets/images/change_node/half.svg
+  String get half => 'assets/images/change_node/half.svg';
+
+  /// File path: assets/images/change_node/quarter.svg
+  String get quarter => 'assets/images/change_node/quarter.svg';
+
+  /// File path: assets/images/change_node/quarterZ.svg
+  String get quarterZ => 'assets/images/change_node/quarterZ.svg';
+
+  /// File path: assets/images/change_node/sixteenth.svg
+  String get sixteenth => 'assets/images/change_node/sixteenth.svg';
+
+  /// File path: assets/images/change_node/sixteenthZ.svg
+  String get sixteenthZ => 'assets/images/change_node/sixteenthZ.svg';
+
+  /// File path: assets/images/change_node/thirtySecond.svg
+  String get thirtySecond => 'assets/images/change_node/thirtySecond.svg';
+
+  /// File path: assets/images/change_node/whole.svg
+  String get whole => 'assets/images/change_node/whole.svg';
+
+  /// List of all assets
+  List<String> get values => [
+        eighth,
+        eighthZ,
+        half,
+        quarter,
+        quarterZ,
+        sixteenth,
+        sixteenthZ,
+        thirtySecond,
+        whole
+      ];
+}
+
+class $AssetsPianoAssetsGen {
+  const $AssetsPianoAssetsGen();
+
+  /// File path: assets/piano/assets/blackKey.png
+  AssetGenImage get blackKey =>
+      const AssetGenImage('assets/piano/assets/blackKey.png');
+
+  /// File path: assets/piano/assets/blackKeyPressed.png
+  AssetGenImage get blackKeyPressed =>
+      const AssetGenImage('assets/piano/assets/blackKeyPressed.png');
+
+  /// File path: assets/piano/assets/whiteKey.png
+  AssetGenImage get whiteKey =>
+      const AssetGenImage('assets/piano/assets/whiteKey.png');
+
+  /// File path: assets/piano/assets/whiteKeyPressed.png
+  AssetGenImage get whiteKeyPressed =>
+      const AssetGenImage('assets/piano/assets/whiteKeyPressed.png');
+
+  /// List of all assets
+  List<AssetGenImage> get values =>
+      [blackKey, blackKeyPressed, whiteKey, whiteKeyPressed];
+}
+
 class $AssetsPlayerSoundfontGen {
   const $AssetsPlayerSoundfontGen();
 
+  /// Directory path: assets/player/soundfont/acoustic_grand_piano-mp3
   $AssetsPlayerSoundfontAcousticGrandPianoMp3Gen get acousticGrandPianoMp3 =>
       const $AssetsPlayerSoundfontAcousticGrandPianoMp3Gen();
+
+  /// Directory path: assets/player/soundfont/acoustic_guitar_steel-mp3
   $AssetsPlayerSoundfontAcousticGuitarSteelMp3Gen get acousticGuitarSteelMp3 =>
       const $AssetsPlayerSoundfontAcousticGuitarSteelMp3Gen();
+
+  /// Directory path: assets/player/soundfont/cello-mp3
   $AssetsPlayerSoundfontCelloMp3Gen get celloMp3 =>
       const $AssetsPlayerSoundfontCelloMp3Gen();
+
+  /// Directory path: assets/player/soundfont/ocarina-mp3
   $AssetsPlayerSoundfontOcarinaMp3Gen get ocarinaMp3 =>
       const $AssetsPlayerSoundfontOcarinaMp3Gen();
+
+  /// Directory path: assets/player/soundfont/violin-mp3
   $AssetsPlayerSoundfontViolinMp3Gen get violinMp3 =>
       const $AssetsPlayerSoundfontViolinMp3Gen();
+}
+
+class $AssetsDoctorStaticCssGen {
+  const $AssetsDoctorStaticCssGen();
+
+  /// File path: assets/doctor/static/css/main.c79c7b97.css
+  String get mainC79c7b97 => 'assets/doctor/static/css/main.c79c7b97.css';
+
+  /// File path: assets/doctor/static/css/main.c79c7b97.css.map
+  String get mainC79c7b97Css =>
+      'assets/doctor/static/css/main.c79c7b97.css.map';
+
+  /// List of all assets
+  List<String> get values => [mainC79c7b97, mainC79c7b97Css];
+}
+
+class $AssetsDoctorStaticJsGen {
+  const $AssetsDoctorStaticJsGen();
+
+  /// File path: assets/doctor/static/js/453.6ef17f8e.chunk.js
+  String get a4536ef17f8eChunk =>
+      'assets/doctor/static/js/453.6ef17f8e.chunk.js';
+
+  /// File path: assets/doctor/static/js/main.8c758f0e.js
+  String get main8c758f0e => 'assets/doctor/static/js/main.8c758f0e.js';
+
+  /// File path: assets/doctor/static/js/main.8c758f0e.js.LICENSE.txt
+  String get main8c758f0eJsLICENSE =>
+      'assets/doctor/static/js/main.8c758f0e.js.LICENSE.txt';
+
+  /// List of all assets
+  List<String> get values =>
+      [a4536ef17f8eChunk, main8c758f0e, main8c758f0eJsLICENSE];
 }
 
 class $AssetsPlayerSoundfontAcousticGrandPianoMp3Gen {
@@ -2047,6 +2782,8 @@ class $AssetsPlayerSoundfontViolinMp3Gen {
 class Assets {
   Assets._();
 
+  static const $AssetsDoctorGen doctor = $AssetsDoctorGen();
+  static const $AssetsFastmodelGen fastmodel = $AssetsFastmodelGen();
   static const $AssetsFontsGen fonts = $AssetsFontsGen();
   static const $AssetsIconsGen icons = $AssetsIconsGen();
   static const $AssetsImagesGen images = $AssetsImagesGen();
@@ -2056,9 +2793,11 @@ class Assets {
 }
 
 class AssetGenImage {
-  const AssetGenImage(this._assetName);
+  const AssetGenImage(this._assetName, {this.size = null});
 
   final String _assetName;
+
+  final Size? size;
 
   Image image({
     Key? key,

@@ -166,6 +166,7 @@ flutter:
     - assets/icons/
     - assets/piano/
     - assets/piano/assets/
+    - assets/images/change_node/
     - assets/doctor/pngList/
     - assets/doctor/static/css/
     - assets/doctor/static/js/

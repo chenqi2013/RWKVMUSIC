@@ -129,7 +129,6 @@ var isAutoSwitch = false.obs;
 ScrollController controller = ScrollController();
 var tokens = ''.obs;
 
-// TODO: @wangce 何时置空
 SelectedNote? selectedNote;
 
 class SelectedNote {
