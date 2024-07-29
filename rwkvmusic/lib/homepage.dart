@@ -297,6 +297,31 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+  final List<String> history = [];
+
+  /// 更改当前琴谱的 abc notation value
+  void _change(String javaScript) async {
+    try {
+      await controllerPiano.runJavaScript(javaScript);
+      history.add(javaScript);
+    } catch (e) {
+      if (kDebugMode) print("😡 $e");
+    }
+  }
+
+  /// 使当前琴谱的 abc notation value 变为上一步的 abc notation value
+  void _undo() async {
+    if (history.isEmpty) return;
+    try {
+      final lastJS = history.last;
+      await controllerPiano.runJavaScript(lastJS);
+      history.removeLast();
+    } catch (e) {
+      if (kDebugMode) print("😡 $e");
+    }
+    // final javascript = history.removeLast();
+  }
+
   void _onReceiveFlutteronClickNote(JavaScriptMessage jsMessage) {
     final json = jsonDecode(jsMessage.message);
 
