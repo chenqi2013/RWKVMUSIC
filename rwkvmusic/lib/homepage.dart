@@ -53,6 +53,10 @@ class HomePage extends StatefulWidget {
   State<HomePage> createState() => _HomePageState();
 }
 
+final List<String> history = [];
+final List<List> virtualNotesHistory = [];
+final List<List<int>> intNodesHistory = [];
+
 class _HomePageState extends State<HomePage> {
   /// 键盘 webview 控制器
   late WebViewControllerPlus controllerKeyboard;
@@ -125,7 +129,7 @@ class _HomePageState extends State<HomePage> {
             finalabcStringPreset = ABCHead.appendTempoParam(
                 finalabcStringPreset, tempo.value.toInt());
 
-            controllerPiano.runJavaScript(finalabcStringPreset);
+            _change(finalabcStringPreset);
             controllerPiano.runJavaScript("setPromptNoteNumberCount(3)");
             controllerPiano.runJavaScript("setStyle()");
           },
@@ -287,7 +291,7 @@ class _HomePageState extends State<HomePage> {
         // String encodedString = base64.encode(utf8.encode(result));
         // // debugPrint("Encoded setAbcString: $encodedString");
         // String base64AbcString = "setAbcString('$encodedString',false)";
-        controllerPiano.runJavaScript(ABCHead.base64AbcString(event));
+        _change(ABCHead.base64AbcString(event));
         // debugPrint('base64abctoEvents==$base64abctoEvents');
         // controllerPiano.runJavaScript(event);
       }
@@ -297,29 +301,56 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  final List<String> history = [];
-
   /// 更改当前琴谱的 abc notation value
-  void _change(String javaScript) async {
+  Future<void> _change(String javaScript) async {
     try {
       await controllerPiano.runJavaScript(javaScript);
-      history.add(javaScript);
+      if (selectstate.value == 1) {
+        history.add(javaScript);
+        virtualNotesHistory.add([...virtualNotes]);
+        intNodesHistory.add([...intNodes]);
+      }
+      selectedNote = null;
     } catch (e) {
+      // JS 是有可能执行出错的
       if (kDebugMode) print("😡 $e");
     }
   }
 
   /// 使当前琴谱的 abc notation value 变为上一步的 abc notation value
   void _undo() async {
-    if (history.isEmpty) return;
+    if (selectstate.value != 1) return;
+    if (history.isEmpty ||
+        virtualNotesHistory.isEmpty ||
+        intNodesHistory.isEmpty) return;
+
+    final historyLength = history.length;
+    final virtualNotesHistoryLength = virtualNotesHistory.length;
+    final intNodesHistoryLength = intNodesHistory.length;
+
+    // 因为上一步的添加过程是相等的
+
+    assert(historyLength == virtualNotesHistoryLength);
+    assert(virtualNotesHistoryLength == intNodesHistoryLength);
+    assert(intNodesHistoryLength == historyLength);
+
+    if (historyLength == 1) return;
+
     try {
-      final lastJS = history.last;
-      await controllerPiano.runJavaScript(lastJS);
+      final historyStep = history[history.length - 2];
+      final virtualNotesStep =
+          virtualNotesHistory[virtualNotesHistory.length - 2];
+      final intNodesStep = intNodesHistory[intNodesHistory.length - 2];
+      await controllerPiano.runJavaScript(historyStep);
       history.removeLast();
+      virtualNotes = [...virtualNotesStep];
+      virtualNotesHistory.removeLast();
+      intNodes = [...intNodesStep];
+      intNodesHistory.removeLast();
     } catch (e) {
+      // JS 是有可能执行出错的
       if (kDebugMode) print("😡 $e");
     }
-    // final javascript = history.removeLast();
   }
 
   void _onReceiveFlutteronClickNote(JavaScriptMessage jsMessage) {
@@ -347,7 +378,6 @@ class _HomePageState extends State<HomePage> {
     if (isWindowsOrMac) isVisibleWebview.value = !isVisibleWebview.value;
 
     final json = jsonDecode(jsMessage.message);
-    if (kDebugMode) print("💬 $json");
 
     final regExp = RegExp(r'\|\\"[ABCDEFGdim#7]+\\"');
     final matches = regExp.allMatches(finalabcStringCreate).toList();
@@ -372,7 +402,7 @@ class _HomePageState extends State<HomePage> {
         selectedChordType.value.abcNotationValue;
     finalabcStringCreate =
         finalabcStringCreate.replaceRange(m.start + 3, m.end - 2, newChord);
-    await controllerPiano.runJavaScript(finalabcStringCreate);
+    await _change(finalabcStringCreate);
   }
 
   void playNoteMp3(String name) {
@@ -445,7 +475,6 @@ class _HomePageState extends State<HomePage> {
     }
     NoteCalculator().noteMap[noteIndex] = newNote;
     virtualNotes[noteIndex] = newNote;
-    if (kDebugMode) print("💬 $newNote");
     StringBuffer sbff = StringBuffer();
     for (String note in virtualNotes) {
       sbff.write(note);
@@ -456,7 +485,7 @@ class _HomePageState extends State<HomePage> {
         "setAbcString(\"%%MIDI program $midiProgramValue\\nL:1/4\\nM:$timeSingnatureStr\\nK:C\\n|$createPrompt\",false)";
     finalabcStringCreate = ABCHead.appendTempoParam(sb, tempo.value.toInt());
     debugPrint('curr=$finalabcStringCreate');
-    await controllerPiano.runJavaScript(finalabcStringCreate);
+    await _change(finalabcStringCreate);
     selectedNote = null;
   }
 
@@ -497,7 +526,6 @@ class _HomePageState extends State<HomePage> {
     }
     NoteCalculator().noteMap[noteIndex] = newNote;
     virtualNotes[noteIndex] = newNote;
-    if (kDebugMode) print("💬 $newNote");
     StringBuffer sbff = StringBuffer();
     for (String note in virtualNotes) {
       sbff.write(note);
@@ -508,7 +536,7 @@ class _HomePageState extends State<HomePage> {
         "setAbcString(\"%%MIDI program $midiProgramValue\\nL:1/4\\nM:$timeSingnatureStr\\nK:C\\n|$createPrompt\",false)";
     finalabcStringCreate = ABCHead.appendTempoParam(sb, tempo.value.toInt());
     debugPrint('curr=$finalabcStringCreate');
-    await controllerPiano.runJavaScript(finalabcStringCreate);
+    await _change(finalabcStringCreate);
     selectedNote = null;
   }
 
@@ -604,7 +632,7 @@ class _HomePageState extends State<HomePage> {
     }
     finalabcStringCreate = ABCHead.appendTempoParam(sb, tempo.value.toInt());
     debugPrint('curr=$finalabcStringCreate');
-    await controllerPiano.runJavaScript(finalabcStringCreate);
+    await _change(finalabcStringCreate);
     selectedNote = null;
   }
 
@@ -678,7 +706,7 @@ class _HomePageState extends State<HomePage> {
     }
     finalabcStringCreate = ABCHead.appendTempoParam(sb, tempo.value.toInt());
     debugPrint('curr=$finalabcStringCreate');
-    await controllerPiano.runJavaScript(finalabcStringCreate);
+    await _change(finalabcStringCreate);
   }
 
   void updateTimeSignature() {
@@ -687,7 +715,7 @@ class _HomePageState extends State<HomePage> {
         "setAbcString(\"%%MIDI program $midiProgramValue\\nL:1/4\\nM:$timeSingnatureStr\\nK:C\\n|$createPrompt\",false)";
     sb = ABCHead.appendTempoParam(sb, tempo.value.toInt());
     debugPrint('curr=$sb');
-    controllerPiano.runJavaScript(sb);
+    _change(sb);
   }
 
   void _delete() {
@@ -699,7 +727,7 @@ class _HomePageState extends State<HomePage> {
     createPrompt = randomizeAbc(createPrompt).replaceAll("\n", "\\n");
     String sb =
         "setAbcString(\"%%MIDI program $midiProgramValue\\n$createPrompt\",false)";
-    await controllerPiano.runJavaScript(sb);
+    _change(sb);
     selectedNote = null;
   }
 
@@ -726,8 +754,7 @@ class _HomePageState extends State<HomePage> {
       finalabcStringCreate =
           ABCHead.appendTempoParam(finalabcStringCreate, tempo.value.toInt());
       debugPrint('str112==$finalabcStringCreate');
-      controllerPiano
-          .runJavaScript(ABCHead.base64AbcString(finalabcStringCreate));
+      _change(ABCHead.base64AbcString(finalabcStringCreate));
       createPrompt = '';
     } else {
       StringBuffer sbff = StringBuffer();
@@ -768,7 +795,7 @@ class _HomePageState extends State<HomePage> {
           "setAbcString(\"%%MIDI program $midiProgramValue\\nL:1/4\\nM:$timeSingnatureStr\\nK:C\\n|${sbff.toString()}\",false)";
       debugPrint('curr=$sb');
       sb = ABCHead.appendTempoParam(sb, tempo.value.toInt());
-      controllerPiano.runJavaScript(sb);
+      _change(sb);
       createPrompt = sbff.toString();
     }
   }
@@ -805,7 +832,7 @@ class _HomePageState extends State<HomePage> {
         // String base64abctoEvents = "ABCtoEvents('$encodedString',false)";
         String base64abctoEvents = ABCHead.base64abctoEvents(
             ABCHead.appendTempoParam(playAbcString, tempo.value.toInt()));
-        controllerPiano.runJavaScript(base64abctoEvents);
+        _change(base64abctoEvents);
         debugPrint('playOrPausePiano base64abctoEvents==$base64abctoEvents');
         controllerPiano.runJavaScript("startPlay()");
 
@@ -1206,7 +1233,7 @@ class _HomePageState extends State<HomePage> {
                                         ),
                                         onPressed: () {
                                           debugPrint('Undo');
-                                          resetLastNote();
+                                          _undo();
                                         },
                                       ),
                                     )),
@@ -1273,8 +1300,7 @@ class _HomePageState extends State<HomePage> {
       //preset
       // controllerPiano.runJavaScript(
       //     "setAbcString(\"%%MIDI program $midiProgramValue\\nL:1/4\\nM:4/4\\nK:D\\n\\\"D\\\" A F F\",false)");
-      controllerPiano
-          .runJavaScript(ABCHead.base64AbcString(finalabcStringPreset));
+      _change(ABCHead.base64AbcString(finalabcStringPreset));
       debugPrint('finalabcStringPreset=$finalabcStringPreset');
       controllerPiano.runJavaScript("setPromptNoteNumberCount(3)");
       controllerKeyboard.loadFlutterAssetServer(filePathKeyboardAnimation);
@@ -1295,7 +1321,7 @@ class _HomePageState extends State<HomePage> {
     finalabcStringCreate =
         ABCHead.appendTempoParam(finalabcStringCreate, tempo.value.toInt());
     debugPrint('str112==$finalabcStringCreate');
-    controllerPiano.runJavaScript(finalabcStringCreate);
+    _change(finalabcStringCreate);
     controllerPiano.runJavaScript("setPromptNoteNumberCount(0)");
     controllerPiano.runJavaScript("setStyle()");
     controllerKeyboard.loadFlutterAssetServer(filePathKeyboard);
@@ -2062,7 +2088,6 @@ class _HomePageState extends State<HomePage> {
                                             : 0 == index),
                                 title: list[index],
                                 onChanged: (value) {
-                                  if (kDebugMode) print("💬 $type");
                                   if (type == STORAGE_PROMPTS_SELECT) {
                                     promptSelectedIndex.value = value;
                                   } else if (type ==
@@ -2152,15 +2177,13 @@ class _HomePageState extends State<HomePage> {
                                       finalabcStringPreset =
                                           "setAbcString(\"$abcstr\",false)";
 
-                                      controllerPiano
-                                          .runJavaScript(finalabcStringPreset);
+                                      _change(finalabcStringPreset);
                                       debugPrint(
                                           'finalabcStringPreset=$finalabcStringPreset');
                                     } else {
                                       finalabcStringCreate =
                                           "setAbcString(\"$abcstr\",false)";
-                                      controllerPiano
-                                          .runJavaScript(finalabcStringCreate);
+                                      _change(finalabcStringCreate);
                                       debugPrint(
                                           'finalabcStringCreate=$finalabcStringCreate');
                                     }
@@ -2187,15 +2210,13 @@ class _HomePageState extends State<HomePage> {
                                     if (selectstate.value == 0) {
                                       finalabcStringPreset =
                                           modifyABCWithInstrument;
-                                      controllerPiano.runJavaScript(
-                                          ABCHead.base64AbcString(
-                                              finalabcStringPreset));
+                                      _change(ABCHead.base64AbcString(
+                                          finalabcStringPreset));
                                     } else {
                                       finalabcStringCreate =
                                           modifyABCWithInstrument;
-                                      controllerPiano.runJavaScript(
-                                          ABCHead.base64AbcString(
-                                              finalabcStringCreate));
+                                      _change(ABCHead.base64AbcString(
+                                          finalabcStringCreate));
                                     }
                                     Future.delayed(
                                         const Duration(milliseconds: 500), () {
