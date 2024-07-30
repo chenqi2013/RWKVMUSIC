@@ -326,7 +326,6 @@ class _HomePageState extends State<HomePage> {
     final json = jsonDecode(jsMessage.message);
 
     String name = json["name"];
-    if (kDebugMode) print("💬 $name");
     if (name.contains("rest")) name = "z";
     if (name.contains("dots.dot")) name = "z";
     final duration = json["duration"] as num;
@@ -698,7 +697,6 @@ class _HomePageState extends State<HomePage> {
 
   void _randomizeAbc() async {
     createPrompt = randomizeAbc(createPrompt).replaceAll("\n", "\\n");
-    if (kDebugMode) print("💬 ");
     String sb =
         "setAbcString(\"%%MIDI program $midiProgramValue\\n$createPrompt\",false)";
     await controllerPiano.runJavaScript(sb);
@@ -1936,6 +1934,7 @@ class _HomePageState extends State<HomePage> {
     final _selectstate = selectstate.value;
     final _isPlay = isPlay.value;
     if (_selectstate != 1 || _isPlay) return;
+    if (isShowDialog) return;
     isShowDialog = true;
     if (isShowOverlay) {
       closeOverlay();
@@ -1950,7 +1949,6 @@ class _HomePageState extends State<HomePage> {
         });
 
     isShowDialog = false;
-    if (kDebugMode) print("💬 $index");
     if (index == null) return;
 
     timeSignature.value = index;
