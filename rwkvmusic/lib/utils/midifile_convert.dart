@@ -1,5 +1,7 @@
+import 'dart:convert';
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:midi_util/midi_util.dart';
 
 class MidifileConvert {
@@ -126,5 +128,25 @@ class MidifileConvert {
     var outputFile = File('$path/${DateTime.now().millisecondsSinceEpoch}.mid');
     myMIDI.writeFile(outputFile);
     return outputFile.path;
+  }
+
+  static Future<String> exportMidiFile(String midiData, String path) async {
+    // 解析 JSON 数据
+    List<dynamic> jsonData = jsonDecode(midiData);
+    // 将 JSON 数据转换为字节数组
+    List<int> byteList = [];
+    for (var obj in jsonData) {
+      obj.forEach((key, value) {
+        byteList.add(value);
+      });
+    }
+    Uint8List bytes = Uint8List.fromList(byteList);
+    // Directory cacheDir = await getApplicationCacheDirectory();
+    String filePath = '$path/${DateTime.now().millisecondsSinceEpoch}.mid';
+    // 写入 MIDI 文件
+    File file = File(filePath);
+    await file.writeAsBytes(bytes);
+    debugPrint('MIDI 文件已生成: $filePath');
+    return filePath;
   }
 }

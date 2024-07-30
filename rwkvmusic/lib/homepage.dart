@@ -1,12 +1,14 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'package:filepicker_windows/filepicker_windows.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:rwkvmusic/main.dart';
 import 'package:rwkvmusic/mainwidget/custom_segment_controller.dart';
 import 'package:rwkvmusic/mainwidget/play_progressbar.dart';
@@ -30,6 +32,7 @@ import 'package:rwkvmusic/utils/justaudioplayer.dart';
 import 'package:rwkvmusic/utils/midiconvert_abc.dart';
 import 'package:rwkvmusic/utils/mididevice_manage.dart';
 import 'package:rwkvmusic/utils/common_utils.dart';
+import 'package:rwkvmusic/utils/midifile_convert.dart';
 import 'package:rwkvmusic/utils/note.dart';
 import 'package:rwkvmusic/utils/note_calculator.dart';
 import 'package:rwkvmusic/utils/notes_database.dart';
@@ -77,6 +80,7 @@ class _HomePageState extends State<HomePage> {
   late MidiDeviceManage deviceManage;
   late String abcString;
   var isVisibleWebview = true.obs;
+  String? exportMidiStr; //导出midi需要的字符串数据
   @override
   void initState() {
     super.initState();
@@ -165,6 +169,11 @@ class _HomePageState extends State<HomePage> {
         debugPrint(
             'flutteronCountPromptNoteNumber onMessageReceived=${jsMessage.message}');
       })
+      ..addJavaScriptChannel("flutteronMidiExport",
+          onMessageReceived: (JavaScriptMessage jsMessage) {
+        exportMidiStr = jsMessage.message;
+        debugPrint('flutteronMidiExport onMessageReceived=$exportMidiStr');
+      })
       ..addJavaScriptChannel("flutteronEvents",
           onMessageReceived: (JavaScriptMessage jsMessage) {
         // debugPrint('flutteronEvents onMessageReceived=${jsMessage.message}');
@@ -182,6 +191,15 @@ class _HomePageState extends State<HomePage> {
         // } else {
         //   isNeedConvertMidiNotes = false;
         // }
+
+        //生成midi数据
+        String abc = selectstate.value == 0
+            ? finalabcStringPreset
+            : finalabcStringCreate;
+        String result =
+            abc.replaceAll('setAbcString("', '').replaceAll('",false)', '');
+        abc = base64.encode(utf8.encode(result));
+        controllerPiano.runJavaScript("exportMidiFile('$abc')");
       })
       ..addJavaScriptChannel("flutteronPlayFinish",
           onMessageReceived: (JavaScriptMessage jsMessage) {
@@ -1456,71 +1474,40 @@ class _HomePageState extends State<HomePage> {
                       child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                        // TextBtn(
-                        //   width: isWindowsOrMac ? 500.w : 500.w,
-                        //   height: isWindowsOrMac ? 113.h : 80.h,
-                        //   onPressed: () async {
-                        //     if (midiNotes.isEmpty) {
-                        //       playPianoAnimation(
-                        //           selectstate.value == 0
-                        //               ? finalabcStringPreset
-                        //               : finalabcStringCreate,
-                        //           true);
-                        //       Future.delayed(const Duration(seconds: 2),
-                        //           () async {
-                        //         debugPrint('Delayed action after 3 seconds');
-                        //         // isNeedConvertMidiNotes = false;
-                        //         if (isWindowsOrMac) {
-                        //           final file = DirectoryPicker()
-                        //             ..title = 'Select a directory';
-                        //           final result = file.getDirectory();
-                        //           if (result != null) {
-                        //             debugPrint(
-                        //                 'Select a directory=${result.path}');
-                        //           }
-                        //           MidifileConvert.saveMidiFile(
-                        //               midiNotes, result!.path);
-                        //           Get.snackbar('提示', '文件保存成功',
-                        //               colorText: Colors.black);
-                        //           // toastInfo(msg: '文件保存成功');
-                        //         } else {
-                        //           //phone save file
-                        //           Directory tempDir =
-                        //               await getApplicationCacheDirectory();
-                        //           String path = MidifileConvert.saveMidiFile(
-                        //               midiNotes, tempDir.path);
-                        //           shareFile(path);
-                        //         }
-                        //       });
-                        //     } else {
-                        //       if (isWindowsOrMac) {
-                        //         final file = DirectoryPicker()
-                        //           ..title = 'Select a directory';
-                        //         final result = file.getDirectory();
-                        //         if (result != null) {
-                        //           debugPrint(
-                        //               'Select a directory=${result.path}');
-                        //         }
-                        //         MidifileConvert.saveMidiFile(
-                        //             midiNotes, result!.path);
-                        //         Get.snackbar('提示', '文件保存成功',
-                        //             colorText: Colors.black);
-                        //         // toastInfo(msg: '文件保存成功');
-                        //       } else {
-                        //         // phone save file
-                        //         Directory tempDir =
-                        //             await getApplicationCacheDirectory();
-                        //         String path = MidifileConvert.saveMidiFile(
-                        //             midiNotes, tempDir.path);
-                        //         shareFile(path);
-                        //       }
-                        //     }
-                        //   },
-                        //   text: 'Export Midi File',
-                        // ),
-                        // SizedBox(
-                        //   width: 30.w,
-                        // ),
+                        TextBtn(
+                          width: isWindowsOrMac ? 500.w : 500.w,
+                          height: isWindowsOrMac ? 113.h : 80.h,
+                          onPressed: () async {
+                            if (exportMidiStr == null) {
+                              return;
+                            }
+                            if (isWindowsOrMac) {
+                              final file = DirectoryPicker()
+                                ..title = 'Select a directory';
+                              final result = file.getDirectory();
+                              if (result != null) {
+                                debugPrint('Select a directory=${result.path}');
+                              }
+                              await MidifileConvert.exportMidiFile(
+                                  exportMidiStr!, result!.path);
+                              Get.snackbar('提示', '文件保存成功',
+                                  colorText: Colors.black);
+                              // toastInfo(msg: '文件保存成功');
+                            } else {
+                              // phone save file
+                              Directory tempDir =
+                                  await getApplicationCacheDirectory();
+                              String path =
+                                  await MidifileConvert.exportMidiFile(
+                                      exportMidiStr!, tempDir.path);
+                              shareFile(path);
+                            }
+                          },
+                          text: 'Export Midi File',
+                        ),
+                        SizedBox(
+                          width: 30.w,
+                        ),
                         TextBtn(
                           width: isWindowsOrMac ? 500.w : 500.w,
                           height: isWindowsOrMac ? 113.h : 80.h,
@@ -1767,62 +1754,41 @@ class _HomePageState extends State<HomePage> {
                         Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              // TextBtn(
-                              //   width: isWindowsOrMac ? 500.w : 500.w,
-                              //   height: isWindowsOrMac ? 113.h : 80.h,
-                              //   onPressed: () {
-                              //     if (midiNotes.isEmpty) {
-                              //       // String oriabcString = finalabcStringPreset
-                              //       //     .replaceAll('setAbcString', 'ABCtoEvents');
-                              //       // // abcString = r'ABCtoEvents("L:1/4\nM:4/4\nK:D\n\"D\" A F F")';
-                              //       // debugPrint(
-                              //       //     'playPianoAnimation ABCtoEvents==$oriabcString');
-                              //       // isNeedConvertMidiNotes = true;
-                              //       // controllerPiano.runJavaScript(oriabcString);
-
-                              //       playPianoAnimation(
-                              //           selectstate.value == 0
-                              //               ? finalabcStringPreset
-                              //               : finalabcStringCreate,
-                              //           true);
-                              //       Future.delayed(const Duration(seconds: 2),
-                              //           () {
-                              //         debugPrint(
-                              //             'Delayed action after 3 seconds');
-                              //         // isNeedConvertMidiNotes = false;
-                              //         final file = DirectoryPicker()
-                              //           ..title = 'Select a directory';
-                              //         final result = file.getDirectory();
-                              //         if (result != null) {
-                              //           debugPrint(
-                              //               'Select a directory=${result.path}');
-                              //         }
-                              //         MidifileConvert.saveMidiFile(
-                              //             midiNotes, result!.path);
-                              //         Get.snackbar('提示', '文件保存成功',
-                              //             colorText: Colors.black);
-                              //         // toastInfo(msg: '文件保存成功');
-                              //       });
-                              //     } else {
-                              //       final file = DirectoryPicker()
-                              //         ..title = 'Select a directory';
-                              //       final result = file.getDirectory();
-                              //       if (result != null) {
-                              //         debugPrint(
-                              //             'Select a directory=${result.path}');
-                              //       }
-                              //       MidifileConvert.saveMidiFile(
-                              //           midiNotes, result!.path);
-                              //       Get.snackbar('提示', '文件保存成功',
-                              //           colorText: Colors.black);
-                              //       // toastInfo(msg: '文件保存成功');
-                              //     }
-                              //   },
-                              //   text: 'Export Midi File',
-                              // ),
-                              // SizedBox(
-                              //   width: 30.w,
-                              // ),
+                              TextBtn(
+                                width: isWindowsOrMac ? 500.w : 500.w,
+                                height: isWindowsOrMac ? 113.h : 80.h,
+                                onPressed: () async {
+                                  if (exportMidiStr == null) {
+                                    return;
+                                  }
+                                  if (isWindowsOrMac) {
+                                    final file = DirectoryPicker()
+                                      ..title = 'Select a directory';
+                                    final result = file.getDirectory();
+                                    if (result != null) {
+                                      debugPrint(
+                                          'Select a directory=${result.path}');
+                                    }
+                                    await MidifileConvert.exportMidiFile(
+                                        exportMidiStr!, result!.path);
+                                    Get.snackbar('提示', '文件保存成功',
+                                        colorText: Colors.black);
+                                    // toastInfo(msg: '文件保存成功');
+                                  } else {
+                                    // phone save file
+                                    Directory tempDir =
+                                        await getApplicationCacheDirectory();
+                                    String path =
+                                        await MidifileConvert.exportMidiFile(
+                                            exportMidiStr!, tempDir.path);
+                                    shareFile(path);
+                                  }
+                                },
+                                text: 'Export Midi File',
+                              ),
+                              SizedBox(
+                                width: 30.w,
+                              ),
                               TextBtn(
                                 width: isWindowsOrMac ? 500.w : 500.w,
                                 height: isWindowsOrMac ? 113.h : 80.h,
