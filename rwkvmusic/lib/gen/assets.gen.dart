@@ -47,10 +47,6 @@ class $AssetsDoctorGen {
 class $AssetsFastmodelGen {
   const $AssetsFastmodelGen();
 
-  /// File path: assets/fastmodel/RWKV-6-ABC-85M-v1-20240217-ctx1024-ncnn.bin
-  String get rWKV6ABC85MV120240217Ctx1024NcnnBin =>
-      'assets/fastmodel/RWKV-6-ABC-85M-v1-20240217-ctx1024-ncnn.bin';
-
   /// File path: assets/fastmodel/RWKV-6-ABC-85M-v1-20240217-ctx1024-ncnn.config
   String get rWKV6ABC85MV120240217Ctx1024NcnnConfig =>
       'assets/fastmodel/RWKV-6-ABC-85M-v1-20240217-ctx1024-ncnn.config';
@@ -64,7 +60,6 @@ class $AssetsFastmodelGen {
 
   /// List of all assets
   List<String> get values => [
-        rWKV6ABC85MV120240217Ctx1024NcnnBin,
         rWKV6ABC85MV120240217Ctx1024NcnnConfig,
         rWKV6ABC85MV120240217Ctx1024NcnnParam,
         libfasterRwkvd
@@ -844,6 +839,9 @@ class $AssetsDoctorStaticGen {
 class $AssetsImagesChangeNodeGen {
   const $AssetsImagesChangeNodeGen();
 
+  /// File path: assets/images/change_node/dottodNote.svg
+  String get dottodNote => 'assets/images/change_node/dottodNote.svg';
+
   /// File path: assets/images/change_node/eighth.svg
   String get eighth => 'assets/images/change_node/eighth.svg';
 
@@ -852,6 +850,9 @@ class $AssetsImagesChangeNodeGen {
 
   /// File path: assets/images/change_node/half.svg
   String get half => 'assets/images/change_node/half.svg';
+
+  /// File path: assets/images/change_node/halfZ.svg
+  String get halfZ => 'assets/images/change_node/halfZ.svg';
 
   /// File path: assets/images/change_node/quarter.svg
   String get quarter => 'assets/images/change_node/quarter.svg';
@@ -871,17 +872,23 @@ class $AssetsImagesChangeNodeGen {
   /// File path: assets/images/change_node/whole.svg
   String get whole => 'assets/images/change_node/whole.svg';
 
+  /// File path: assets/images/change_node/wholeZ.svg
+  String get wholeZ => 'assets/images/change_node/wholeZ.svg';
+
   /// List of all assets
   List<String> get values => [
+        dottodNote,
         eighth,
         eighthZ,
         half,
+        halfZ,
         quarter,
         quarterZ,
         sixteenth,
         sixteenthZ,
         thirtySecond,
-        whole
+        whole,
+        wholeZ
       ];
 }
 

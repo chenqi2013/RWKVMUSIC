@@ -37,11 +37,11 @@ extension _FindAssets on ChangeNoteKey {
       case ChangeNoteKey.thirtySecond:
         return Assets.images.changeNode.thirtySecond;
       case ChangeNoteKey.dottodNote:
-        return null;
+        return Assets.images.changeNode.dottodNote;
       case ChangeNoteKey.wholeZ:
-        return null;
+        return Assets.images.changeNode.wholeZ;
       case ChangeNoteKey.halfZ:
-        return null;
+        return Assets.images.changeNode.halfZ;
       case ChangeNoteKey.quarterZ:
         return Assets.images.changeNode.quarterZ;
       case ChangeNoteKey.eighthZ:
@@ -63,6 +63,10 @@ extension _FindAssets on ChangeNoteKey {
         return Size(20, 20);
       case ChangeNoteKey.eighthZ:
         return Size(20, 20);
+      case ChangeNoteKey.wholeZ:
+        return Size(6, 6);
+      case ChangeNoteKey.halfZ:
+        return Size(6, 6);
       default:
         return Size(32, 32);
     }
