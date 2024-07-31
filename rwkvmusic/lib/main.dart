@@ -199,6 +199,36 @@ class SelectedNote {
 
     return 2;
   }
+
+  static int noteLengthIndexFromString(String note) {
+    if (note.endsWith("6")) return 6;
+    if (note.endsWith("3")) return 7;
+    if (note.endsWith("3/2")) return 8;
+    if (note.endsWith("3/4")) return 9;
+    if (note.endsWith("3/8")) return 10;
+    if (note.endsWith("3/16")) return 11;
+    if (note.endsWith("4")) return 0;
+    if (note.endsWith("2")) return 1;
+    if (note.endsWith("1/2")) return 3;
+    if (note.endsWith("1/4")) return 4;
+    if (note.endsWith("1/8")) return 5;
+    return 2;
+  }
+
+  static num durationFromString(String note) {
+    if (note.endsWith("6")) return 1.5;
+    if (note.endsWith("3")) return 0.5 * 1.5;
+    if (note.endsWith("3/2")) return 0.25 * 1.5;
+    if (note.endsWith("3/4")) return 0.125 * 1.5;
+    if (note.endsWith("3/8")) return 0.0625 * 1.5;
+    if (note.endsWith("3/16")) return 0.03125 * 1.5;
+    if (note.endsWith("4")) return 1;
+    if (note.endsWith("2")) return 0.5;
+    if (note.endsWith("1/2")) return 0.125;
+    if (note.endsWith("1/4")) return 0.0625;
+    if (note.endsWith("1/8")) return 0.03125;
+    return 0.25;
+  }
 }
 
 List<Note> notes = [];
