@@ -41,6 +41,30 @@
           return null;
         }
       }
+      let isBlock = false;
+      function debounce(delay) {
+        console.log("debounce");
+        if (isBlock) {
+          return;
+        }
+        isBlock = true;
+        setTimeout(() => {
+          isBlock = false;
+        }, delay);
+      }
+
+      let isBlockPropagation = false;
+      function handleBlockPropagation(delay) {
+        console.log("handleBlockPropagation");
+        if (isBlockPropagation) {
+          return;
+        }
+        isBlockPropagation = true;
+        setTimeout(() => {
+          isBlockPropagation = false;
+        }, delay);
+      }
+
       window.onload = function () {
         console.log("window.onload");
         const windowsSize = getElementSize();
@@ -80,8 +104,11 @@
               tuneNumber,
               classes,
               dragIndex,
-              analysis
+              analysis,
+              event
             ) {
+              handleBlockPropagation(500);
+
               // 获取 data-index 属性
               const svgElement = abcElem.abselem.elemset[0];
               const dataIndex = svgElement.getAttribute("data-index");
@@ -92,42 +119,61 @@
                   return new Promise((resolve) => setTimeout(resolve, time));
                 }
                 delay(100).then(() => {
-                  if (dataIndex == selectedChord.index) {
-                    //点的是和弦
+                  if (!isBlock) {
+                    if (dataIndex == selectedChord.index) {
+                      //点的是和弦
+                      console.log("点击了和弦");
+                      let onClickParam = {
+                        name: selectedChord.chord,
+                        index: dataIndex,
+                        duration: abcElem.duration,
+                        notation: tempRawAbcString,
+                      };
 
+                      flutterOnClickChord.postMessage(
+                        JSON.stringify(onClickParam)
+                      );
+                      console.log(
+                        "called flutterOnClickChord.postMessage with param",
+                        onClickParam
+                      );
 
-                    let onClickParam = {
-                      name: selectedChord.chord,
-                      index: dataIndex,
-                      duration: abcElem.duration,
-                      notation: tempRawAbcString,
-                    };
-                    console.log(onClickParam);
-                    flutterOnClickChord.postMessage(JSON.stringify(onClickParam));
-
-                    selectedChord.chord = "";
-                    selectedChord.index = -1;
-                  } else {
-                    //点的是音符
-                    console.log("点击了音符");
-                    let onClickParam = {
-                      name: "",
-                      index: dataIndex,
-                      duration: abcElem.duration,
-                      notation: tempRawAbcString,
-                    };
-                    // console.log(safeStringify(abcElem));
-                    if (abcElem.pitches) {
-                      onClickParam.name = abcElem.pitches[0].name;
-                      flutteronClickNote.postMessage(JSON.stringify(onClickParam));
+                      selectedChord.chord = "";
+                      selectedChord.index = -1;
                     } else {
-                      onClickParam.name = abcElem.abselem.children[0].name,
-                      flutteronClickNote.postMessage(JSON.stringify(onClickParam));
-                    }
-                    console.log(onClickParam);
+                      //点的是音符
+                      console.log("点击了音符");
+                      let onClickParam = {
+                        name: "",
+                        index: dataIndex,
+                        duration: abcElem.duration,
+                        notation: tempRawAbcString,
+                      };
+                      // console.log(safeStringify(abcElem));
+                      if (abcElem.pitches) {
+                        onClickParam.name = abcElem.pitches[0].name;
+                        flutteronClickNote.postMessage(
+                          JSON.stringify(onClickParam)
+                        );
+                        console.log(
+                          "called flutteronClickNote.postMessage with param",
+                          onClickParam
+                        );
+                      } else {
+                        (onClickParam.name = abcElem.abselem.children[0].name),
+                          flutteronClickNote.postMessage(
+                            JSON.stringify(onClickParam)
+                          );
+                        console.log(
+                          "called flutteronClickNote.postMessage with param",
+                          onClickParam
+                        );
+                      }
 
-                    selectedChord.chord = "";
-                    selectedChord.index = -1;
+                      selectedChord.chord = "";
+                      selectedChord.index = -1;
+                    }
+                    debounce(500);
                   }
                 });
               } else {
@@ -140,6 +186,8 @@
               for (let i = 0; i < timeSignatureEle.length; i++) {
                 timeSignatureEle[i].classList.remove("abcjs-note_selected");
               }
+              selectedChord.chord = "";
+              selectedChord.index = -1;
             },
           },
           warnings_id: "warnings",
@@ -527,49 +575,56 @@
           var timeSignatureEle = document.getElementsByClassName(
             "abcjs-time-signature"
           );
+          console.log("timeSignatureEle", timeSignatureEle);
           let timeSignatureNum = "";
 
           timeSignatureEle[0].addEventListener("click", function (e) {
-            // 清空之前的时间签名数字
-            timeSignatureNum = "";
+            e.stopPropagation(); // 阻止事件冒泡
+            if (!isBlock) {
+              // 清空之前的时间签名数字
+              timeSignatureNum = "";
 
-            // 取消选中的和弦
-            selectedChord.chord = "";
-            selectedChord.index = -1;
-            // 取消其它节点的选中高亮，但不包括当前点击的元素
-            let preSelectedElm = document.getElementsByClassName(
-              "abcjs-note_selected"
-            );
-            for (let j = 0; j < preSelectedElm.length; j++) {
-              if (
-                !preSelectedElm[j].classList.contains("abcjs-time-signature") ||
-                preSelectedElm[j] !== e.currentTarget
-              ) {
-                preSelectedElm[j].classList.remove("abcjs-note_selected");
+              // 取消选中的和弦
+              selectedChord.chord = "";
+              selectedChord.index = -1;
+              // 取消其它节点的选中高亮，但不包括当前点击的元素
+              let preSelectedElm = document.getElementsByClassName(
+                "abcjs-note_selected"
+              );
+              for (let j = 0; j < preSelectedElm.length; j++) {
+                if (
+                  !preSelectedElm[j].classList.contains(
+                    "abcjs-time-signature"
+                  ) ||
+                  preSelectedElm[j] !== e.currentTarget
+                ) {
+                  preSelectedElm[j].classList.remove("abcjs-note_selected");
+                }
               }
-            }
 
-            // 当前时间签名元素添加高亮
-            e.currentTarget.classList.add("abcjs-note_selected");
+              // 当前时间签名元素添加高亮
+              e.currentTarget.classList.add("abcjs-note_selected");
 
-            // 获取子元素属性值并拼接成字符串
-            let childrenElements = e.currentTarget.children;
-            for (let k = 0; k < childrenElements.length; k++) {
-              if (childrenElements[k].attributes[0]) {
-                // 确保属性存在
-                timeSignatureNum += childrenElements[k].attributes[0]?.value;
+              // 获取子元素属性值并拼接成字符串
+              let childrenElements = e.currentTarget.children;
+              for (let k = 0; k < childrenElements.length; k++) {
+                if (childrenElements[k].attributes[0]) {
+                  // 确保属性存在
+                  timeSignatureNum += childrenElements[k].attributes[0]?.value;
+                }
               }
-            }
 
-            console.log("timeSignatureNum", timeSignatureNum);
-            // flutteronClickNote.postMessage(timeSignatureNum + "," + "-1");
-            flutterOnClickTime.postMessage("");
+              console.log("timeSignatureNum", timeSignatureNum);
+              flutterOnClickTime.postMessage("");
+              debounce(500);
+            }
           });
 
           //添加和弦点击事件
           var chordEle = document.getElementsByTagName("text");
           for (let i = 0; i < chordEle.length; i++) {
             chordEle[i].addEventListener("click", function (e) {
+              e.stopPropagation(); // 阻止事件冒泡
               selectedChord.chord = chordEle[i].textContent;
               selectedChord.index =
                 chordEle[i].parentElement.getAttribute("data-index");
@@ -971,6 +1026,29 @@
           inline: "center",
         });
       }
+
+      function unselectAll() {
+        console.log("unselectAll");
+        var paper = document.querySelector("#paper");
+        var selectedG = paper.querySelectorAll(".abcjs-note_selected");
+        console.log("selectedG", selectedG);
+        for (let i = 0; i < selectedG.length; i++) {
+          selectedG[i].classList.remove("abcjs-note_selected");
+          console.log("removed abcjs-note_selected");
+        }
+      }
+
+      function handleClickOnEmptySpace() {
+        if (!isBlockPropagation) {
+          console.log("handleClickOnEmptySpace");
+          unselectAll();
+          flutterOnTapEmpty.postMessage();
+          selectedChord.chord = "";
+          selectedChord.index = -1;
+        }
+      }
+
+      window.unselectAll = unselectAll;
       window.setAbcString = setAbcString;
       window.triggerButtonClick = triggerButtonClick;
       window.ABCtoEvents = ABCtoEvents;
@@ -987,7 +1065,7 @@
     </script>
   </head>
 
-  <body>
+  <body onclick="handleClickOnEmptySpace()">
     <div class="container" id="container">
       <div id="audio"></div>
       <div id="paper"></div>

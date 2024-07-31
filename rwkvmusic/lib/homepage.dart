@@ -226,6 +226,8 @@ class _HomePageState extends State<HomePage> {
           onMessageReceived: (JavaScriptMessage javaScriptMessage) {
         _showTimeChangingDialog();
       })
+      ..addJavaScriptChannel("flutterOnTapEmpty",
+          onMessageReceived: _flutterOnTapEmptyReceived)
       ..addJavaScriptChannel("flutterOnClickChord",
           onMessageReceived: _onReceiveChordClick);
 
@@ -302,10 +304,13 @@ class _HomePageState extends State<HomePage> {
   }
 
   /// 更改当前琴谱的 abc notation value
+  ///
+  /// 预设：这个过程一定调用了 setAbcString 这个函数
   Future<void> _change(String javaScript) async {
     try {
       await controllerPiano.runJavaScript(javaScript);
       if (selectstate.value == 1) {
+        assert(javaScript.startsWith("setAbcString"));
         history.add(javaScript);
         virtualNotesHistory.add([...virtualNotes]);
         intNodesHistory.add([...intNodes]);
@@ -315,6 +320,12 @@ class _HomePageState extends State<HomePage> {
       // JS 是有可能执行出错的
       if (kDebugMode) print("😡 $e");
     }
+  }
+
+  Future<void> _unselectAll() async {
+    if (selectstate.value != 1) return;
+    selectedNote = null;
+    await controllerPiano.runJavaScript("unselectAll()");
   }
 
   /// 使当前琴谱的 abc notation value 变为上一步的 abc notation value
@@ -361,6 +372,16 @@ class _HomePageState extends State<HomePage> {
     if (name.contains("dots.dot")) name = "z";
     final duration = json["duration"] as num;
 
+    final _s = selectedNote;
+    if (_s != null) {
+      if (_s.name == name &&
+          _s.index == int.parse(json["index"]) &&
+          _s.duration == duration) {
+        selectedNote = null;
+        _unselectAll();
+        return;
+      }
+    }
     selectedNote = SelectedNote()
       ..name = name
       ..index = int.parse(json["index"])
@@ -394,6 +415,8 @@ class _HomePageState extends State<HomePage> {
         builder: (BuildContext context) {
           return const ChordEditing();
         });
+
+    _unselectAll();
 
     isShowDialog = false;
     if (ok == null) return;
@@ -430,7 +453,22 @@ class _HomePageState extends State<HomePage> {
 
   void _updateDottod() async {
     final selected = selectedNote;
-    if (selected == null) return;
+    if (selected == null) {
+      if (virtualNotes.isEmpty) return;
+      String name = "";
+      final last = virtualNotes.last as String;
+      if (last.startsWith("^")) {
+        name = last.substring(0, 2);
+      } else {
+        name = last.substring(0, 1);
+      }
+      selectedNote = SelectedNote()
+        ..index = virtualNotes.length - 1
+        ..name = name
+        ..duration = SelectedNote.durationFromString(last);
+      _updateDottod();
+      return;
+    }
     final note = selected.name;
     final noteIndex = selected.index;
     String newNote = "";
@@ -888,365 +926,374 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
         resizeToAvoidBottomInset: false,
-        body: Container(
-          padding: EdgeInsets.symmetric(horizontal: 85.w, vertical: 30.h),
-          decoration: const BoxDecoration(
-            image: DecorationImage(
-              image:
-                  AssetImage('assets/images/backgroundbg.jpg'), // 替换为你的背景图片路径
-              fit: BoxFit.cover,
+        body: GestureDetector(
+          onTap: () {
+            _unselectAll();
+          },
+          child: Container(
+            padding: EdgeInsets.symmetric(horizontal: 85.w, vertical: 30.h),
+            decoration: const BoxDecoration(
+              image: DecorationImage(
+                image:
+                    AssetImage('assets/images/backgroundbg.jpg'), // 替换为你的背景图片路径
+                fit: BoxFit.cover,
+              ),
             ),
-          ),
-          child: Column(
-            children: [
-              Expanded(
-                child: Container(
-                  padding:
-                      const EdgeInsets.symmetric(vertical: 0, horizontal: 0),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      SizedBox(
-                        width: isWindowsOrMac ? 605.w : 535.w,
-                        height: isWindowsOrMac ? 123.h : 104.h,
-                        child: CustomSegmentControl(
-                          selectedIndex: selectstate,
-                          segments: const ['Prompt Mode', 'Create Mode'],
-                          callBack: (int newValue) {
-                            // 当选择改变时执行的操作
-                            debugPrint('选择了选项 $newValue');
-                            selectstate.value = newValue;
-                            segmentChange(newValue);
-                          },
-                        ),
-                      ),
-                      Row(
-                        children: [
-                          Obx(
-                            () => selectstate.value == 0
-                                ? BorderBottomBtn(
-                                    width: 253.w,
-                                    height: isWindowsOrMac ? 123.h : 96.h,
-                                    text: 'Prompt',
-                                    icon: SvgPicture.asset(
-                                      'assets/images/ic_arrowdown.svg',
-                                      width: 28.w,
-                                      height: 21.h,
-                                    ),
-                                    onPressed: () {
-                                      debugPrint("Promptss");
-                                      showPromptDialog(context, 'Prompts',
-                                          prompts, STORAGE_PROMPTS_SELECT);
-                                    },
-                                  )
-                                : BorderBottomBtn(
-                                    width: 372.w,
-                                    height: isWindowsOrMac ? 123.h : 96.h,
-                                    text: 'Soft keyboard',
-                                    icon: SvgPicture.asset(
-                                      'assets/images/ic_arrowdown.svg',
-                                      width: 28.w,
-                                      height: 21.h,
-                                    ),
-                                    onPressed: () {
-                                      debugPrint("Simulate keyboard");
-                                      showPromptDialog(
-                                          context,
-                                          'Keyboard Options',
-                                          keyboardOptions,
-                                          STORAGE_KEYBOARD_SELECT);
-                                    },
-                                  ),
-                          ),
-                          SizedBox(
-                            width: 55.w,
-                          ),
-                          Obx(
-                            () => BorderBottomBtn(
-                              width: selectstate.value == 0 ? 357.w : 358.w,
-                              height: isWindowsOrMac ? 123.h : 96.h,
-                              text: 'Instrument',
-                              icon: SvgPicture.asset(
-                                'assets/images/ic-${instruments[effectSelectedIndex.value]}.svg', //
-                                width: isWindowsOrMac ? 61.w : 52.w,
-                                height: isWindowsOrMac ? 57.h : 48.h,
-                              ),
-                              onPressed: () {
-                                debugPrint("Sounds Effect");
-                                var list = soundEffect.keys.toList();
-                                showPromptDialog(context, 'Instrument', list,
-                                    STORAGE_SOUNDSEFFECT_SELECT);
-                              },
-                            ),
-                          ),
-                          SizedBox(
-                            width: 55.w,
-                          ),
-                          BorderBottomBtn(
-                            width: isWindowsOrMac ? 123.h : 96.h,
-                            height: isWindowsOrMac ? 123.h : 96.h,
-                            text: '',
-                            icon: SvgPicture.asset(
-                              'assets/images/ic_setting.svg',
-                              width: isWindowsOrMac ? 61.w : 52.w,
-                              height: isWindowsOrMac ? 61.h : 52.h,
-                            ),
-                            onPressed: () {
-                              debugPrint('Settings');
-                              if (isShowOverlay) {
-                                closeOverlay();
-                              }
-                              if (isWindowsOrMac) {
-                                isVisibleWebview.value =
-                                    !isVisibleWebview.value;
-                                // setState(() {});
-                              }
-
-                              if (selectstate.value == 0) {
-                                showSettingDialog(context);
-                              } else {
-                                showCreateModelSettingDialog(context);
-                              }
+            child: Column(
+              children: [
+                Expanded(
+                  child: Container(
+                    padding:
+                        const EdgeInsets.symmetric(vertical: 0, horizontal: 0),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        SizedBox(
+                          width: isWindowsOrMac ? 605.w : 535.w,
+                          height: isWindowsOrMac ? 123.h : 104.h,
+                          child: CustomSegmentControl(
+                            selectedIndex: selectstate,
+                            segments: const ['Prompt Mode', 'Create Mode'],
+                            callBack: (int newValue) {
+                              // 当选择改变时执行的操作
+                              debugPrint('选择了选项 $newValue');
+                              selectstate.value = newValue;
+                              segmentChange(newValue);
                             },
                           ),
-                        ],
-                      ),
-                    ],
+                        ),
+                        Row(
+                          children: [
+                            Obx(
+                              () => selectstate.value == 0
+                                  ? BorderBottomBtn(
+                                      width: 253.w,
+                                      height: isWindowsOrMac ? 123.h : 96.h,
+                                      text: 'Prompt',
+                                      icon: SvgPicture.asset(
+                                        'assets/images/ic_arrowdown.svg',
+                                        width: 28.w,
+                                        height: 21.h,
+                                      ),
+                                      onPressed: () {
+                                        debugPrint("Promptss");
+                                        showPromptDialog(context, 'Prompts',
+                                            prompts, STORAGE_PROMPTS_SELECT);
+                                      },
+                                    )
+                                  : BorderBottomBtn(
+                                      width: 372.w,
+                                      height: isWindowsOrMac ? 123.h : 96.h,
+                                      text: 'Soft keyboard',
+                                      icon: SvgPicture.asset(
+                                        'assets/images/ic_arrowdown.svg',
+                                        width: 28.w,
+                                        height: 21.h,
+                                      ),
+                                      onPressed: () {
+                                        debugPrint("Simulate keyboard");
+                                        showPromptDialog(
+                                            context,
+                                            'Keyboard Options',
+                                            keyboardOptions,
+                                            STORAGE_KEYBOARD_SELECT);
+                                      },
+                                    ),
+                            ),
+                            SizedBox(
+                              width: 55.w,
+                            ),
+                            Obx(
+                              () => BorderBottomBtn(
+                                width: selectstate.value == 0 ? 357.w : 358.w,
+                                height: isWindowsOrMac ? 123.h : 96.h,
+                                text: 'Instrument',
+                                icon: SvgPicture.asset(
+                                  'assets/images/ic-${instruments[effectSelectedIndex.value]}.svg', //
+                                  width: isWindowsOrMac ? 61.w : 52.w,
+                                  height: isWindowsOrMac ? 57.h : 48.h,
+                                ),
+                                onPressed: () {
+                                  debugPrint("Sounds Effect");
+                                  var list = soundEffect.keys.toList();
+                                  showPromptDialog(context, 'Instrument', list,
+                                      STORAGE_SOUNDSEFFECT_SELECT);
+                                },
+                              ),
+                            ),
+                            SizedBox(
+                              width: 55.w,
+                            ),
+                            BorderBottomBtn(
+                              width: isWindowsOrMac ? 123.h : 96.h,
+                              height: isWindowsOrMac ? 123.h : 96.h,
+                              text: '',
+                              icon: SvgPicture.asset(
+                                'assets/images/ic_setting.svg',
+                                width: isWindowsOrMac ? 61.w : 52.w,
+                                height: isWindowsOrMac ? 61.h : 52.h,
+                              ),
+                              onPressed: () {
+                                debugPrint('Settings');
+                                if (isShowOverlay) {
+                                  closeOverlay();
+                                }
+                                if (isWindowsOrMac) {
+                                  isVisibleWebview.value =
+                                      !isVisibleWebview.value;
+                                  // setState(() {});
+                                }
+
+                                if (selectstate.value == 0) {
+                                  showSettingDialog(context);
+                                } else {
+                                  showCreateModelSettingDialog(context);
+                                }
+                              },
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-              ),
-              SizedBox(
-                height: isWindowsOrMac ? 33.h : 15.h,
-              ),
-              Obx(() => Flexible(
-                    flex: isWindowsOrMac ? 2 : 2,
-                    child: Visibility(
-                        key: const ValueKey('ValueKey11'),
+                SizedBox(
+                  height: isWindowsOrMac ? 33.h : 15.h,
+                ),
+                Obx(() => Flexible(
+                      flex: isWindowsOrMac ? 2 : 2,
+                      child: Visibility(
+                          key: const ValueKey('ValueKey11'),
+                          visible: isVisibleWebview.value,
+                          // maintainSize: true, // 保持占位空间
+                          // maintainAnimation: true, // 保持动画
+                          // maintainState: true,
+                          child: WebViewWidget(
+                            controller: controllerPiano,
+                          )),
+                    )),
+                Obx(() {
+                  return Visibility(
+                    visible: selectstate.value == 1,
+                    child: SizedBox(height: isWindowsOrMac ? 33.h : 15.h),
+                  );
+                }),
+                Obx(() {
+                  return Visibility(
+                    visible: selectstate.value == 1,
+                    child: ChangeNote(
+                      onTapAtIndex: (context, key) {
+                        switch (key) {
+                          case ChangeNoteKey.whole:
+                            _updateNote(noteLengthIndex: 0);
+                            break;
+                          case ChangeNoteKey.half:
+                            _updateNote(noteLengthIndex: 1);
+                            break;
+                          case ChangeNoteKey.quarter:
+                            _updateNote(noteLengthIndex: 2);
+                            break;
+                          case ChangeNoteKey.eighth:
+                            _updateNote(noteLengthIndex: 3);
+                            break;
+                          case ChangeNoteKey.sixteenth:
+                            _updateNote(noteLengthIndex: 4);
+                            break;
+                          case ChangeNoteKey.thirtySecond:
+                            _updateNote(noteLengthIndex: 5);
+                            break;
+                          case ChangeNoteKey.dottodNote:
+                            _updateDottod();
+                            break;
+                          case ChangeNoteKey.wholeZ:
+                            _inserOrUpdatetRest(0);
+                            break;
+                          case ChangeNoteKey.halfZ:
+                            _inserOrUpdatetRest(1);
+                            break;
+                          case ChangeNoteKey.quarterZ:
+                            _inserOrUpdatetRest(2);
+                            break;
+                          case ChangeNoteKey.eighthZ:
+                            _inserOrUpdatetRest(3);
+                            break;
+                          case ChangeNoteKey.sixteenthZ:
+                            _inserOrUpdatetRest(4);
+                            break;
+                          case ChangeNoteKey.randomGroove:
+                            _randomizeAbc();
+                            break;
+                          case ChangeNoteKey.delete:
+                            _delete();
+                            break;
+                        }
+                      },
+                      onLongPress: (BuildContext context, ChangeNoteKey key) {
+                        if (key != ChangeNoteKey.delete) return;
+                        resetToDefaulValueInCreateMode();
+                      },
+                    ),
+                  );
+                }),
+                SizedBox(height: isWindowsOrMac ? 33.h : 15.h),
+                Obx(
+                  () => Flexible(
+                      flex: isWindowsOrMac ? 6 : 4,
+                      child: Visibility(
                         visible: isVisibleWebview.value,
                         // maintainSize: true, // 保持占位空间
                         // maintainAnimation: true, // 保持动画
                         // maintainState: true,
-                        child: WebViewWidget(
-                          controller: controllerPiano,
-                        )),
-                  )),
-              Obx(() {
-                return Visibility(
-                  visible: selectstate.value == 1,
-                  child: SizedBox(height: isWindowsOrMac ? 33.h : 15.h),
-                );
-              }),
-              Obx(() {
-                return Visibility(
-                  visible: selectstate.value == 1,
-                  child: ChangeNote(
-                    onTapAtIndex: (context, key) {
-                      switch (key) {
-                        case ChangeNoteKey.whole:
-                          _updateNote(noteLengthIndex: 0);
-                          break;
-                        case ChangeNoteKey.half:
-                          _updateNote(noteLengthIndex: 1);
-                          break;
-                        case ChangeNoteKey.quarter:
-                          _updateNote(noteLengthIndex: 2);
-                          break;
-                        case ChangeNoteKey.eighth:
-                          _updateNote(noteLengthIndex: 3);
-                          break;
-                        case ChangeNoteKey.sixteenth:
-                          _updateNote(noteLengthIndex: 4);
-                          break;
-                        case ChangeNoteKey.thirtySecond:
-                          _updateNote(noteLengthIndex: 5);
-                          break;
-                        case ChangeNoteKey.dottodNote:
-                          _updateDottod();
-                          break;
-                        case ChangeNoteKey.wholeZ:
-                          _inserOrUpdatetRest(0);
-                          break;
-                        case ChangeNoteKey.halfZ:
-                          _inserOrUpdatetRest(1);
-                          break;
-                        case ChangeNoteKey.quarterZ:
-                          _inserOrUpdatetRest(2);
-                          break;
-                        case ChangeNoteKey.eighthZ:
-                          _inserOrUpdatetRest(3);
-                          break;
-                        case ChangeNoteKey.sixteenthZ:
-                          _inserOrUpdatetRest(4);
-                          break;
-                        case ChangeNoteKey.randomGroove:
-                          _randomizeAbc();
-                          break;
-                        case ChangeNoteKey.delete:
-                          _delete();
-                          break;
-                      }
-                    },
-                    onLongPress: (BuildContext context, ChangeNoteKey key) {
-                      if (key != ChangeNoteKey.delete) return;
-                      resetToDefaulValueInCreateMode();
-                    },
-                  ),
-                );
-              }),
-              SizedBox(height: isWindowsOrMac ? 33.h : 15.h),
-              Obx(
-                () => Flexible(
-                    flex: isWindowsOrMac ? 6 : 4,
+                        key: const ValueKey('ValueKey22'),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(9),
+                          child: WebViewWidget(
+                            controller: controllerKeyboard,
+                          ),
+                        ),
+                      )),
+                ),
+                //   ],
+                // )),
+                Obx(
+                  () => Expanded(
+                    flex: isWindowsOrMac ? 1 : 1,
                     child: Visibility(
                       visible: isVisibleWebview.value,
-                      // maintainSize: true, // 保持占位空间
-                      // maintainAnimation: true, // 保持动画
-                      // maintainState: true,
-                      key: const ValueKey('ValueKey22'),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(9),
-                        child: WebViewWidget(
-                          controller: controllerKeyboard,
-                        ),
-                      ),
-                    )),
-              ),
-              //   ],
-              // )),
-              Obx(
-                () => Expanded(
-                  flex: isWindowsOrMac ? 1 : 1,
-                  child: Visibility(
-                    visible: isVisibleWebview.value,
-                    key: const ValueKey('ValueKey33'),
-                    child: Container(
-                      padding: EdgeInsets.only(
-                          left: 0,
-                          top: isWindowsOrMac ? 40.h : 28.h,
-                          right: 0,
-                          bottom: 2),
-                      child: Obx(
-                        () => Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            SvgPicture.asset(
-                              'assets/images/title_logo.svg',
-                              width: isWindowsOrMac ? 433.w : 366.w,
-                              height: isWindowsOrMac ? 33.h : 28.h,
-                              fit: BoxFit.cover,
-                            ),
-                            // if (selectstate.value == 0)
-                            Row(
-                              children: [
-                                Obx(() => isGenerating.value
-                                    ? SizedBox(
-                                        width: isWindowsOrMac ? 48.w : 32.w,
-                                        height: isWindowsOrMac ? 48.w : 32.w,
-                                        child: const CircularProgressIndicator(
-                                          valueColor:
-                                              AlwaysStoppedAnimation<Color>(
-                                                  Colors.white),
-                                        ),
-                                      )
-                                    : Container(
-                                        child: null,
-                                      )),
-                                SizedBox(
-                                  width: 40.w,
-                                ),
-                                PlayProgressBar(
-                                    currentSliderValue: playProgress,
-                                    totalTime: pianoAllTime,
-                                    onPressed: () {
-                                      playOrPausePiano();
-                                    },
-                                    isPlay: isPlay.value),
-                              ],
-                            ),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.end,
-                              children: [
-                                Obx(
-                                  () => BorderBottomBtn(
-                                    textColor: AppColor.color_A1D632,
-                                    width: selectstate.value == 0
-                                        ? (isWindowsOrMac ? 666.w : 555.w)
-                                        : (isWindowsOrMac ? 453.w : 354.w),
-                                    height: isWindowsOrMac ? 123.h : 96.h,
-                                    text: !isGenerating.value
-                                        ? 'AI Compose'
-                                        : 'Stop Compose',
-                                    icon: SvgPicture.asset(
-                                      'assets/images/ic_generate.svg',
-                                      width: isWindowsOrMac ? 68.w : 58.w,
-                                      height: isWindowsOrMac ? 75.h : 64.h,
-                                    ),
-                                    onPressed: () {
-                                      debugPrint('Generate');
-                                      if (isClicking || isOnlyLoadFastModel) {
-                                        debugPrint(
-                                            'isClicking || isOnlyLoadFastModel');
-                                        return;
-                                      }
-                                      isClicking = true;
-                                      isGenerating.value = !isGenerating.value;
-                                      if (isGenerating.value) {
-                                        resetPianoAndKeyboard();
-
-                                        // if (isWindowsOrMac) {
-                                        fetchABCDataByIsolate();
-                                        // } else {
-                                        //   getABCDataByAPI();
-                                        // }
-
-                                        isFinishABCEvent = false;
-                                        if (selectstate.value == 1) {
-                                          isCreateGenerate.value = true;
-                                          controllerKeyboard
-                                              .loadFlutterAssetServer(
-                                                  filePathKeyboardAnimation);
-                                        }
-                                      } else {
-                                        // isolateSendPort.send('stop Generating');
-                                        isolateEventBus.fire("stop Generating");
-                                      }
-                                    },
-                                  ),
-                                ),
-                                if (selectstate.value == 1)
+                      key: const ValueKey('ValueKey33'),
+                      child: Container(
+                        padding: EdgeInsets.only(
+                            left: 0,
+                            top: isWindowsOrMac ? 40.h : 28.h,
+                            right: 0,
+                            bottom: 2),
+                        child: Obx(
+                          () => Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              SvgPicture.asset(
+                                'assets/images/title_logo.svg',
+                                width: isWindowsOrMac ? 433.w : 366.w,
+                                height: isWindowsOrMac ? 33.h : 28.h,
+                                fit: BoxFit.cover,
+                              ),
+                              // if (selectstate.value == 0)
+                              Row(
+                                children: [
+                                  Obx(() => isGenerating.value
+                                      ? SizedBox(
+                                          width: isWindowsOrMac ? 48.w : 32.w,
+                                          height: isWindowsOrMac ? 48.w : 32.w,
+                                          child:
+                                              const CircularProgressIndicator(
+                                            valueColor:
+                                                AlwaysStoppedAnimation<Color>(
+                                                    Colors.white),
+                                          ),
+                                        )
+                                      : Container(
+                                          child: null,
+                                        )),
                                   SizedBox(
-                                    width: 55.w,
+                                    width: 40.w,
                                   ),
-                                Obx(() => Visibility(
-                                      visible: selectstate.value == 1,
-                                      child: BorderBottomBtn(
-                                        width: isWindowsOrMac ? 257.w : 200.w,
-                                        height: isWindowsOrMac ? 123.h : 96.h,
-                                        text: !isCreateGenerate.value
-                                            ? 'Undo'
-                                            : 'Reset',
-                                        icon: SvgPicture.asset(
-                                          'assets/images/ic_undo.svg',
-                                          width: isWindowsOrMac ? 61.w : 50.w,
-                                          height: isWindowsOrMac ? 61.h : 50.h,
-                                        ),
-                                        onPressed: () {
-                                          debugPrint('Undo');
-                                          _undo();
-                                        },
+                                  PlayProgressBar(
+                                      currentSliderValue: playProgress,
+                                      totalTime: pianoAllTime,
+                                      onPressed: () {
+                                        playOrPausePiano();
+                                      },
+                                      isPlay: isPlay.value),
+                                ],
+                              ),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.end,
+                                children: [
+                                  Obx(
+                                    () => BorderBottomBtn(
+                                      textColor: AppColor.color_A1D632,
+                                      width: selectstate.value == 0
+                                          ? (isWindowsOrMac ? 666.w : 555.w)
+                                          : (isWindowsOrMac ? 453.w : 354.w),
+                                      height: isWindowsOrMac ? 123.h : 96.h,
+                                      text: !isGenerating.value
+                                          ? 'AI Compose'
+                                          : 'Stop Compose',
+                                      icon: SvgPicture.asset(
+                                        'assets/images/ic_generate.svg',
+                                        width: isWindowsOrMac ? 68.w : 58.w,
+                                        height: isWindowsOrMac ? 75.h : 64.h,
                                       ),
-                                    )),
-                              ],
-                            ),
-                          ],
+                                      onPressed: () {
+                                        debugPrint('Generate');
+                                        if (isClicking || isOnlyLoadFastModel) {
+                                          debugPrint(
+                                              'isClicking || isOnlyLoadFastModel');
+                                          return;
+                                        }
+                                        isClicking = true;
+                                        isGenerating.value =
+                                            !isGenerating.value;
+                                        if (isGenerating.value) {
+                                          resetPianoAndKeyboard();
+
+                                          // if (isWindowsOrMac) {
+                                          fetchABCDataByIsolate();
+                                          // } else {
+                                          //   getABCDataByAPI();
+                                          // }
+
+                                          isFinishABCEvent = false;
+                                          if (selectstate.value == 1) {
+                                            isCreateGenerate.value = true;
+                                            controllerKeyboard
+                                                .loadFlutterAssetServer(
+                                                    filePathKeyboardAnimation);
+                                          }
+                                        } else {
+                                          // isolateSendPort.send('stop Generating');
+                                          isolateEventBus
+                                              .fire("stop Generating");
+                                        }
+                                      },
+                                    ),
+                                  ),
+                                  if (selectstate.value == 1)
+                                    SizedBox(
+                                      width: 55.w,
+                                    ),
+                                  Obx(() => Visibility(
+                                        visible: selectstate.value == 1,
+                                        child: BorderBottomBtn(
+                                          width: isWindowsOrMac ? 257.w : 200.w,
+                                          height: isWindowsOrMac ? 123.h : 96.h,
+                                          text: !isCreateGenerate.value
+                                              ? 'Undo'
+                                              : 'Reset',
+                                          icon: SvgPicture.asset(
+                                            'assets/images/ic_undo.svg',
+                                            width: isWindowsOrMac ? 61.w : 50.w,
+                                            height:
+                                                isWindowsOrMac ? 61.h : 50.h,
+                                          ),
+                                          onPressed: () {
+                                            debugPrint('Undo');
+                                            _undo();
+                                          },
+                                        ),
+                                      )),
+                                ],
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ));
   }
@@ -1974,6 +2021,8 @@ class _HomePageState extends State<HomePage> {
           return const TimeChanging();
         });
 
+    _unselectAll();
+
     isShowDialog = false;
     if (index == null) return;
 
@@ -2547,5 +2596,10 @@ class _HomePageState extends State<HomePage> {
   Future<void> shareFile(String filepath) async {
     print('shareFile path=$filepath');
     ShareExtend.share(filepath, "file");
+  }
+
+  void _flutterOnTapEmptyReceived(JavaScriptMessage p1) {
+    if (selectstate.value != 1) return;
+    selectedNote = null;
   }
 }
