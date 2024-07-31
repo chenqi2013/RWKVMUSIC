@@ -780,9 +780,9 @@ class _HomePageState extends State<HomePage> {
   }
 
   void _randomizeAbc() async {
-    createPrompt = randomizeAbc(createPrompt).replaceAll("\n", "\\n");
+    String createPromptTmp = randomizeAbc(createPrompt).replaceAll("\n", "\\n");
     String sb =
-        "setAbcString(\"%%MIDI program $midiProgramValue\\n$createPrompt\",false)";
+        "setAbcString(\"%%MIDI program $midiProgramValue\\n$createPromptTmp\",false)";
     _change(sb);
     selectedNote = null;
   }
