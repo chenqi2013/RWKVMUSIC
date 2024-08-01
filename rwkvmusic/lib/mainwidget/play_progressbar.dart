@@ -25,7 +25,7 @@ class PlayProgressBar extends StatelessWidget {
 
     return Obx(
       () => Container(
-        padding: EdgeInsets.symmetric(horizontal: 15.w, vertical: 25.h),
+        padding: EdgeInsets.symmetric(horizontal: 15.w, vertical: 5.h),
         width: isWindowsOrMac ? 1163.w : 984.w,
         height: isWindowsOrMac ? 113.h : 96.h,
         decoration: BoxDecoration(

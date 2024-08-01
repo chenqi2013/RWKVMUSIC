@@ -1,6 +1,8 @@
 import 'dart:math';
 import 'dart:core';
 
+import 'package:flutter/foundation.dart';
+
 List parseAbc(String abcNotation) {
   Map<String, String> header = {
     'L': '1/4',
@@ -149,8 +151,8 @@ String formatBarsTest(Map<String, String> header, List<List<String>> bars) {
 
     for (String note in bar) {
       var parsedNote = parseNoteLength(note);
-      String noteChar = parsedNote[0];
-      String noteLength = parsedNote[1];
+      String noteChar = parsedNote['note'];
+      Fraction noteLength = parsedNote['length'];
 
       // 提取音符字母部分和升降号部分
       RegExp accidentalRegex = RegExp(r'''[\^_=]?[A-Ga-gz][,\']*''');
@@ -159,27 +161,34 @@ String formatBarsTest(Map<String, String> header, List<List<String>> bars) {
       String baseNote = baseNoteRegex.firstMatch(noteChar)!.group(0)!;
 
       // 检查数组中是否已有相同的音符
-      String? matchedNote = accidentalNotes.firstWhere((x) => x == baseNote);
-
-      // 如果当前音符不带升降号
-      if (accidental == baseNote) {
-        if (noteChar.startsWith('-')) {
-          newBar.add('-=' + accidental + noteLength);
-        } else {
-          newBar.add('=' + note);
+      String? matchedNote = accidentalNotes.firstWhere((x) => x == baseNote,
+          orElse: () => 'null');
+      if (matchedNote != 'null') {
+        // 如果当前音符不带升降号
+        if (accidental == baseNote) {
+          if (noteChar.startsWith('-')) {
+            newBar.add('-=' + accidental + noteLength.toString());
+          } else {
+            newBar.add('=' + note);
+          }
+          accidentalNotes.remove(matchedNote);
         }
-        accidentalNotes.remove(matchedNote);
-      }
-      // 如果当前音符带还原号
-      else if (accidental.startsWith('=')) {
+        // 如果当前音符带还原号
+        else if (accidental.startsWith('=')) {
+          newBar.add(note);
+          accidentalNotes.remove(matchedNote);
+        }
+        // 如果当前音符带升降号
+        else {
+          newBar.add(note);
+          accidentalNotes.remove(matchedNote);
+          accidentalNotes.add(baseNote);
+        }
+      } else {
+        if (accidental != baseNote) {
+          accidentalNotes.add(baseNote);
+        }
         newBar.add(note);
-        accidentalNotes.remove(matchedNote);
-      }
-      // 如果当前音符带升降号
-      else {
-        newBar.add(note);
-        accidentalNotes.remove(matchedNote);
-        accidentalNotes.add(baseNote);
       }
     }
 
@@ -187,7 +196,7 @@ String formatBarsTest(Map<String, String> header, List<List<String>> bars) {
     formattedAbc += ' |';
   }
 
-  return formattedAbc.substring(0, formattedAbc.length - 1);
+  return formattedAbc.substring(0, formattedAbc.length - 2);
 }
 
 String formatBars(Map<String, String> header, List<List<String>> bars) {
@@ -219,7 +228,7 @@ String splitMeasureAbc(String abcNotation) {
   List<String> notes = result[1];
   Fraction barLength = calculateBarLength(header['M'], header['L']);
   List<List<String>> bars = divideIntoBars(notes, barLength);
-  return formatBars(header, bars);
+  return formatBarsTest(header, bars);
 }
 
 String splitMeasureAbc_end(String abcNotation) {

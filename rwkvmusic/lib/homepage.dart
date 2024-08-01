@@ -539,8 +539,10 @@ class _HomePageState extends State<HomePage> {
       sbff.write(" ");
     }
     createPrompt = sbff.toString();
+    String splitMeasureAndChordStr = splitMeasureAndChord(createPrompt);
+    createPrompt = splitMeasureAndChordStr.replaceAll("\\n", "\n");
     String sb =
-        "setAbcString(\"%%MIDI program $midiProgramValue\\nL:1/4\\nM:$timeSingnatureStr\\nK:C\\n|$createPrompt\",false)";
+        "setAbcString(\"%%MIDI program $midiProgramValue\\n$splitMeasureAndChordStr\",false)";
     finalabcStringCreate = ABCHead.appendTempoParam(sb, tempo.value.toInt());
     debugPrint('curr=$finalabcStringCreate');
     await _change(finalabcStringCreate);
@@ -590,8 +592,10 @@ class _HomePageState extends State<HomePage> {
       sbff.write(" ");
     }
     createPrompt = sbff.toString();
+    String splitMeasureAndChordStr = splitMeasureAndChord(createPrompt);
+    createPrompt = splitMeasureAndChordStr.replaceAll("\\n", "\n");
     String sb =
-        "setAbcString(\"%%MIDI program $midiProgramValue\\nL:1/4\\nM:$timeSingnatureStr\\nK:C\\n|$createPrompt\",false)";
+        "setAbcString(\"%%MIDI program $midiProgramValue\\n$splitMeasureAndChordStr\",false)";
     finalabcStringCreate = ABCHead.appendTempoParam(sb, tempo.value.toInt());
     debugPrint('curr=$finalabcStringCreate');
     await _change(finalabcStringCreate);
@@ -679,14 +683,15 @@ class _HomePageState extends State<HomePage> {
       sbff.write(" ");
     }
     createPrompt = sbff.toString();
-
+    String splitMeasureAndChordStr = splitMeasureAndChord(createPrompt);
+    createPrompt = splitMeasureAndChordStr.replaceAll("\\n", "\n");
     String sb;
     if (isChangeTempo) {
       sb =
-          "setAbcString(\"Q:${tempo.value.toInt()}\\nL:1/4\\nM:$timeSingnatureStr\\nK:C\\n|$createPrompt\",false)";
+          "setAbcString(\"Q:${tempo.value.toInt()}\\n$splitMeasureAndChordStr\",false)";
     } else {
       sb =
-          "setAbcString(\"%%MIDI program $midiProgramValue\\nL:1/4\\nM:$timeSingnatureStr\\nK:C\\n|$createPrompt\",false)";
+          "setAbcString(\"%%MIDI program $midiProgramValue\\n$splitMeasureAndChordStr\",false)";
     }
     finalabcStringCreate = ABCHead.appendTempoParam(sb, tempo.value.toInt());
     debugPrint('curr=$finalabcStringCreate');
@@ -754,28 +759,36 @@ class _HomePageState extends State<HomePage> {
       sbff.write(" ");
     }
     createPrompt = sbff.toString();
+    String splitMeasureAndChordStr = splitMeasureAndChord(createPrompt);
+    createPrompt = splitMeasureAndChordStr.replaceAll("\\n", "\n");
+    String sb;
+    if (isChangeTempo) {
+      sb =
+          "setAbcString(\"Q:${tempo.value.toInt()}\\n$splitMeasureAndChordStr\",false)";
+    } else {
+      sb =
+          "setAbcString(\"%%MIDI program $midiProgramValue\\n$splitMeasureAndChordStr\",false)";
+    }
+    finalabcStringCreate = ABCHead.appendTempoParam(sb, tempo.value.toInt());
+    // debugPrint('curr=$finalabcStringCreate');
+    await _change(finalabcStringCreate);
+  }
+
+  /// 自动分割及生成和弦
+  String splitMeasureAndChord(String createPrompt) {
     // // 自动分割小节
     String needSplitStr = 'L:1/4\\nM:$timeSingnatureStr\\nK:C\\n|$createPrompt'
         .replaceAll("\\n", "\n");
     // ABCHead.testchord_split(needSplitStr);
     String splitMeasureAbcStr = splitMeasureAbc(needSplitStr);
-    // print('splitMeasureAbcStr---$splitMeasureAbcStr');
+    print('splitMeasureAbcStr---$splitMeasureAbcStr');
     // 每一节生成一个和弦
     List<String> chords = generateChordAbcNotation(splitMeasureAbcStr);
-    // print('generateChordAbcNotation---$chords');
+    print('generateChordAbcNotation---$chords');
     splitMeasureAbcStr = ABCHead.combineAbc_Chord(chords, splitMeasureAbcStr);
-    // print('combineAbc_Chord---$splitMeasureAbcStr');
+    print('combineAbc_Chord---$splitMeasureAbcStr');
     needSplitStr = splitMeasureAbcStr.replaceAll("\n", "\\n");
-    String sb;
-    if (isChangeTempo) {
-      sb = "setAbcString(\"Q:${tempo.value.toInt()}\\n$needSplitStr\",false)";
-    } else {
-      sb =
-          "setAbcString(\"%%MIDI program $midiProgramValue\\n$needSplitStr\",false)";
-    }
-    finalabcStringCreate = ABCHead.appendTempoParam(sb, tempo.value.toInt());
-    // debugPrint('curr=$finalabcStringCreate');
-    await _change(finalabcStringCreate);
+    return needSplitStr;
   }
 
   void updateTimeSignature() {
