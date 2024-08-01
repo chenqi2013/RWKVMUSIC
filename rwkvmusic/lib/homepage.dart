@@ -28,7 +28,9 @@ import 'package:rwkvmusic/utils/abchead.dart';
 import 'package:rwkvmusic/utils/audioplayer.dart';
 import 'package:rwkvmusic/utils/automeasure_randomizeabc.dart';
 import 'package:rwkvmusic/utils/chord_util.dart';
+import 'package:rwkvmusic/utils/convert_chord.dart';
 import 'package:rwkvmusic/utils/justaudioplayer.dart';
+import 'package:rwkvmusic/utils/key_convert.dart';
 import 'package:rwkvmusic/utils/midiconvert_abc.dart';
 import 'package:rwkvmusic/utils/mididevice_manage.dart';
 import 'package:rwkvmusic/utils/common_utils.dart';
@@ -717,51 +719,62 @@ class _HomePageState extends State<HomePage> {
 
     StringBuffer sbff = StringBuffer();
     List chordList = [];
-    if (timeSignature.value == 2) {
-      String chordStr = ChordUtil.getChord(intNodes.toString());
-      chordList = jsonDecode(chordStr);
-      debugPrint('chordStr=${chordList.length}');
-    }
+    // if (timeSignature.value == 2) {
+    //   String chordStr = ChordUtil.getChord(intNodes.toString());
+    //   chordList = jsonDecode(chordStr);
+    //   debugPrint('chordStr=${chordList.length}');
+    // }
+
     String timeSignatureStr = timeSignatures[timeSignature.value];
     String noteLengthStr = kNoteLengths[defaultNoteLenght.value];
     debugPrint(
         'timeSignatureStr=$timeSignatureStr,noteLengthStr=$noteLengthStr');
     for (int i = 0; i < virtualNotes.length; i++) {
       String note = virtualNotes[i];
-      if (timeSignatureStr == '4/4' && noteLengthStr == '1/4') {
-        if (i % 4 == 0) {
-          int chordLenght = i ~/ 4;
-          if (chordList.length > chordLenght) {
-            //插入竖线和和弦
-            if (i == 0) {
-              sbff.write('\\"${chordList[chordLenght]}\\" ');
-            } else {
-              sbff.write('|\\"${chordList[chordLenght]}\\" ');
-            }
-          }
-        }
-      } else {
-        int postion =
-            ABCHead.insertMeasureLinePosition(timeSignatureStr, noteLengthStr);
-        if (i % postion == 0 && i > 0) {
-          sbff.write('|');
-        }
-      }
+      // if (timeSignatureStr == '4/4' && noteLengthStr == '1/4') {
+      //   if (i % 4 == 0) {
+      //     int chordLenght = i ~/ 4;
+      //     if (chordList.length > chordLenght) {
+      //       //插入竖线和和弦
+      //       if (i == 0) {
+      //         sbff.write('\\"${chordList[chordLenght]}\\" ');
+      //       } else {
+      //         sbff.write('|\\"${chordList[chordLenght]}\\" ');
+      //       }
+      //     }
+      //   }
+      // } else {
+      //   int postion =
+      //       ABCHead.insertMeasureLinePosition(timeSignatureStr, noteLengthStr);
+      //   if (i % postion == 0 && i > 0) {
+      //     sbff.write('|');
+      //   }
+      // }
       sbff.write(note);
       sbff.write(" ");
     }
     createPrompt = sbff.toString();
-
+    // // 自动分割小节
+    String needSplitStr = 'L:1/4\\nM:$timeSingnatureStr\\nK:C\\n|$createPrompt'
+        .replaceAll("\\n", "\n");
+    // ABCHead.testchord_split(needSplitStr);
+    String splitMeasureAbcStr = splitMeasureAbc(needSplitStr);
+    // print('splitMeasureAbcStr---$splitMeasureAbcStr');
+    // 每一节生成一个和弦
+    List<String> chords = generateChordAbcNotation(splitMeasureAbcStr);
+    // print('generateChordAbcNotation---$chords');
+    splitMeasureAbcStr = ABCHead.combineAbc_Chord(chords, splitMeasureAbcStr);
+    // print('combineAbc_Chord---$splitMeasureAbcStr');
+    needSplitStr = splitMeasureAbcStr.replaceAll("\n", "\\n");
     String sb;
     if (isChangeTempo) {
-      sb =
-          "setAbcString(\"Q:${tempo.value.toInt()}\\nL:1/4\\nM:$timeSingnatureStr\\nK:C\\n|$createPrompt\",false)";
+      sb = "setAbcString(\"Q:${tempo.value.toInt()}\\n$needSplitStr\",false)";
     } else {
       sb =
-          "setAbcString(\"%%MIDI program $midiProgramValue\\nL:1/4\\nM:$timeSingnatureStr\\nK:C\\n|$createPrompt\",false)";
+          "setAbcString(\"%%MIDI program $midiProgramValue\\n$needSplitStr\",false)";
     }
     finalabcStringCreate = ABCHead.appendTempoParam(sb, tempo.value.toInt());
-    debugPrint('curr=$finalabcStringCreate');
+    // debugPrint('curr=$finalabcStringCreate');
     await _change(finalabcStringCreate);
   }
 
