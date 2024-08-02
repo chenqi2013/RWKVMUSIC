@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'dart:core';
 
-import 'package:rwkvmusic/utils/automeasure_randomizeabc.dart';
+import 'automeasure_randomizeabc.dart';
 
 Map<String, Map<String, String>> keytoneToTruetone = {
   'C Major': {},
@@ -810,6 +810,7 @@ Map<String, String> keyToShort = {
   'C# Major': 'C#',
   'A# Minor': 'A#m',
   'F Major': 'F',
+  'E# Major': 'F',
   'D Minor': 'Dm',
   'Bb Major': 'Bb',
   'A# Major': 'A#',

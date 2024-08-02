@@ -32,6 +32,9 @@ import 'package:window_manager/window_manager.dart';
 // import 'package:flutter_gen_runner/flutter_gen_runner.dart';
 import 'package:event_bus/event_bus.dart';
 
+import 'utils/automeasure_randomizeabc.dart';
+import 'utils/key_convert.dart';
+
 void main(List<String> args) async {
   WidgetsFlutterBinding.ensureInitialized();
   if (Platform.isWindows || Platform.isMacOS) {
@@ -130,6 +133,9 @@ ScrollController controller = ScrollController();
 var tokens = ''.obs;
 
 SelectedNote? selectedNote;
+
+String? splitMeasure;
+List chords = [];
 
 class SelectedNote {
   String name = "";
@@ -289,8 +295,12 @@ void fetchABCDataByIsolate() async {
     if (currentModelType == ModelType.ncnn) {
       binPath = await CommonUtils.copyFileFromAssets(
           'RWKV-6-ABC-85M-v1-20240217-ctx1024-ncnn.bin');
+      // binPath =
+      //     await CommonUtils.copyFileFromAssets('rwkv.cpp-v6-ABC-85M-FP32.bin');
       configPath = await CommonUtils.copyFileFromAssets(
           'RWKV-6-ABC-85M-v1-20240217-ctx1024-ncnn.config');
+      // configPath = await CommonUtils.copyFileFromAssets(
+      //     'rwkv.cpp-v6-ABC-85M-FP32.config');
       paramPath = await CommonUtils.copyFileFromAssets(
           'RWKV-6-ABC-85M-v1-20240217-ctx1024-ncnn.param');
     } else if (currentModelType == ModelType.qnn) {
@@ -338,7 +348,25 @@ void fetchABCDataByIsolate() async {
   if (selectstate.value == 0) {
     prompt = promptsAbc[promptSelectedIndex.value];
   } else {
-    prompt = "L:1/4\nM:$timeSingnatureStr\nK:C\n|$createPrompt";
+    // prompt = "L:1/4\nM:$timeSingnatureStr\nK:C\n|$createPrompt";
+
+    //--------ai compose 转换prompt
+    String convertAbcNotationstr =
+        convertAbcNotation(splitMeasure!, chords[1].toString());
+    print('convertAbcNotationstr---$convertAbcNotationstr');
+
+    String splitmeasureabcEndstr = splitMeasureAbc_end(convertAbcNotationstr);
+    print('splitMeasureAbc_endstr---$splitmeasureabcEndstr');
+
+    String combineabcChordstr =
+        ABCHead.combineAbc_Chord(chords[0], splitmeasureabcEndstr);
+    print('combineAbc_Chord---$combineabcChordstr');
+    prompt = combineabcChordstr.replaceAll('\\"', '"');
+
+    // prompt = 'L:1/4\nM:4/4\nK:C\n| "C" E G B c | "G" ^A ^G =G E';
+    // prompt = "L:1/4\nM:4/4\n|\"C\" C3/4 G B c | \"F\" F ^G d c";
+
+    //--------ai compose 转换prompt
   }
   debugPrint('generate Prompt==$prompt');
   var fastmodel = [];
@@ -459,6 +487,7 @@ void getABCDataByLocalModel(var array) async {
   // Pointer<Char> strategy = 'webgpu auto'
   //     .toNativeUtf8()
   //     .cast<Char>(); //ncnn fp32    webgpu auto  (通用pc上和ios上可以webgpu auto)
+  // strategy = 'rwkv.cpp auto'.toNativeUtf8().cast<Char>();
   if (currentModelType == ModelType.qnn) {
     strategy = 'qnn auto'.toNativeUtf8().cast<Char>();
   } else if (currentModelType == ModelType.mtk) {

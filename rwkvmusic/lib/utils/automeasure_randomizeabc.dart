@@ -1,7 +1,7 @@
 import 'dart:math';
 import 'dart:core';
 
-import 'package:flutter/foundation.dart';
+import 'key_convert.dart';
 
 List parseAbc(String abcNotation) {
   Map<String, String> header = {
@@ -167,9 +167,9 @@ String formatBarsTest(Map<String, String> header, List<List<String>> bars) {
         // 如果当前音符不带升降号
         if (accidental == baseNote) {
           if (noteChar.startsWith('-')) {
-            newBar.add('-=' + accidental + noteLength.toString());
+            newBar.add('-=$accidental$noteLength');
           } else {
-            newBar.add('=' + note);
+            newBar.add('=$note');
           }
           accidentalNotes.remove(matchedNote);
         }
@@ -200,7 +200,7 @@ String formatBarsTest(Map<String, String> header, List<List<String>> bars) {
 }
 
 String formatBars(Map<String, String> header, List<List<String>> bars) {
-  String formattedAbc = 'L:${header['L']}\nM:${header['M']}\n|';
+  String formattedAbc = 'L:${header['L']}\nM:${header['M']}\n';
   for (int i = 0; i < bars.length; i++) {
     formattedAbc += bars[i].join(' ');
     if (i < bars.length - 1) {
@@ -210,16 +210,75 @@ String formatBars(Map<String, String> header, List<List<String>> bars) {
   return formattedAbc.trim();
 }
 
-String formatBars_1(Map<String, String> header, List<List<String>> bars) {
+String formatBars1(Map<String, String> header, List<List<String>> bars) {
   String formattedAbc =
-      'L:${header['L']}\nM:${header['M']}\nK:${header['K']}\n|';
-  for (int i = 0; i < bars.length; i++) {
-    formattedAbc += bars[i].join(' ');
-    if (i < bars.length - 1) {
-      formattedAbc += ' |';
+      "L:${header['L']}\nM:${header['M']}\nK:${header['K']}\n|";
+
+  // 从keytone_to_truetone字典中提取当前调性的音符转换规则
+  String? keytone = header['K'];
+  keytone = shortToKey[keytone] ?? keytone;
+  Map<String, String> conversionDict = keytoneToTruetone[keytone] ?? {};
+
+  for (List<String> bar in bars) {
+    List<String> newBar = [];
+    List<String> accidentalNotes = []; // 储存已还原的音符
+
+    for (String note in bar) {
+      var parsedNote = parseNoteLength(note);
+      String noteChar = parsedNote['note'];
+      String noteLength = parsedNote['length'].toString();
+
+      if (noteLength == '1') {
+        noteLength = '';
+      } else if (noteLength == '1/2') {
+        noteLength = '/';
+      } else if (noteLength == '1/4') {
+        noteLength = '/4';
+      } else if (noteLength == '1/8') {
+        noteLength = '/8';
+      } else if (noteLength == '1/16') {
+        noteLength = '/16';
+      }
+
+      RegExp accidentalExp = RegExp(r'''[\^_=]?[A-Ga-g][,\']*''');
+      RegExp baseNoteExp = RegExp(r'''[A-Ga-g][,\']*''');
+      RegExp notevExp = RegExp(r'[A-Ga-g]');
+
+      String? accidental = accidentalExp.stringMatch(noteChar);
+      String? baseNote = baseNoteExp.stringMatch(noteChar);
+      String? notev = notevExp.stringMatch(noteChar);
+
+      String matchedNote = accidentalNotes.firstWhere((x) => x == baseNote,
+          orElse: () => "null");
+
+      if (matchedNote != 'null') {
+        if (accidental == baseNote) {
+          String correctedNoteChar =
+              noteChar.replaceFirst(notev!, conversionDict[notev] ?? notev);
+          newBar.add(correctedNoteChar + noteLength);
+          accidentalNotes.remove(matchedNote);
+        } else if (accidental!.startsWith('=')) {
+          newBar.add(noteChar + noteLength);
+        } else {
+          newBar.add(noteChar + noteLength);
+          accidentalNotes.remove(matchedNote);
+        }
+      } else {
+        if (accidental != null &&
+            accidental.startsWith('=') &&
+            conversionDict.containsKey(notev)) {
+          accidentalNotes.add(baseNote!);
+          newBar.add(noteChar + noteLength);
+        } else {
+          newBar.add(noteChar + noteLength);
+        }
+      }
     }
+
+    formattedAbc += '${newBar.join(' ')} |';
   }
-  return formattedAbc.trim();
+
+  return formattedAbc.substring(0, formattedAbc.length - 1).trim();
 }
 
 String splitMeasureAbc(String abcNotation) {
@@ -237,12 +296,12 @@ String splitMeasureAbc_end(String abcNotation) {
   List<String> notes = result[1];
   Fraction barLength = calculateBarLength(header['M'], header['L']);
   List<List<String>> bars = divideIntoBars(notes, barLength);
-  return formatBars_1(header, bars);
+  return formatBars1(header, bars);
 }
 
 String formatNotes(Map<String, String> header, List<String> notes) {
   String formattedAbc =
-      'L:${header['L']}\nM:${header['M']}\nK:${header['K']}\n|';
+      'L:${header['L']}\nM:${header['M']}\nK:${header['K']}\n';
   formattedAbc += notes.join(' ');
   return formattedAbc.trim();
 }

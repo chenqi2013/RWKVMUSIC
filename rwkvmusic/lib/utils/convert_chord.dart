@@ -60,7 +60,7 @@ const Map<String, int> NOTE_TO_SEMITONE = {
   'b': 11,
   '^b': 0,
   '_b': 10,
-  '=b': 11
+  '=b': 11,
 };
 
 const Map<int, String> SEMITONE_TO_NOTE = {
@@ -239,17 +239,18 @@ List<Map<String, dynamic>> analyzeNotes(String abcNotation) {
 
       if (pitch.toLowerCase() == 'z') {
         pitch = 'rest';
-      } else {
-        int octaveShift = 0;
-        if (octaveModifier != null) {
-          if (pitch.toLowerCase() == pitch) {
-            octaveShift = 1;
-          }
-          octaveShift += "'".allMatches(octaveModifier).length;
-          octaveShift -= ",".allMatches(octaveModifier).length;
-        }
-        pitch = pitch.toUpperCase() + "'" * octaveShift;
       }
+      // else {
+      //   int octaveShift = 0;
+      //   if (octaveModifier != null) {
+      //     if (pitch.toLowerCase() == pitch) {
+      //       octaveShift = 1;
+      //     }
+      //     octaveShift += "'".allMatches(octaveModifier).length;
+      //     octaveShift -= ",".allMatches(octaveModifier).length;
+      //   }
+      //   pitch = pitch.toUpperCase() + "'" * octaveShift;
+      // }
 
       notes.add({
         'pitch': pitch,
@@ -322,7 +323,7 @@ Map<int, String> generateChordNames(Key keySignature) {
   }
 }
 
-List<String> analyzeChords(
+List<dynamic> analyzeChords(
     List<List<List<String>>> notesByMeasure,
     Map<int, List<int>> chordMap,
     Map<int, String> chordNames,
@@ -474,7 +475,9 @@ List<List<List<String>>> extractNotesAndMeasures(String abcNotation) {
       while (beats.length <= beatIndex) {
         beats.add([]);
       }
-      beats[beatIndex].add(n['pitch']);
+      if (n['pitch'] != 'rest') {
+        beats[beatIndex].add(n['pitch']);
+      }
     }
   }
 
@@ -490,15 +493,17 @@ List<List<List<String>>> extractNotesAndMeasures(String abcNotation) {
   return notesByMeasure;
 }
 
-List<String> generateChordAbcNotation(String abcNotation) {
+List<dynamic> generateChordAbcNotation(String abcNotation) {
   Key keySignature = analyzeKey(abcNotation);
   Map<int, List<int>> chordMap = generateChordMaps(keySignature);
   Map<int, String> chordNames = generateChordNames(keySignature);
   List<List<List<String>>> notesByMeasure =
       extractNotesAndMeasures(abcNotation);
 
-  return analyzeChords(
-      notesByMeasure, chordMap, chordNames, keySignature, '4/4');
+  return [
+    analyzeChords(notesByMeasure, chordMap, chordNames, keySignature, '4/4'),
+    keySignature
+  ];
 }
 
 void main() {
@@ -507,6 +512,6 @@ M:4/4
 Q: 90
 z z z A/B/ d3/2-e/ ^f/^c/ B/4^c/4B/4A/4 B3 d/e/ ^f3/2-a/ b/d/ e/4^f/4 g/ ^f3 ^f/a/ b3/2 a/ b""";
 
-  List<String> chords = generateChordAbcNotation(abcNotation);
+  List<dynamic> chords = generateChordAbcNotation(abcNotation);
   print(chords);
 }

@@ -780,14 +780,14 @@ class _HomePageState extends State<HomePage> {
     String needSplitStr = 'L:1/4\\nM:$timeSingnatureStr\\nK:C\\n|$createPrompt'
         .replaceAll("\\n", "\n");
     // ABCHead.testchord_split(needSplitStr);
-    String splitMeasureAbcStr = splitMeasureAbc(needSplitStr);
-    print('splitMeasureAbcStr---$splitMeasureAbcStr');
+    splitMeasure = splitMeasureAbc(needSplitStr);
+    print('splitMeasureAbcStr---$splitMeasure');
     // 每一节生成一个和弦
-    List<String> chords = generateChordAbcNotation(splitMeasureAbcStr);
+    chords = generateChordAbcNotation(splitMeasure!);
     print('generateChordAbcNotation---$chords');
-    splitMeasureAbcStr = ABCHead.combineAbc_Chord(chords, splitMeasureAbcStr);
-    print('combineAbc_Chord---$splitMeasureAbcStr');
-    needSplitStr = splitMeasureAbcStr.replaceAll("\n", "\\n");
+    String combineabcChord = ABCHead.combineAbc_Chord(chords[0], splitMeasure!);
+    print('combineAbc_Chord---$combineabcChord');
+    needSplitStr = combineabcChord.replaceAll("\n", "\\n");
     return needSplitStr;
   }
 

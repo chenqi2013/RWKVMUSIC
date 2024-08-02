@@ -155,7 +155,7 @@ class ABCHead {
     String splitMeasure = splitMeasureAbc(abcNotation);
     print('splitMeasureAbc---$splitMeasure');
     // 每一节生成一个和弦
-    List<String> chords = generateChordAbcNotation(splitMeasure);
+    List<dynamic> chords = generateChordAbcNotation(splitMeasure);
     print('generateChordAbcNotation---$chords');
     // 添加随机律动
     String randomize = randomizeAbc(splitMeasure);
