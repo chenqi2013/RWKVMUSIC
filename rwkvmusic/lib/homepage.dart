@@ -554,9 +554,23 @@ class _HomePageState extends State<HomePage> {
     final selected = selectedNote;
     if (selected == null) {
       if (virtualNotes.isEmpty) return;
-      selectedNote = SelectedNote()
+      late final String name;
+
+      if (noteSymbol != null) {
+        name = noteSymbol;
+      } else {
+        final last = virtualNotes.last as String;
+        if (last.startsWith("^")) {
+          name = last.substring(0, 2);
+        } else {
+          name = last.substring(0, 1);
+        }
+      }
+
+      final _selectedNote = SelectedNote()
         ..index = virtualNotes.length - 1
-        ..name = noteSymbol ?? (virtualNotes.last as String).substring(0, 1);
+        ..name = name;
+      selectedNote = _selectedNote;
       _updateNote(noteLengthIndex: noteLengthIndex);
       return;
     }

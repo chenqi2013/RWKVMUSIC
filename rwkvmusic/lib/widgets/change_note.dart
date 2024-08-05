@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:get/get_connect/http/src/request/request.dart';
 import 'package:halo/halo.dart';
 import 'package:rwkvmusic/gen/assets.gen.dart';
 
