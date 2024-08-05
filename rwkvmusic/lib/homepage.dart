@@ -1422,9 +1422,8 @@ class _HomePageState extends State<HomePage> {
   void resetToDefaulValueInCreateMode() {
     virtualNotes.clear();
     intNodes.clear();
-
     finalabcStringCreate =
-        "setAbcString(\"${ABCHead.getABCWithInstrument(r'L:1/4\nM:4/4\nK:C\n|', midiProgramValue)}\",false)";
+        "setAbcString(\"${ABCHead.getABCWithInstrument('L:1/4\\nM:$timeSingnatureStr\\nK:C\\n|', midiProgramValue)}\",false)";
     finalabcStringCreate =
         ABCHead.appendTempoParam(finalabcStringCreate, tempo.value.toInt());
     debugPrint('str112==$finalabcStringCreate');
