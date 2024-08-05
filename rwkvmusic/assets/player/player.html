@@ -290,7 +290,7 @@
         console.log("清理后的数据", x);
         console.log("================================");
         let speedRate = 1;
-        speedRate = x.match(/Q:(\d+)/);
+        speedRate = x.match(/Q:\s*\d+\/\d+=\s*(\d+)/)
         console.log(";;;;;;;;;;;;;;;;;");
         console.log("speedRate", speedRate);
         midi_data = ABCJS.synth.getMidiFile(x, {
