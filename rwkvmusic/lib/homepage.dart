@@ -274,7 +274,7 @@ class _HomePageState extends State<HomePage> {
           onMessageReceived: (JavaScriptMessage jsMessage) {
         debugPrint('flutteronNoteOff onMessageReceived=${jsMessage.message}');
       })
-      // @wangce 按下 webview 中的琴键
+      // 按下 webview 中的琴键
       ..addJavaScriptChannel("flutteronNoteOn",
           onMessageReceived: (JavaScriptMessage jsMessage) {
         debugPrint('flutteronNoteOn onMessageReceived=${jsMessage.message}');
@@ -408,7 +408,7 @@ class _HomePageState extends State<HomePage> {
       ..duration = duration;
   }
 
-  /// @wangce 和弦点击
+  /// 和弦点击
   void _onReceiveChordClick(JavaScriptMessage jsMessage) async {
     final _selectstate = selectstate.value;
     final _isPlay = isPlay.value;
@@ -549,7 +549,7 @@ class _HomePageState extends State<HomePage> {
     selectedNote = null;
   }
 
-  /// @wangce 通过执行 JS 更新琴谱
+  /// 通过执行 JS 更新琴谱
   void _updateNote({int? noteLengthIndex, String? noteSymbol}) async {
     final selected = selectedNote;
     if (selected == null) {
@@ -616,7 +616,7 @@ class _HomePageState extends State<HomePage> {
     selectedNote = null;
   }
 
-  /// @wangce 插入休止符
+  /// 插入休止符
   void _inserOrUpdatetRest(int lengthIndex) async {
     if (selectedNote != null) {
       _updateNote(noteLengthIndex: lengthIndex, noteSymbol: "z");
@@ -713,7 +713,7 @@ class _HomePageState extends State<HomePage> {
     selectedNote = null;
   }
 
-  /// @wangce 插入音符
+  /// 插入音符
   ///
   /// 1. 通过按下虚拟键盘触发
   void updatePianoNote(int node) async {
@@ -817,7 +817,6 @@ class _HomePageState extends State<HomePage> {
   }
 
   void _delete() {
-    // TODO: @wangce selected
     resetLastNote();
   }
 
