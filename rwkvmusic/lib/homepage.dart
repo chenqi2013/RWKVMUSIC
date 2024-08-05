@@ -702,7 +702,7 @@ class _HomePageState extends State<HomePage> {
     String sb;
     if (isChangeTempo) {
       sb =
-          "setAbcString(\"Q:${tempo.value.toInt()}\\n$splitMeasureAndChordStr\",false)";
+          "setAbcString(\"Q:1/4=${tempo.value.toInt()}\\n$splitMeasureAndChordStr\",false)";
     } else {
       sb =
           "setAbcString(\"%%MIDI program $midiProgramValue\\n$splitMeasureAndChordStr\",false)";
@@ -778,7 +778,7 @@ class _HomePageState extends State<HomePage> {
     String sb;
     if (isChangeTempo) {
       sb =
-          "setAbcString(\"Q:${tempo.value.toInt()}\\n$splitMeasureAndChordStr\",false)";
+          "setAbcString(\"Q:1/4=${tempo.value.toInt()}\\n$splitMeasureAndChordStr\",false)";
     } else {
       sb =
           "setAbcString(\"%%MIDI program $midiProgramValue\\n$splitMeasureAndChordStr\",false)";
@@ -807,8 +807,10 @@ class _HomePageState extends State<HomePage> {
 
   void updateTimeSignature() {
     // setAbcString("%%MIDI program 0\nL:1/4\nM:4/4\nK:C\n|",false)
+    int index = createPrompt.indexOf('|');
+    String createPromptTmp = createPrompt.substring(index + 1);
     String sb =
-        "setAbcString(\"%%MIDI program $midiProgramValue\\nL:1/4\\nM:$timeSingnatureStr\\nK:C\\n|$createPrompt\",false)";
+        "setAbcString(\"%%MIDI program $midiProgramValue\\nL:1/4\\nM:$timeSingnatureStr\\nK:C\\n|$createPromptTmp\",false)";
     sb = ABCHead.appendTempoParam(sb, tempo.value.toInt());
     debugPrint('curr=$sb');
     _change(sb);

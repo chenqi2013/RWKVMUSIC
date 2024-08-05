@@ -30,10 +30,10 @@ class ABCHead {
   }
 
   static String appendTempoParam(String abc, int tempo) {
-    String tempoConfig = "Q:$tempo";
+    String tempoConfig = "Q:1/4=$tempo";
     String result = '';
-    if (abc.contains("Q:")) {
-      result = abc.replaceAll(RegExp(r"Q:\d+"), tempoConfig);
+    if (abc.contains("Q:1/4=")) {
+      result = abc.replaceAll(RegExp(r"Q:1/4=\d+"), tempoConfig);
     } else {
       // return abc;
       // result = "$tempoConfig\\n$abc";
