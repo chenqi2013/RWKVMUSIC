@@ -571,14 +571,28 @@
           // });
 
           // 添加排号点击事件
-          var timeSignatureEle = document.getElementsByClassName(
-            "abcjs-time-signature"
-          );
+          var timeSignatureEle = document.getElementsByClassName("abcjs-time-signature");
           console.log("timeSignatureEle", timeSignatureEle);
           let timeSignatureNum = "";
 
+          //[BUG FIXED]
+          //BUG Description: 拍号不好点击 
+          //BUG Fixed by: 为g元素添加一个透明的矩形，使得g元素的点击范围更大
+          let timeSignatureEleWidth = timeSignatureEle[0].getBBox().width;
+          let timeSignatureEleHeight = timeSignatureEle[0].getBBox().height;
+          let timeSignatureEleX = timeSignatureEle[0].getBBox().x;
+          let timeSignatureEleY = timeSignatureEle[0].getBBox().y;
+          var newRect = document.createElementNS("http://www.w3.org/2000/svg","rect");
+          newRect.setAttribute("x", timeSignatureEleX);
+          newRect.setAttribute("y", timeSignatureEleY);
+          newRect.setAttribute("width", timeSignatureEleWidth);
+          newRect.setAttribute("height", timeSignatureEleHeight);
+          newRect.setAttribute("fill", "transparent");
+          timeSignatureEle[0].appendChild(newRect);
+
           timeSignatureEle[0].addEventListener("click", function (e) {
             e.stopPropagation(); // 阻止事件冒泡
+
             if (!isBlock) {
               // 清空之前的时间签名数字
               timeSignatureNum = "";
