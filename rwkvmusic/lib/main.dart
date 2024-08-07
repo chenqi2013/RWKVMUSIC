@@ -115,8 +115,11 @@ RxBool infiniteGeneration = false.obs;
 List midiNotes = [];
 // bool isNeedConvertMidiNotes = false;
 
-List virtualNotes = []; //虚拟键盘按键音符
-List<int> intNodes = []; //计算和弦需要使用
+/// 虚拟键盘按键音符
+List virtualNotes = [];
+
+/// 计算和弦需要使用
+List<int> intNodes = [];
 String prechord = '';
 
 /// prompt mode or create mode

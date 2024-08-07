@@ -72,6 +72,9 @@ extension _FindAssets on ChangeNoteKey {
   }
 }
 
+const _kButtonHeight = 40.0;
+const _kContainerHeight = 44.0;
+
 class ChangeNote extends StatelessWidget {
   final void Function(BuildContext context, ChangeNoteKey key) onTapAtIndex;
   final void Function(BuildContext context, ChangeNoteKey key) onLongPress;
@@ -91,9 +94,13 @@ class ChangeNote extends StatelessWidget {
           decoration: BD(
             color: Color(0xFF222222),
           ),
-          height: 60,
+          constraints: BoxConstraints(
+            maxHeight: _kContainerHeight,
+            minHeight: _kContainerHeight,
+          ),
           width: screenWidth,
           child: Ro(
+            m: MAA.center,
             children: [
               5.w,
               ...ChangeNoteKey.values.indexMap((index, k) {
@@ -137,8 +144,8 @@ class ChangeNote extends StatelessWidget {
                     onLongPress(context, k);
                   },
                   child: C(
-                    height: 50,
-                    width: k == ChangeNoteKey.delete ? 78 : 50,
+                    height: _kButtonHeight,
+                    width: k == ChangeNoteKey.delete ? 78 : _kButtonHeight,
                     decoration: BD(color: kW, borderRadius: 4.r),
                     child: child,
                   ),
