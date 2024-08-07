@@ -7,6 +7,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:rwkvmusic/main.dart';
@@ -824,8 +825,14 @@ class _HomePageState extends State<HomePage> {
   }
 
   void _randomizeAbc() async {
+    if (virtualNotes.isEmpty || intNodes.isEmpty) {
+      Fluttertoast.showToast(msg: "Please play some notes before randomizing.");
+      return;
+    }
+
     String randomizeAbcStr = randomizeAbc(createPrompt);
     String createPromptTmp = randomizeAbcStr.replaceAll("\n", "\\n");
+
     String sb =
         "setAbcString(\"%%MIDI program $midiProgramValue\\n$createPromptTmp\",false)";
     _change(sb);
@@ -1425,9 +1432,12 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+  /// 清除全部内容
   void resetToDefaulValueInCreateMode() {
     virtualNotes.clear();
     intNodes.clear();
+    timeSingnatureStr = "4/4";
+    timeSignature.value = 2;
     finalabcStringCreate =
         "setAbcString(\"${ABCHead.getABCWithInstrument('L:1/4\\nM:$timeSingnatureStr\\nK:C\\n|', midiProgramValue)}\",false)";
     finalabcStringCreate =

@@ -72,6 +72,9 @@ extension _FindAssets on ChangeNoteKey {
   }
 }
 
+const _kButtonHeight = 48.0;
+const _kContainerHeight = 52.0;
+
 class ChangeNote extends StatelessWidget {
   final void Function(BuildContext context, ChangeNoteKey key) onTapAtIndex;
   final void Function(BuildContext context, ChangeNoteKey key) onLongPress;
@@ -91,64 +94,143 @@ class ChangeNote extends StatelessWidget {
           decoration: BD(
             color: Color(0xFF222222),
           ),
-          height: 60,
+          constraints: BoxConstraints(
+            maxHeight: _kContainerHeight,
+            minHeight: _kContainerHeight,
+          ),
           width: screenWidth,
-          child: Ro(
-            children: [
-              5.w,
-              ...ChangeNoteKey.values.indexMap((index, k) {
-                Widget child = C();
-                final assetName = k.assetName;
-                if (assetName != null) {
-                  child = Center(
-                    child: SvgPicture.asset(
-                      assetName,
-                      width: k.assetSize.width,
-                      height: k.assetSize.height,
-                    ),
-                  );
-                }
-                if (k == ChangeNoteKey.randomGroove) {
-                  child = Center(
-                      child: T(
-                    "Random\nGroove",
-                    textAlign: TextAlign.center,
-                    s: TS(
-                      w: FW.w500,
-                      s: 10,
-                    ),
-                  ));
-                }
-                if (k == ChangeNoteKey.delete) {
-                  child = C(
-                    decoration: BD(color: kCR.wo(0.5)),
-                    child: Center(
+          child: Center(
+            child: ListView(
+              scrollDirection: Axis.horizontal,
+              shrinkWrap: true,
+              children: [
+                5.w,
+                ...ChangeNoteKey.values.indexMap((index, k) {
+                  Widget child = C();
+                  final assetName = k.assetName;
+                  if (assetName != null) {
+                    child = Center(
+                      child: SvgPicture.asset(
+                        assetName,
+                        width: k.assetSize.width,
+                        height: k.assetSize.height,
+                      ),
+                    );
+                  }
+                  if (k == ChangeNoteKey.randomGroove) {
+                    child = Center(
+                        child: T(
+                      "Random\nGroove",
+                      textAlign: TextAlign.center,
+                      s: TS(
+                        w: FW.w500,
+                        s: 10,
+                      ),
+                    ));
+                  }
+                  if (k == ChangeNoteKey.delete) {
+                    child = Center(
                         child: T(
                       "Delete",
                       s: TS(w: FW.w500, s: 16),
-                    )),
-                  );
-                }
-                return GD(
-                  onTap: () {
-                    onTapAtIndex(context, k);
-                  },
-                  onLongPress: () {
-                    onLongPress(context, k);
-                  },
-                  child: C(
-                    height: 50,
-                    width: k == ChangeNoteKey.delete ? 78 : 50,
-                    decoration: BD(color: kW, borderRadius: 4.r),
+                    ));
+                  }
+
+                  return _Button(
+                    index: index,
+                    onTap: () {
+                      onTapAtIndex(context, k);
+                    },
+                    onLongPress: k == ChangeNoteKey.delete
+                        ? () {
+                            onLongPress(context, k);
+                          }
+                        : null,
+                    height: _kButtonHeight,
+                    width: k == ChangeNoteKey.delete ? 78 : _kButtonHeight,
+                    color: k == ChangeNoteKey.delete ? Color(0xFFFF6666) : null,
                     child: child,
-                  ),
-                );
-              }).widgetJoin(
-                (_) => 4.w,
-              ),
-              5.w,
-            ],
+                  );
+                }).widgetJoin(
+                  (_) => 4.w,
+                ),
+                5.w,
+              ],
+            ),
           )),
+    );
+  }
+}
+
+class _Button extends StatefulWidget {
+  final Widget child;
+  final int index;
+  final void Function()? onTap;
+  final void Function()? onLongPress;
+  final double height;
+  final double width;
+  final Color? color;
+
+  const _Button({
+    required this.width,
+    required this.child,
+    required this.index,
+    required this.height,
+    this.onTap,
+    this.onLongPress,
+    this.color,
+  });
+
+  @override
+  State<_Button> createState() => _ButtonState();
+}
+
+class _ButtonState extends State<_Button> {
+  bool tapped = false;
+
+  @override
+  Widget build(BuildContext context) {
+    print(tapped);
+    return GD(
+      onTapDown: (_) {
+        setState(() {
+          tapped = true;
+        });
+      },
+      onTapCancel: () async {
+        await wait(100);
+        setState(() {
+          tapped = false;
+        });
+      },
+      onTapUp: (details) async {
+        await wait(100);
+        setState(() {
+          tapped = false;
+        });
+      },
+      onTap: widget.onTap,
+      onLongPress: widget.onLongPress,
+      child: SB(
+        height: _kButtonHeight,
+        width: widget.width,
+        child: Center(
+          child: AnimatedContainer(
+            duration: 100.ms,
+            curve: Curves.easeOutCirc,
+            height: _kButtonHeight * (tapped ? 0.9 : 1),
+            width: widget.width * (tapped ? 0.9 : 1),
+            decoration: BD(
+              color: widget.color ?? kW,
+              borderRadius: 4.r,
+            ),
+            child: Transform.scale(
+              scale: tapped ? 0.9 : 1,
+              child: widget.child,
+            ),
+          ),
+        ),
+      ),
     );
   }
 }
