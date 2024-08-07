@@ -17,6 +17,8 @@ class CustomSegmentControl extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     bool isWindowsOrMac = Platform.isWindows || Platform.isMacOS;
+    var width = isWindowsOrMac ? 605.w : 535.w;
+
     return Container(
       // height: 50,
       decoration: BoxDecoration(
@@ -56,9 +58,10 @@ class CustomSegmentControl extends StatelessWidget {
               // });
             },
             child: Obx(() => Container(
+                  width: width / 2,
                   alignment: Alignment.center,
-                  padding: EdgeInsets.symmetric(
-                      horizontal: isWindowsOrMac ? 25.w : 20.w),
+                  // padding: EdgeInsets.symmetric(
+                  //     horizontal: isWindowsOrMac ? 25.w : 20.w),
                   decoration: BoxDecoration(
                     color: selectedIndex.value == index
                         ? AppColor.color_494949
@@ -68,6 +71,7 @@ class CustomSegmentControl extends StatelessWidget {
                   ),
                   child: Text(
                     segments[index],
+                    textAlign: TextAlign.center,
                     style: TextStyle(
                       // backgroundColor: Colors.red,
                       color: selectedIndex.value == index
