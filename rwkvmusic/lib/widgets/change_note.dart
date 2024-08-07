@@ -212,7 +212,9 @@ class _ButtonState extends State<_Button> {
         height: _kButtonHeight,
         width: widget.width,
         child: Center(
-          child: C(
+          child: AnimatedContainer(
+            duration: 100.ms,
+            curve: Curves.easeOutCirc,
             height: _kButtonHeight * (tapped ? 0.9 : 1),
             width: widget.width * (tapped ? 0.9 : 1),
             decoration: BD(
