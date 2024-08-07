@@ -99,61 +99,64 @@ class ChangeNote extends StatelessWidget {
             minHeight: _kContainerHeight,
           ),
           width: screenWidth,
-          child: Ro(
-            m: MAA.center,
-            children: [
-              5.w,
-              ...ChangeNoteKey.values.indexMap((index, k) {
-                Widget child = C();
-                final assetName = k.assetName;
-                if (assetName != null) {
-                  child = Center(
-                    child: SvgPicture.asset(
-                      assetName,
-                      width: k.assetSize.width,
-                      height: k.assetSize.height,
-                    ),
-                  );
-                }
-                if (k == ChangeNoteKey.randomGroove) {
-                  child = Center(
-                      child: T(
-                    "Random\nGroove",
-                    textAlign: TextAlign.center,
-                    s: TS(
-                      w: FW.w500,
-                      s: 10,
-                    ),
-                  ));
-                }
-                if (k == ChangeNoteKey.delete) {
-                  child = Center(
-                      child: T(
-                    "Delete",
-                    s: TS(w: FW.w500, s: 16),
-                  ));
-                }
+          child: Center(
+            child: ListView(
+              scrollDirection: Axis.horizontal,
+              shrinkWrap: true,
+              children: [
+                5.w,
+                ...ChangeNoteKey.values.indexMap((index, k) {
+                  Widget child = C();
+                  final assetName = k.assetName;
+                  if (assetName != null) {
+                    child = Center(
+                      child: SvgPicture.asset(
+                        assetName,
+                        width: k.assetSize.width,
+                        height: k.assetSize.height,
+                      ),
+                    );
+                  }
+                  if (k == ChangeNoteKey.randomGroove) {
+                    child = Center(
+                        child: T(
+                      "Random\nGroove",
+                      textAlign: TextAlign.center,
+                      s: TS(
+                        w: FW.w500,
+                        s: 10,
+                      ),
+                    ));
+                  }
+                  if (k == ChangeNoteKey.delete) {
+                    child = Center(
+                        child: T(
+                      "Delete",
+                      s: TS(w: FW.w500, s: 16),
+                    ));
+                  }
 
-                return _Button(
-                  child,
-                  index,
-                  () {
-                    onTapAtIndex(context, k);
-                  },
-                  k == ChangeNoteKey.delete
-                      ? () {
-                          onLongPress(context, k);
-                        }
-                      : null,
-                  _kButtonHeight,
-                  k == ChangeNoteKey.delete ? 78 : _kButtonHeight,
-                  color: k == ChangeNoteKey.delete ? Color(0xFFFF6666) : null,
-                );
-              }).widgetJoin(
-                (_) => 4.w,
-              ),
-              5.w,
-            ],
+                  return _Button(
+                    index: index,
+                    onTap: () {
+                      onTapAtIndex(context, k);
+                    },
+                    onLongPress: k == ChangeNoteKey.delete
+                        ? () {
+                            onLongPress(context, k);
+                          }
+                        : null,
+                    height: _kButtonHeight,
+                    width: k == ChangeNoteKey.delete ? 78 : _kButtonHeight,
+                    color: k == ChangeNoteKey.delete ? Color(0xFFFF6666) : null,
+                    child: child,
+                  );
+                }).widgetJoin(
+                  (_) => 4.w,
+                ),
+                5.w,
+              ],
+            ),
           )),
     );
   }
@@ -168,13 +171,13 @@ class _Button extends StatefulWidget {
   final double width;
   final Color? color;
 
-  const _Button(
-    this.child,
-    this.index,
+  const _Button({
+    required this.width,
+    required this.child,
+    required this.index,
+    required this.height,
     this.onTap,
     this.onLongPress,
-    this.height,
-    this.width, {
     this.color,
   });
 
