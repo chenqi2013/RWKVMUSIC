@@ -72,8 +72,8 @@ extension _FindAssets on ChangeNoteKey {
   }
 }
 
-const _kButtonHeight = 40.0;
-const _kContainerHeight = 44.0;
+const _kButtonHeight = 48.0;
+const _kContainerHeight = 52.0;
 
 class ChangeNote extends StatelessWidget {
   final void Function(BuildContext context, ChangeNoteKey key) onTapAtIndex;
@@ -127,28 +127,27 @@ class ChangeNote extends StatelessWidget {
                   ));
                 }
                 if (k == ChangeNoteKey.delete) {
-                  child = C(
-                    decoration: BD(color: kCR.wo(0.5)),
-                    child: Center(
-                        child: T(
-                      "Delete",
-                      s: TS(w: FW.w500, s: 16),
-                    )),
-                  );
+                  child = Center(
+                      child: T(
+                    "Delete",
+                    s: TS(w: FW.w500, s: 16),
+                  ));
                 }
-                return GD(
-                  onTap: () {
+
+                return _Button(
+                  child,
+                  index,
+                  () {
                     onTapAtIndex(context, k);
                   },
-                  onLongPress: () {
-                    onLongPress(context, k);
-                  },
-                  child: C(
-                    height: _kButtonHeight,
-                    width: k == ChangeNoteKey.delete ? 78 : _kButtonHeight,
-                    decoration: BD(color: kW, borderRadius: 4.r),
-                    child: child,
-                  ),
+                  k == ChangeNoteKey.delete
+                      ? () {
+                          onLongPress(context, k);
+                        }
+                      : null,
+                  _kButtonHeight,
+                  k == ChangeNoteKey.delete ? 78 : _kButtonHeight,
+                  color: k == ChangeNoteKey.delete ? Color(0xFFFF6666) : null,
                 );
               }).widgetJoin(
                 (_) => 4.w,
@@ -156,6 +155,77 @@ class ChangeNote extends StatelessWidget {
               5.w,
             ],
           )),
+    );
+  }
+}
+
+class _Button extends StatefulWidget {
+  final Widget child;
+  final int index;
+  final void Function()? onTap;
+  final void Function()? onLongPress;
+  final double height;
+  final double width;
+  final Color? color;
+
+  const _Button(
+    this.child,
+    this.index,
+    this.onTap,
+    this.onLongPress,
+    this.height,
+    this.width, {
+    this.color,
+  });
+
+  @override
+  State<_Button> createState() => _ButtonState();
+}
+
+class _ButtonState extends State<_Button> {
+  bool tapped = false;
+
+  @override
+  Widget build(BuildContext context) {
+    print(tapped);
+    return GD(
+      onTapDown: (_) {
+        setState(() {
+          tapped = true;
+        });
+      },
+      onTapCancel: () async {
+        await wait(100);
+        setState(() {
+          tapped = false;
+        });
+      },
+      onTapUp: (details) async {
+        await wait(100);
+        setState(() {
+          tapped = false;
+        });
+      },
+      onTap: widget.onTap,
+      onLongPress: widget.onLongPress,
+      child: SB(
+        height: _kButtonHeight,
+        width: widget.width,
+        child: Center(
+          child: C(
+            height: _kButtonHeight * (tapped ? 0.9 : 1),
+            width: widget.width * (tapped ? 0.9 : 1),
+            decoration: BD(
+              color: widget.color ?? kW,
+              borderRadius: 4.r,
+            ),
+            child: Transform.scale(
+              scale: tapped ? 0.9 : 1,
+              child: widget.child,
+            ),
+          ),
+        ),
+      ),
     );
   }
 }
