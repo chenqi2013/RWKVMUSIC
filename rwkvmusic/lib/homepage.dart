@@ -178,7 +178,7 @@ class _HomePageState extends State<HomePage> {
       ..addJavaScriptChannel("flutteronMidiExport",
           onMessageReceived: (JavaScriptMessage jsMessage) {
         exportMidiStr = jsMessage.message;
-        debugPrint('flutteronMidiExport onMessageReceived=$exportMidiStr');
+        // debugPrint('flutteronMidiExport onMessageReceived=$exportMidiStr');
       })
       ..addJavaScriptChannel("flutteronEvents",
           onMessageReceived: (JavaScriptMessage jsMessage) {
@@ -204,6 +204,9 @@ class _HomePageState extends State<HomePage> {
             : finalabcStringCreate;
         String result =
             abc.replaceAll('setAbcString("', '').replaceAll('",false)', '');
+        result = result.replaceAll(r'\"', '"');
+        result = result.replaceAll('\\n', '\n');
+        // debugPrint('result==>>>>$result');
         abc = base64.encode(utf8.encode(result));
         controllerPiano.runJavaScript("exportMidiFile('$abc')");
       })
