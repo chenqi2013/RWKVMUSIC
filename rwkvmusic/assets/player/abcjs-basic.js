@@ -462,7 +462,7 @@ THE SOFTWARE.
                 while (
                   self.noteTimings.length > self.currentEvent &&
                   self.noteTimings[self.currentEvent].milliseconds <
-                    self.currentTime
+                  self.currentTime
                 ) {
                   if (
                     self.eventCallback &&
@@ -480,12 +480,12 @@ THE SOFTWARE.
                   self.lineEndCallback &&
                   self.lineEndTimings.length > self.currentLine &&
                   self.lineEndTimings[self.currentLine].milliseconds <
-                    self.currentTime &&
+                  self.currentTime &&
                   self.currentEvent < self.noteTimings.length
                 ) {
                   var leftEvent =
                     self.noteTimings[self.currentEvent].milliseconds ===
-                    self.currentTime
+                      self.currentTime
                       ? self.noteTimings[self.currentEvent]
                       : self.noteTimings[self.currentEvent - 1];
                   self.lineEndCallback(
@@ -721,7 +721,7 @@ THE SOFTWARE.
               while (
                 self.noteTimings.length > self.currentEvent &&
                 self.noteTimings[self.currentEvent].milliseconds <
-                  self.currentTime
+                self.currentTime
               ) {
                 self.currentEvent++;
               }
@@ -730,8 +730,8 @@ THE SOFTWARE.
                 while (
                   self.lineEndTimings.length > self.currentLine &&
                   self.lineEndTimings[self.currentLine].milliseconds +
-                    self.lineEndAnticipation <
-                    self.currentTime
+                  self.lineEndAnticipation <
+                  self.currentTime
                 ) {
                   self.currentLine++;
                 }
@@ -798,18 +798,18 @@ THE SOFTWARE.
             return (
               (_typeof =
                 "function" == typeof Symbol &&
-                "symbol" == typeof Symbol.iterator
+                  "symbol" == typeof Symbol.iterator
                   ? function (obj) {
-                      return typeof obj;
-                    }
+                    return typeof obj;
+                  }
                   : function (obj) {
-                      return obj &&
-                        "function" == typeof Symbol &&
-                        obj.constructor === Symbol &&
-                        obj !== Symbol.prototype
-                        ? "symbol"
-                        : typeof obj;
-                    }),
+                    return obj &&
+                      "function" == typeof Symbol &&
+                      obj.constructor === Symbol &&
+                      obj !== Symbol.prototype
+                      ? "symbol"
+                      : typeof obj;
+                  }),
               _typeof(obj)
             );
           }
@@ -979,8 +979,8 @@ THE SOFTWARE.
                       };
                       lastChord =
                         measureStartChord &&
-                        measureStartChord.chord &&
-                        measureStartChord.chord.length > 0
+                          measureStartChord.chord &&
+                          measureStartChord.chord.length > 0
                           ? measureStartChord.chord[0].name
                           : null;
                       if (lastChord) measure.lastChord = lastChord;
@@ -1063,8 +1063,8 @@ THE SOFTWARE.
                               };
                               lastChord =
                                 measureStartChord &&
-                                measureStartChord.chord &&
-                                measureStartChord.chord.length > 0
+                                  measureStartChord.chord &&
+                                  measureStartChord.chord.length > 0
                                   ? measureStartChord.chord[0].name
                                   : null;
                               if (lastChord) measure.lastChord = lastChord;
@@ -1267,7 +1267,7 @@ THE SOFTWARE.
         /***/ function (module, __unused_webpack_exports, __webpack_require__) {
           var _require = __webpack_require__(
               /*! ./relative-major */ "./src/const/relative-major.js"
-            ),
+          ),
             relativeMajor = _require.relativeMajor;
           var key1sharp = {
             acc: "sharp",
@@ -2908,7 +2908,7 @@ THE SOFTWARE.
             }
             /*
   if (params.tablature_options) {
-  	abcjsParams['tablatures'] = params.tablature_options;
+    abcjsParams['tablatures'] = params.tablature_options;
   }
   */
             if (abcjsParams.tablature) {
@@ -3132,7 +3132,7 @@ THE SOFTWARE.
                   selection.start,
                   selection.end
                 );
-            } catch (e) {} // maybe printer isn't defined yet?
+            } catch (e) { } // maybe printer isn't defined yet?
             if (this.selectionChangeCallback)
               this.selectionChangeCallback(selection.start, selection.end);
           };
@@ -3677,13 +3677,13 @@ THE SOFTWARE.
                 encode(line.substring(col_num + 1).substring(0, 64));
               addWarning(
                 "Music Line:" +
-                  tokenizer.lineIndex +
-                  ":" +
-                  (col_num + 1) +
-                  ": " +
-                  str +
-                  ":  " +
-                  clean_line
+                tokenizer.lineIndex +
+                ":" +
+                (col_num + 1) +
+                ": " +
+                str +
+                ":  " +
+                clean_line
               );
               addWarningObject({
                 message: str,
@@ -4875,8 +4875,8 @@ THE SOFTWARE.
                       } else
                         warn(
                           "Unknown parameter " +
-                            currToken.token +
-                            " in font definition.",
+                          currToken.token +
+                          " in font definition.",
                           str,
                           position
                         );
@@ -4918,8 +4918,8 @@ THE SOFTWARE.
                     } else
                       warn(
                         "Unknown parameter " +
-                          currToken.token +
-                          " in font definition.",
+                        currToken.token +
+                        " in font definition.",
                         str,
                         position
                       );
@@ -5345,7 +5345,7 @@ THE SOFTWARE.
                 else if (midi[0].type !== "alpha" || midi[1].type !== "number")
                   warn(
                     "Expected one string and one integer parameters in MIDI " +
-                      midi_cmd,
+                    midi_cmd,
                     restOfString,
                     0
                   );
@@ -5382,7 +5382,7 @@ THE SOFTWARE.
                 } else {
                   warn(
                     "Expected one note name and one integer parameter in MIDI " +
-                      midi_cmd,
+                    midi_cmd,
                     restOfString,
                     0
                   );
@@ -5493,7 +5493,7 @@ THE SOFTWARE.
                   if (midi[3].type !== "number")
                     warn(
                       "Expected integer parameter for octave in MIDI " +
-                        midi_cmd,
+                      midi_cmd,
                       restOfString,
                       0
                     );
@@ -5508,14 +5508,14 @@ THE SOFTWARE.
                 if (midi.length < 2)
                   warn(
                     "Expected string parameter and at least one integer parameter in MIDI " +
-                      midi_cmd,
+                    midi_cmd,
                     restOfString,
                     0
                   );
                 else if (midi[0].type !== "alpha")
                   warn(
                     "Expected string parameter and at least one integer parameter in MIDI " +
-                      midi_cmd,
+                    midi_cmd,
                     restOfString,
                     0
                   );
@@ -6098,13 +6098,13 @@ THE SOFTWARE.
                         var bracket = justOpenBracket
                           ? "start"
                           : openBracket
-                          ? "continue"
-                          : undefined;
+                            ? "continue"
+                            : undefined;
                         var brace = justOpenBrace
                           ? "start"
                           : openBrace
-                          ? "continue"
-                          : undefined;
+                            ? "continue"
+                            : undefined;
                         addVoice(vc, newStaff, bracket, brace, continueBar);
                         justOpenParen = false;
                         justOpenBracket = false;
@@ -6177,10 +6177,10 @@ THE SOFTWARE.
                   if (footerArr.length > 3)
                     warn(
                       "Too many tabs in " +
-                        cmd +
-                        ": " +
-                        footerArr.length +
-                        " found.",
+                      cmd +
+                      ": " +
+                      footerArr.length +
+                      " found.",
                       restOfString,
                       0
                     );
@@ -6268,8 +6268,8 @@ THE SOFTWARE.
                       if (tokens.length !== 1 || tokens[0].type !== "number")
                         warn(
                           'Directive "' +
-                            cmd +
-                            '" requires a number as a parameter.'
+                          cmd +
+                          '" requires a number as a parameter.'
                         );
                       tune.formatting.fontboxpadding = tokens[0].floatt;
                       break;
@@ -7751,7 +7751,7 @@ THE SOFTWARE.
                             multilineVars.key.accidentals[
                               k
                             ].note.toLowerCase() ===
-                              oldKey.accidentals[kk].note.toLowerCase()
+                            oldKey.accidentals[kk].note.toLowerCase()
                           )
                             oldKey.accidentals[kk].note = null;
                         }
@@ -8218,17 +8218,17 @@ THE SOFTWARE.
                   if (attr.warn !== undefined)
                     warn(
                       "Expected one of (_B, _E, _b, _e) for " +
-                        name +
-                        " in voice: " +
-                        attr.warn,
+                      name +
+                      " in voice: " +
+                      attr.warn,
                       line,
                       start
                     );
                   else if (attr.token.length === 0 && line[start] !== '"')
                     warn(
                       "Expected one of (_B, _E, _b, _e) for " +
-                        name +
-                        " in voice",
+                      name +
+                      " in voice",
                       line,
                       start
                     );
@@ -8237,8 +8237,8 @@ THE SOFTWARE.
                     if (!t)
                       warn(
                         "Expected one of (_B, _E, _b, _e) for " +
-                          name +
-                          " in voice",
+                        name +
+                        " in voice",
                         line,
                         start
                       );
@@ -8600,7 +8600,7 @@ THE SOFTWARE.
             // If this is single voice music then the voice index isn't set, so we use the first voice.
             var voiceIndex = multilineVars.currentVoice
               ? multilineVars.currentVoice.staffNum * 100 +
-                multilineVars.currentVoice.index
+              multilineVars.currentVoice.index
               : 0;
             if (multilineVars.inTie[overlayLevel][voiceIndex]) {
               if (el.pitches !== undefined || el.rest.type !== "spacer")
@@ -8826,8 +8826,8 @@ THE SOFTWARE.
                         if (
                           multilineVars.barNumbers &&
                           multilineVars.currBarNumber %
-                            multilineVars.barNumbers ===
-                            0
+                          multilineVars.barNumbers ===
+                          0
                         )
                           bar.barNumber = multilineVars.currBarNumber;
                       }
@@ -9149,7 +9149,7 @@ THE SOFTWARE.
                         if (!el.rest || el.rest.type !== "spacer")
                           warn(
                             "Duration not representable: " +
-                              line.substring(startI, i),
+                            line.substring(startI, i),
                             line,
                             i
                           );
@@ -9192,7 +9192,7 @@ THE SOFTWARE.
             // If this is single voice music then the voice index isn't set, so we use the first voice.
             var voiceIndex = multilineVars.currentVoice
               ? multilineVars.currentVoice.staffNum * 100 +
-                multilineVars.currentVoice.index
+              multilineVars.currentVoice.index
               : 0;
             if (multilineVars.inTie[overlayLevel] === undefined)
               multilineVars.inTie[overlayLevel] = [];
@@ -9350,8 +9350,8 @@ THE SOFTWARE.
                   } else
                     warn(
                       "Unknown character '" +
-                        gra[1][ii] +
-                        "' while parsing grace note",
+                      gra[1][ii] +
+                      "' while parsing grace note",
                       line,
                       i
                     );
@@ -9747,20 +9747,20 @@ THE SOFTWARE.
               params.part = multilineVars.partForNextLine;
             params.clef =
               multilineVars.currentVoice &&
-              multilineVars.staves[multilineVars.currentVoice.staffNum].clef !==
+                multilineVars.staves[multilineVars.currentVoice.staffNum].clef !==
                 undefined
                 ? parseCommon.clone(
-                    multilineVars.staves[multilineVars.currentVoice.staffNum]
-                      .clef
-                  )
+                  multilineVars.staves[multilineVars.currentVoice.staffNum]
+                    .clef
+                )
                 : parseCommon.clone(multilineVars.clef);
             var scoreTranspose = multilineVars.currentVoice
               ? multilineVars.currentVoice.scoreTranspose
               : 0;
             params.key = parseKeyVoice.standardKey(
               multilineVars.key.root +
-                multilineVars.key.acc +
-                multilineVars.key.mode,
+              multilineVars.key.acc +
+              multilineVars.key.mode,
               multilineVars.key.root,
               multilineVars.key.acc,
               scoreTranspose
@@ -10015,7 +10015,7 @@ THE SOFTWARE.
                     el.pitch +=
                       7 *
                       (multilineVars.currentVoice &&
-                      multilineVars.currentVoice.octave !== undefined
+                        multilineVars.currentVoice.octave !== undefined
                         ? multilineVars.currentVoice.octave
                         : multilineVars.octave);
                     el.name = line[index];
@@ -10589,7 +10589,6 @@ THE SOFTWARE.
                         token: "bar_invisible",
                       };
                   }
-                  break;
                 case ":":
                   ++i;
                   switch (line[i]) {
@@ -10624,7 +10623,6 @@ THE SOFTWARE.
                                 token: "bar_right_repeat",
                               };
                           }
-                          break;
                         case "|":
                           // :||
                           ++i;
@@ -10643,14 +10641,12 @@ THE SOFTWARE.
                             token: "bar_right_repeat",
                           };
                       }
-                      break;
                     default:
                       return {
                         len: 1,
                         warn: "Unknown bar symbol",
                       };
                   }
-                  break;
                 case "[":
                   // [
                   ++i;
@@ -10684,7 +10680,6 @@ THE SOFTWARE.
                       len: 0,
                     };
                   }
-                  break;
                 case "|":
                   // |
                   ++i;
@@ -10722,7 +10717,6 @@ THE SOFTWARE.
                         token: "bar_thin",
                       };
                   }
-                  break;
               }
               return {
                 len: 0,
@@ -10988,7 +10982,6 @@ THE SOFTWARE.
                         warn: "Expected note name after accidental",
                       };
                   }
-                  break;
                 default:
                   return {
                     len: 1,
@@ -12226,7 +12219,7 @@ THE SOFTWARE.
                               durationsPerLines[ii] &&
                               tune.lines[ii].staff &&
                               staff.voices.length >=
-                                tune.lines[ii].staff[0].voices.length
+                              tune.lines[ii].staff[0].voices.length
                             ) {
                               tune.lines[ii].staff[0].voices.push([
                                 {
@@ -12348,7 +12341,7 @@ THE SOFTWARE.
                 var i = start - 1;
                 i > 0 && voice[i].el_type !== "bar";
                 i--
-              ) {}
+              ) { }
               return i;
             }
             function fixTitles(lines) {
@@ -12643,7 +12636,7 @@ THE SOFTWARE.
                           el.pitches[0].endSlur.shift();
                         else if (
                           el.pitches[0].endSlur[
-                            el.pitches[0].endSlur.length - 1
+                          el.pitches[0].endSlur.length - 1
                           ] === 100
                         )
                           el.pitches[0].endSlur.pop();
@@ -12787,7 +12780,7 @@ THE SOFTWARE.
                 tune.lines[tune.lineNum].staff &&
                 tune.lines[tune.lineNum].staff[tune.staffNum] &&
                 tune.lines[tune.lineNum].staff[tune.staffNum].voices[
-                  tune.voiceNum
+                tune.voiceNum
                 ]
               ) {
                 for (
@@ -12800,7 +12793,7 @@ THE SOFTWARE.
                 ) {
                   var el =
                     tune.lines[tune.lineNum].staff[tune.staffNum].voices[
-                      tune.voiceNum
+                    tune.voiceNum
                     ][i];
                   if (el.el_type === "note") {
                     return el;
@@ -12983,7 +12976,7 @@ THE SOFTWARE.
                 // These elements should not be added twice, so if the element exists on tune line without a note or bar before it, just replace the staff version.
                 var voice =
                   tune.lines[tune.lineNum].staff[tune.staffNum].voices[
-                    tune.voiceNum
+                  tune.voiceNum
                   ];
                 for (var i = 0; i < voice.length; i++) {
                   if (
@@ -13240,14 +13233,14 @@ THE SOFTWARE.
                 createStaff(params);
               else if (
                 tune.lines[tune.lineNum].staff[tune.staffNum].voices[
-                  tune.voiceNum
+                tune.voiceNum
                 ] === undefined
               )
                 createVoice(params);
               else if (
                 !this.containsNotes(
                   tune.lines[tune.lineNum].staff[tune.staffNum].voices[
-                    tune.voiceNum
+                  tune.voiceNum
                   ]
                 )
               ) {
@@ -13331,7 +13324,7 @@ THE SOFTWARE.
                   if (
                     tune.lines[i].staff[staffNum] === undefined ||
                     tune.lines[i].staff[staffNum].voices[voiceNum] ===
-                      undefined ||
+                    undefined ||
                     !this.containsNotes(
                       tune.lines[i].staff[staffNum].voices[voiceNum]
                     )
@@ -13439,7 +13432,7 @@ THE SOFTWARE.
                 }
                 if (
                   !outputLines[action.line].staff[action.staff].voices[
-                    action.voice
+                  action.voice
                   ]
                 ) {
                   outputLines[action.line].staff[action.staff].voices[
@@ -13461,7 +13454,7 @@ THE SOFTWARE.
                   });
                 var currVoice =
                   outputLines[action.line].staff[action.staff].voices[
-                    action.voice
+                  action.voice
                   ];
                 for (var kk = currVoice.length - 1; kk >= 0; kk--) {
                   if (currVoice[kk].el_type === "key") {
@@ -13964,7 +13957,7 @@ THE SOFTWARE.
           );
           var _require = __webpack_require__(
               /*! ../const/relative-major */ "./src/const/relative-major.js"
-            ),
+          ),
             relativeMajor = _require.relativeMajor,
             transposeKey = _require.transposeKey,
             relativeMode = _require.relativeMode;
@@ -14452,17 +14445,17 @@ THE SOFTWARE.
                 match = note.match(
                   new RegExp(
                     regPreBracket.source +
-                      regOpenBracket.source +
-                      regOptionalNote.source +
-                      regOptionalNote.source +
-                      regOptionalNote.source +
-                      regOptionalNote.source +
-                      regOptionalNote.source +
-                      regOptionalNote.source +
-                      regOptionalNote.source +
-                      regOptionalNote.source +
-                      regCloseBracket.source +
-                      regSpace.source
+                    regOpenBracket.source +
+                    regOptionalNote.source +
+                    regOptionalNote.source +
+                    regOptionalNote.source +
+                    regOptionalNote.source +
+                    regOptionalNote.source +
+                    regOptionalNote.source +
+                    regOptionalNote.source +
+                    regOptionalNote.source +
+                    regCloseBracket.source +
+                    regSpace.source
                   )
                 );
                 if (match) {
@@ -14501,24 +14494,24 @@ THE SOFTWARE.
               var match = note.match(
                 new RegExp(
                   regPreBrace.source +
-                    regOpenBrace.source +
-                    regPreNote.source +
-                    regOptionalNote.source +
-                    regPreNote.source +
-                    regOptionalNote.source +
-                    regPreNote.source +
-                    regOptionalNote.source +
-                    regPreNote.source +
-                    regOptionalNote.source +
-                    regPreNote.source +
-                    regOptionalNote.source +
-                    regPreNote.source +
-                    regOptionalNote.source +
-                    regPreNote.source +
-                    regOptionalNote.source +
-                    regPreNote.source +
-                    regOptionalNote.source +
-                    regCloseBrace.source
+                  regOpenBrace.source +
+                  regPreNote.source +
+                  regOptionalNote.source +
+                  regPreNote.source +
+                  regOptionalNote.source +
+                  regPreNote.source +
+                  regOptionalNote.source +
+                  regPreNote.source +
+                  regOptionalNote.source +
+                  regPreNote.source +
+                  regOptionalNote.source +
+                  regPreNote.source +
+                  regOptionalNote.source +
+                  regPreNote.source +
+                  regOptionalNote.source +
+                  regPreNote.source +
+                  regOptionalNote.source +
+                  regCloseBrace.source
                 )
               );
               if (match) {
@@ -14870,7 +14863,7 @@ THE SOFTWARE.
                           ii = currentTrack.length - 1;
                           ii >= 0 && currentTrack[ii].cmd !== "program";
                           ii--
-                        ) {}
+                        ) { }
                         if (
                           ii < 0 ||
                           currentTrack[ii].instrument !== element.program
@@ -14911,8 +14904,8 @@ THE SOFTWARE.
                       // This should never happen
                       console.log(
                         "MIDI creation. Unknown el_type: " +
-                          element.el_type +
-                          "\n"
+                        element.el_type +
+                        "\n"
                       ); // jshint ignore:line
                       break;
                   }
@@ -17034,7 +17027,7 @@ THE SOFTWARE.
                                     Math.round(
                                       (tripletDurationTotal -
                                         tripletDurationCount) *
-                                        1000000
+                                      1000000
                                     ) / 1000000;
                                 } else {
                                   noteElem.duration =
@@ -17279,8 +17272,8 @@ THE SOFTWARE.
                           default:
                             console.log(
                               "MIDI: element type " +
-                                elem.el_type +
-                                " not handled."
+                              elem.el_type +
+                              " not handled."
                             );
                         }
                       }
@@ -18106,8 +18099,8 @@ THE SOFTWARE.
               self.millisecondsPerMeasure = options.millisecondsPerMeasure
                 ? options.millisecondsPerMeasure
                 : options.visualObj
-                ? options.visualObj.millisecondsPerMeasure(self.flattened.tempo)
-                : 1000;
+                  ? options.visualObj.millisecondsPerMeasure(self.flattened.tempo)
+                  : 1000;
               self.beatsPerMeasure = options.visualObj
                 ? options.visualObj.getBeatsPerMeasure()
                 : 4;
@@ -18151,10 +18144,10 @@ THE SOFTWARE.
               if (self.debugCallback)
                 self.debugCallback(
                   "note gathering time = " +
-                    Math.floor(
-                      (activeAudioContext().currentTime - startTime) * 1000
-                    ) +
-                    "ms"
+                  Math.floor(
+                    (activeAudioContext().currentTime - startTime) * 1000
+                  ) +
+                  "ms"
                 );
               startTime = activeAudioContext().currentTime;
               var notes = [];
@@ -18233,10 +18226,10 @@ THE SOFTWARE.
                   if (self.debugCallback)
                     self.debugCallback(
                       "mp3 load time = " +
-                        Math.floor(
-                          (activeAudioContext().currentTime - startTime) * 1000
-                        ) +
-                        "ms"
+                      Math.floor(
+                        (activeAudioContext().currentTime - startTime) * 1000
+                      ) +
+                      "ms"
                     );
                   var loaded = [];
                   var cached = [];
@@ -18284,9 +18277,9 @@ THE SOFTWARE.
                             .then(function (response) {
                               resolve(response);
                             })
-                            ["catch"](function (error) {
-                              reject(error);
-                            });
+                          ["catch"](function (error) {
+                            reject(error);
+                          });
                         }, delay);
                       });
                     } else {
@@ -18312,10 +18305,10 @@ THE SOFTWARE.
                     });
                   }
                 })
-                ["catch"](function (error) {
-                  if (self.debugCallback)
-                    self.debugCallback("loadBatch catch " + error.message);
-                });
+              ["catch"](function (error) {
+                if (self.debugCallback)
+                  self.debugCallback("loadBatch catch " + error.message);
+              });
             };
             self.prime = function () {
               // At this point all of the notes are loaded. This function writes them into the output buffer.
@@ -18428,10 +18421,10 @@ THE SOFTWARE.
                   self.debugCallback("totalSamples = " + totalSamples);
                   self.debugCallback(
                     "creationTime = " +
-                      Math.floor(
-                        (activeAudioContext().currentTime - startTime) * 1000
-                      ) +
-                      "ms"
+                    Math.floor(
+                      (activeAudioContext().currentTime - startTime) * 1000
+                    ) +
+                    "ms"
                   );
                 }
                 function resolveData(me) {
@@ -18509,8 +18502,6 @@ THE SOFTWARE.
                 }
                 return panDistances;
               }
-              // There was either no panning, or the parameters were illegal
-              return null;
             }
 
             // This is called after everything is set up, so it can quickly make sound
@@ -19069,7 +19060,7 @@ THE SOFTWARE.
               instrumentCache[name] = new Promise(function (resolve, reject) {
                 var xhr = new XMLHttpRequest();
                 var noteUrl =
-                  "./soundfont/" + instrument + "-mp3/" + name + ".mp3";
+                  "/assets/player/soundfont/" + instrument + "-mp3/" + name + ".mp3";
                 console.log(noteUrl);
                 xhr.open("GET", noteUrl, true);
                 xhr.responseType = "arraybuffer";
@@ -19078,9 +19069,9 @@ THE SOFTWARE.
                     reject(
                       Error(
                         "Can't load sound at " +
-                          noteUrl +
-                          " status=" +
-                          xhr.status
+                        noteUrl +
+                        " status=" +
+                        xhr.status
                       )
                     );
                     return;
@@ -19529,11 +19520,11 @@ THE SOFTWARE.
                   fnResolve = resolve;
                 });
               })
-              ["catch"](function (error) {
-                if (debugCallback)
-                  debugCallback("placeNote catch: " + error.message);
-                return Promise.resolve();
-              });
+            ["catch"](function (error) {
+              if (debugCallback)
+                debugCallback("placeNote catch: " + error.message);
+              return Promise.resolve();
+            });
           }
           var copyToChannel = function copyToChannel(
             toBuffer,
@@ -19785,7 +19776,7 @@ THE SOFTWARE.
                 (self.visualObj.millisecondsPerMeasure() * 100) / self.warp;
               self.currentTempo = Math.round(
                 (self.visualObj.getBeatsPerMeasure() / millisecondsPerMeasure) *
-                  60000
+                60000
               );
               if (self.control) self.control.setTempo(self.currentTempo);
               self.percent = 0;
@@ -20196,7 +20187,7 @@ Emit tab for Guitar staff
             var rndrer = new TabRenderer(this, renderer, line, staffIndex);
             rndrer.doLayout();
           };
-          function Plugin() {}
+          function Plugin() { }
 
           //
           // Tablature plugin definition
@@ -20219,7 +20210,7 @@ Emit tab for Guitar staff
         /***/ function (module, __unused_webpack_exports, __webpack_require__) {
           var _require = __webpack_require__(
               /*! ../../synth/note-to-midi */ "./src/synth/note-to-midi.js"
-            ),
+          ),
             noteToMidi = _require.noteToMidi;
           var TabNote = __webpack_require__(
             /*! ./tab-note */ "./src/tablatures/instruments/tab-note.js"
@@ -20616,7 +20607,7 @@ Emit tab for Guitar staff
         /***/ function (module, __unused_webpack_exports, __webpack_require__) {
           var _require = __webpack_require__(
               /*! ../../synth/note-to-midi */ "./src/synth/note-to-midi.js"
-            ),
+          ),
             noteToMidi = _require.noteToMidi,
             midiToNote = _require.midiToNote;
 
@@ -20932,7 +20923,7 @@ Emit tab for Guitar staff
             var rndrer = new TabRenderer(this, renderer, line, staffIndex);
             rndrer.doLayout();
           };
-          function Plugin() {}
+          function Plugin() { }
 
           //
           // Tablature plugin definition
@@ -21921,7 +21912,7 @@ Emit tab for Guitar staff
                     v,
                     abcstaff.voices.length
                   ) /
-                    spacing.STEP;
+                  spacing.STEP;
               }
               if (abcstaff.clef && abcstaff.clef.type === "perc")
                 voice.isPercussion = true;
@@ -22891,7 +22882,7 @@ Emit tab for Guitar staff
               var tot = Math.pow(2, durlog), inc = tot / 2;
               tot < duration;
               dot++, tot += inc, inc /= 2
-            ) {}
+            ) { }
             if (elem.startTriplet) {
               this.tripletmultiplier = elem.tripletMultiplier;
             }
@@ -24536,7 +24527,7 @@ Emit tab for Guitar staff
                       new RelativeElement(
                         "scripts.arpeggio",
                         -glyphs.getSymbolWidth("scripts.arpeggio") * 2 -
-                          roomtaken,
+                        roomtaken,
                         0,
                         j + 2,
                         {
@@ -32351,8 +32342,8 @@ Emit tab for Guitar staff
             ];
             renderer.paper.insertStyles(
               ".abcjs-dragging-in-progress text, .abcjs-dragging-in-progress tspan {" +
-                styles.join(" ") +
-                "}"
+              styles.join(" ") +
+              "}"
             );
             var parentStyles = {
               overflow: "hidden",
@@ -32385,18 +32376,18 @@ Emit tab for Guitar staff
             return (
               (_typeof =
                 "function" == typeof Symbol &&
-                "symbol" == typeof Symbol.iterator
+                  "symbol" == typeof Symbol.iterator
                   ? function (obj) {
-                      return typeof obj;
-                    }
+                    return typeof obj;
+                  }
                   : function (obj) {
-                      return obj &&
-                        "function" == typeof Symbol &&
-                        obj.constructor === Symbol &&
-                        obj !== Symbol.prototype
-                        ? "symbol"
-                        : typeof obj;
-                    }),
+                    return obj &&
+                      "function" == typeof Symbol &&
+                      obj.constructor === Symbol &&
+                      obj !== Symbol.prototype
+                      ? "symbol"
+                      : typeof obj;
+                  }),
               _typeof(obj)
             );
           }
@@ -35866,7 +35857,7 @@ Emit tab for Guitar staff
                 if (v.voicenumber === 0) lastTopVoice = i;
                 var topVoice =
                   lastTopVoice !== undefined &&
-                  currentvoices[lastTopVoice].voicenumber !== v.voicenumber
+                    currentvoices[lastTopVoice].voicenumber !== v.voicenumber
                     ? currentvoices[lastTopVoice]
                     : undefined;
                 if (!isSameStaff(v, topVoice)) topVoice = undefined;
@@ -35930,7 +35921,7 @@ Emit tab for Guitar staff
             return (
               element.durationindex -
               (element.children[element.i] &&
-              element.children[element.i].duration > 0
+                element.children[element.i].duration > 0
                 ? 0
                 : 0.0000005)
             ); // if the ith element doesn't have a duration (is not a note), its duration index is fractionally before. This enables CLEF KEYSIG TIMESIG PART, etc. to be laid out before we get to the first note of other voices
@@ -36038,7 +36029,7 @@ Emit tab for Guitar staff
                 element.xTextPos =
                   element.anchor1.x +
                   (element.anchor2.x + element.anchor2.w - element.anchor1.x) /
-                    2;
+                  2;
                 element.top = element.yTextPos + 1;
               }
             }
@@ -36075,7 +36066,7 @@ Emit tab for Guitar staff
   !*** ./src/write/layout/voice-elements.js ***!
   \********************************************/
         /***/ function (module) {
-          var VoiceElement = function VoiceElements() {};
+          var VoiceElement = function VoiceElements() { };
           VoiceElement.beginLayout = function (startx, voice) {
             voice.i = 0;
             voice.durationindex = 0;
