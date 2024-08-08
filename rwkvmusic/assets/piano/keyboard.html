@@ -50,7 +50,7 @@
         left: 0px;
         right: 0px;
         /* width: calc(100% - 10px); */
-        width: 4000px;
+        /* width: 4000px; */
         height: calc(100% - 10px);
         position: absolute;
         display: flex;
@@ -197,6 +197,17 @@
       </div>
     </div>
     <script>
+      // 计算钢琴键盘的宽度
+        const totalKeys = 88; // 琴键总数
+        const keyboardRatio = 0.2; // 单一琴键宽高比，0 = |, 1 = 一
+        let windowHigh = window.innerHeight;
+        let keyboardWidth = Math.round(windowHigh * keyboardRatio * totalKeys)
+        console.log("keyboardWidth", keyboardWidth);
+
+        // 设置钢琴键盘的宽度
+        document.getElementById("keyboard").style.width = `${keyboardWidth}px`;
+
+      
       // JavaScript 代码用于动态创建钢琴键盘
       window.setPiano = function (start, end) {
         start = 21;
@@ -350,9 +361,12 @@
       setPiano(21, 108);
       const key65 = document.querySelector('.key[data-midikey="65"]');
       console.log(key65);
-      key65.scrollIntoView({ behavior: "smooth", block: "center" , inline: "center"});
+      key65.scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+        inline: "center",
+      });
       // const keyboardEle = document.getElementById("keyboard");
-
     </script>
   </body>
 </html>
