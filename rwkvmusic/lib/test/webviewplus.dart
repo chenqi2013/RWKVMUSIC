@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:webview_flutter_plus/webview_flutter_plus.dart';
 
@@ -57,7 +56,7 @@ class _MainPageState extends State<MainPage> {
     super.initState();
   }
 
-  double _height = 0.1;
+  final double _height = 0.1;
 
   @override
   Widget build(BuildContext context) {

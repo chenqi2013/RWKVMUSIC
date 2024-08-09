@@ -76,7 +76,7 @@ CREATE TABLE $tableNotes (
   Future<List<Note>> readAllNotes() async {
     final db = await instance.database;
 
-    final orderBy = '${NoteFields.createdTime} ASC';
+    const orderBy = '${NoteFields.createdTime} ASC';
     // final result =
     //     await db.rawQuery('SELECT * FROM $tableNotes ORDER BY $orderBy');
 

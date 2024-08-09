@@ -109,7 +109,7 @@ class DropButtonList extends StatelessWidget {
           scrollbarTheme: ScrollbarThemeData(
             // radius: const Radius.circular(40),
             // thickness: MaterialStateProperty.all(6),
-            thumbVisibility: MaterialStateProperty.all(true),
+            thumbVisibility: WidgetStateProperty.all(true),
           ),
         ),
         menuItemStyleData: MenuItemStyleData(

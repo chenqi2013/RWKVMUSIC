@@ -105,6 +105,10 @@ dependencies:
   device_info_plus: ^10.1.0
   halo:
 
+  path: any
+  webview_flutter_android: any
+  webview_flutter_wkwebview: any
+  ffi: any
 dev_dependencies:
   flutter_lints: ^3.0.1
   flutter_test:

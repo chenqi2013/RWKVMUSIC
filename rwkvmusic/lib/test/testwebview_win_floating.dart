@@ -8,7 +8,7 @@ void main() {
 }
 
 class WindowsWebviewTest extends StatefulWidget {
-  const WindowsWebviewTest({Key? key}) : super(key: key);
+  const WindowsWebviewTest({super.key});
 
   @override
   State<WindowsWebviewTest> createState() => _WindowsWebviewTestState();

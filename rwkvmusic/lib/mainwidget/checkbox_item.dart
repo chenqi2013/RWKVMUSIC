@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:rwkvmusic/mainwidget/text_item.dart';
-import 'package:rwkvmusic/style/color.dart';
 
 class CheckBoxItem extends StatelessWidget {
   CheckBoxItem(

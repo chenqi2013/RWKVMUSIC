@@ -1,12 +1,7 @@
-import 'dart:async';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_midi_command/flutter_midi_command.dart';
 import 'package:get/get.dart';
-import 'package:rwkvmusic/utils/audioplayer.dart';
-import 'package:rwkvmusic/utils/midiconvert_abc.dart';
 import 'package:rwkvmusic/utils/mididevice_manage.dart';
 
 // import 'controller.dart';

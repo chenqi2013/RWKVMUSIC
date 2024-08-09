@@ -31,7 +31,6 @@ import 'package:rwkvmusic/utils/automeasure_randomizeabc.dart';
 import 'package:rwkvmusic/utils/chord_util.dart';
 import 'package:rwkvmusic/utils/convert_chord.dart';
 import 'package:rwkvmusic/utils/justaudioplayer.dart';
-import 'package:rwkvmusic/utils/key_convert.dart';
 import 'package:rwkvmusic/utils/midiconvert_abc.dart';
 import 'package:rwkvmusic/utils/mididevice_manage.dart';
 import 'package:rwkvmusic/utils/common_utils.dart';

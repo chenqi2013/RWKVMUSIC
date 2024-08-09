@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:rwkvmusic/style/color.dart';
 
 class SwitchItem extends StatelessWidget {
   SwitchItem({super.key, required this.value, required this.onChanged});

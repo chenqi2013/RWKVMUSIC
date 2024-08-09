@@ -21,6 +21,8 @@ void main(List<String> args) {
 }
 
 class TestPage extends StatefulWidget {
+  const TestPage({super.key});
+
   @override
   State<TestPage> createState() => TestPageState();
 }
