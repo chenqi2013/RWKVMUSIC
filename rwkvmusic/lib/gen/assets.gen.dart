@@ -47,6 +47,10 @@ class $AssetsDoctorGen {
 class $AssetsFastmodelGen {
   const $AssetsFastmodelGen();
 
+  /// File path: assets/fastmodel/RWKV-6-ABC-85M-v1-20240217-ctx1024-ncnn.bin
+  String get rWKV6ABC85MV120240217Ctx1024NcnnBin =>
+      'assets/fastmodel/RWKV-6-ABC-85M-v1-20240217-ctx1024-ncnn.bin';
+
   /// File path: assets/fastmodel/RWKV-6-ABC-85M-v1-20240217-ctx1024-ncnn.config
   String get rWKV6ABC85MV120240217Ctx1024NcnnConfig =>
       'assets/fastmodel/RWKV-6-ABC-85M-v1-20240217-ctx1024-ncnn.config';
@@ -60,6 +64,7 @@ class $AssetsFastmodelGen {
 
   /// List of all assets
   List<String> get values => [
+        rWKV6ABC85MV120240217Ctx1024NcnnBin,
         rWKV6ABC85MV120240217Ctx1024NcnnConfig,
         rWKV6ABC85MV120240217Ctx1024NcnnParam,
         libfasterRwkvd
@@ -839,6 +844,18 @@ class $AssetsDoctorStaticGen {
 class $AssetsImagesChangeNodeGen {
   const $AssetsImagesChangeNodeGen();
 
+  /// File path: assets/images/change_node/btn.png
+  AssetGenImage get btn =>
+      const AssetGenImage('assets/images/change_node/btn.png');
+
+  /// File path: assets/images/change_node/btn_d.png
+  AssetGenImage get btnD =>
+      const AssetGenImage('assets/images/change_node/btn_d.png');
+
+  /// File path: assets/images/change_node/btn_w.png
+  AssetGenImage get btnW =>
+      const AssetGenImage('assets/images/change_node/btn_w.png');
+
   /// File path: assets/images/change_node/dottodNote.svg
   String get dottodNote => 'assets/images/change_node/dottodNote.svg';
 
@@ -876,7 +893,10 @@ class $AssetsImagesChangeNodeGen {
   String get wholeZ => 'assets/images/change_node/wholeZ.svg';
 
   /// List of all assets
-  List<String> get values => [
+  List<dynamic> get values => [
+        btn,
+        btnD,
+        btnW,
         dottodNote,
         eighth,
         eighthZ,
@@ -2800,11 +2820,16 @@ class Assets {
 }
 
 class AssetGenImage {
-  const AssetGenImage(this._assetName, {this.size = null});
+  const AssetGenImage(
+    this._assetName, {
+    this.size,
+    this.flavors = const {},
+  });
 
   final String _assetName;
 
   final Size? size;
+  final Set<String> flavors;
 
   Image image({
     Key? key,

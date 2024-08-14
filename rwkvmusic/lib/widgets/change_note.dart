@@ -54,6 +54,17 @@ extension _FindAssets on ChangeNoteKey {
     }
   }
 
+  AssetGenImage get bgImage {
+    switch (this) {
+      case ChangeNoteKey.delete:
+        return Assets.images.changeNode.btnD;
+      case ChangeNoteKey.randomGroove:
+        return Assets.images.changeNode.btnW;
+      default:
+        return Assets.images.changeNode.btn;
+    }
+  }
+
   Size get assetSize {
     switch (this) {
       case ChangeNoteKey.whole:
@@ -92,7 +103,7 @@ class ChangeNote extends StatelessWidget {
       borderRadius: 8.r,
       child: C(
           decoration: BD(
-            color: Color(0xFF222222),
+            color: kC,
           ),
           constraints: BoxConstraints(
             maxHeight: _kContainerHeight,
@@ -114,6 +125,7 @@ class ChangeNote extends StatelessWidget {
                         assetName,
                         width: k.assetSize.width,
                         height: k.assetSize.height,
+                        color: kW,
                       ),
                     );
                   }
@@ -136,6 +148,10 @@ class ChangeNote extends StatelessWidget {
                     ));
                   }
 
+                  final svg = Center(
+                    child: k.bgImage.image(),
+                  );
+
                   return _Button(
                     index: index,
                     onTap: () {
@@ -149,7 +165,12 @@ class ChangeNote extends StatelessWidget {
                     height: _kButtonHeight,
                     width: k == ChangeNoteKey.delete ? 78 : _kButtonHeight,
                     color: k == ChangeNoteKey.delete ? Color(0xFFFF6666) : null,
-                    child: child,
+                    child: Stack(
+                      children: [
+                        svg,
+                        child,
+                      ],
+                    ),
                   );
                 }).widgetJoin(
                   (_) => 4.w,
@@ -220,10 +241,6 @@ class _ButtonState extends State<_Button> {
             curve: Curves.easeOutCirc,
             height: _kButtonHeight * (tapped ? 0.9 : 1),
             width: widget.width * (tapped ? 0.9 : 1),
-            decoration: BD(
-              color: widget.color ?? kW,
-              borderRadius: 4.r,
-            ),
             child: Transform.scale(
               scale: tapped ? 0.9 : 1,
               child: widget.child,
