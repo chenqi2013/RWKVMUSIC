@@ -15,7 +15,7 @@ void main(List<String> args) {
     DeviceOrientation.landscapeLeft,
     DeviceOrientation.landscapeRight,
   ]);
-  runApp(MaterialApp(
+  runApp(const MaterialApp(
     home: TestPage(),
   ));
 }
@@ -126,7 +126,7 @@ Page resource error:
         debugShowCheckedModeBanner: false,
         home: Scaffold(
           appBar: AppBar(
-            title: Text('h5页面'),
+            title: const Text('h5页面'),
           ),
           body: WebViewWidget(controller: _controller),
         ));

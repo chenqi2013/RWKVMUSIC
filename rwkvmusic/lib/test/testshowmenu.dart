@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 void main() {
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
@@ -12,7 +12,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(
-          title: Text('showMenu Example'),
+          title: const Text('showMenu Example'),
         ),
         body: Center(
           child: ElevatedButton(
@@ -21,24 +21,24 @@ class MyApp extends StatelessWidget {
               // Show the menu when the button is pressed
               showMenu(
                 context: context,
-                position: RelativeRect.fromLTRB(100, 100, 0, 0),
+                position: const RelativeRect.fromLTRB(100, 100, 0, 0),
                 items: [
-                  PopupMenuItem(
+                  const PopupMenuItem(
                     value: 'Option 1',
                     child: Text('Option 1'),
                   ),
-                  PopupMenuItem(
+                  const PopupMenuItem(
                     value: 'Option 2',
                     child: Text('Option 2'),
                   ),
-                  PopupMenuItem(
+                  const PopupMenuItem(
                     value: 'Option 3',
                     child: Text('Option 3'),
                   ),
                 ],
               );
             },
-            child: Text('Show Menu'),
+            child: const Text('Show Menu'),
           ),
         ),
       ),

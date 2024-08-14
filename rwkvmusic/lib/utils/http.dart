@@ -35,10 +35,10 @@ class HttpUtil {
 
       // baseUrl: storage.read(key: STORAGE_KEY_APIURL) ?? SERVICE_API_BASEURL,
       //连接服务器超时时间，单位是毫秒.
-      connectTimeout: Duration(milliseconds: 10000),
+      connectTimeout: const Duration(milliseconds: 10000),
 
       // 响应流上前后两次接受到数据的间隔，单位为毫秒。
-      receiveTimeout: Duration(milliseconds: 5000),
+      receiveTimeout: const Duration(milliseconds: 5000),
 
       // Http请求头.
       headers: {},
@@ -126,8 +126,6 @@ class HttpUtil {
         return ErrorEntity(code: -1, message: "请求超时");
       case DioExceptionType.receiveTimeout:
         return ErrorEntity(code: -1, message: "响应超时");
-      case DioExceptionType.cancel:
-        return ErrorEntity(code: -1, message: "请求取消");
       case DioExceptionType.badResponse:
         {
           try {

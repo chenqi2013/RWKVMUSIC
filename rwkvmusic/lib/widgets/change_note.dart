@@ -68,17 +68,17 @@ extension _FindAssets on ChangeNoteKey {
   Size get assetSize {
     switch (this) {
       case ChangeNoteKey.whole:
-        return Size(8, 8);
+        return const Size(8, 8);
       case ChangeNoteKey.quarterZ:
-        return Size(20, 20);
+        return const Size(20, 20);
       case ChangeNoteKey.eighthZ:
-        return Size(20, 20);
+        return const Size(20, 20);
       case ChangeNoteKey.wholeZ:
-        return Size(6, 6);
+        return const Size(6, 6);
       case ChangeNoteKey.halfZ:
-        return Size(6, 6);
+        return const Size(6, 6);
       default:
-        return Size(32, 32);
+        return const Size(32, 32);
     }
   }
 }
@@ -102,10 +102,10 @@ class ChangeNote extends StatelessWidget {
     return ClipRRect(
       borderRadius: 8.r,
       child: C(
-          decoration: BD(
+          decoration: const BD(
             color: kC,
           ),
-          constraints: BoxConstraints(
+          constraints: const BoxConstraints(
             maxHeight: _kContainerHeight,
             minHeight: _kContainerHeight,
           ),
@@ -130,14 +130,14 @@ class ChangeNote extends StatelessWidget {
                     );
                   }
                   if (k == ChangeNoteKey.randomGroove) {
-                    final Shader linearGradient = LinearGradient(
+                    final Shader linearGradient = const LinearGradient(
                       begin: Alignment.topCenter,
                       end: Alignment.bottomCenter,
                       colors: <Color>[
                         Color(0xFFEBFEC1),
                         Color(0xFFA1D632),
                       ],
-                    ).createShader(Rect.fromLTWH(
+                    ).createShader(const Rect.fromLTWH(
                       0.0,
                       0.0,
                       _kButtonHeight * 1.55,
@@ -155,20 +155,20 @@ class ChangeNote extends StatelessWidget {
                             Shadow(
                               color: kB.wo(0.25),
                               blurRadius: 4,
-                              offset: Offset(0, 2),
+                              offset: const Offset(0, 2),
                             ),
                           ]),
                     ));
                   }
                   if (k == ChangeNoteKey.delete) {
-                    final Shader linearGradient = LinearGradient(
+                    final Shader linearGradient = const LinearGradient(
                       begin: Alignment.topCenter,
                       end: Alignment.bottomCenter,
                       colors: <Color>[
                         Color(0xFFFFFFFF),
                         Color(0xFF999999),
                       ],
-                    ).createShader(Rect.fromLTWH(
+                    ).createShader(const Rect.fromLTWH(
                       0.0,
                       0.0,
                       _kButtonHeight * 1.55,
@@ -185,7 +185,7 @@ class ChangeNote extends StatelessWidget {
                             Shadow(
                               color: kB.wo(0.25),
                               blurRadius: 4,
-                              offset: Offset(0, 2),
+                              offset: const Offset(0, 2),
                             ),
                           ]),
                     ));
@@ -210,7 +210,7 @@ class ChangeNote extends StatelessWidget {
                             k == ChangeNoteKey.randomGroove)
                         ? _kButtonHeight * 1.55
                         : _kButtonHeight,
-                    color: k == ChangeNoteKey.delete ? Color(0xFFFF6666) : null,
+                    color: k == ChangeNoteKey.delete ? const Color(0xFFFF6666) : null,
                     child: Stack(
                       children: [
                         svg,
@@ -292,7 +292,7 @@ class _ButtonState extends State<_Button> {
                 BoxShadow(
                   color: kB.wo(0.3),
                   blurRadius: 4,
-                  offset: Offset(0, 1),
+                  offset: const Offset(0, 1),
                 ),
               ],
             ),

@@ -131,14 +131,14 @@ class ChordEditing extends StatelessWidget {
             width: 350,
             height: screenHeight - 100,
             decoration: BD(
-                color: Color(0xFF333333).wo(0.33),
+                color: const Color(0xFF333333).wo(0.33),
                 borderRadius: 12.r,
                 border: Border.all(color: kW.wo(0.33), width: 0.5)),
             child: Co(
               c: CAA.stretch,
               children: [
                 12.h,
-                T(
+                const T(
                   "Chord Editing",
                   textAlign: TextAlign.center,
                   s: TS(c: kW, s: 16, w: FW.w700),
@@ -150,7 +150,7 @@ class ChordEditing extends StatelessWidget {
                       4.w,
                       Exp(
                         child: ListView.builder(
-                          padding: EI.o(b: 4),
+                          padding: const EI.o(b: 4),
                           itemBuilder: (context, index) {
                             return Obx(
                               () {
@@ -180,7 +180,7 @@ class ChordEditing extends StatelessWidget {
                           children: [
                             Exp(
                               child: ListView.builder(
-                                padding: EI.o(b: 4),
+                                padding: const EI.o(b: 4),
                                 itemBuilder: (context, index) {
                                   return Obx(
                                     () {
@@ -219,7 +219,7 @@ class ChordEditing extends StatelessWidget {
                                         borderRadius: 2.r,
                                       ),
                                       height: _kHeight,
-                                      child: Center(
+                                      child: const Center(
                                           child: Icon(
                                         Icons.check,
                                         color: kW,
@@ -240,7 +240,7 @@ class ChordEditing extends StatelessWidget {
                                         borderRadius: 2.r,
                                       ),
                                       height: _kHeight,
-                                      child: Center(
+                                      child: const Center(
                                           child: Icon(
                                         Icons.close,
                                         color: kW,
@@ -275,7 +275,7 @@ class _Item extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return C(
-      margin: EI.s(v: 2),
+      margin: const EI.s(v: 2),
       height: _kHeight,
       decoration:
           BD(color: highlighted ? kCB.wo(0.5) : kW.wo(0.1), borderRadius: 2.r),
@@ -283,7 +283,7 @@ class _Item extends StatelessWidget {
         child: T(
           t,
           textAlign: TextAlign.center,
-          s: TS(c: kW, s: 16, w: FW.w700),
+          s: const TS(c: kW, s: 16, w: FW.w700),
         ),
       ),
     );

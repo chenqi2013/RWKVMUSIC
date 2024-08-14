@@ -41,7 +41,7 @@ Widget btnFlatButtonWidget({
           }
           return gbColor;
         }),
-        shape: WidgetStateProperty.all(RoundedRectangleBorder(
+        shape: WidgetStateProperty.all(const RoundedRectangleBorder(
           borderRadius: Radii.k6pxRadius,
         )),
       ),
@@ -93,7 +93,7 @@ Widget btnFlatButtonBorderOnlyWidget({
         //   }
         //   return AppColors.primaryElement;
         // }),
-        shape: WidgetStateProperty.all(RoundedRectangleBorder(
+        shape: WidgetStateProperty.all(const RoundedRectangleBorder(
           borderRadius: Radii.k6pxRadius,
         )),
       ),

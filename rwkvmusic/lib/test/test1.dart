@@ -13,7 +13,7 @@ void main(List<String> args) {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
+    return const Center(
       child: Image(image: AssetImage('assets/images/account_header.png')),
     );
   }

@@ -3,7 +3,7 @@ import 'package:get/get.dart';
 import 'package:rwkvmusic/widgets/widgets.dart';
 
 void main() {
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
@@ -11,7 +11,7 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GetMaterialApp(
+    return const GetMaterialApp(
       home: MyHomePage(),
     );
   }
@@ -24,7 +24,7 @@ class MyHomePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('showMenu Example'),
+        title: const Text('showMenu Example'),
       ),
       body: Center(
         child: ElevatedButton(
@@ -39,15 +39,15 @@ class MyHomePage extends StatelessWidget {
               context: context,
               position: RelativeRect.fromLTRB(offset.dx, 250, 0, 0),
               items: [
-                PopupMenuItem(
+                const PopupMenuItem(
                   value: 'Option 1',
                   child: Text('Option 1'),
                 ),
-                PopupMenuItem(
+                const PopupMenuItem(
                   value: 'Option 2',
                   child: Text('Option 2'),
                 ),
-                PopupMenuItem(
+                const PopupMenuItem(
                   value: 'Option 3',
                   child: Text('Option 3'),
                 ),
@@ -59,7 +59,7 @@ class MyHomePage extends StatelessWidget {
               }
             });
           },
-          child: Text('Show Menu',style: TextStyle(color: Colors.red),),
+          child: const Text('Show Menu',style: TextStyle(color: Colors.red),),
         ),
       ),
     );
