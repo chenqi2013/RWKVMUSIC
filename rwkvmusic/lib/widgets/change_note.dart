@@ -130,21 +130,64 @@ class ChangeNote extends StatelessWidget {
                     );
                   }
                   if (k == ChangeNoteKey.randomGroove) {
+                    final Shader linearGradient = LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: <Color>[
+                        Color(0xFFEBFEC1),
+                        Color(0xFFA1D632),
+                      ],
+                    ).createShader(Rect.fromLTWH(
+                      0.0,
+                      0.0,
+                      _kButtonHeight * 1.55,
+                      _kButtonHeight,
+                    ));
                     child = Center(
                         child: T(
                       "Random\nGroove",
                       textAlign: TextAlign.center,
                       s: TS(
-                        w: FW.w500,
-                        s: 10,
-                      ),
+                          w: FW.w900,
+                          s: 14,
+                          foreground: Paint()..shader = linearGradient,
+                          shadows: [
+                            Shadow(
+                              color: kB.wo(0.25),
+                              blurRadius: 4,
+                              offset: Offset(0, 2),
+                            ),
+                          ]),
                     ));
                   }
                   if (k == ChangeNoteKey.delete) {
+                    final Shader linearGradient = LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: <Color>[
+                        Color(0xFFFFFFFF),
+                        Color(0xFF999999),
+                      ],
+                    ).createShader(Rect.fromLTWH(
+                      0.0,
+                      0.0,
+                      _kButtonHeight * 1.55,
+                      _kButtonHeight,
+                    ));
                     child = Center(
                         child: T(
                       "Delete",
-                      s: TS(w: FW.w500, s: 16),
+                      s: TS(
+                          w: FW.w900,
+                          s: 14,
+                          foreground: Paint()..shader = linearGradient,
+                          shadows: [
+                            Shadow(
+                              color: kB.wo(0.25),
+                              blurRadius: 4,
+                              offset: Offset(0, 2),
+                            ),
+                          ]),
                     ));
                   }
 
@@ -163,7 +206,10 @@ class ChangeNote extends StatelessWidget {
                           }
                         : null,
                     height: _kButtonHeight,
-                    width: k == ChangeNoteKey.delete ? 78 : _kButtonHeight,
+                    width: (k == ChangeNoteKey.delete ||
+                            k == ChangeNoteKey.randomGroove)
+                        ? _kButtonHeight * 1.55
+                        : _kButtonHeight,
                     color: k == ChangeNoteKey.delete ? Color(0xFFFF6666) : null,
                     child: Stack(
                       children: [
@@ -239,10 +285,19 @@ class _ButtonState extends State<_Button> {
           child: AnimatedContainer(
             duration: 100.ms,
             curve: Curves.easeOutCirc,
-            height: _kButtonHeight * (tapped ? 0.9 : 1),
-            width: widget.width * (tapped ? 0.9 : 1),
+            height: _kButtonHeight * (tapped ? 0.95 : 1),
+            width: widget.width * (tapped ? 0.95 : 1),
+            decoration: BD(
+              boxShadow: [
+                BoxShadow(
+                  color: kB.wo(0.3),
+                  blurRadius: 4,
+                  offset: Offset(0, 1),
+                ),
+              ],
+            ),
             child: Transform.scale(
-              scale: tapped ? 0.9 : 1,
+              scale: tapped ? 0.95 : 1,
               child: widget.child,
             ),
           ),
