@@ -103,7 +103,8 @@ MidiToABCConverter convertABC = MidiToABCConverter();
 int midiProgramValue = 0;
 
 RxInt timeSignature = 2.obs;
-RxInt defaultNoteLenght = 0.obs;
+@Deprecated("需求变更了，不要使用这个值了")
+RxInt noteLengthSelectedIndex = 0.obs;
 RxDouble randomness = 0.7.obs;
 RxInt seed = 22416.obs;
 bool isUseCurrentTime = true;

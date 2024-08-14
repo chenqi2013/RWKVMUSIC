@@ -729,10 +729,10 @@ class _HomePageState extends State<HomePage> {
       return;
     }
 
-    if (defaultNoteLenght.value == 0) {
-    } else if (defaultNoteLenght.value == 1) {
+    if (noteLengthSelectedIndex.value == 0) {
+    } else if (noteLengthSelectedIndex.value == 1) {
       noteName = "$noteName/2";
-    } else if (defaultNoteLenght.value == 2) {
+    } else if (noteLengthSelectedIndex.value == 2) {
       noteName = "$noteName/4";
     }
     // sbNoteCreate.write(noteName);
@@ -748,7 +748,7 @@ class _HomePageState extends State<HomePage> {
     // }
 
     String timeSignatureStr = timeSignatures[timeSignature.value];
-    String noteLengthStr = kNoteLengths[defaultNoteLenght.value];
+    String noteLengthStr = kAvailableNoteLength[noteLengthSelectedIndex.value];
     debugPrint(
         'timeSignatureStr=$timeSignatureStr,noteLengthStr=$noteLengthStr');
     for (int i = 0; i < virtualNotes.length; i++) {
@@ -875,7 +875,8 @@ class _HomePageState extends State<HomePage> {
         debugPrint('chordStr=${chordList.length}');
       }
       String timeSignatureStr = timeSignatures[timeSignature.value];
-      String noteLengthStr = kNoteLengths[defaultNoteLenght.value];
+      String noteLengthStr =
+          kAvailableNoteLength[noteLengthSelectedIndex.value];
       debugPrint(
           'timeSignatureStr=$timeSignatureStr,noteLengthStr=$noteLengthStr');
       for (int i = 0; i < virtualNotes.length; i++) {
@@ -1751,10 +1752,10 @@ class _HomePageState extends State<HomePage> {
                             TextItem(text: 'Default note length'),
                             Obx(() => DropButtonList(
                                   key: const ValueKey('Default'),
-                                  items: kNoteLengths,
-                                  index: defaultNoteLenght.value,
+                                  items: kAvailableNoteLength,
+                                  index: noteLengthSelectedIndex.value,
                                   onChanged: (index) {
-                                    defaultNoteLenght.value = index;
+                                    noteLengthSelectedIndex.value = index;
                                   },
                                 )),
                           ],
