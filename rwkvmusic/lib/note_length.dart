@@ -152,11 +152,14 @@ NoteLength noteLengthFromString(String notation) {
   if (notation.endsWith("3/4")) return NoteLength.eighthDotted;
   if (notation.endsWith("3/8")) return NoteLength.sixteenthDotted;
   if (notation.endsWith("3/16")) return NoteLength.thirtySecondDotted;
-  if (notation.endsWith("1/2")) return NoteLength.eighth;
+  if (notation.endsWith("/16")) return NoteLength.thirtySecondDotted;
+  if (notation.endsWith("/2")) return NoteLength.eighth;
   if (notation.endsWith("2")) return NoteLength.half;
   if (notation.endsWith("1/4")) return NoteLength.sixteenth;
+  if (notation.endsWith("/4")) return NoteLength.sixteenth;
   if (notation.endsWith("4")) return NoteLength.whole;
   if (notation.endsWith("1/8")) return NoteLength.thirtySecond;
+  if (notation.endsWith("/8")) return NoteLength.thirtySecond;
   return NoteLength.quarter;
 }
 

@@ -666,29 +666,11 @@ class _HomePageState extends State<HomePage> {
       debugPrint('chordStr=${chordList.length}');
     }
     String timeSignatureStr = timeSignatures[timeSignature.value];
-    String noteLengthStr = "";
-    switch (lengthIndex) {
-      case 0:
-        noteLengthStr = "1/1";
-        break;
-      case 1:
-        noteLengthStr = "1/2";
-        break;
-      case 2:
-        noteLengthStr = "1/4";
-        break;
-      case 3:
-        noteLengthStr = "1/8";
-        break;
-      case 4:
-        noteLengthStr = "1/16";
-        break;
-    }
-    debugPrint(
-        'timeSignatureStr=$timeSignatureStr,noteLengthStr=$noteLengthStr');
+    final noteLength = noteLengthFromString(noteName);
+
     for (int i = 0; i < virtualNotes.length; i++) {
       String note = virtualNotes[i];
-      if (timeSignatureStr == '4/4' && noteLengthStr == '1/4') {
+      if (timeSignatureStr == '4/4' && noteLength == NoteLength.quarter) {
         if (i % 4 == 0) {
           int chordLenght = i ~/ 4;
           if (chordList.length > chordLenght) {
@@ -702,7 +684,7 @@ class _HomePageState extends State<HomePage> {
         }
       } else {
         int postion =
-            ABCHead.insertMeasureLinePosition(timeSignatureStr, noteLengthStr);
+            ABCHead.insertMeasureLinePosition(timeSignatureStr, noteLength);
         if (i % postion == 0 && i > 0) {
           sbff.write('|');
         }
@@ -854,13 +836,10 @@ class _HomePageState extends State<HomePage> {
         debugPrint('chordStr=${chordList.length}');
       }
       String timeSignatureStr = timeSignatures[timeSignature.value];
-      String noteLengthStr =
-          kAvailableNoteLength[noteLengthSelectedIndex.value];
-      debugPrint(
-          'timeSignatureStr=$timeSignatureStr,noteLengthStr=$noteLengthStr');
+      final noteLength = inputNoteLength.value;
       for (int i = 0; i < virtualNotes.length; i++) {
         String note = virtualNotes[i];
-        if (timeSignatureStr == '4/4' && noteLengthStr == '1/4') {
+        if (timeSignatureStr == '4/4' && noteLength == NoteLength.quarter) {
           if (i % 4 == 0) {
             int chordLenght = i ~/ 4;
             if (chordList.length > chordLenght) {
@@ -873,8 +852,8 @@ class _HomePageState extends State<HomePage> {
             }
           }
         } else {
-          int postion = ABCHead.insertMeasureLinePosition(
-              timeSignatureStr, noteLengthStr);
+          int postion =
+              ABCHead.insertMeasureLinePosition(timeSignatureStr, noteLength);
           if (i % postion == 0 && i > 0) {
             sbff.write('|');
           }

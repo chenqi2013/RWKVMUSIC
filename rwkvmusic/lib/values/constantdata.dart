@@ -97,13 +97,6 @@ List<String> instruments = [
   'guitar',
 ];
 
-@Deprecated("需求变更了，不要使用这个值了")
-List<String> kAvailableNoteLength = [
-  '1/4',
-  '1/8',
-  '1/16',
-];
-
 List<String> timeSignatures = [
   '2/4',
   '3/4',

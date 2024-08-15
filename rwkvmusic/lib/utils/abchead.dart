@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
+import 'package:rwkvmusic/note_length.dart';
 import 'package:rwkvmusic/utils/automeasure_randomizeabc.dart';
 import 'package:rwkvmusic/utils/convert_chord.dart';
 import 'package:rwkvmusic/utils/key_convert.dart';
@@ -70,36 +71,36 @@ class ABCHead {
   }
 
   static int insertMeasureLinePosition(
-      String timeSignatures, String noteLengths) {
-    if (timeSignatures == '2/4' && noteLengths == '1/4') {
+      String timeSignatures, NoteLength noteLength) {
+    if (timeSignatures == '2/4' && noteLength == NoteLength.quarter) {
       return 2;
-    } else if (timeSignatures == '2/4' && noteLengths == '1/8') {
+    } else if (timeSignatures == '2/4' && noteLength == NoteLength.eighth) {
       return 4;
-    } else if (timeSignatures == '2/4' && noteLengths == '1/16') {
+    } else if (timeSignatures == '2/4' && noteLength == NoteLength.sixteenth) {
       return 8;
-    } else if (timeSignatures == '3/4' && noteLengths == '1/4') {
+    } else if (timeSignatures == '3/4' && noteLength == NoteLength.quarter) {
       return 3;
-    } else if (timeSignatures == '3/4' && noteLengths == '1/8') {
+    } else if (timeSignatures == '3/4' && noteLength == NoteLength.eighth) {
       return 6;
-    } else if (timeSignatures == '3/4' && noteLengths == '1/16') {
+    } else if (timeSignatures == '3/4' && noteLength == NoteLength.sixteenth) {
       return 12;
-    } else if (timeSignatures == '4/4' && noteLengths == '1/4') {
+    } else if (timeSignatures == '4/4' && noteLength == NoteLength.quarter) {
       return 4;
-    } else if (timeSignatures == '4/4' && noteLengths == '1/8') {
+    } else if (timeSignatures == '4/4' && noteLength == NoteLength.eighth) {
       return 8;
-    } else if (timeSignatures == '4/4' && noteLengths == '1/16') {
+    } else if (timeSignatures == '4/4' && noteLength == NoteLength.sixteenth) {
       return 16;
-    } else if (timeSignatures == '3/8' && noteLengths == '1/4') {
+    } else if (timeSignatures == '3/8' && noteLength == NoteLength.quarter) {
       return 1;
-    } else if (timeSignatures == '3/8' && noteLengths == '1/8') {
+    } else if (timeSignatures == '3/8' && noteLength == NoteLength.eighth) {
       return 3;
-    } else if (timeSignatures == '3/8' && noteLengths == '1/16') {
+    } else if (timeSignatures == '3/8' && noteLength == NoteLength.sixteenth) {
       return 6;
-    } else if (timeSignatures == '6/8' && noteLengths == '1/4') {
+    } else if (timeSignatures == '6/8' && noteLength == NoteLength.quarter) {
       return 3;
-    } else if (timeSignatures == '6/8' && noteLengths == '1/8') {
+    } else if (timeSignatures == '6/8' && noteLength == NoteLength.eighth) {
       return 6;
-    } else if (timeSignatures == '6/8' && noteLengths == '1/16') {
+    } else if (timeSignatures == '6/8' && noteLength == NoteLength.sixteenth) {
       return 12;
     }
 
