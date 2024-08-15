@@ -11,7 +11,7 @@ enum NoteLength {
   sixteenth,
   sixteenthDotted,
   thirtySecond,
-  thirtySecondDotted,
+  thirtySecondDotted;
 }
 
 extension NoteLengthAdapter on NoteLength {
@@ -78,7 +78,7 @@ extension NoteLengthAdapter on NoteLength {
       case NoteLength.halfDotted:
         return "3";
       case NoteLength.quarter:
-        return "1";
+        return "";
       case NoteLength.quarterDotted:
         return "3/2";
       case NoteLength.eighth:
@@ -95,35 +95,35 @@ extension NoteLengthAdapter on NoteLength {
         return "3/16";
     }
   }
+}
 
-  NoteLength fromString(String notation) {
-    if (notation.endsWith("6")) return NoteLength.wholeDotted;
-    if (notation.endsWith("3")) return NoteLength.halfDotted;
-    if (notation.endsWith("3/2")) return NoteLength.quarterDotted;
-    if (notation.endsWith("3/4")) return NoteLength.eighthDotted;
-    if (notation.endsWith("3/8")) return NoteLength.sixteenthDotted;
-    if (notation.endsWith("3/16")) return NoteLength.thirtySecondDotted;
-    if (notation.endsWith("1/2")) return NoteLength.eighth;
-    if (notation.endsWith("2")) return NoteLength.half;
-    if (notation.endsWith("1/4")) return NoteLength.sixteenth;
-    if (notation.endsWith("4")) return NoteLength.whole;
-    if (notation.endsWith("1/8")) return NoteLength.thirtySecond;
-    return NoteLength.quarter;
-  }
+NoteLength noteLengthFromString(String notation) {
+  if (notation.endsWith("6")) return NoteLength.wholeDotted;
+  if (notation.endsWith("3")) return NoteLength.halfDotted;
+  if (notation.endsWith("3/2")) return NoteLength.quarterDotted;
+  if (notation.endsWith("3/4")) return NoteLength.eighthDotted;
+  if (notation.endsWith("3/8")) return NoteLength.sixteenthDotted;
+  if (notation.endsWith("3/16")) return NoteLength.thirtySecondDotted;
+  if (notation.endsWith("1/2")) return NoteLength.eighth;
+  if (notation.endsWith("2")) return NoteLength.half;
+  if (notation.endsWith("1/4")) return NoteLength.sixteenth;
+  if (notation.endsWith("4")) return NoteLength.whole;
+  if (notation.endsWith("1/8")) return NoteLength.thirtySecond;
+  return NoteLength.quarter;
+}
 
-  NoteLength fromLength(num duration) {
-    if (duration == 1.5) return NoteLength.wholeDotted;
-    if (duration == 1.5 * 0.5) return NoteLength.halfDotted;
-    if (duration == 1.5 * 0.25) return NoteLength.quarterDotted;
-    if (duration == 1.5 * 0.125) return NoteLength.eighthDotted;
-    if (duration == 1.5 * 0.0625) return NoteLength.sixteenthDotted;
-    if (duration == 1.5 * 0.03125) return NoteLength.thirtySecondDotted;
-    if (duration == 1.0) return NoteLength.whole;
-    if (duration == 0.5) return NoteLength.half;
-    if (duration == 0.25) return NoteLength.quarter;
-    if (duration == 0.125) return NoteLength.eighth;
-    if (duration == 0.0625) return NoteLength.sixteenth;
-    if (duration == 0.03125) return NoteLength.thirtySecond;
-    return NoteLength.quarter;
-  }
+NoteLength noteLengthFromLength(num duration) {
+  if (duration == 1.5) return NoteLength.wholeDotted;
+  if (duration == 1.5 * 0.5) return NoteLength.halfDotted;
+  if (duration == 1.5 * 0.25) return NoteLength.quarterDotted;
+  if (duration == 1.5 * 0.125) return NoteLength.eighthDotted;
+  if (duration == 1.5 * 0.0625) return NoteLength.sixteenthDotted;
+  if (duration == 1.5 * 0.03125) return NoteLength.thirtySecondDotted;
+  if (duration == 1.0) return NoteLength.whole;
+  if (duration == 0.5) return NoteLength.half;
+  if (duration == 0.25) return NoteLength.quarter;
+  if (duration == 0.125) return NoteLength.eighth;
+  if (duration == 0.0625) return NoteLength.sixteenth;
+  if (duration == 0.03125) return NoteLength.thirtySecond;
+  return NoteLength.quarter;
 }
