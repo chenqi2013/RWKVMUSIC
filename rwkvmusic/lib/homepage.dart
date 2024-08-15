@@ -22,6 +22,8 @@ import 'package:rwkvmusic/mainwidget/switch_item.dart';
 import 'package:rwkvmusic/mainwidget/text_btn.dart';
 import 'package:rwkvmusic/mainwidget/text_item.dart';
 import 'package:rwkvmusic/mainwidget/text_title.dart';
+import 'package:rwkvmusic/note_length.dart';
+import 'package:rwkvmusic/state.dart';
 import 'package:rwkvmusic/store/config.dart';
 import 'package:rwkvmusic/style/color.dart';
 import 'package:rwkvmusic/style/style.dart';
@@ -244,7 +246,7 @@ class _HomePageState extends State<HomePage> {
         // }
       })
       ..addJavaScriptChannel("flutteronClickNote",
-          onMessageReceived: _onReceiveFlutteronClickNote)
+          onMessageReceived: _onClickNote)
       ..addJavaScriptChannel("flutterOnClickTime",
           onMessageReceived: (JavaScriptMessage javaScriptMessage) {
         _showTimeChangingDialog();
@@ -348,6 +350,7 @@ class _HomePageState extends State<HomePage> {
   Future<void> _unselectAll() async {
     if (selectstate.value != 1) return;
     selectedNote = null;
+    selectNoteLength.value = null;
     await controllerPiano.runJavaScript("unselectAll()");
   }
 
@@ -387,7 +390,7 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  void _onReceiveFlutteronClickNote(JavaScriptMessage jsMessage) {
+  void _onClickNote(JavaScriptMessage jsMessage) {
     final json = jsonDecode(jsMessage.message);
 
     String name = json["name"];
@@ -397,14 +400,18 @@ class _HomePageState extends State<HomePage> {
 
     final _s = selectedNote;
     if (_s != null) {
-      if (_s.name == name &&
+      final isSameNote = _s.name == name &&
           _s.index == int.parse(json["index"]) &&
-          _s.duration == duration) {
+          _s.duration == duration;
+      if (isSameNote) {
         selectedNote = null;
         _unselectAll();
         return;
       }
     }
+
+    selectNoteLength.value = noteLengthFromLength(duration);
+
     selectedNote = SelectedNote()
       ..name = name
       ..index = int.parse(json["index"])
@@ -477,19 +484,20 @@ class _HomePageState extends State<HomePage> {
   void _updateDottod() async {
     final selected = selectedNote;
     if (selected == null) {
-      if (virtualNotes.isEmpty) return;
-      String name = "";
-      final last = virtualNotes.last as String;
-      if (last.startsWith("^")) {
-        name = last.substring(0, 2);
-      } else {
-        name = last.substring(0, 1);
-      }
-      selectedNote = SelectedNote()
-        ..index = virtualNotes.length - 1
-        ..name = name
-        ..duration = SelectedNote.durationFromString(last);
-      _updateDottod();
+      if (kDebugMode) print("😡 No selected note when update dotted");
+      // if (virtualNotes.isEmpty) return;
+      // String name = "";
+      // final last = virtualNotes.last as String;
+      // if (last.startsWith("^")) {
+      //   name = last.substring(0, 2);
+      // } else {
+      //   name = last.substring(0, 1);
+      // }
+      // selectedNote = SelectedNote()
+      //   ..index = virtualNotes.length - 1
+      //   ..name = name
+      //   ..duration = SelectedNote.durationFromString(last);
+      // _updateDottod();
       return;
     }
     final note = selected.name;
@@ -553,28 +561,31 @@ class _HomePageState extends State<HomePage> {
   }
 
   /// 通过执行 JS 更新琴谱
+  ///
+  /// TDOO: check selected note's dotted
   void _updateNote({int? noteLengthIndex, String? noteSymbol}) async {
     final selected = selectedNote;
     if (selected == null) {
-      if (virtualNotes.isEmpty) return;
-      late final String name;
+      if (kDebugMode) print("😡 No selected note when update note");
+      // if (virtualNotes.isEmpty) return;
+      // late final String name;
 
-      if (noteSymbol != null) {
-        name = noteSymbol;
-      } else {
-        final last = virtualNotes.last as String;
-        if (last.startsWith("^")) {
-          name = last.substring(0, 2);
-        } else {
-          name = last.substring(0, 1);
-        }
-      }
+      // if (noteSymbol != null) {
+      //   name = noteSymbol;
+      // } else {
+      //   final last = virtualNotes.last as String;
+      //   if (last.startsWith("^")) {
+      //     name = last.substring(0, 2);
+      //   } else {
+      //     name = last.substring(0, 1);
+      //   }
+      // }
 
-      final _selectedNote = SelectedNote()
-        ..index = virtualNotes.length - 1
-        ..name = name;
-      selectedNote = _selectedNote;
-      _updateNote(noteLengthIndex: noteLengthIndex);
+      // final _selectedNote = SelectedNote()
+      //   ..index = virtualNotes.length - 1
+      //   ..name = name;
+      // selectedNote = _selectedNote;
+      // _updateNote(noteLengthIndex: noteLengthIndex);
       return;
     }
     final note = noteSymbol ?? selected.name;
@@ -729,52 +740,21 @@ class _HomePageState extends State<HomePage> {
       return;
     }
 
-    if (noteLengthSelectedIndex.value == 0) {
-    } else if (noteLengthSelectedIndex.value == 1) {
-      noteName = "$noteName/2";
-    } else if (noteLengthSelectedIndex.value == 2) {
-      noteName = "$noteName/4";
-    }
+    final noteLength = inputNoteLength.value;
+    noteName = noteName + noteLength.end;
+
     // sbNoteCreate.write(noteName);
     virtualNotes.add(noteName);
     intNodes.add(node);
 
     StringBuffer sbff = StringBuffer();
-    List chordList = [];
-    // if (timeSignature.value == 2) {
-    //   String chordStr = ChordUtil.getChord(intNodes.toString());
-    //   chordList = jsonDecode(chordStr);
-    //   debugPrint('chordStr=${chordList.length}');
-    // }
 
-    String timeSignatureStr = timeSignatures[timeSignature.value];
-    String noteLengthStr = kAvailableNoteLength[noteLengthSelectedIndex.value];
-    debugPrint(
-        'timeSignatureStr=$timeSignatureStr,noteLengthStr=$noteLengthStr');
     for (int i = 0; i < virtualNotes.length; i++) {
       String note = virtualNotes[i];
-      // if (timeSignatureStr == '4/4' && noteLengthStr == '1/4') {
-      //   if (i % 4 == 0) {
-      //     int chordLenght = i ~/ 4;
-      //     if (chordList.length > chordLenght) {
-      //       //插入竖线和和弦
-      //       if (i == 0) {
-      //         sbff.write('\\"${chordList[chordLenght]}\\" ');
-      //       } else {
-      //         sbff.write('|\\"${chordList[chordLenght]}\\" ');
-      //       }
-      //     }
-      //   }
-      // } else {
-      //   int postion =
-      //       ABCHead.insertMeasureLinePosition(timeSignatureStr, noteLengthStr);
-      //   if (i % postion == 0 && i > 0) {
-      //     sbff.write('|');
-      //   }
-      // }
       sbff.write(note);
       sbff.write(" ");
     }
+
     createPrompt = sbff.toString();
     String splitMeasureAndChordStr = splitMeasureAndChord(createPrompt);
     createPrompt = splitMeasureAndChordStr.replaceAll("\\n", "\n");
@@ -787,7 +767,6 @@ class _HomePageState extends State<HomePage> {
           "setAbcString(\"%%MIDI program $midiProgramValue\\n$splitMeasureAndChordStr\",false)";
     }
     finalabcStringCreate = ABCHead.appendTempoParam(sb, tempo.value.toInt());
-    // debugPrint('curr=$finalabcStringCreate');
     await _change(finalabcStringCreate);
   }
 
@@ -1157,27 +1136,49 @@ class _HomePageState extends State<HomePage> {
                     visible: selectstate.value == 1,
                     child: ChangeNote(
                       onTapAtIndex: (context, key) {
+                        final v = inputNoteLength.value;
+                        final noteSelected = selectedNote == null;
                         switch (key) {
                           case ChangeNoteKey.whole:
-                            _updateNote(noteLengthIndex: 0);
+                            if (!noteSelected) _updateNote(noteLengthIndex: 0);
+                            if (noteSelected)
+                              inputNoteLength.value =
+                                  NoteLength.whole.withDotted(v.dotted);
                             break;
                           case ChangeNoteKey.half:
-                            _updateNote(noteLengthIndex: 1);
+                            if (!noteSelected) _updateNote(noteLengthIndex: 1);
+                            if (noteSelected)
+                              inputNoteLength.value =
+                                  NoteLength.half.withDotted(v.dotted);
                             break;
                           case ChangeNoteKey.quarter:
-                            _updateNote(noteLengthIndex: 2);
+                            if (!noteSelected) _updateNote(noteLengthIndex: 2);
+                            if (noteSelected)
+                              inputNoteLength.value =
+                                  NoteLength.quarter.withDotted(v.dotted);
                             break;
                           case ChangeNoteKey.eighth:
-                            _updateNote(noteLengthIndex: 3);
+                            if (!noteSelected) _updateNote(noteLengthIndex: 3);
+                            if (noteSelected)
+                              inputNoteLength.value =
+                                  NoteLength.eighth.withDotted(v.dotted);
                             break;
                           case ChangeNoteKey.sixteenth:
-                            _updateNote(noteLengthIndex: 4);
+                            if (!noteSelected) _updateNote(noteLengthIndex: 4);
+                            if (noteSelected)
+                              inputNoteLength.value =
+                                  NoteLength.sixteenth.withDotted(v.dotted);
                             break;
                           case ChangeNoteKey.thirtySecond:
-                            _updateNote(noteLengthIndex: 5);
+                            if (!noteSelected) _updateNote(noteLengthIndex: 5);
+                            if (noteSelected)
+                              inputNoteLength.value =
+                                  NoteLength.thirtySecond.withDotted(v.dotted);
                             break;
                           case ChangeNoteKey.dottodNote:
-                            _updateDottod();
+                            if (!noteSelected) _updateDottod();
+                            if (noteSelected)
+                              inputNoteLength.value = v.withDotted(!v.dotted);
                             break;
                           case ChangeNoteKey.wholeZ:
                             _inserOrUpdatetRest(0);
@@ -1737,25 +1738,6 @@ class _HomePageState extends State<HomePage> {
                                     timeSignature.value = index;
                                     timeSingnatureStr = timeSignatures[index];
                                     updateTimeSignature();
-                                  },
-                                )),
-                          ],
-                        ),
-                        SizedBox(
-                          height: 20.h,
-                        ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          crossAxisAlignment: CrossAxisAlignment.baseline,
-                          textBaseline: TextBaseline.alphabetic, // 指定基线对齐的基线
-                          children: [
-                            TextItem(text: 'Default note length'),
-                            Obx(() => DropButtonList(
-                                  key: const ValueKey('Default'),
-                                  items: kAvailableNoteLength,
-                                  index: noteLengthSelectedIndex.value,
-                                  onChanged: (index) {
-                                    noteLengthSelectedIndex.value = index;
                                   },
                                 )),
                           ],

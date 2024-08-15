@@ -95,6 +95,54 @@ extension NoteLengthAdapter on NoteLength {
         return "3/16";
     }
   }
+
+  bool get dotted {
+    switch (this) {
+      case NoteLength.whole:
+      case NoteLength.half:
+      case NoteLength.quarter:
+      case NoteLength.eighth:
+      case NoteLength.sixteenth:
+      case NoteLength.thirtySecond:
+        return false;
+      case NoteLength.wholeDotted:
+      case NoteLength.halfDotted:
+      case NoteLength.quarterDotted:
+      case NoteLength.eighthDotted:
+      case NoteLength.sixteenthDotted:
+      case NoteLength.thirtySecondDotted:
+        return true;
+    }
+  }
+
+  NoteLength withDotted(bool dotted) {
+    switch (this) {
+      case NoteLength.whole:
+        return dotted ? NoteLength.wholeDotted : NoteLength.whole;
+      case NoteLength.half:
+        return dotted ? NoteLength.halfDotted : NoteLength.half;
+      case NoteLength.quarter:
+        return dotted ? NoteLength.quarterDotted : NoteLength.quarter;
+      case NoteLength.eighth:
+        return dotted ? NoteLength.eighthDotted : NoteLength.eighth;
+      case NoteLength.sixteenth:
+        return dotted ? NoteLength.sixteenthDotted : NoteLength.sixteenth;
+      case NoteLength.thirtySecond:
+        return dotted ? NoteLength.thirtySecondDotted : NoteLength.thirtySecond;
+      case NoteLength.wholeDotted:
+        return dotted ? NoteLength.wholeDotted : NoteLength.whole;
+      case NoteLength.halfDotted:
+        return dotted ? NoteLength.halfDotted : NoteLength.half;
+      case NoteLength.quarterDotted:
+        return dotted ? NoteLength.quarterDotted : NoteLength.quarter;
+      case NoteLength.eighthDotted:
+        return dotted ? NoteLength.eighthDotted : NoteLength.eighth;
+      case NoteLength.sixteenthDotted:
+        return dotted ? NoteLength.sixteenthDotted : NoteLength.sixteenth;
+      case NoteLength.thirtySecondDotted:
+        return dotted ? NoteLength.thirtySecondDotted : NoteLength.thirtySecond;
+    }
+  }
 }
 
 NoteLength noteLengthFromString(String notation) {
