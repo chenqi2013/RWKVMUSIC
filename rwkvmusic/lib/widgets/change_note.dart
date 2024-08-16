@@ -123,7 +123,9 @@ class ChangeNote extends StatelessWidget {
                 children: [
                   5.w,
                   ...ChangeNoteKey.values.indexMap((index, k) {
-                    return _buildKey(
+                    return _KeyWrapper(
+                      onTapAtIndex: onTapAtIndex,
+                      onLongPress: onLongPress,
                       context: context,
                       k: k,
                       inputNoteLengthV: inputNoteLengthV,
@@ -140,14 +142,29 @@ class ChangeNote extends StatelessWidget {
       );
     });
   }
+}
 
-  Widget _buildKey({
-    required BuildContext context,
-    required ChangeNoteKey k,
-    required NoteLength inputNoteLengthV,
-    required int index,
-    NewNote? selectedNote,
-  }) {
+class _KeyWrapper extends StatelessWidget {
+  const _KeyWrapper({
+    required this.onTapAtIndex,
+    required this.onLongPress,
+    required this.context,
+    required this.k,
+    required this.inputNoteLengthV,
+    required this.index,
+    required this.selectedNote,
+  });
+
+  final void Function(BuildContext context, ChangeNoteKey key) onTapAtIndex;
+  final void Function(BuildContext context, ChangeNoteKey key) onLongPress;
+  final BuildContext context;
+  final ChangeNoteKey k;
+  final NoteLength inputNoteLengthV;
+  final int index;
+  final NewNote? selectedNote;
+
+  @override
+  Widget build(BuildContext context) {
     Widget child = C();
     final assetName = k.assetName;
     if (assetName != null) {
@@ -228,17 +245,13 @@ class ChangeNote extends StatelessWidget {
     );
 
     Widget highlight = C();
-    final highlighted = Positioned(
-      top: 4,
-      left: 4,
+    final highlighted = Positioned.fill(
       child: C(
-        width: 6,
-        height: 6,
         decoration: BD(
-          color: kCR,
+          color: kW.wo(0.2),
           borderRadius: 4.r,
           boxShadow: [
-            BoxShadow(color: kCR, blurRadius: 10),
+            BoxShadow(color: kW.wo(0.2), blurRadius: 10),
           ],
         ),
       ),
@@ -305,6 +318,7 @@ class ChangeNote extends StatelessWidget {
           ),
         ));
 
+    final selectedNote = this.selectedNote;
     if (selectedNote != null) {
       final selectedNoteLengthV = selectedNote.length;
       final isZ = selectedNote.isZ;
@@ -458,8 +472,8 @@ class _ButtonState extends State<_Button> {
           child: AnimatedContainer(
             duration: 100.ms,
             curve: Curves.easeOutCirc,
-            height: _kButtonHeight * (tapped ? 0.95 : 1),
-            width: widget.width * (tapped ? 0.95 : 1),
+            height: _kButtonHeight * (tapped ? 0.97 : 1),
+            width: widget.width * (tapped ? 0.97 : 1),
             decoration: BD(
               boxShadow: [
                 BoxShadow(
@@ -470,7 +484,7 @@ class _ButtonState extends State<_Button> {
               ],
             ),
             child: Transform.scale(
-              scale: tapped ? 0.95 : 1,
+              scale: tapped ? 0.97 : 1,
               child: widget.child,
             ),
           ),
