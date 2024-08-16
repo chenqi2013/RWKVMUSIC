@@ -340,7 +340,7 @@ class _HomePageState extends State<HomePage> {
         virtualNotesHistory.add([...virtualNotes]);
         intNodesHistory.add([...intNodes]);
       }
-      selectedNote = null;
+      selectedNote.value = null;
     } catch (e) {
       // JS 是有可能执行出错的
       if (kDebugMode) print("😡 $e");
@@ -349,8 +349,7 @@ class _HomePageState extends State<HomePage> {
 
   Future<void> _unselectAll() async {
     if (selectstate.value != 1) return;
-    selectedNote = null;
-    selectNoteLength.value = null;
+    selectedNote.value = null;
     await controllerPiano.runJavaScript("unselectAll()");
   }
 
@@ -397,25 +396,34 @@ class _HomePageState extends State<HomePage> {
     if (name.contains("rest")) name = "z";
     if (name.contains("dots.dot")) name = "z";
     final duration = json["duration"] as num;
+    final noteLength = noteLengthFromLength(duration);
 
-    final _s = selectedNote;
+    final _s = selectedNote.value;
     if (_s != null) {
       final isSameNote = _s.name == name &&
           _s.index == int.parse(json["index"]) &&
-          _s.duration == duration;
+          _s.length == noteLength;
       if (isSameNote) {
-        selectedNote = null;
+        selectedNote.value = null;
         _unselectAll();
         return;
       }
     }
 
-    selectNoteLength.value = noteLengthFromLength(duration);
+    // if (kDebugMode) print("✅ $");
 
-    selectedNote = SelectedNote()
+    final index = int.parse(json["index"]);
+
+    if (kDebugMode) print("✅ Note selected:");
+    if (kDebugMode) print("✅ name: $name");
+    if (kDebugMode) print("✅ index: $index");
+    if (kDebugMode) print("✅ duration: $duration");
+    if (kDebugMode) print("✅ noteLength: $noteLength");
+
+    selectedNote.value = NewNote()
       ..name = name
-      ..index = int.parse(json["index"])
-      ..duration = duration;
+      ..index = index
+      ..length = noteLength;
   }
 
   /// 和弦点击
@@ -482,7 +490,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   void _updateDottod() async {
-    final selected = selectedNote;
+    final selected = selectedNote.value;
     if (selected == null) {
       if (kDebugMode) print("😡 No selected note when update dotted");
       // if (virtualNotes.isEmpty) return;
@@ -500,48 +508,9 @@ class _HomePageState extends State<HomePage> {
       // _updateDottod();
       return;
     }
-    final note = selected.name;
+    // final note = selected.name;
     final noteIndex = selected.index;
-    String newNote = "";
-    final noteLengthIndex = selected.noteLengthIndex;
-    switch (noteLengthIndex) {
-      case 0:
-        newNote = "${note}6";
-        break;
-      case 1:
-        newNote = "${note}3";
-        break;
-      case 2:
-        newNote = "${note}3/2";
-        break;
-      case 3:
-        newNote = "${note}3/4";
-        break;
-      case 4:
-        newNote = "${note}3/8";
-        break;
-      case 5:
-        newNote = "${note}3/16";
-        break;
-      case 6:
-        newNote = "${note}4";
-        break;
-      case 7:
-        newNote = "${note}2";
-        break;
-      case 8:
-        newNote = note;
-        break;
-      case 9:
-        newNote = "${note}1/2";
-        break;
-      case 10:
-        newNote = "${note}1/4";
-        break;
-      case 11:
-        newNote = "${note}1/8";
-        break;
-    }
+    final newNote = selected.notationWithDotted(!selected.length.dotted);
     NoteCalculator().noteMap[noteIndex] = newNote;
     virtualNotes[noteIndex] = newNote;
     StringBuffer sbff = StringBuffer();
@@ -557,14 +526,17 @@ class _HomePageState extends State<HomePage> {
     finalabcStringCreate = ABCHead.appendTempoParam(sb, tempo.value.toInt());
     debugPrint('curr=$finalabcStringCreate');
     await _change(finalabcStringCreate);
-    selectedNote = null;
+    selectedNote.value = null;
   }
 
   /// 通过执行 JS 更新琴谱
   ///
   /// TDOO: check selected note's dotted
-  void _updateNote({int? noteLengthIndex, String? noteSymbol}) async {
-    final selected = selectedNote;
+  void _updateNote({
+    NoteLength? noteLength,
+    String? noteSymbol,
+  }) async {
+    final selected = selectedNote.value;
     if (selected == null) {
       if (kDebugMode) print("😡 No selected note when update note");
       // if (virtualNotes.isEmpty) return;
@@ -590,28 +562,9 @@ class _HomePageState extends State<HomePage> {
     }
     final note = noteSymbol ?? selected.name;
     final noteIndex = selected.index;
-    String newNote = "";
-    noteLengthIndex ??= selected.noteLengthIndex;
-    switch (noteLengthIndex) {
-      case 0:
-        newNote = "${note}4";
-        break;
-      case 1:
-        newNote = "${note}2";
-        break;
-      case 2:
-        newNote = note;
-        break;
-      case 3:
-        newNote = "$note/2";
-        break;
-      case 4:
-        newNote = "$note/4";
-        break;
-      case 5:
-        newNote = "$note/8";
-        break;
-    }
+    final inputDotted = inputNoteLength.value.dotted;
+    noteLength ??= selected.length;
+    String newNote = note + noteLength.withDotted(inputDotted).end;
     NoteCalculator().noteMap[noteIndex] = newNote;
     virtualNotes[noteIndex] = newNote;
     StringBuffer sbff = StringBuffer();
@@ -627,34 +580,20 @@ class _HomePageState extends State<HomePage> {
     finalabcStringCreate = ABCHead.appendTempoParam(sb, tempo.value.toInt());
     debugPrint('curr=$finalabcStringCreate');
     await _change(finalabcStringCreate);
-    selectedNote = null;
+    selectedNote.value = null;
   }
 
   /// 插入休止符
-  void _inserOrUpdatetRest(int lengthIndex) async {
-    if (selectedNote != null) {
-      _updateNote(noteLengthIndex: lengthIndex, noteSymbol: "z");
+  void _inserOrUpdatetRest(NoteLength noteLength) async {
+    if (selectedNote.value != null) {
+      _updateNote(noteLength: noteLength, noteSymbol: "z");
       return;
     }
     const node = 24;
     String noteName = "z";
-    switch (lengthIndex) {
-      case 0:
-        noteName = "${noteName}4";
-        break;
-      case 1:
-        noteName = "${noteName}2";
-        break;
-      case 2:
-        noteName = noteName;
-        break;
-      case 3:
-        noteName = "$noteName/2";
-        break;
-      case 4:
-        noteName = "$noteName/4";
-        break;
-    }
+    final _inputNoteLength = inputNoteLength.value;
+    final inputDotted = _inputNoteLength.dotted;
+    noteName = noteName + noteLength.withDotted(inputDotted).end;
     virtualNotes.add(noteName);
     intNodes.add(node);
 
@@ -666,11 +605,11 @@ class _HomePageState extends State<HomePage> {
       debugPrint('chordStr=${chordList.length}');
     }
     String timeSignatureStr = timeSignatures[timeSignature.value];
-    final noteLength = noteLengthFromString(noteName);
+    final _noteLength = noteLengthFromString(noteName);
 
     for (int i = 0; i < virtualNotes.length; i++) {
       String note = virtualNotes[i];
-      if (timeSignatureStr == '4/4' && noteLength == NoteLength.quarter) {
+      if (timeSignatureStr == '4/4' && _noteLength == NoteLength.quarter) {
         if (i % 4 == 0) {
           int chordLenght = i ~/ 4;
           if (chordList.length > chordLenght) {
@@ -684,7 +623,7 @@ class _HomePageState extends State<HomePage> {
         }
       } else {
         int postion =
-            ABCHead.insertMeasureLinePosition(timeSignatureStr, noteLength);
+            ABCHead.insertMeasureLinePosition(timeSignatureStr, _noteLength);
         if (i % postion == 0 && i > 0) {
           sbff.write('|');
         }
@@ -706,7 +645,7 @@ class _HomePageState extends State<HomePage> {
     finalabcStringCreate = ABCHead.appendTempoParam(sb, tempo.value.toInt());
     debugPrint('curr=$finalabcStringCreate');
     await _change(finalabcStringCreate);
-    selectedNote = null;
+    selectedNote.value = null;
   }
 
   /// 插入音符
@@ -715,10 +654,10 @@ class _HomePageState extends State<HomePage> {
   void updatePianoNote(int node) async {
     String noteName = MidiToABCConverter().getNoteName(node);
 
-    final selected = selectedNote;
+    final selected = selectedNote.value;
     if (selected != null) {
       _updateNote(noteSymbol: noteName);
-      selectedNote = null;
+      selectedNote.value = null;
       return;
     }
 
@@ -796,7 +735,7 @@ class _HomePageState extends State<HomePage> {
     String sb =
         "setAbcString(\"%%MIDI program $midiProgramValue\\n$createPromptTmp\",false)";
     _change(sb);
-    selectedNote = null;
+    selectedNote.value = null;
     int index = randomizeAbcStr.indexOf('|');
     String promptStr = randomizeAbcStr.substring(index + 1);
     splitMeasureAndChord(promptStr);
@@ -1116,63 +1055,70 @@ class _HomePageState extends State<HomePage> {
                     child: ChangeNote(
                       onTapAtIndex: (context, key) {
                         final v = inputNoteLength.value;
-                        final noteSelected = selectedNote == null;
+                        final selected = selectedNote.value;
+                        final noteSelected = selected != null;
                         switch (key) {
                           case ChangeNoteKey.whole:
-                            if (!noteSelected) _updateNote(noteLengthIndex: 0);
                             if (noteSelected)
+                              _updateNote(noteLength: NoteLength.whole);
+                            if (!noteSelected)
                               inputNoteLength.value =
                                   NoteLength.whole.withDotted(v.dotted);
                             break;
                           case ChangeNoteKey.half:
-                            if (!noteSelected) _updateNote(noteLengthIndex: 1);
                             if (noteSelected)
+                              _updateNote(noteLength: NoteLength.half);
+                            if (!noteSelected)
                               inputNoteLength.value =
                                   NoteLength.half.withDotted(v.dotted);
                             break;
                           case ChangeNoteKey.quarter:
-                            if (!noteSelected) _updateNote(noteLengthIndex: 2);
                             if (noteSelected)
+                              _updateNote(noteLength: NoteLength.quarter);
+                            if (!noteSelected)
                               inputNoteLength.value =
                                   NoteLength.quarter.withDotted(v.dotted);
                             break;
                           case ChangeNoteKey.eighth:
-                            if (!noteSelected) _updateNote(noteLengthIndex: 3);
                             if (noteSelected)
+                              _updateNote(noteLength: NoteLength.eighth);
+                            if (!noteSelected)
                               inputNoteLength.value =
                                   NoteLength.eighth.withDotted(v.dotted);
                             break;
                           case ChangeNoteKey.sixteenth:
-                            if (!noteSelected) _updateNote(noteLengthIndex: 4);
                             if (noteSelected)
+                              _updateNote(noteLength: NoteLength.sixteenth);
+                            if (!noteSelected)
                               inputNoteLength.value =
                                   NoteLength.sixteenth.withDotted(v.dotted);
                             break;
                           case ChangeNoteKey.thirtySecond:
-                            if (!noteSelected) _updateNote(noteLengthIndex: 5);
                             if (noteSelected)
+                              _updateNote(noteLength: NoteLength.thirtySecond);
+                            if (!noteSelected)
                               inputNoteLength.value =
                                   NoteLength.thirtySecond.withDotted(v.dotted);
                             break;
                           case ChangeNoteKey.dottodNote:
-                            if (!noteSelected) _updateDottod();
-                            if (noteSelected)
+                            if (noteSelected) _updateDottod();
+                            if (!noteSelected)
                               inputNoteLength.value = v.withDotted(!v.dotted);
                             break;
                           case ChangeNoteKey.wholeZ:
-                            _inserOrUpdatetRest(0);
+                            _inserOrUpdatetRest(NoteLength.whole);
                             break;
                           case ChangeNoteKey.halfZ:
-                            _inserOrUpdatetRest(1);
+                            _inserOrUpdatetRest(NoteLength.half);
                             break;
                           case ChangeNoteKey.quarterZ:
-                            _inserOrUpdatetRest(2);
+                            _inserOrUpdatetRest(NoteLength.quarter);
                             break;
                           case ChangeNoteKey.eighthZ:
-                            _inserOrUpdatetRest(3);
+                            _inserOrUpdatetRest(NoteLength.eighth);
                             break;
                           case ChangeNoteKey.sixteenthZ:
-                            _inserOrUpdatetRest(4);
+                            _inserOrUpdatetRest(NoteLength.sixteenth);
                             break;
                           case ChangeNoteKey.randomGroove:
                             _randomizeAbc();
@@ -1414,6 +1360,7 @@ class _HomePageState extends State<HomePage> {
 
   /// 清除全部内容
   void resetToDefaulValueInCreateMode() {
+    selectedNote.value = null;
     virtualNotes.clear();
     intNodes.clear();
     timeSingnatureStr = "4/4";
@@ -2584,6 +2531,6 @@ class _HomePageState extends State<HomePage> {
 
   void _flutterOnTapEmptyReceived(JavaScriptMessage p1) {
     if (selectstate.value != 1) return;
-    selectedNote = null;
+    selectedNote.value = null;
   }
 }

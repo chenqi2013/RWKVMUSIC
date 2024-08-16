@@ -4,5 +4,23 @@ import 'package:rwkvmusic/note_length.dart';
 /// 输入 note 时匹配的时值
 final inputNoteLength = Rx<NoteLength>(NoteLength.quarter);
 
-/// 当前正在被选择的节点的时值
-final selectNoteLength = Rx<NoteLength?>(null);
+final selectedNote = Rx<NewNote?>(null);
+
+class NewNote {
+  late final String name;
+  late final int index;
+  late final NoteLength length;
+
+  String get notation {
+    return name + this.length.end;
+  }
+
+  bool get isZ {
+    return name == "z";
+  }
+
+  String notationWithDotted(bool dotted) {
+    if (this.length.dotted == dotted) return notation;
+    return name + this.length.withDotted(dotted).end;
+  }
+}

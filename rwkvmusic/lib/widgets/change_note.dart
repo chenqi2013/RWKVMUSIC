@@ -105,13 +105,12 @@ class ChangeNote extends StatelessWidget {
     final screenWidth = MediaQuery.of(context).size.width;
     return Obx(() {
       final inputNoteLengthV = inputNoteLength.value;
-      final selectedNoteLengthV = selectNoteLength.value;
+      final selectedNoteV = selectedNote.value;
+
       return ClipRRect(
         borderRadius: 8.r,
         child: C(
-            decoration: const BD(
-              color: kC,
-            ),
+            decoration: const BD(color: kC),
             constraints: const BoxConstraints(
               maxHeight: _kContainerHeight,
               minHeight: _kContainerHeight,
@@ -124,240 +123,12 @@ class ChangeNote extends StatelessWidget {
                 children: [
                   5.w,
                   ...ChangeNoteKey.values.indexMap((index, k) {
-                    Widget child = C();
-                    final assetName = k.assetName;
-                    if (assetName != null) {
-                      child = Center(
-                        child: SvgPicture.asset(
-                          assetName,
-                          width: k.assetSize.width,
-                          height: k.assetSize.height,
-                          color: kW,
-                        ),
-                      );
-                    }
-                    if (k == ChangeNoteKey.randomGroove) {
-                      final Shader linearGradient = const LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: <Color>[
-                          Color(0xFFEBFEC1),
-                          Color(0xFFA1D632),
-                        ],
-                      ).createShader(const Rect.fromLTWH(
-                        0.0,
-                        0.0,
-                        _kButtonHeight * 1.55,
-                        _kButtonHeight,
-                      ));
-                      child = Center(
-                          child: T(
-                        "Random\nGroove",
-                        textAlign: TextAlign.center,
-                        s: TS(
-                            w: FW.w900,
-                            s: 14,
-                            foreground: Paint()..shader = linearGradient,
-                            shadows: [
-                              Shadow(
-                                color: kB.wo(0.25),
-                                blurRadius: 4,
-                                offset: const Offset(0, 2),
-                              ),
-                            ]),
-                      ));
-                    }
-
-                    if (k == ChangeNoteKey.delete) {
-                      final Shader linearGradient = const LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: <Color>[
-                          Color(0xFFFFFFFF),
-                          Color(0xFF999999),
-                        ],
-                      ).createShader(const Rect.fromLTWH(
-                        0.0,
-                        0.0,
-                        _kButtonHeight * 1.55,
-                        _kButtonHeight,
-                      ));
-                      child = Center(
-                          child: T(
-                        "Delete",
-                        s: TS(
-                            w: FW.w900,
-                            s: 14,
-                            foreground: Paint()..shader = linearGradient,
-                            shadows: [
-                              Shadow(
-                                color: kB.wo(0.25),
-                                blurRadius: 4,
-                                offset: const Offset(0, 2),
-                              ),
-                            ]),
-                      ));
-                    }
-
-                    final svg = Center(
-                      child: k.bgImage.image(),
-                    );
-
-                    Widget highlight = C();
-                    final highlighted = Positioned(
-                        child: C(
-                      width: 10,
-                      height: 10,
-                      decoration: BD(color: kCR),
-                    ));
-
-                    switch (inputNoteLengthV) {
-                      case NoteLength.whole:
-                      case NoteLength.wholeDotted:
-                        if (k == ChangeNoteKey.whole) highlight = highlighted;
-                        break;
-                      case NoteLength.half:
-                      case NoteLength.halfDotted:
-                        if (k == ChangeNoteKey.half) highlight = highlighted;
-                        break;
-                      case NoteLength.quarter:
-                      case NoteLength.quarterDotted:
-                        if (k == ChangeNoteKey.quarter) highlight = highlighted;
-                        break;
-                      case NoteLength.eighth:
-                      case NoteLength.eighthDotted:
-                        if (k == ChangeNoteKey.eighth) highlight = highlighted;
-                        break;
-                      case NoteLength.sixteenth:
-                      case NoteLength.sixteenthDotted:
-                        if (k == ChangeNoteKey.sixteenth)
-                          highlight = highlighted;
-                        break;
-                      case NoteLength.thirtySecond:
-                      case NoteLength.thirtySecondDotted:
-                        if (k == ChangeNoteKey.thirtySecond)
-                          highlight = highlighted;
-                        break;
-                    }
-
-                    switch (inputNoteLengthV) {
-                      case NoteLength.wholeDotted:
-                        if (k == ChangeNoteKey.dottodNote)
-                          highlight = highlighted;
-                      case NoteLength.halfDotted:
-                        if (k == ChangeNoteKey.dottodNote)
-                          highlight = highlighted;
-                      case NoteLength.quarterDotted:
-                        if (k == ChangeNoteKey.dottodNote)
-                          highlight = highlighted;
-                      case NoteLength.eighthDotted:
-                        if (k == ChangeNoteKey.dottodNote)
-                          highlight = highlighted;
-                      case NoteLength.sixteenthDotted:
-                        if (k == ChangeNoteKey.dottodNote)
-                          highlight = highlighted;
-                      case NoteLength.thirtySecondDotted:
-                        if (k == ChangeNoteKey.dottodNote)
-                          highlight = highlighted;
-                      default:
-                        break;
-                    }
-
-                    Widget selectedHighlight = C();
-
-                    final selectedHighlighted = Positioned(
-                        right: 0,
-                        top: 0,
-                        child: C(
-                          width: 10,
-                          height: 10,
-                          decoration: BD(color: AppColor.color_A1D632),
-                        ));
-
-                    if (selectedNoteLengthV != null) {
-                      switch (selectedNoteLengthV) {
-                        case NoteLength.whole:
-                        case NoteLength.wholeDotted:
-                          if (k == ChangeNoteKey.whole)
-                            selectedHighlight = selectedHighlighted;
-                          break;
-                        case NoteLength.half:
-                        case NoteLength.halfDotted:
-                          if (k == ChangeNoteKey.half)
-                            selectedHighlight = selectedHighlighted;
-                          break;
-                        case NoteLength.quarter:
-                        case NoteLength.quarterDotted:
-                          if (k == ChangeNoteKey.quarter)
-                            selectedHighlight = selectedHighlighted;
-                          break;
-                        case NoteLength.eighth:
-                        case NoteLength.eighthDotted:
-                          if (k == ChangeNoteKey.eighth)
-                            selectedHighlight = selectedHighlighted;
-                          break;
-                        case NoteLength.sixteenth:
-                        case NoteLength.sixteenthDotted:
-                          if (k == ChangeNoteKey.sixteenth)
-                            selectedHighlight = selectedHighlighted;
-                          break;
-                        case NoteLength.thirtySecond:
-                        case NoteLength.thirtySecondDotted:
-                          if (k == ChangeNoteKey.thirtySecond)
-                            selectedHighlight = selectedHighlighted;
-                          break;
-                      }
-
-                      switch (selectedNoteLengthV) {
-                        case NoteLength.wholeDotted:
-                          if (k == ChangeNoteKey.dottodNote)
-                            selectedHighlight = selectedHighlighted;
-                        case NoteLength.halfDotted:
-                          if (k == ChangeNoteKey.dottodNote)
-                            selectedHighlight = selectedHighlighted;
-                        case NoteLength.quarterDotted:
-                          if (k == ChangeNoteKey.dottodNote)
-                            selectedHighlight = selectedHighlighted;
-                        case NoteLength.eighthDotted:
-                          if (k == ChangeNoteKey.dottodNote)
-                            selectedHighlight = selectedHighlighted;
-                        case NoteLength.sixteenthDotted:
-                          if (k == ChangeNoteKey.dottodNote)
-                            selectedHighlight = selectedHighlighted;
-                        case NoteLength.thirtySecondDotted:
-                          if (k == ChangeNoteKey.dottodNote)
-                            selectedHighlight = selectedHighlighted;
-                        default:
-                          break;
-                      }
-                    }
-
-                    return _Button(
+                    return _buildKey(
+                      context: context,
+                      k: k,
+                      inputNoteLengthV: inputNoteLengthV,
                       index: index,
-                      onTap: () {
-                        onTapAtIndex(context, k);
-                      },
-                      onLongPress: k == ChangeNoteKey.delete
-                          ? () {
-                              onLongPress(context, k);
-                            }
-                          : null,
-                      height: _kButtonHeight,
-                      width: (k == ChangeNoteKey.delete ||
-                              k == ChangeNoteKey.randomGroove)
-                          ? _kButtonHeight * 1.55
-                          : _kButtonHeight,
-                      color: k == ChangeNoteKey.delete
-                          ? const Color(0xFFFF6666)
-                          : null,
-                      child: Stack(
-                        children: [
-                          svg,
-                          child,
-                          highlight,
-                          selectedHighlight,
-                        ],
-                      ),
+                      selectedNote: selectedNoteV,
                     );
                   }).widgetJoin(
                     (_) => 4.w,
@@ -368,6 +139,266 @@ class ChangeNote extends StatelessWidget {
             )),
       );
     });
+  }
+
+  Widget _buildKey({
+    required BuildContext context,
+    required ChangeNoteKey k,
+    required NoteLength inputNoteLengthV,
+    required int index,
+    NewNote? selectedNote,
+  }) {
+    Widget child = C();
+    final assetName = k.assetName;
+    if (assetName != null) {
+      child = Center(
+        child: SvgPicture.asset(
+          assetName,
+          width: k.assetSize.width,
+          height: k.assetSize.height,
+          color: kW,
+        ),
+      );
+    }
+    if (k == ChangeNoteKey.randomGroove) {
+      final Shader linearGradient = const LinearGradient(
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+        colors: <Color>[
+          Color(0xFFEBFEC1),
+          Color(0xFFA1D632),
+        ],
+      ).createShader(const Rect.fromLTWH(
+        0.0,
+        0.0,
+        _kButtonHeight * 1.55,
+        _kButtonHeight,
+      ));
+      child = Center(
+          child: T(
+        "Random\nGroove",
+        textAlign: TextAlign.center,
+        s: TS(
+            w: FW.w900,
+            s: 14,
+            foreground: Paint()..shader = linearGradient,
+            shadows: [
+              Shadow(
+                color: kB.wo(0.25),
+                blurRadius: 4,
+                offset: const Offset(0, 2),
+              ),
+            ]),
+      ));
+    }
+
+    if (k == ChangeNoteKey.delete) {
+      final Shader linearGradient = const LinearGradient(
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+        colors: <Color>[
+          Color(0xFFFFFFFF),
+          Color(0xFF999999),
+        ],
+      ).createShader(const Rect.fromLTWH(
+        0.0,
+        0.0,
+        _kButtonHeight * 1.55,
+        _kButtonHeight,
+      ));
+      child = Center(
+          child: T(
+        "Delete",
+        s: TS(
+            w: FW.w900,
+            s: 14,
+            foreground: Paint()..shader = linearGradient,
+            shadows: [
+              Shadow(
+                color: kB.wo(0.25),
+                blurRadius: 4,
+                offset: const Offset(0, 2),
+              ),
+            ]),
+      ));
+    }
+
+    final svg = Center(
+      child: k.bgImage.image(),
+    );
+
+    Widget highlight = C();
+    final highlighted = Positioned(
+      top: 4,
+      left: 4,
+      child: C(
+        width: 6,
+        height: 6,
+        decoration: BD(
+          color: kCR,
+          borderRadius: 4.r,
+          boxShadow: [
+            BoxShadow(color: kCR, blurRadius: 10),
+          ],
+        ),
+      ),
+    );
+
+    switch (inputNoteLengthV) {
+      case NoteLength.whole:
+      case NoteLength.wholeDotted:
+        if (k == ChangeNoteKey.whole) highlight = highlighted;
+        break;
+      case NoteLength.half:
+      case NoteLength.halfDotted:
+        if (k == ChangeNoteKey.half) highlight = highlighted;
+        break;
+      case NoteLength.quarter:
+      case NoteLength.quarterDotted:
+        if (k == ChangeNoteKey.quarter) highlight = highlighted;
+        break;
+      case NoteLength.eighth:
+      case NoteLength.eighthDotted:
+        if (k == ChangeNoteKey.eighth) highlight = highlighted;
+        break;
+      case NoteLength.sixteenth:
+      case NoteLength.sixteenthDotted:
+        if (k == ChangeNoteKey.sixteenth) highlight = highlighted;
+        break;
+      case NoteLength.thirtySecond:
+      case NoteLength.thirtySecondDotted:
+        if (k == ChangeNoteKey.thirtySecond) highlight = highlighted;
+        break;
+    }
+
+    switch (inputNoteLengthV) {
+      case NoteLength.wholeDotted:
+        if (k == ChangeNoteKey.dottodNote) highlight = highlighted;
+      case NoteLength.halfDotted:
+        if (k == ChangeNoteKey.dottodNote) highlight = highlighted;
+      case NoteLength.quarterDotted:
+        if (k == ChangeNoteKey.dottodNote) highlight = highlighted;
+      case NoteLength.eighthDotted:
+        if (k == ChangeNoteKey.dottodNote) highlight = highlighted;
+      case NoteLength.sixteenthDotted:
+        if (k == ChangeNoteKey.dottodNote) highlight = highlighted;
+      case NoteLength.thirtySecondDotted:
+        if (k == ChangeNoteKey.dottodNote) highlight = highlighted;
+      default:
+        break;
+    }
+
+    Widget selectedHighlight = C();
+
+    final selectedHighlighted = Positioned(
+        right: 4,
+        top: 4,
+        child: C(
+          width: 6,
+          height: 6,
+          decoration: BD(
+            color: AppColor.color_A1D632,
+            borderRadius: 4.r,
+            boxShadow: [
+              BoxShadow(color: AppColor.color_A1D632, blurRadius: 10),
+            ],
+          ),
+        ));
+
+    if (selectedNote != null) {
+      final selectedNoteLengthV = selectedNote.length;
+      final isZ = selectedNote.isZ;
+      switch (selectedNoteLengthV) {
+        case NoteLength.whole:
+        case NoteLength.wholeDotted:
+          if (k == ChangeNoteKey.whole && !isZ)
+            selectedHighlight = selectedHighlighted;
+          if (k == ChangeNoteKey.wholeZ && isZ)
+            selectedHighlight = selectedHighlighted;
+          break;
+        case NoteLength.half:
+        case NoteLength.halfDotted:
+          if (k == ChangeNoteKey.half && !isZ)
+            selectedHighlight = selectedHighlighted;
+          if (k == ChangeNoteKey.halfZ && isZ)
+            selectedHighlight = selectedHighlighted;
+          break;
+        case NoteLength.quarter:
+        case NoteLength.quarterDotted:
+          if (k == ChangeNoteKey.quarter && !isZ)
+            selectedHighlight = selectedHighlighted;
+          if (k == ChangeNoteKey.quarterZ && isZ)
+            selectedHighlight = selectedHighlighted;
+          break;
+        case NoteLength.eighth:
+        case NoteLength.eighthDotted:
+          if (k == ChangeNoteKey.eighth && !isZ)
+            selectedHighlight = selectedHighlighted;
+          if (k == ChangeNoteKey.eighthZ && isZ)
+            selectedHighlight = selectedHighlighted;
+          break;
+        case NoteLength.sixteenth:
+        case NoteLength.sixteenthDotted:
+          if (k == ChangeNoteKey.sixteenth && !isZ)
+            selectedHighlight = selectedHighlighted;
+          if (k == ChangeNoteKey.sixteenthZ && isZ)
+            selectedHighlight = selectedHighlighted;
+          break;
+        case NoteLength.thirtySecond:
+        case NoteLength.thirtySecondDotted:
+          if (k == ChangeNoteKey.thirtySecond && !isZ)
+            selectedHighlight = selectedHighlighted;
+          break;
+      }
+
+      switch (selectedNoteLengthV) {
+        case NoteLength.wholeDotted:
+          if (k == ChangeNoteKey.dottodNote)
+            selectedHighlight = selectedHighlighted;
+        case NoteLength.halfDotted:
+          if (k == ChangeNoteKey.dottodNote)
+            selectedHighlight = selectedHighlighted;
+        case NoteLength.quarterDotted:
+          if (k == ChangeNoteKey.dottodNote)
+            selectedHighlight = selectedHighlighted;
+        case NoteLength.eighthDotted:
+          if (k == ChangeNoteKey.dottodNote)
+            selectedHighlight = selectedHighlighted;
+        case NoteLength.sixteenthDotted:
+          if (k == ChangeNoteKey.dottodNote)
+            selectedHighlight = selectedHighlighted;
+        case NoteLength.thirtySecondDotted:
+          if (k == ChangeNoteKey.dottodNote)
+            selectedHighlight = selectedHighlighted;
+        default:
+          break;
+      }
+    }
+
+    return _Button(
+      index: index,
+      onTap: () {
+        onTapAtIndex(context, k);
+      },
+      onLongPress: k == ChangeNoteKey.delete
+          ? () {
+              onLongPress(context, k);
+            }
+          : null,
+      height: _kButtonHeight,
+      width: (k == ChangeNoteKey.delete || k == ChangeNoteKey.randomGroove)
+          ? _kButtonHeight * 1.55
+          : _kButtonHeight,
+      color: k == ChangeNoteKey.delete ? const Color(0xFFFF6666) : null,
+      child: Stack(
+        children: [
+          svg,
+          child,
+          highlight,
+          selectedHighlight,
+        ],
+      ),
+    );
   }
 }
 
