@@ -356,6 +356,15 @@ class _HomePageState extends State<HomePage> {
   /// 使当前琴谱的 abc notation value 变为上一步的 abc notation value
   void _undo() async {
     if (selectstate.value != 1) return;
+    if (isCreateGenerate.value) {
+      if (!isGenerating.value) {
+        isCreateGenerate.value = false;
+        segmentChange(1);
+      } else {
+        debugPrint('需要先停止生成再暫停');
+      }
+      return;
+    }
     if (history.isEmpty ||
         virtualNotesHistory.isEmpty ||
         intNodesHistory.isEmpty) return;
@@ -1059,51 +1068,64 @@ class _HomePageState extends State<HomePage> {
                         final noteSelected = selected != null;
                         switch (key) {
                           case ChangeNoteKey.whole:
-                            if (noteSelected)
+                            if (noteSelected) {
                               _updateNote(noteLength: NoteLength.whole);
-                            if (!noteSelected)
+                            }
+                            if (!noteSelected) {
                               inputNoteLength.value =
                                   NoteLength.whole.withDotted(v.dotted);
+                            }
                             break;
                           case ChangeNoteKey.half:
-                            if (noteSelected)
+                            if (noteSelected) {
                               _updateNote(noteLength: NoteLength.half);
-                            if (!noteSelected)
+                            }
+                            if (!noteSelected) {
                               inputNoteLength.value =
                                   NoteLength.half.withDotted(v.dotted);
+                            }
                             break;
                           case ChangeNoteKey.quarter:
-                            if (noteSelected)
+                            if (noteSelected) {
                               _updateNote(noteLength: NoteLength.quarter);
-                            if (!noteSelected)
+                            }
+                            if (!noteSelected) {
                               inputNoteLength.value =
                                   NoteLength.quarter.withDotted(v.dotted);
+                            }
                             break;
                           case ChangeNoteKey.eighth:
-                            if (noteSelected)
+                            if (noteSelected) {
                               _updateNote(noteLength: NoteLength.eighth);
-                            if (!noteSelected)
+                            }
+                            if (!noteSelected) {
                               inputNoteLength.value =
                                   NoteLength.eighth.withDotted(v.dotted);
+                            }
                             break;
                           case ChangeNoteKey.sixteenth:
-                            if (noteSelected)
+                            if (noteSelected) {
                               _updateNote(noteLength: NoteLength.sixteenth);
-                            if (!noteSelected)
+                            }
+                            if (!noteSelected) {
                               inputNoteLength.value =
                                   NoteLength.sixteenth.withDotted(v.dotted);
+                            }
                             break;
                           case ChangeNoteKey.thirtySecond:
-                            if (noteSelected)
+                            if (noteSelected) {
                               _updateNote(noteLength: NoteLength.thirtySecond);
-                            if (!noteSelected)
+                            }
+                            if (!noteSelected) {
                               inputNoteLength.value =
                                   NoteLength.thirtySecond.withDotted(v.dotted);
+                            }
                             break;
                           case ChangeNoteKey.dottodNote:
                             if (noteSelected) _updateDottod();
-                            if (!noteSelected)
+                            if (!noteSelected) {
                               inputNoteLength.value = v.withDotted(!v.dotted);
+                            }
                             break;
                           case ChangeNoteKey.wholeZ:
                             _inserOrUpdatetRest(NoteLength.whole);
