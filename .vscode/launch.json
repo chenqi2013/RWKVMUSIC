@@ -23,6 +23,52 @@
             "request": "launch",
             "type": "dart",
             "flutterMode": "release"
-        }
-    ]
+        },
+        {
+            "name": "15 (Halo)",
+            "cwd": "rwkvmusic",
+            "request": "launch",
+            "type": "dart",
+            "deviceId": "0F55E962-8087-474B-88CA-E6A9B1990BBC"
+        },
+        {
+            "name": "Xs (Halo)",
+            "cwd": "rwkvmusic",
+            "request": "launch",
+            "type": "dart",
+            "deviceId": "E7E404D3-7D6E-482E-8E2E-C348983251A1"
+        },
+        {
+            "name": "SE (Halo)",
+            "cwd": "rwkvmusic",
+            "request": "launch",
+            "type": "dart",
+            "deviceId": "20F9AA5F-0481-4812-90BE-FE8EC5EA4324"
+        },
+        {
+            "name": "13 (Halo)",
+            "cwd": "rwkvmusic",
+            "request": "launch",
+            "type": "dart",
+            "deviceId": "DD479E47-4940-4053-A190-F69555C3AA99"
+        },
+        {
+            "name": "iPad mini (Halo)",
+            "cwd": "rwkvmusic",
+            "request": "launch",
+            "type": "dart",
+            "deviceId": "CCD64777-FF29-4DC0-99BB-14680702F70F"
+        },
+    ],
+    "compounds": [
+        {
+            "name": "All (Halo)",
+            "cwd": "rwkvmusic",
+            "configurations": [
+                "15 (Halo)",
+                "SE (Halo)",
+                "iPad mini (Halo)",
+            ],
+        },
+    ],
 }
