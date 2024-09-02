@@ -1,4 +1,7 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:halo/halo.dart';
@@ -87,8 +90,9 @@ extension _FindAssets on ChangeNoteKey {
   }
 }
 
-const _kButtonHeight = 48.0;
-const _kContainerHeight = 52.0;
+double _kButtonHeight = 48.0;
+double _kContainerHeight = 52.0;
+const _kKeysDesignWidth = 787.0;
 
 class ChangeNote extends StatelessWidget {
   final void Function(BuildContext context, ChangeNoteKey key) onTapAtIndex;
@@ -103,6 +107,20 @@ class ChangeNote extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
+    final padding = MediaQuery.of(context).padding;
+
+    final availableWidth = screenWidth -
+        max(padding.left, ScreenUtil().setWidth(85)) -
+        max(padding.right, ScreenUtil().setWidth(85));
+
+    if (availableWidth >= _kKeysDesignWidth) {
+      _kButtonHeight = 48.0;
+      _kContainerHeight = 52.0;
+    } else {
+      _kButtonHeight = 48.0 * availableWidth / _kKeysDesignWidth - 1;
+      _kContainerHeight = 52.0 * availableWidth / _kKeysDesignWidth - 1;
+    }
+
     return Obx(() {
       final inputNoteLengthV = inputNoteLength.value;
       final selectedNoteV = selectedNote.value;
@@ -111,13 +129,14 @@ class ChangeNote extends StatelessWidget {
         borderRadius: 8.r,
         child: C(
             decoration: const BD(color: kC),
-            constraints: const BoxConstraints(
+            constraints: BoxConstraints(
               maxHeight: _kContainerHeight,
               minHeight: _kContainerHeight,
             ),
             width: screenWidth,
             child: Center(
               child: ListView(
+                padding: EI.o(l: padding.left, r: padding.right),
                 scrollDirection: Axis.horizontal,
                 shrinkWrap: true,
                 children: [
@@ -171,8 +190,8 @@ class _KeyWrapper extends StatelessWidget {
       child = Center(
         child: SvgPicture.asset(
           assetName,
-          width: k.assetSize.width,
-          height: k.assetSize.height,
+          width: k.assetSize.width * _kButtonHeight / 48.0,
+          height: k.assetSize.height * _kButtonHeight / 48.0,
           color: kW,
         ),
       );
@@ -185,7 +204,7 @@ class _KeyWrapper extends StatelessWidget {
           Color(0xFFEBFEC1),
           Color(0xFFA1D632),
         ],
-      ).createShader(const Rect.fromLTWH(
+      ).createShader(Rect.fromLTWH(
         0.0,
         0.0,
         _kButtonHeight * 1.55,
@@ -197,7 +216,7 @@ class _KeyWrapper extends StatelessWidget {
         textAlign: TextAlign.center,
         s: TS(
             w: FW.w900,
-            s: 14,
+            s: 14 * _kButtonHeight / 48.0,
             foreground: Paint()..shader = linearGradient,
             shadows: [
               Shadow(
@@ -217,7 +236,7 @@ class _KeyWrapper extends StatelessWidget {
           Color(0xFFFFFFFF),
           Color(0xFF999999),
         ],
-      ).createShader(const Rect.fromLTWH(
+      ).createShader(Rect.fromLTWH(
         0.0,
         0.0,
         _kButtonHeight * 1.55,
@@ -228,7 +247,7 @@ class _KeyWrapper extends StatelessWidget {
         "Delete",
         s: TS(
             w: FW.w900,
-            s: 14,
+            s: 14 * _kButtonHeight / 48.0,
             foreground: Paint()..shader = linearGradient,
             shadows: [
               Shadow(
