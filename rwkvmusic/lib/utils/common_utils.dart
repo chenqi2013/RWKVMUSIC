@@ -1,12 +1,15 @@
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
+import 'package:app_installer/app_installer.dart';
 import 'package:archive/archive.dart';
 import 'package:device_info_plus/device_info_plus.dart';
+import 'package:isolated_download_manager/isolated_download_manager.dart';
 import 'package:path/path.dart' as p;
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:rwkvmusic/values/values.dart';
 
 class CommonUtils {
   static String? extractTextValue(String jsonData) {
@@ -180,6 +183,45 @@ class CommonUtils {
     final allInfo = deviceInfo.data;
     debugPrint('getDeviceInfo=${allInfo.toString()}');
     return allInfo.toString();
+  }
+
+  static void downloadfile(BuildContext context, String downloadurl,
+      Function(DownloadStatus, double) progressStatus) async {
+    String downloadPath = await CommonUtils.getCachePath();
+    // Initialize
+    await DownloadManager.instance.init(
+      isolates: 3,
+    );
+
+    Uri uri = Uri.parse(downloadurl);
+    var name = uri.pathSegments.last;
+    print('file name=$name');
+    var request = DownloadManager.instance
+        .download(downloadurl, path: '$downloadPath/$name');
+
+    // Listen
+    request.events.listen((event) {
+      if (event is DownloadState) {
+        print("event: $event");
+        if (event == DownloadState.started) {
+          progressStatus(DownloadStatus.start, 0);
+        } else if (event == DownloadState.finished) {
+          print('finished');
+          // CommonUtils.setIsdownload(true);
+          // Navigator.of(context).pop();
+          progressStatus(DownloadStatus.finish, 1.0);
+
+          AppInstaller.installApk('$downloadPath/$name');
+        }
+      } else if (event is double) {
+        // progress.value = event;
+        print("progress: ${(event * 100.0).toStringAsFixed(0)}%");
+        progressStatus(DownloadStatus.downloading, event);
+      }
+    }, onError: (error) {
+      print("error $error");
+      progressStatus(DownloadStatus.fail, -1);
+    });
   }
 
   // void getABCDataByAPI() async {

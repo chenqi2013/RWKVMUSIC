@@ -30,12 +30,13 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-
+  app_installer: ^1.2.0
+  isolated_download_manager: ^1.0.3
   webview_windows: ^0.4.0
   audioplayers: ^5.2.1
   cached_network_image: ^3.3.1
   cookie_jar: ^4.0.8
-  crypto: ^3.0.1
+  crypto: ^3.0.3
   cupertino_icons: ^1.0.2
   device_info:
   dio: ^5.4.1
@@ -62,7 +63,7 @@ dependencies:
   package_info: ^2.0.0
   permission_handler: ^11.3.0
   pull_to_refresh: ^2.0.0
-  sentry: ^7.16.1
+  sentry: ^8.8.0
   share: ^2.0.1
   shared_preferences: ^2.2.2
   sqflite: ^2.3.2

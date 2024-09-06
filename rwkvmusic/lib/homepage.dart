@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'package:app_installer/app_installer.dart';
+import 'package:crypto/crypto.dart';
 import 'package:filepicker_windows/filepicker_windows.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
@@ -63,6 +65,8 @@ class HomePage extends StatefulWidget {
 final List<String> history = [];
 final List<List> virtualNotesHistory = [];
 final List<List<int>> intNodesHistory = [];
+RxDouble downloadProgress = 0.0.obs;
+RxBool isdownloading = false.obs;
 
 class _HomePageState extends State<HomePage> {
   /// 键盘 webview 控制器
@@ -325,6 +329,9 @@ class _HomePageState extends State<HomePage> {
     });
     if (isOnlyLoadFastModel && modelAddress == 0) {
       fetchABCDataByIsolate();
+    }
+    if (Platform.isAndroid) {
+      checkAppUpdate('android', context);
     }
   }
 
@@ -1253,6 +1260,13 @@ class _HomePageState extends State<HomePage> {
                                               'isClicking || isOnlyLoadFastModel');
                                           return;
                                         }
+                                        if (selectstate.value == 1 &&
+                                            splitMeasure == null) {
+                                          Fluttertoast.showToast(
+                                              msg:
+                                                  "Please input some notes before generating.");
+                                          return;
+                                        }
                                         isClicking = true;
                                         isGenerating.value =
                                             !isGenerating.value;
@@ -1597,7 +1611,7 @@ class _HomePageState extends State<HomePage> {
                   SizedBox(
                     height: isWindowsOrMac ? 60.h : 40.h,
                   ),
-                  Center(child: TextItem(text: 'Version: RWKV-6 1.2.0')),
+                  Center(child: TextItem(text: 'Version: $appVersion')),
                 ],
               ),
             ),
@@ -1859,7 +1873,7 @@ class _HomePageState extends State<HomePage> {
                         SizedBox(
                           height: isWindowsOrMac ? 60.h : 40.h,
                         ),
-                        Center(child: TextItem(text: 'Version: RWKV-6 1.2.0')),
+                        Center(child: TextItem(text: 'Version: $appVersion')),
                         const SizedBox(
                           height: 10,
                         ),
@@ -2554,5 +2568,148 @@ class _HomePageState extends State<HomePage> {
   void _flutterOnTapEmptyReceived(JavaScriptMessage p1) {
     if (selectstate.value != 1) return;
     selectedNote.value = null;
+  }
+
+  Future<void> checkAppUpdate(String type, BuildContext context) async {
+    var url =
+        'https://api.rwkv.cn/rest/v1/rwkv_music_version?select=*&type=eq.$type';
+
+    try {
+      // 创建 HttpClient 实例
+      final httpClient = HttpClient();
+
+      // 创建 Http 请求
+      final request = await httpClient.getUrl(Uri.parse(url));
+      request.headers.add('apikey',
+          'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.ewogICJyb2xlIjogInNlcnZpY2Vfcm9sZSIsCiAgImlzcyI6ICJzdXBhYmFzZSIsCiAgImlhdCI6IDE3MjMwNDY0MDAsCiAgImV4cCI6IDE4ODA4MTI4MDAKfQ.HxaITOB4IJ-Qf0dKOw0DcfFGo76wWVEsQVoJLev7qi8');
+      // 等待请求的响应
+      final response = await request.close();
+
+      // 处理响应数据
+      if (response.statusCode == 200) {
+        final responseData = await response.transform(utf8.decoder).join();
+        List array = jsonDecode(responseData);
+        String downloadurl = array[0]['download_url'];
+        String version = array[0]['version'];
+        String description = array[0]['description'];
+        bool isForce = array[0]['is_force'];
+        String md5 = array[0]['md5'];
+
+        print('checkAppUpdate: $array');
+        if (version != appVersion) {
+          // 下载新版本
+          showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              return AlertDialog(
+                title: Text('发现新版本'),
+                content: Container(
+                  height: 280.h,
+                  margin: const EdgeInsets.all(10),
+                  child: Obx(() => Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(description).marginOnly(bottom: 20),
+                          if (isdownloading.value)
+                            SizedBox(
+                              width: double.infinity,
+                              height: 20,
+                              child: SliderTheme(
+                                data: SliderTheme.of(context).copyWith(
+                                  trackHeight: 3.0, // 进度条高度
+                                  thumbShape: const RoundSliderThumbShape(
+                                    enabledThumbRadius: 0, // 滑块的半径
+                                  ),
+                                  overlayShape: const RoundSliderOverlayShape(
+                                    overlayRadius: 0.0, // 滑块被拖动时的扩展半径
+                                  ),
+                                ),
+                                child: Slider(
+                                  // allowedInteraction: SliderInteraction.tapOnly,
+                                  activeColor: AppColor.color_757575,
+                                  inactiveColor: Colors.grey,
+                                  thumbColor: Colors.white,
+                                  value: downloadProgress.value,
+                                  onChanged: (double newValue) {},
+                                ),
+                              ),
+                            ),
+                          if (isdownloading.value)
+                            Text(
+                                '${(downloadProgress * 100).toStringAsFixed(0)}%'),
+                          if (!isdownloading.value)
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              children: [
+                                if (!isForce)
+                                  TextButton(
+                                    child: Text('取消'),
+                                    onPressed: () {
+                                      Navigator.of(context).pop();
+                                    },
+                                  ),
+                                TextButton(
+                                  child: Text('更新'),
+                                  onPressed: () {
+                                    downloadfile(context, downloadurl, md5);
+                                    // Navigator.of(context).pop();
+                                  },
+                                ),
+                              ],
+                            )
+                        ],
+                      )),
+                ),
+              );
+            },
+            barrierDismissible: false,
+          );
+        }
+      } else {
+        print('checkAppUpdate Error: ${response.statusCode}');
+      }
+
+      // 关闭 HttpClient
+      httpClient.close();
+    } catch (e) {
+      print('checkAppUpdate Exception: $e');
+    }
+  }
+
+  void downloadfile(
+      BuildContext context, String downloadurl, String md5Str) async {
+    String downloadPath = await CommonUtils.getCachePath();
+    Uri uri = Uri.parse(downloadurl);
+    var name = uri.pathSegments.last;
+    debugPrint('file name=$name');
+    String filePath = '$downloadPath/$name';
+    if (File(filePath).existsSync()) {
+      debugPrint('file existsSync');
+      var file = File(filePath);
+      var fileBytes = await file.readAsBytes();
+      // 计算 MD5
+      var md5Digest = md5.convert(fileBytes);
+      // 输出 MD5 哈希值
+      print('MD5 hash: ${md5Digest.toString()}');
+      if (md5Digest.toString() == md5Str) {
+        Get.back();
+        AppInstaller.installApk(filePath);
+        return;
+      }
+    }
+    CommonUtils.downloadfile(context, downloadurl, (status, progress) {
+      if (status == DownloadStatus.start) {
+        isdownloading.value = true;
+      } else if (status == DownloadStatus.finish) {
+        print('downloadfile finished');
+        // CommonUtils.setIsdownload(true);
+        Get.back();
+        AppInstaller.installApk(filePath);
+      } else if (status == DownloadStatus.downloading) {
+        downloadProgress.value = progress;
+      } else if (status == DownloadStatus.fail) {
+        Fluttertoast.showToast(msg: "please check network,download fail");
+      }
+    });
   }
 }

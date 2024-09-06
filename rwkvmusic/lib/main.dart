@@ -16,6 +16,7 @@ import 'package:rwkvmusic/utils/common_utils.dart';
 import 'package:rwkvmusic/utils/note.dart';
 import 'package:rwkvmusic/values/constantdata.dart';
 import 'package:rwkvmusic/values/values.dart';
+import 'package:sentry/sentry.dart';
 import 'package:universal_ble/universal_ble.dart';
 import 'package:webview_win_floating/webview_plugin.dart';
 
@@ -57,15 +58,29 @@ void main(List<String> args) async {
   }
   await Get.putAsync<StorageService>(() => StorageService().init());
   Get.put<ConfigStore>(ConfigStore());
-  runApp(ScreenUtilInit(
-    designSize: Platform.isWindows
-        ? const Size(2880, 1600)
-        : const Size(2436, 1125), //812, 375
-    child: const GetMaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: HomePage(),
+  await Sentry.init(
+    (options) {
+      options.dsn =
+          'https://e7b4e1cfa474037accf726c5893d86f8@o4507886670708736.ingest.us.sentry.io/4507886687944704';
+      // Set tracesSampleRate to 1.0 to capture 100% of transactions for tracing.
+      // We recommend adjusting this value in production.
+      options.tracesSampleRate = 1.0;
+      // The sampling rate for profiling is relative to tracesSampleRate
+      // Setting to 1.0 will profile 100% of sampled transactions:
+      // options.profilesSampleRate = 1.0;
+    },
+    appRunner: () => runApp(
+      ScreenUtilInit(
+        designSize: Platform.isWindows
+            ? const Size(2880, 1600)
+            : const Size(2436, 1125), //812, 375
+        child: const GetMaterialApp(
+          debugShowCheckedModeBanner: false,
+          home: HomePage(),
+        ),
+      ),
     ),
-  ));
+  );
 }
 
 bool isShowDialog = false;

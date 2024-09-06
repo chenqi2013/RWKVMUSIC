@@ -5,6 +5,15 @@ enum ModelType {
   mtk, // android手机包括三者
 }
 
+enum DownloadStatus {
+  start,
+  downloading,
+  finish,
+  fail,
+}
+
+const String appVersion = 'ncnn_1.5.0_20240906';
+
 var qnnSoList = [
   'libQnnDspV66Skel.so',
   'libQnnHtp.so',
