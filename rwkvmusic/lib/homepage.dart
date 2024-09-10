@@ -12,6 +12,8 @@ import 'package:flutter_svg/svg.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:rwkvmusic/agree_dialog.dart';
+import 'package:rwkvmusic/feedback_page.dart';
 import 'package:rwkvmusic/main.dart';
 import 'package:rwkvmusic/mainwidget/custom_segment_controller.dart';
 import 'package:rwkvmusic/mainwidget/play_progressbar.dart';
@@ -1021,6 +1023,10 @@ class _HomePageState extends State<HomePage> {
                                 height: isWindowsOrMac ? 61.h : 52.h,
                               ),
                               onPressed: () {
+                                // showAgreementDialog(context);
+                                // Get.to(FeedbackPage());
+                                // return;
+
                                 debugPrint('Settings');
                                 if (isShowOverlay) {
                                   closeOverlay();
@@ -1807,6 +1813,32 @@ class _HomePageState extends State<HomePage> {
                         ),
                         SizedBox(
                           height: 20.h,
+                        ),
+                        Center(
+                          child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                TextItem(text: 'show Prompt'),
+                                Obx(() => SwitchItem(
+                                      value: showPrompt.value,
+                                      onChanged: (newValue) {
+                                        showPrompt.value = newValue;
+                                      },
+                                    )),
+                              ]),
+                        ),
+                        SizedBox(
+                          height: 20.h,
+                        ),
+                        Obx(
+                          () => showPrompt.value
+                              ? SelectableText(
+                                  currentGeneratePromptTmp.value,
+                                  style: TextStyle(color: Colors.white),
+                                )
+                              : SizedBox(
+                                  width: 0,
+                                ),
                         ),
                         SizedBox(
                           height: 20.h,

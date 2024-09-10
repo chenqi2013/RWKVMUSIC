@@ -120,7 +120,7 @@ RxDouble tempo = 180.0.obs;
 bool isChangeTempo = false;
 RxBool autoChord = true.obs;
 RxBool infiniteGeneration = false.obs;
-
+RxBool showPrompt = false.obs;
 List midiNotes = [];
 // bool isNeedConvertMidiNotes = false;
 
@@ -159,6 +159,8 @@ int samplerAddress = 0;
 bool isClicking = false;
 ModelType currentModelType = ModelType.ncnn;
 bool isOnlyLoadFastModel = true; //提前模型初始化，加快生成速度
+String currentGeneratePrompt = '';
+RxString currentGeneratePromptTmp = ''.obs;
 
 void fetchABCDataByIsolate() async {
   String? dllPath;
@@ -254,9 +256,8 @@ void fetchABCDataByIsolate() async {
 
   mainReceivePort = ReceivePort();
 
-  String prompt = '';
   if (selectstate.value == 0) {
-    prompt = promptsAbc[promptSelectedIndex.value];
+    currentGeneratePrompt = promptsAbc[promptSelectedIndex.value];
   } else {
     // prompt = "L:1/4\nM:$timeSingnatureStr\nK:C\n|$createPrompt";
 
@@ -271,14 +272,14 @@ void fetchABCDataByIsolate() async {
     String combineabcChordstr =
         ABCHead.combineAbc_Chord(chords[0], splitmeasureabcEndstr);
     print('combineAbc_Chord---$combineabcChordstr');
-    prompt = combineabcChordstr.replaceAll('\\"', '"');
+    currentGeneratePrompt = combineabcChordstr.replaceAll('\\"', '"');
 
     // prompt = 'L:1/4\nM:4/4\nK:C\n| "C" E G B c | "G" ^A ^G =G E';
     // prompt = "L:1/4\nM:4/4\n|\"C\" C3/4 G B c | \"F\" F ^G d c";
 
     //--------ai compose 转换prompt
   }
-  debugPrint('generate Prompt==$prompt');
+  debugPrint('generate prompt before==$currentGeneratePrompt');
   var fastmodel = [];
   if (modelAddress != 0) {
     fastmodel = [modelAddress, abcTokenizerAddress, samplerAddress];
@@ -286,10 +287,12 @@ void fetchABCDataByIsolate() async {
     debugPrint(
         'modelAddress==$modelAddress,abcTokenizerAddress==$abcTokenizerAddress');
   }
-
+  currentGeneratePromptTmp.value = currentGeneratePrompt +
+      '\nseed:${seed.value}' +
+      '\nrandomness:${randomness.value}';
   userIsolate = await Isolate.spawn(getABCDataByLocalModel, [
     mainReceivePort.sendPort,
-    selectstate.value == 0 ? prompt : prompt,
+    selectstate.value == 0 ? currentGeneratePrompt : currentGeneratePrompt,
     midiProgramValue,
     seed.value,
     randomness.value,
@@ -368,7 +371,7 @@ void getABCDataByLocalModel(var array) async {
   double tempo = array[9];
   int eosId = 3;
   String prompt = currentPrompt;
-  debugPrint('promptprompt==$prompt');
+  debugPrint('promptprompt==$currentPrompt');
   debugPrint('dllPath==$dllPath,binPath==$binPath');
   var isolateReceivePort = ReceivePort();
   var isStopGenerating = false;
@@ -389,7 +392,7 @@ void getABCDataByLocalModel(var array) async {
   Pointer<Void> model;
   Pointer<Void> abcTokenizer;
   Pointer<Void> sampler;
-
+  debugPrint('generate prompt after==$prompt');
   Pointer<Char> promptChar = prompt.toNativeUtf8().cast<Char>();
   faster_rwkvd fastrwkv = faster_rwkvd(
       Platform.isIOS ? DynamicLibrary.process() : DynamicLibrary.open(dllPath));
