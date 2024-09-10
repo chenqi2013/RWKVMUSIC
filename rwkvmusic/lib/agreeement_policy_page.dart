@@ -18,7 +18,7 @@ class AgreementPolicyPage extends StatelessWidget {
     controllerPiano?.loadRequest(Uri.parse(url));
     return Scaffold(
       appBar: AppBar(
-        title: Text('用户协议'),
+        title: Text(type == 1 ? '隐私政策' : '用户协议'),
       ),
       body: WebViewWidget(
         controller: controllerPiano!,

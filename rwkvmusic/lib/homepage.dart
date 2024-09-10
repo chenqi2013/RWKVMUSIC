@@ -335,11 +335,13 @@ class _HomePageState extends State<HomePage> {
     if (Platform.isAndroid) {
       checkAppUpdate('android', context);
     }
+
     if (Platform.isIOS || Platform.isAndroid) {
       if (!ConfigStore.to.isFirstOpen) {
         debugPrint('isFirstOpen');
-        showAgreementDialog(context);
-        ConfigStore.to.saveAlreadyOpen();
+        Future.delayed(const Duration(milliseconds: 1000), () {
+          showAgreementDialog(context);
+        });
       }
     }
   }
@@ -1922,6 +1924,21 @@ class _HomePageState extends State<HomePage> {
                                 text: 'Scan BlueTooth Device',
                               ),
                             ]),
+                        if (Platform.isIOS || Platform.isAndroid)
+                          SizedBox(
+                            height: 30.w,
+                          ),
+                        if (Platform.isIOS || Platform.isAndroid)
+                          Center(
+                            child: TextBtn(
+                              width: isWindowsOrMac ? 1000.w : 1000.w,
+                              height: isWindowsOrMac ? 113.h : 80.h,
+                              onPressed: () {
+                                Get.to(FeedbackPage());
+                              },
+                              text: 'FeedBack',
+                            ),
+                          ),
                         SizedBox(
                           height: isWindowsOrMac ? 60.h : 40.h,
                         ),

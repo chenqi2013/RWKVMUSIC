@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 import 'package:rwkvmusic/main.dart';
 import 'package:rwkvmusic/mainwidget/text_btn.dart';
@@ -34,42 +35,55 @@ class _FeedbackPageState extends State<FeedbackPage> {
       appBar: AppBar(
         title: Text('FeedBack'),
       ),
-      body: Container(
-        margin: EdgeInsets.all(20.w),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('*FeedBack Content'),
-            SizedBox(
-              height: 400.h,
-              child: TextField(
-                controller: _controller,
-                maxLength: _maxLength,
-                maxLines: null,
-                expands: true,
-                decoration: InputDecoration(
-                  labelText: "Please input your opinions or suggestions",
-                  counterText: "${currentLength.value}/$_maxLength",
-                  enabledBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: Colors.grey), // 边框颜色为红色
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: Colors.grey), // 聚焦时边框颜色为红色
+      body: SingleChildScrollView(
+        child: Container(
+          margin: EdgeInsets.all(20.w),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('*FeedBack Content'),
+              SizedBox(
+                height: 20.h,
+              ),
+              SizedBox(
+                height: 400.h,
+                child: TextField(
+                  controller: _controller,
+                  maxLength: _maxLength,
+                  maxLines: null,
+                  expands: true,
+                  decoration: InputDecoration(
+                    labelText: "Please input your opinions or suggestions",
+                    counterText: "${currentLength.value}/$_maxLength",
+                    enabledBorder: OutlineInputBorder(
+                      borderSide: BorderSide(color: Colors.grey), // 边框颜色为红色
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: BorderSide(color: Colors.grey), // 聚焦时边框颜色为红色
+                    ),
                   ),
                 ),
               ),
-            ),
-            Center(
-              child: TextBtn(
-                width: isWindowsOrMac ? 500.w : 500.w,
-                height: isWindowsOrMac ? 113.h : 80.h,
-                onPressed: () async {
-                  debugPrint('提交反馈');
-                },
-                text: 'Submit',
+              Center(
+                child: TextBtn(
+                  width: isWindowsOrMac ? 500.w : 500.w,
+                  height: isWindowsOrMac ? 113.h : 80.h,
+                  onPressed: () async {
+                    debugPrint('提交反馈');
+                    if (_controller.text.isEmpty) {
+                      Fluttertoast.showToast(
+                          msg: "Please input your opinions or suggestions.");
+                    } else {
+                      Fluttertoast.showToast(
+                          msg:
+                              "Thank you, we have received your suggestions and feedback.");
+                    }
+                  },
+                  text: 'Submit',
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

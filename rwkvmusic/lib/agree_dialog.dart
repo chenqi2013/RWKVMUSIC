@@ -1,8 +1,11 @@
+import 'dart:io';
+
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:rwkvmusic/agreeement_policy_page.dart';
+import 'package:rwkvmusic/store/config.dart';
 
 void showAgreementDialog(BuildContext context) {
   showDialog(
@@ -55,6 +58,7 @@ void showAgreementDialog(BuildContext context) {
             child: Text("同意", style: TextStyle(color: Colors.blue)),
             onPressed: () {
               // 点击同意，关闭弹窗
+              ConfigStore.to.saveAlreadyOpen();
               Navigator.of(context).pop();
             },
           ),
@@ -84,5 +88,9 @@ void _exitApp(BuildContext context) {
   Navigator.of(context).pop();
   // 退出应用的处理逻辑
   print("退出应用");
-  SystemNavigator.pop();
+  if (Platform.isAndroid) {
+    SystemNavigator.pop();
+  } else if (Platform.isIOS) {
+    exit(0);
+  }
 }
