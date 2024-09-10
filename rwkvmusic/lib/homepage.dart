@@ -335,6 +335,13 @@ class _HomePageState extends State<HomePage> {
     if (Platform.isAndroid) {
       checkAppUpdate('android', context);
     }
+    if (Platform.isIOS || Platform.isAndroid) {
+      if (!ConfigStore.to.isFirstOpen) {
+        debugPrint('isFirstOpen');
+        showAgreementDialog(context);
+        ConfigStore.to.saveAlreadyOpen();
+      }
+    }
   }
 
   /// 更改当前琴谱的 abc notation value
@@ -1023,10 +1030,6 @@ class _HomePageState extends State<HomePage> {
                                 height: isWindowsOrMac ? 61.h : 52.h,
                               ),
                               onPressed: () {
-                                // showAgreementDialog(context);
-                                // Get.to(FeedbackPage());
-                                // return;
-
                                 debugPrint('Settings');
                                 if (isShowOverlay) {
                                   closeOverlay();
@@ -1445,7 +1448,7 @@ class _HomePageState extends State<HomePage> {
                 ),
               ),
               width: isWindowsOrMac ? 1400.w : 1200.w,
-              height: isWindowsOrMac ? 1000.h : 910.h,
+              // height: isWindowsOrMac ? 1000.h : 910.h,
               padding: EdgeInsets.symmetric(
                   horizontal: isWindowsOrMac ? 60.w : 40.w,
                   vertical: isWindowsOrMac ? 40.h : 20.h),
@@ -1462,7 +1465,7 @@ class _HomePageState extends State<HomePage> {
                       InkWell(
                         child: Icon(
                           Icons.close,
-                          size: 50.w,
+                          size: 70.w,
                         ),
                         onTap: () {
                           isShowDialog = false;
@@ -1568,9 +1571,9 @@ class _HomePageState extends State<HomePage> {
                     height: 40.h,
                   ),
                   Center(
-                      child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
                         TextBtn(
                           width: isWindowsOrMac ? 500.w : 500.w,
                           height: isWindowsOrMac ? 113.h : 80.h,
@@ -1613,7 +1616,24 @@ class _HomePageState extends State<HomePage> {
                           },
                           text: 'Scan BlueTooth Device',
                         ),
-                      ])),
+                      ],
+                    ),
+                  ),
+                  if (Platform.isIOS || Platform.isAndroid)
+                    SizedBox(
+                      height: 30.w,
+                    ),
+                  if (Platform.isIOS || Platform.isAndroid)
+                    Center(
+                      child: TextBtn(
+                        width: isWindowsOrMac ? 1000.w : 1000.w,
+                        height: isWindowsOrMac ? 113.h : 80.h,
+                        onPressed: () {
+                          Get.to(FeedbackPage());
+                        },
+                        text: 'FeedBack',
+                      ),
+                    ),
                   SizedBox(
                     height: isWindowsOrMac ? 60.h : 40.h,
                   ),
@@ -1676,7 +1696,7 @@ class _HomePageState extends State<HomePage> {
                             InkWell(
                               child: Icon(
                                 Icons.close,
-                                size: 50.w,
+                                size: 70.w,
                               ),
                               onTap: () {
                                 isShowDialog = false;
@@ -2082,7 +2102,7 @@ class _HomePageState extends State<HomePage> {
                         InkWell(
                           child: Icon(
                             Icons.close,
-                            size: 50.w,
+                            size: 70.w,
                           ),
                           onTap: () {
                             // if (isWindowsOrMac) {
@@ -2400,7 +2420,7 @@ class _HomePageState extends State<HomePage> {
                             InkWell(
                               child: Icon(
                                 Icons.close,
-                                size: 50.w,
+                                size: 70.w,
                               ),
                               onTap: () {
                                 isShowDialog = false;

@@ -32,14 +32,14 @@ class _FeedbackPageState extends State<FeedbackPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('意见反馈'),
+        title: Text('FeedBack'),
       ),
       body: Container(
         margin: EdgeInsets.all(20.w),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('*反馈内容'),
+            Text('*FeedBack Content'),
             SizedBox(
               height: 400.h,
               child: TextField(
@@ -48,7 +48,7 @@ class _FeedbackPageState extends State<FeedbackPage> {
                 maxLines: null,
                 expands: true,
                 decoration: InputDecoration(
-                  labelText: "请输入您的意见或建议",
+                  labelText: "Please input your opinions or suggestions",
                   counterText: "${currentLength.value}/$_maxLength",
                   enabledBorder: OutlineInputBorder(
                     borderSide: BorderSide(color: Colors.grey), // 边框颜色为红色
@@ -66,7 +66,7 @@ class _FeedbackPageState extends State<FeedbackPage> {
                 onPressed: () async {
                   debugPrint('提交反馈');
                 },
-                text: '提交',
+                text: 'Submit',
               ),
             ),
           ],

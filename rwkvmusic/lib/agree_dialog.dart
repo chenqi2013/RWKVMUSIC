@@ -1,6 +1,8 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:get/get.dart';
+import 'package:rwkvmusic/agreeement_policy_page.dart';
 
 void showAgreementDialog(BuildContext context) {
   showDialog(
@@ -65,11 +67,17 @@ void showAgreementDialog(BuildContext context) {
 void _openUserAgreement() {
   // 打开用户协议页面
   print("打开用户协议");
+  Get.to(AgreementPolicyPage(
+    type: 0,
+  ));
 }
 
 void _openPrivacyPolicy() {
   // 打开隐私政策页面
   print("打开隐私政策");
+  Get.to(AgreementPolicyPage(
+    type: 1,
+  ));
 }
 
 void _exitApp(BuildContext context) {
