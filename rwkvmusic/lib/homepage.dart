@@ -31,6 +31,7 @@ import 'package:rwkvmusic/state.dart';
 import 'package:rwkvmusic/store/config.dart';
 import 'package:rwkvmusic/style/color.dart';
 import 'package:rwkvmusic/style/style.dart';
+import 'package:rwkvmusic/transpose.dart';
 import 'package:rwkvmusic/utils/abchead.dart';
 import 'package:rwkvmusic/utils/audioplayer.dart';
 import 'package:rwkvmusic/utils/automeasure_randomizeabc.dart';
@@ -1033,6 +1034,12 @@ class _HomePageState extends State<HomePage> {
                               ),
                               onPressed: () {
                                 debugPrint('Settings');
+                                // String result = transposeAbc(
+                                //     "X:1\nL:1/4\nK:C\nE,,1/2 =F,, ^G, a/ ^f' g",
+                                //     7);
+                                // debugPrint('transposeAbc==$result');
+                                // result = splitMeasureAbc(result);
+                                // debugPrint('splitMeasureAbc==$result');
                                 if (isShowOverlay) {
                                   closeOverlay();
                                 }
