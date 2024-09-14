@@ -306,7 +306,7 @@ String formatNotes(Map<String, String> header, List<String> notes) {
   return formattedAbc.trim();
 }
 
-List<String> randomizeNoteLengths(List<String> notes) {
+List<String> randomizeNoteLengthsList(List<String> notes) {
   List<String> noteLengths = ['1', '/', '2', '3/2', '3', '4', '3/4'];
   List<double> weights = [0.65, 0.7, 0.7, 0.65, 0.3, 0.2, 0.4];
   Random random = Random();
@@ -334,7 +334,7 @@ String randomizeAbc(String abcNotation) {
   List<String> notes = result[1];
 
   header['M'] = randomizeMeter();
-  notes = randomizeNoteLengths(notes);
+  notes = randomizeNoteLengthsList(notes);
 
   return splitMeasureAbc(formatNotes(header, notes));
 }

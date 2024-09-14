@@ -45,6 +45,7 @@ import 'package:rwkvmusic/utils/midifile_convert.dart';
 import 'package:rwkvmusic/utils/note.dart';
 import 'package:rwkvmusic/utils/note_calculator.dart';
 import 'package:rwkvmusic/utils/notes_database.dart';
+import 'package:rwkvmusic/utils/randomGroove.dart';
 import 'package:rwkvmusic/values/values.dart';
 import 'package:rwkvmusic/widgets/change_note.dart';
 import 'package:rwkvmusic/widgets/chord_editing.dart';
@@ -756,8 +757,10 @@ class _HomePageState extends State<HomePage> {
       Fluttertoast.showToast(msg: "Please play some notes before randomizing.");
       return;
     }
-
-    String randomizeAbcStr = randomizeAbc(createPrompt);
+    // createPrompt = "L:1/4\nM:3/8\nK:C\n e a c' e' d' c' b c' a ^g";
+    // String randomizeAbcStr = randomizeAbc(createPrompt);
+    String randomizeAbcStr = await randomizeNoteLengths(createPrompt);
+    debugPrint('chenqi randomizeAbcStr==$randomizeAbcStr');
     String createPromptTmp = randomizeAbcStr.replaceAll("\n", "\\n");
 
     String sb =
