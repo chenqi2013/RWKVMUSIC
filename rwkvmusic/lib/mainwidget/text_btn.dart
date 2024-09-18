@@ -11,12 +11,16 @@ class TextBtn extends StatelessWidget {
       required this.height,
       required this.text,
       required this.onPressed,
-      this.textColor});
+      this.textColor,
+      this.linearColorStart,
+      this.linearColorEnd});
   final double width;
   final double height;
   final String text;
   final VoidCallback onPressed;
   Color? textColor;
+  Color? linearColorStart;
+  Color? linearColorEnd;
   @override
   Widget build(BuildContext context) {
     bool isWindowsOrMac = Platform.isWindows || Platform.isMacOS;
@@ -29,10 +33,14 @@ class TextBtn extends StatelessWidget {
           width: width,
           height: height,
           decoration: BoxDecoration(
-            gradient: const LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [AppColor.color_494949, AppColor.color_323232]),
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                linearColorStart ?? AppColor.color_494949,
+                linearColorEnd ?? AppColor.color_323232,
+              ],
+            ),
             borderRadius: BorderRadius.circular(11.h),
             boxShadow: [
               BoxShadow(

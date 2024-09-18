@@ -1644,6 +1644,8 @@ class _HomePageState extends State<HomePage> {
                           Get.to(FeedbackPage());
                         },
                         text: 'FeedBack',
+                        linearColorStart: AppColor.color_805353,
+                        linearColorEnd: AppColor.color_5E1E1E,
                       ),
                     ),
                   SizedBox(
@@ -1947,6 +1949,8 @@ class _HomePageState extends State<HomePage> {
                                 Get.to(FeedbackPage());
                               },
                               text: 'FeedBack',
+                              linearColorStart: AppColor.color_805353,
+                              linearColorEnd: AppColor.color_5E1E1E,
                             ),
                           ),
                         SizedBox(
