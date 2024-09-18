@@ -2684,64 +2684,93 @@ class _HomePageState extends State<HomePage> {
           showDialog(
             context: context,
             builder: (BuildContext context) {
-              return AlertDialog(
-                title: Text('发现新版本'),
-                content: Container(
-                  height: 280.h,
-                  margin: const EdgeInsets.all(10),
-                  child: Obx(() => Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(description).marginOnly(bottom: 20),
-                          if (isdownloading.value)
-                            SizedBox(
-                              width: double.infinity,
-                              height: 20,
-                              child: SliderTheme(
-                                data: SliderTheme.of(context).copyWith(
-                                  trackHeight: 3.0, // 进度条高度
-                                  thumbShape: const RoundSliderThumbShape(
-                                    enabledThumbRadius: 0, // 滑块的半径
+              return Dialog(
+                backgroundColor: Colors.transparent,
+                child: SingleChildScrollView(
+                  physics: const ClampingScrollPhysics(),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.all(Radius.circular(30.w)),
+                      color: Colors.transparent,
+                      image: const DecorationImage(
+                        image: AssetImage(
+                            'assets/images/backgroundbg.jpg'), // 替换为你的背景图片路径
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                    width: isWindowsOrMac ? 1400.w : 1200.w,
+                    // height: isWindowsOrMac ? 1000.h : 910.h,
+                    padding: EdgeInsets.symmetric(
+                        horizontal: isWindowsOrMac ? 60.w : 40.w,
+                        vertical: isWindowsOrMac ? 40.h : 60.h),
+                    child: Obx(() => Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            TextItem(
+                              text: 'Version Update',
+                              fontSize: 48.sp,
+                              fontWeight: FontWeight.bold,
+                            ),
+                            TextItem(text: description)
+                                .marginSymmetric(vertical: 20.h),
+                            if (isdownloading.value)
+                              SizedBox(
+                                width: double.infinity,
+                                height: 20,
+                                child: SliderTheme(
+                                  data: SliderTheme.of(context).copyWith(
+                                    trackHeight: 3.0, // 进度条高度
+                                    thumbShape: const RoundSliderThumbShape(
+                                      enabledThumbRadius: 0, // 滑块的半径
+                                    ),
+                                    overlayShape: const RoundSliderOverlayShape(
+                                      overlayRadius: 0.0, // 滑块被拖动时的扩展半径
+                                    ),
                                   ),
-                                  overlayShape: const RoundSliderOverlayShape(
-                                    overlayRadius: 0.0, // 滑块被拖动时的扩展半径
+                                  child: Slider(
+                                    // allowedInteraction: SliderInteraction.tapOnly,
+                                    activeColor: AppColor.color_757575,
+                                    inactiveColor: Colors.white,
+                                    thumbColor: Colors.white,
+                                    value: downloadProgress.value,
+                                    onChanged: (double newValue) {},
                                   ),
-                                ),
-                                child: Slider(
-                                  // allowedInteraction: SliderInteraction.tapOnly,
-                                  activeColor: AppColor.color_757575,
-                                  inactiveColor: Colors.grey,
-                                  thumbColor: Colors.white,
-                                  value: downloadProgress.value,
-                                  onChanged: (double newValue) {},
                                 ),
                               ),
-                            ),
-                          if (isdownloading.value)
-                            Text(
-                                '${(downloadProgress * 100).toStringAsFixed(0)}%'),
-                          if (!isdownloading.value)
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.end,
-                              children: [
-                                if (!isForce)
-                                  TextButton(
-                                    child: Text('取消'),
+                            if (isdownloading.value)
+                              TextItem(
+                                  text:
+                                      '${(downloadProgress * 100).toStringAsFixed(0)}%'),
+                            if (!isdownloading.value)
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.end,
+                                children: [
+                                  if (!isForce)
+                                    TextBtn(
+                                      width: isWindowsOrMac ? 1000.w : 400.w,
+                                      height: isWindowsOrMac ? 113.h : 80.h,
+                                      onPressed: () {
+                                        Navigator.of(context).pop();
+                                      },
+                                      text: 'Cancel',
+                                      linearColorStart: AppColor.color_805353,
+                                      linearColorEnd: AppColor.color_5E1E1E,
+                                    ),
+                                  TextBtn(
+                                    width: isWindowsOrMac ? 1000.w : 400.w,
+                                    height: isWindowsOrMac ? 113.h : 80.h,
                                     onPressed: () {
-                                      Navigator.of(context).pop();
+                                      downloadfile(context, downloadurl, md5);
                                     },
-                                  ),
-                                TextButton(
-                                  child: Text('更新'),
-                                  onPressed: () {
-                                    downloadfile(context, downloadurl, md5);
-                                    // Navigator.of(context).pop();
-                                  },
-                                ),
-                              ],
-                            )
-                        ],
-                      )),
+                                    text: 'Update',
+                                    // linearColorStart: AppColor.color_805353,
+                                    // linearColorEnd: AppColor.color_5E1E1E,
+                                  ).marginOnly(left: 40.w),
+                                ],
+                              ).marginOnly(top: 40.h)
+                          ],
+                        )),
+                  ),
                 ),
               );
             },
