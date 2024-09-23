@@ -79,7 +79,7 @@ dependencies:
   flutter_platform_alert: ^0.5.1
   # flutter_gen_runner: ^5.4.0
   # flutter_dialogs: ^3.0.0
-  # adaptive_dialog: ^2.1.0
+  adaptive_dialog:
   # custom_alert_dialog_box: ^1.0.2
   # emerge_alert_dialog: ^0.0.3
   # h_alert_dialog: ^1.1.2

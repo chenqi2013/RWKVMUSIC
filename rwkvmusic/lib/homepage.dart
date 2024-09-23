@@ -459,37 +459,49 @@ class _HomePageState extends State<HomePage> {
     final _isPlay = isPlay.value;
     if (_selectstate != 1 || _isPlay) return;
 
-    isShowDialog = true;
     if (isShowOverlay) closeOverlay();
     if (isWindowsOrMac) isVisibleWebview.value = !isVisibleWebview.value;
 
     final json = jsonDecode(jsMessage.message);
 
-    final regExp = RegExp(r'\|\\"[ABCDEFGdim#7]+\\"');
-    final matches = regExp.allMatches(finalabcStringCreate).toList();
+    bool withSpace = false;
+
+    RegExp regExp = RegExp(r'\|\\"[ABCDEFGdim#7]+\\"');
+    List<RegExpMatch> matches =
+        regExp.allMatches(finalabcStringCreate).toList();
+
+    if (matches.isEmpty) {
+      withSpace = true;
+      regExp = RegExp(r'\| \\"[ABCDEFGdim#7]+\\"');
+      matches = regExp.allMatches(finalabcStringCreate).toList();
+    }
+
     if (matches.isEmpty) return;
+
     final index = int.parse(json["index"]) ~/ 4;
     final m = matches[index];
-    final text = finalabcStringCreate.substring(m.start + 3, m.end - 2);
+    final text = finalabcStringCreate.substring(
+        m.start + (withSpace ? 4 : 3), m.end - 2);
     final r = calculateRootAndType(text);
     selectedChordRoot.value = r.$1;
     selectedChordType.value = r.$2;
 
+    isShowDialog = true;
     final ok = await showDialog(
         context: context,
         builder: (BuildContext context) {
           return const ChordEditing();
         });
+    isShowDialog = false;
 
     _unselectAll();
 
-    isShowDialog = false;
     if (ok == null) return;
 
     final newChord = selectedChordRoot.value.abcNotationValue +
         selectedChordType.value.abcNotationValue;
-    finalabcStringCreate =
-        finalabcStringCreate.replaceRange(m.start + 3, m.end - 2, newChord);
+    finalabcStringCreate = finalabcStringCreate.replaceRange(
+        m.start + (withSpace ? 4 : 3), m.end - 2, newChord);
     await _change(finalabcStringCreate);
   }
 
@@ -725,12 +737,12 @@ class _HomePageState extends State<HomePage> {
         .replaceAll("\\n", "\n");
     // ABCHead.testchord_split(needSplitStr);
     splitMeasure = splitMeasureAbc(needSplitStr);
-    print('splitMeasureAbcStr---$splitMeasure');
+    if (kDebugMode) print('splitMeasureAbcStr---$splitMeasure');
     // 每一节生成一个和弦
     chords = generateChordAbcNotation(splitMeasure!);
-    print('generateChordAbcNotation---$chords');
+    if (kDebugMode) print('generateChordAbcNotation---$chords');
     String combineabcChord = ABCHead.combineAbc_Chord(chords[0], splitMeasure!);
-    print('combineAbc_Chord---$combineabcChord');
+    if (kDebugMode) print('combineAbc_Chord---$combineabcChord');
     needSplitStr = combineabcChord.replaceAll("\n", "\\n");
     return needSplitStr;
   }
@@ -748,6 +760,25 @@ class _HomePageState extends State<HomePage> {
 
   void _delete() {
     resetLastNote();
+  }
+
+  void _transposeTo(int value) async {
+    String transposed = transposeAbc(createPrompt, value);
+    debugPrint('chenqi randomizeAbcStr==$transposed');
+    String createPromptTmp = transposed.replaceAll("\n", "\\n");
+
+    String sb =
+        "setAbcString(\"%%MIDI program $midiProgramValue\\n$createPromptTmp\",false)";
+    _change(sb);
+    selectedNote.value = null;
+    int index = transposed.indexOf('|');
+    String promptStr = transposed.substring(index + 1);
+    splitMeasureAndChord(promptStr);
+  }
+
+  // TODO: @halo waiting for chenqi
+  void _settle(int value) {
+    _transposeTo(0);
   }
 
   void _randomizeAbc() async {
@@ -1090,7 +1121,7 @@ class _HomePageState extends State<HomePage> {
                   return Visibility(
                     visible: selectstate.value == 1,
                     child: ChangeNote(
-                      onTapAtIndex: (context, key) {
+                      onTapKey: (context, key) {
                         final v = inputNoteLength.value;
                         final selected = selectedNote.value;
                         final noteSelected = selected != null;
@@ -1176,11 +1207,19 @@ class _HomePageState extends State<HomePage> {
                           case ChangeNoteKey.delete:
                             _delete();
                             break;
+                          case ChangeNoteKey.transposeUp:
+                          case ChangeNoteKey.transposeDown:
+                          case ChangeNoteKey.mergedZ:
+                          case ChangeNoteKey.transpose:
+                            break;
                         }
                       },
                       onLongPress: (BuildContext context, ChangeNoteKey key) {
                         if (key != ChangeNoteKey.delete) return;
                         resetToDefaulValueInCreateMode();
+                      },
+                      onTapTranspose: (BuildContext context, int value) {
+                        _transposeTo(value);
                       },
                     ),
                   );
@@ -2240,8 +2279,10 @@ class _HomePageState extends State<HomePage> {
                                         UniversalBle.onConnectionChanged =
                                             (String deviceId,
                                                 BleConnectionState state) {
-                                          print(
-                                              'OnConnectionChanged $deviceId, $state');
+                                          if (kDebugMode) {
+                                            print(
+                                                'OnConnectionChanged $deviceId, $state');
+                                          }
                                           if (state ==
                                               BleConnectionState.connected) {
                                             if (isWindowsOrMac) {
@@ -2644,7 +2685,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> shareFile(String filepath) async {
-    print('shareFile path=$filepath');
+    if (kDebugMode) print('shareFile path=$filepath');
     ShareExtend.share(filepath, "file");
   }
 
@@ -2678,7 +2719,7 @@ class _HomePageState extends State<HomePage> {
         bool isForce = array[0]['is_force'];
         String md5 = array[0]['md5'];
 
-        print('checkAppUpdate: $array');
+        if (kDebugMode) print('checkAppUpdate: $array');
         if (version != appVersion) {
           // 下载新版本
           showDialog(
@@ -2778,13 +2819,13 @@ class _HomePageState extends State<HomePage> {
           );
         }
       } else {
-        print('checkAppUpdate Error: ${response.statusCode}');
+        if (kDebugMode) print('checkAppUpdate Error: ${response.statusCode}');
       }
 
       // 关闭 HttpClient
       httpClient.close();
     } catch (e) {
-      print('checkAppUpdate Exception: $e');
+      if (kDebugMode) print('checkAppUpdate Exception: $e');
     }
   }
 
@@ -2802,7 +2843,7 @@ class _HomePageState extends State<HomePage> {
       // 计算 MD5
       var md5Digest = md5.convert(fileBytes);
       // 输出 MD5 哈希值
-      print('MD5 hash: ${md5Digest.toString()}');
+      if (kDebugMode) print('MD5 hash: ${md5Digest.toString()}');
       if (md5Digest.toString() == md5Str) {
         Get.back();
         AppInstaller.installApk(filePath);
@@ -2813,7 +2854,7 @@ class _HomePageState extends State<HomePage> {
       if (status == DownloadStatus.start) {
         isdownloading.value = true;
       } else if (status == DownloadStatus.finish) {
-        print('downloadfile finished');
+        if (kDebugMode) print('downloadfile finished');
         // CommonUtils.setIsdownload(true);
         Get.back();
         AppInstaller.installApk(filePath);

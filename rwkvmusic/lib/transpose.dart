@@ -1,7 +1,5 @@
-import 'dart:math';
 import 'dart:core';
 
-import 'package:flutter/material.dart';
 import 'package:rwkvmusic/utils/automeasure_randomizeabc.dart';
 
 // 半音阶音符列表

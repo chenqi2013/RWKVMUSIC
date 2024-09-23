@@ -318,6 +318,9 @@ class $AssetsImagesGen {
   /// File path: assets/images/undo.jpg
   AssetGenImage get undo => const AssetGenImage('assets/images/undo.jpg');
 
+  /// File path: assets/images/white_back.svg
+  String get whiteBack => 'assets/images/white_back.svg';
+
   /// List of all assets
   List<dynamic> get values => [
         accountHeader,
@@ -379,7 +382,8 @@ class $AssetsImagesGen {
         switchoff,
         switchon,
         titleLogo,
-        undo
+        undo,
+        whiteBack
       ];
 }
 
@@ -883,8 +887,22 @@ class $AssetsImagesChangeNodeGen {
   /// File path: assets/images/change_node/sixteenthZ.svg
   String get sixteenthZ => 'assets/images/change_node/sixteenthZ.svg';
 
+  /// File path: assets/images/change_node/t_down.svg
+  String get tDown => 'assets/images/change_node/t_down.svg';
+
+  /// File path: assets/images/change_node/t_up.svg
+  String get tUp => 'assets/images/change_node/t_up.svg';
+
   /// File path: assets/images/change_node/thirtySecond.svg
   String get thirtySecond => 'assets/images/change_node/thirtySecond.svg';
+
+  /// File path: assets/images/change_node/tl.png
+  AssetGenImage get tl =>
+      const AssetGenImage('assets/images/change_node/tl.png');
+
+  /// File path: assets/images/change_node/tr.png
+  AssetGenImage get tr =>
+      const AssetGenImage('assets/images/change_node/tr.png');
 
   /// File path: assets/images/change_node/whole.svg
   String get whole => 'assets/images/change_node/whole.svg';
@@ -906,7 +924,11 @@ class $AssetsImagesChangeNodeGen {
         quarterZ,
         sixteenth,
         sixteenthZ,
+        tDown,
+        tUp,
         thirtySecond,
+        tl,
+        tr,
         whole,
         wholeZ
       ];

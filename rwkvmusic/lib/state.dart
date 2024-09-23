@@ -1,10 +1,13 @@
 import 'package:get/get_rx/src/rx_types/rx_types.dart';
 import 'package:rwkvmusic/note_length.dart';
+import 'package:rwkvmusic/widgets/change_note.dart';
 
 /// 输入 note 时匹配的时值
 final inputNoteLength = Rx<NoteLength>(NoteLength.quarter);
 
 final selectedNote = Rx<NewNote?>(null);
+
+final latestUsedRest = Rx<ChangeNoteKey>(ChangeNoteKey.quarterZ);
 
 class NewNote {
   late final String name;
@@ -12,7 +15,7 @@ class NewNote {
   late final NoteLength length;
 
   String get notation {
-    return name + this.length.end;
+    return name + length.end;
   }
 
   bool get isZ {
@@ -20,7 +23,7 @@ class NewNote {
   }
 
   String notationWithDotted(bool dotted) {
-    if (this.length.dotted == dotted) return notation;
-    return name + this.length.withDotted(dotted).end;
+    if (length.dotted == dotted) return notation;
+    return name + length.withDotted(dotted).end;
   }
 }
