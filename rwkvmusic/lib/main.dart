@@ -128,7 +128,7 @@ List midiNotes = [];
 List virtualNotes = [];
 
 /// 计算和弦需要使用
-List<int> intNodes = [];
+// List<int> intNodes = [];
 String prechord = '';
 
 /// prompt mode or create mode

@@ -68,7 +68,7 @@ class HomePage extends StatefulWidget {
 
 final List<String> history = [];
 final List<List> virtualNotesHistory = [];
-final List<List<int>> intNodesHistory = [];
+// final List<List<int>> intNodesHistory = [];
 RxDouble downloadProgress = 0.0.obs;
 RxBool isdownloading = false.obs;
 
@@ -310,7 +310,7 @@ class _HomePageState extends State<HomePage> {
         tokens.value = ' -- ${event.toString()}';
       } else if (event == 'finish') {
         virtualNotes.clear();
-        intNodes.clear();
+        // intNodes.clear();
         if (!isPlay.value) {
           Future.delayed(const Duration(milliseconds: 1000), () {
             // isPlay.value = false;
@@ -358,7 +358,7 @@ class _HomePageState extends State<HomePage> {
         assert(javaScript.startsWith("setAbcString"));
         history.add(javaScript);
         virtualNotesHistory.add([...virtualNotes]);
-        intNodesHistory.add([...intNodes]);
+        // intNodesHistory.add([...intNodes]);
       }
       selectedNote.value = null;
     } catch (e) {
@@ -385,19 +385,17 @@ class _HomePageState extends State<HomePage> {
       }
       return;
     }
-    if (history.isEmpty ||
-        virtualNotesHistory.isEmpty ||
-        intNodesHistory.isEmpty) return;
+    if (history.isEmpty || virtualNotesHistory.isEmpty) return;
 
     final historyLength = history.length;
     final virtualNotesHistoryLength = virtualNotesHistory.length;
-    final intNodesHistoryLength = intNodesHistory.length;
+    // final intNodesHistoryLength = intNodesHistory.length;
 
     // 因为上一步的添加过程是相等的
 
     assert(historyLength == virtualNotesHistoryLength);
-    assert(virtualNotesHistoryLength == intNodesHistoryLength);
-    assert(intNodesHistoryLength == historyLength);
+    // assert(virtualNotesHistoryLength == intNodesHistoryLength);
+    // assert(intNodesHistoryLength == historyLength);
 
     if (historyLength == 1) return;
 
@@ -405,13 +403,13 @@ class _HomePageState extends State<HomePage> {
       final historyStep = history[history.length - 2];
       final virtualNotesStep =
           virtualNotesHistory[virtualNotesHistory.length - 2];
-      final intNodesStep = intNodesHistory[intNodesHistory.length - 2];
+      // final intNodesStep = intNodesHistory[intNodesHistory.length - 2];
       await controllerPiano.runJavaScript(historyStep);
       history.removeLast();
       virtualNotes = [...virtualNotesStep];
       virtualNotesHistory.removeLast();
-      intNodes = [...intNodesStep];
-      intNodesHistory.removeLast();
+      // intNodes = [...intNodesStep];
+      // intNodesHistory.removeLast();
     } catch (e) {
       // JS 是有可能执行出错的
       if (kDebugMode) print("😡 $e");
@@ -624,39 +622,39 @@ class _HomePageState extends State<HomePage> {
     final inputDotted = _inputNoteLength.dotted;
     noteName = noteName + noteLength.withDotted(inputDotted).end;
     virtualNotes.add(noteName);
-    intNodes.add(node);
+    // intNodes.add(node);
 
     StringBuffer sbff = StringBuffer();
-    List chordList = [];
-    if (timeSignature.value == 2) {
-      String chordStr = ChordUtil.getChord(intNodes.toString());
-      chordList = jsonDecode(chordStr);
-      debugPrint('chordStr=${chordList.length}');
-    }
-    String timeSignatureStr = timeSignatures[timeSignature.value];
-    final _noteLength = noteLengthFromString(noteName);
+    // List chordList = [];
+    // if (timeSignature.value == 2) {
+    //   String chordStr = ChordUtil.getChord(intNodes.toString());
+    //   chordList = jsonDecode(chordStr);
+    //   debugPrint('chordStr=${chordList.length}');
+    // }
+    // String timeSignatureStr = timeSignatures[timeSignature.value];
+    // final _noteLength = noteLengthFromString(noteName);
 
     for (int i = 0; i < virtualNotes.length; i++) {
       String note = virtualNotes[i];
-      if (timeSignatureStr == '4/4' && _noteLength == NoteLength.quarter) {
-        if (i % 4 == 0) {
-          int chordLenght = i ~/ 4;
-          if (chordList.length > chordLenght) {
-            //插入竖线和和弦
-            if (i == 0) {
-              sbff.write('\\"${chordList[chordLenght]}\\" ');
-            } else {
-              sbff.write('|\\"${chordList[chordLenght]}\\" ');
-            }
-          }
-        }
-      } else {
-        int postion =
-            ABCHead.insertMeasureLinePosition(timeSignatureStr, _noteLength);
-        if (i % postion == 0 && i > 0) {
-          sbff.write('|');
-        }
-      }
+      // if (timeSignatureStr == '4/4' && _noteLength == NoteLength.quarter) {
+      //   if (i % 4 == 0) {
+      //     int chordLenght = i ~/ 4;
+      //     if (chordList.length > chordLenght) {
+      //       //插入竖线和和弦
+      //       if (i == 0) {
+      //         sbff.write('\\"${chordList[chordLenght]}\\" ');
+      //       } else {
+      //         sbff.write('|\\"${chordList[chordLenght]}\\" ');
+      //       }
+      //     }
+      //   }
+      // } else {
+      // int postion =
+      //     ABCHead.insertMeasureLinePosition(timeSignatureStr, _noteLength);
+      // if (i % postion == 0 && i > 0) {
+      //   sbff.write('|');
+      // }
+      // }
       sbff.write(note);
       sbff.write(" ");
     }
@@ -695,7 +693,7 @@ class _HomePageState extends State<HomePage> {
 
     // sbNoteCreate.write(noteName);
     virtualNotes.add(noteName);
-    intNodes.add(node);
+    // intNodes.add(node);
 
     StringBuffer sbff = StringBuffer();
 
@@ -753,7 +751,8 @@ class _HomePageState extends State<HomePage> {
   }
 
   void _randomizeAbc() async {
-    if (virtualNotes.isEmpty || intNodes.isEmpty) {
+    if (virtualNotes.isEmpty) {
+      // || intNodes.isEmpty
       Fluttertoast.showToast(msg: "Please play some notes before randomizing.");
       return;
     }
@@ -787,7 +786,7 @@ class _HomePageState extends State<HomePage> {
     if (virtualNotes.isEmpty) return;
 
     virtualNotes.removeLast();
-    intNodes.removeLast();
+    // intNodes.removeLast();
 
     if (virtualNotes.isEmpty) {
       finalabcStringCreate =
@@ -799,36 +798,37 @@ class _HomePageState extends State<HomePage> {
       createPrompt = '';
     } else {
       StringBuffer sbff = StringBuffer();
-      List chordList = [];
-      if (timeSignature.value == 2) {
-        String chordStr = ChordUtil.getChord(intNodes.toString());
-        chordList = jsonDecode(chordStr);
-        debugPrint('chordStr=${chordList.length}');
-      }
-      String timeSignatureStr = timeSignatures[timeSignature.value];
-      final noteLength = inputNoteLength.value;
+      // List chordList = [];
+      // if (timeSignature.value == 2) {
+      //   String chordStr = ChordUtil.getChord(intNodes.toString());
+      //   chordList = jsonDecode(chordStr);
+      //   debugPrint('chordStr=${chordList.length}');
+      // }
+      // String timeSignatureStr = timeSignatures[timeSignature.value];
+      // final noteLength = inputNoteLength.value;
       for (int i = 0; i < virtualNotes.length; i++) {
         String note = virtualNotes[i];
-        if (timeSignatureStr == '4/4' && noteLength == NoteLength.quarter) {
-          if (i % 4 == 0) {
-            int chordLenght = i ~/ 4;
-            if (chordList.length > chordLenght) {
-              //插入竖线和和弦
-              if (i == 0) {
-                sbff.write('\\"${chordList[chordLenght]}\\" ');
-              } else {
-                sbff.write('|\\"${chordList[chordLenght]}\\" ');
-              }
-            }
-          }
-        } else {
-          int postion =
-              ABCHead.insertMeasureLinePosition(timeSignatureStr, noteLength);
-          if (i % postion == 0 && i > 0) {
-            sbff.write('|');
-          }
-        }
+        // if (timeSignatureStr == '4/4' && noteLength == NoteLength.quarter) {
+        //   if (i % 4 == 0) {
+        //     int chordLenght = i ~/ 4;
+        //     if (chordList.length > chordLenght) {
+        //       //插入竖线和和弦
+        //       if (i == 0) {
+        //         sbff.write('\\"${chordList[chordLenght]}\\" ');
+        //       } else {
+        //         sbff.write('|\\"${chordList[chordLenght]}\\" ');
+        //       }
+        //     }
+        //   }
+        // } else {
+        // int postion =
+        //     ABCHead.insertMeasureLinePosition(timeSignatureStr, noteLength);
+        // if (i % postion == 0 && i > 0) {
+        //   sbff.write('|');
+        // }
+        // }
         sbff.write(note);
+        sbff.write(" ");
       }
       String sb =
           "setAbcString(\"%%MIDI program $midiProgramValue\\nL:1/4\\nM:$timeSingnatureStr\\nK:C\\n|${sbff.toString()}\",false)";
@@ -1419,7 +1419,7 @@ class _HomePageState extends State<HomePage> {
   void resetToDefaulValueInCreateMode() {
     selectedNote.value = null;
     virtualNotes.clear();
-    intNodes.clear();
+    // intNodes.clear();
     timeSingnatureStr = "4/4";
     timeSignature.value = 2;
     finalabcStringCreate =
