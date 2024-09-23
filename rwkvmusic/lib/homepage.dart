@@ -31,7 +31,6 @@ import 'package:rwkvmusic/state.dart';
 import 'package:rwkvmusic/store/config.dart';
 import 'package:rwkvmusic/style/color.dart';
 import 'package:rwkvmusic/style/style.dart';
-import 'package:rwkvmusic/transpose.dart';
 import 'package:rwkvmusic/utils/abchead.dart';
 import 'package:rwkvmusic/utils/audioplayer.dart';
 import 'package:rwkvmusic/utils/automeasure_randomizeabc.dart';
