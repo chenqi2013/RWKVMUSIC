@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -26,7 +27,9 @@ enum ChangeNoteKey {
   sixteenthZ,
   mergedZ,
   randomGroove,
+  transposeDown,
   transpose,
+  transposeUp,
   delete;
 
   bool get isMain =>
@@ -36,7 +39,7 @@ enum ChangeNoteKey {
       this != ChangeNoteKey.eighthZ &&
       this != ChangeNoteKey.sixteenthZ;
 
-  String? get assetName {
+  String? get iconImage {
     switch (this) {
       case ChangeNoteKey.whole:
         return Assets.images.changeNode.whole;
@@ -62,25 +65,38 @@ enum ChangeNoteKey {
         return Assets.images.changeNode.eighthZ;
       case ChangeNoteKey.sixteenthZ:
         return Assets.images.changeNode.sixteenthZ;
-      case ChangeNoteKey.randomGroove:
-        return null;
-      case ChangeNoteKey.delete:
-        return null;
-      case ChangeNoteKey.mergedZ:
-        return null;
-      case ChangeNoteKey.transpose:
+      default:
         return null;
     }
   }
 
-  AssetGenImage get bgImage {
+  Widget get bgWidget {
     switch (this) {
       case ChangeNoteKey.delete:
-        return Assets.images.changeNode.btnD;
+        return Center(child: Assets.images.changeNode.btnD.image());
       case ChangeNoteKey.randomGroove:
-        return Assets.images.changeNode.btnW;
+        return Center(child: Assets.images.changeNode.btnW.image());
+      case ChangeNoteKey.transposeDown:
+        return Center(child: Assets.images.changeNode.tl.image());
+      case ChangeNoteKey.transpose:
+        return Obx(
+          () => Positioned.fill(
+            child: C(
+              decoration: BD(color: kB),
+              child: Center(
+                child: T(
+                  _transpose.value.toString(),
+                  s: TS(w: FW.w900, s: 14 * _kButtonHeight / 48.0, c: kW),
+                ),
+              ),
+            ),
+          ),
+        );
+      case ChangeNoteKey.transposeUp:
+        return Center(child: Assets.images.changeNode.tr.image());
+
       default:
-        return Assets.images.changeNode.btn;
+        return Center(child: Assets.images.changeNode.btn.image());
     }
   }
 
@@ -100,15 +116,66 @@ enum ChangeNoteKey {
         return const Size(32, 32);
     }
   }
+
+  double get widthModifier {
+    switch (this) {
+      case ChangeNoteKey.randomGroove:
+      case ChangeNoteKey.delete:
+        return 1.55;
+      default:
+        return 1;
+    }
+  }
+
+  Widget get leftWidget {
+    switch (this) {
+      case ChangeNoteKey.delete:
+        return 0.w;
+      case ChangeNoteKey.transposeDown:
+      case ChangeNoteKey.transpose:
+        return 0.w;
+      default:
+        return 4.w;
+    }
+  }
 }
 
 double _kButtonHeight = 48.0;
 double _kContainerHeight = 52.0;
 const _kKeysDesignWidth = 787.0;
 
+final _latestButtonClickPosition = Rx<Offset?>(null);
+
+final _expandedZSelections = RxBool(false);
+
+final _transpose = Rx<int>(0);
+
+final _kAvailableTranspose = [
+  -7,
+  -6,
+  -5,
+  -4,
+  -3,
+  -2,
+  -1,
+  0,
+  1,
+  2,
+  3,
+  4,
+  5,
+  6,
+  7
+];
+
 class ChangeNote extends StatelessWidget {
   final void Function(BuildContext context, ChangeNoteKey key) onTapAtIndex;
   final void Function(BuildContext context, ChangeNoteKey key) onLongPress;
+
+  // TODO: @halo use it!
+  static void emptyTransposeValue() {
+    _transpose.value = 0;
+  }
 
   const ChangeNote({
     super.key,
@@ -116,7 +183,7 @@ class ChangeNote extends StatelessWidget {
     required this.onLongPress,
   });
 
-  void _onTapAtIndex(BuildContext context, ChangeNoteKey key) async {
+  void _onTapKey(BuildContext context, ChangeNoteKey key) async {
     switch (key) {
       case ChangeNoteKey.mergedZ:
         _expandedZSelections.value = true;
@@ -135,6 +202,36 @@ class ChangeNote extends StatelessWidget {
       case ChangeNoteKey.quarterZ:
       case ChangeNoteKey.eighthZ:
       case ChangeNoteKey.sixteenthZ:
+        break;
+      case ChangeNoteKey.transposeUp:
+        _transpose.value = _transpose.value + 1;
+        // TODO: @halo do it!
+        break;
+      case ChangeNoteKey.transposeDown:
+        _transpose.value = _transpose.value - 1;
+        // TODO: @halo do it!
+        break;
+      case ChangeNoteKey.transpose:
+        if (kDebugMode) print("💬 Deal with it");
+        final result = await showConfirmationDialog<int>(
+          builder: (context, dialog) {
+            return SB(
+              width: 300,
+              child: dialog,
+            );
+          },
+          initialSelectedActionKey: _transpose.value,
+          context: context,
+          title: "Transpose",
+          message: "Enter the number of semitones to transpose",
+          actions: _kAvailableTranspose
+              .map((e) => AlertDialogAction(key: e, label: e.toString()))
+              .toList(),
+        );
+        if (result != null) {
+          _transpose.value = result;
+        }
+        // TODO: @halo do it!
         break;
       default:
         onTapAtIndex(context, key);
@@ -167,53 +264,60 @@ class ChangeNote extends StatelessWidget {
       _kContainerHeight = 52.0 * availableWidth / _kKeysDesignWidth - 1;
     }
 
-    return Obx(() {
-      final inputNoteLengthV = inputNoteLength.value;
-      final selectedNoteV = selectedNote.value;
+    return Theme(
+      data: ThemeData.dark(),
+      child: Obx(() {
+        final inputNoteLengthV = inputNoteLength.value;
+        final selectedNoteV = selectedNote.value;
 
-      return ClipRRect(
-        borderRadius: 8.r,
-        child: C(
-            decoration: const BD(color: kC),
-            constraints: BoxConstraints(
-              maxHeight: _kContainerHeight,
-              minHeight: _kContainerHeight,
-            ),
-            width: screenWidth,
-            child: Center(
-              child: ListView(
-                padding: EI.o(l: padding.left, r: padding.right),
-                scrollDirection: Axis.horizontal,
-                shrinkWrap: true,
-                children: [
-                  5.w,
-                  ...ChangeNoteKey.values
-                      .where((k) => k.isMain)
-                      .indexMap((index, k) {
-                    return Obx(
-                      () {
-                        final latestUsedRestV = latestUsedRest.value;
-                        final expandedZSelectionsV = _expandedZSelections.value;
-                        return _KeyWrapper(
-                          onTapAtIndex: _onTapAtIndex,
-                          onLongPress: _onLongPress,
-                          context: context,
-                          k: k,
-                          inputNoteLengthV: inputNoteLengthV,
-                          index: index,
-                          selectedNote: selectedNoteV,
-                        );
-                      },
-                    );
-                  }).widgetJoin(
-                    (_) => 4.w,
-                  ),
-                  5.w,
-                ],
+        return ClipRRect(
+          borderRadius: 8.r,
+          child: C(
+              decoration: const BD(color: kC),
+              constraints: BoxConstraints(
+                maxHeight: _kContainerHeight,
+                minHeight: _kContainerHeight,
               ),
-            )),
-      );
-    });
+              width: screenWidth,
+              child: Center(
+                child: ListView(
+                  padding: EI.o(l: padding.left, r: padding.right),
+                  scrollDirection: Axis.horizontal,
+                  shrinkWrap: true,
+                  children: [
+                    5.w,
+                    ...ChangeNoteKey.values
+                        .where((k) => k.isMain)
+                        .indexMap((index, k) {
+                      return Obx(
+                        () {
+                          final latestUsedRestV = latestUsedRest.value;
+                          final expandedZSelectionsV =
+                              _expandedZSelections.value;
+                          return _KeyWrapper(
+                            onTapAtIndex: _onTapKey,
+                            onLongPress: _onLongPress,
+                            context: context,
+                            k: k,
+                            inputNoteLengthV: inputNoteLengthV,
+                            index: index,
+                            selectedNote: selectedNoteV,
+                          );
+                        },
+                      );
+                    }).widgetJoin(
+                      (index) => ChangeNoteKey.values
+                          .where((k) => k.isMain)
+                          .elementAt(index)
+                          .leftWidget,
+                    ),
+                    5.w,
+                  ],
+                ),
+              )),
+        );
+      }),
+    );
   }
 }
 
@@ -242,7 +346,7 @@ class _KeyWrapper extends StatelessWidget {
 
     final isMergedZ = k == ChangeNoteKey.mergedZ;
 
-    final assetName = isMergedZ ? latestUsedRest.value.assetName : k.assetName;
+    final assetName = isMergedZ ? latestUsedRest.value.iconImage : k.iconImage;
 
     if (assetName != null) {
       final assetWidth = isMergedZ
@@ -325,9 +429,7 @@ class _KeyWrapper extends StatelessWidget {
       ));
     }
 
-    final svg = Center(
-      child: k.bgImage.image(),
-    );
+    final svg = k.bgWidget;
 
     Widget highlight = C();
     final highlighted = Positioned.fill(
@@ -506,9 +608,7 @@ class _KeyWrapper extends StatelessWidget {
             }
           : null,
       height: _kButtonHeight,
-      width: (k == ChangeNoteKey.delete || k == ChangeNoteKey.randomGroove)
-          ? _kButtonHeight * 1.55
-          : _kButtonHeight,
+      width: k.widthModifier * _kButtonHeight,
       color: k == ChangeNoteKey.delete ? const Color(0xFFFF6666) : null,
       child: Stack(
         children: [
@@ -633,10 +733,6 @@ class _ButtonState extends State<_Button> {
   }
 }
 
-final _latestButtonClickPosition = Rx<Offset?>(null);
-
-final _expandedZSelections = RxBool(false);
-
 class _ZSelections extends StatelessWidget {
   const _ZSelections();
 
@@ -682,13 +778,11 @@ class _ZSelections extends StatelessWidget {
                     final key = ChangeNoteKey.values
                         .where((k) => !k.isMain)
                         .elementAt(index);
-                    final svg = Center(
-                      child: key.bgImage.image(),
-                    );
+                    final svg = key.bgWidget;
 
                     final child = Center(
                       child: SvgPicture.asset(
-                        key.assetName!,
+                        key.iconImage!,
                         width: key.assetSize.width * _kButtonHeight / 48.0,
                         height: key.assetSize.height * _kButtonHeight / 48.0,
                         color: kW,

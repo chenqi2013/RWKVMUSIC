@@ -1188,9 +1188,7 @@ class _HomePageState extends State<HomePage> {
                           case ChangeNoteKey.delete:
                             _delete();
                             break;
-                          case ChangeNoteKey.mergedZ:
-                            break;
-                          case ChangeNoteKey.transpose:
+                          default:
                             break;
                         }
                       },
