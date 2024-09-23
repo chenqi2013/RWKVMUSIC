@@ -1,17 +1,18 @@
 import 'dart:io';
 import 'dart:isolate';
+import 'package:flutter/foundation.dart';
 import 'package:path/path.dart' as p;
 
 void main() async {
   // 创建 ReceivePort，以接收来自子线程的消息
   final receivePort = ReceivePort();
-  print('objectobjectobjectobject');
+  if (kDebugMode) print('objectobjectobjectobject');
   // 创建一个新的 Isolate
   await Isolate.spawn(readFile, receivePort.sendPort);
 
   // 监听来自子线线程的数据
   receivePort.listen((data) {
-    print('Received data: $data');
+    if (kDebugMode) print('Received data: $data');
     receivePort.close(); // 操作完成后，关闭 ReceivePort
   });
 }

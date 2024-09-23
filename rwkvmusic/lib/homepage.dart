@@ -739,12 +739,12 @@ class _HomePageState extends State<HomePage> {
         .replaceAll("\\n", "\n");
     // ABCHead.testchord_split(needSplitStr);
     splitMeasure = splitMeasureAbc(needSplitStr);
-    print('splitMeasureAbcStr---$splitMeasure');
+    if (kDebugMode) print('splitMeasureAbcStr---$splitMeasure');
     // 每一节生成一个和弦
     chords = generateChordAbcNotation(splitMeasure!);
-    print('generateChordAbcNotation---$chords');
+    if (kDebugMode) print('generateChordAbcNotation---$chords');
     String combineabcChord = ABCHead.combineAbc_Chord(chords[0], splitMeasure!);
-    print('combineAbc_Chord---$combineabcChord');
+    if (kDebugMode) print('combineAbc_Chord---$combineabcChord');
     needSplitStr = combineabcChord.replaceAll("\n", "\\n");
     return needSplitStr;
   }
@@ -2279,8 +2279,10 @@ class _HomePageState extends State<HomePage> {
                                         UniversalBle.onConnectionChanged =
                                             (String deviceId,
                                                 BleConnectionState state) {
-                                          print(
-                                              'OnConnectionChanged $deviceId, $state');
+                                          if (kDebugMode) {
+                                            print(
+                                                'OnConnectionChanged $deviceId, $state');
+                                          }
                                           if (state ==
                                               BleConnectionState.connected) {
                                             if (isWindowsOrMac) {
@@ -2683,7 +2685,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> shareFile(String filepath) async {
-    print('shareFile path=$filepath');
+    if (kDebugMode) print('shareFile path=$filepath');
     ShareExtend.share(filepath, "file");
   }
 
@@ -2717,7 +2719,7 @@ class _HomePageState extends State<HomePage> {
         bool isForce = array[0]['is_force'];
         String md5 = array[0]['md5'];
 
-        print('checkAppUpdate: $array');
+        if (kDebugMode) print('checkAppUpdate: $array');
         if (version != appVersion) {
           // 下载新版本
           showDialog(
@@ -2817,13 +2819,13 @@ class _HomePageState extends State<HomePage> {
           );
         }
       } else {
-        print('checkAppUpdate Error: ${response.statusCode}');
+        if (kDebugMode) print('checkAppUpdate Error: ${response.statusCode}');
       }
 
       // 关闭 HttpClient
       httpClient.close();
     } catch (e) {
-      print('checkAppUpdate Exception: $e');
+      if (kDebugMode) print('checkAppUpdate Exception: $e');
     }
   }
 
@@ -2841,7 +2843,7 @@ class _HomePageState extends State<HomePage> {
       // 计算 MD5
       var md5Digest = md5.convert(fileBytes);
       // 输出 MD5 哈希值
-      print('MD5 hash: ${md5Digest.toString()}');
+      if (kDebugMode) print('MD5 hash: ${md5Digest.toString()}');
       if (md5Digest.toString() == md5Str) {
         Get.back();
         AppInstaller.installApk(filePath);
@@ -2852,7 +2854,7 @@ class _HomePageState extends State<HomePage> {
       if (status == DownloadStatus.start) {
         isdownloading.value = true;
       } else if (status == DownloadStatus.finish) {
-        print('downloadfile finished');
+        if (kDebugMode) print('downloadfile finished');
         // CommonUtils.setIsdownload(true);
         Get.back();
         AppInstaller.installApk(filePath);

@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:flutter/foundation.dart';
 import 'package:rwkvmusic/utils/automeasure_randomizeabc.dart';
 import 'package:rwkvmusic/utils/unique_rhythm_dataset.dart';
 
@@ -62,7 +63,8 @@ Future<String> randomizeNoteLengths(String abcNotation) async {
       groove = getRandomGroove(header['M'], rhythmDataset, remainingNotes);
     }
 
-    print(groove);
+    if (kDebugMode) print(groove);
+
     if (groove == null) {
       break;
     }

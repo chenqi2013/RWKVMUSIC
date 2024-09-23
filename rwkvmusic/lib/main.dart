@@ -1,6 +1,7 @@
 import 'dart:ffi' hide Size;
 import 'dart:isolate';
 import 'package:ffi/ffi.dart';
+import 'package:flutter/foundation.dart';
 import 'dart:io';
 import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
@@ -264,14 +265,14 @@ void fetchABCDataByIsolate() async {
     //--------ai compose 转换prompt
     String convertAbcNotationstr =
         convertAbcNotation(splitMeasure!, chords[1].toString());
-    print('convertAbcNotationstr---$convertAbcNotationstr');
+    if (kDebugMode) print('convertAbcNotationstr---$convertAbcNotationstr');
 
     String splitmeasureabcEndstr = splitMeasureAbc_end(convertAbcNotationstr);
-    print('splitMeasureAbc_endstr---$splitmeasureabcEndstr');
+    if (kDebugMode) print('splitMeasureAbc_endstr---$splitmeasureabcEndstr');
 
     String combineabcChordstr =
         ABCHead.combineAbc_Chord(chords[0], splitmeasureabcEndstr);
-    print('combineAbc_Chord---$combineabcChordstr');
+    if (kDebugMode) print('combineAbc_Chord---$combineabcChordstr');
     currentGeneratePrompt = combineabcChordstr.replaceAll('\\"', '"');
 
     // prompt = 'L:1/4\nM:4/4\nK:C\n| "C" E G B c | "G" ^A ^G =G E';

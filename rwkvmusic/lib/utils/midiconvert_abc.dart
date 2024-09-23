@@ -1,5 +1,7 @@
 import 'dart:typed_data';
 
+import 'package:flutter/foundation.dart';
+
 class MidiToABCConverter {
   static const TAG = "MidiToABCConverter";
 
@@ -20,7 +22,7 @@ class MidiToABCConverter {
   }
 
   List<dynamic> midiToABC(Uint8List midiData, bool needRaiseKey) {
-    print("$TAG midiToABC: $midiData");
+    if (kDebugMode) print("$TAG midiToABC: $midiData");
     final abcStringBuilder = StringBuffer();
     var currentTime = 0;
     var currentNote = "";
@@ -46,7 +48,7 @@ class MidiToABCConverter {
           if (needRaiseKey) {
             noteNumber += 12;
           }
-          print("noteNumber=$noteNumber");
+          if (kDebugMode) print("noteNumber=$noteNumber");
           notePosition = noteNumber;
           currentNote = getNoteName(noteNumber);
           abcStringBuilder.write(currentNote);
