@@ -85,7 +85,7 @@ enum ChangeNoteKey {
               decoration: BD(color: kB),
               child: Center(
                 child: T(
-                  _transpose.value.toString(),
+                  gloableTranspose.value.toString(),
                   s: TS(w: FW.w900, s: 14 * _kButtonHeight / 48.0, c: kW),
                 ),
               ),
@@ -148,7 +148,7 @@ final _latestButtonClickPosition = Rx<Offset?>(null);
 
 final _expandedZSelections = RxBool(false);
 
-final _transpose = Rx<int>(0);
+final gloableTranspose = Rx<int>(0);
 
 final _kAvailableTranspose = [
   -7,
@@ -172,11 +172,6 @@ class ChangeNote extends StatelessWidget {
   final void Function(BuildContext context, ChangeNoteKey key) onTapKey;
   final void Function(BuildContext context, ChangeNoteKey key) onLongPress;
   final void Function(BuildContext context, int value) onTapTranspose;
-
-  // TODO: @halo use it!
-  static void emptyTransposeValue() {
-    _transpose.value = 0;
-  }
 
   const ChangeNote({
     super.key,
@@ -206,12 +201,12 @@ class ChangeNote extends StatelessWidget {
       case ChangeNoteKey.sixteenthZ:
         break;
       case ChangeNoteKey.transposeUp:
-        _transpose.value = _transpose.value + 1;
-        onTapTranspose(context, _transpose.value);
+        gloableTranspose.value = gloableTranspose.value + 1;
+        onTapTranspose(context, gloableTranspose.value);
         break;
       case ChangeNoteKey.transposeDown:
-        _transpose.value = _transpose.value - 1;
-        onTapTranspose(context, _transpose.value);
+        gloableTranspose.value = gloableTranspose.value - 1;
+        onTapTranspose(context, gloableTranspose.value);
         break;
       case ChangeNoteKey.transpose:
         if (kDebugMode) print("💬 Deal with it");
@@ -222,7 +217,7 @@ class ChangeNote extends StatelessWidget {
               child: dialog,
             );
           },
-          initialSelectedActionKey: _transpose.value,
+          initialSelectedActionKey: gloableTranspose.value,
           context: context,
           title: "Transpose",
           message: "Enter the number of semitones to transpose",
@@ -231,9 +226,9 @@ class ChangeNote extends StatelessWidget {
               .toList(),
         );
         if (result != null) {
-          _transpose.value = result;
+          gloableTranspose.value = result;
         }
-        // TODO: @halo do it!
+        if (context.mounted) onTapTranspose(context, gloableTranspose.value);
         break;
       default:
         onTapKey(context, key);

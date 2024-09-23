@@ -35,7 +35,6 @@ import 'package:rwkvmusic/transpose.dart';
 import 'package:rwkvmusic/utils/abchead.dart';
 import 'package:rwkvmusic/utils/audioplayer.dart';
 import 'package:rwkvmusic/utils/automeasure_randomizeabc.dart';
-import 'package:rwkvmusic/utils/chord_util.dart';
 import 'package:rwkvmusic/utils/convert_chord.dart';
 import 'package:rwkvmusic/utils/justaudioplayer.dart';
 import 'package:rwkvmusic/utils/midiconvert_abc.dart';
@@ -68,7 +67,8 @@ class HomePage extends StatefulWidget {
 
 final List<String> history = [];
 final List<List> virtualNotesHistory = [];
-// final List<List<int>> intNodesHistory = [];
+final List<int> transposeHistory = [];
+
 RxDouble downloadProgress = 0.0.obs;
 RxBool isdownloading = false.obs;
 
@@ -354,11 +354,12 @@ class _HomePageState extends State<HomePage> {
   Future<void> _change(String javaScript) async {
     try {
       await controllerPiano.runJavaScript(javaScript);
-      if (selectstate.value == 1) {
+      final inCreateMode = selectstate.value == 1;
+      if (inCreateMode) {
         assert(javaScript.startsWith("setAbcString"));
         history.add(javaScript);
         virtualNotesHistory.add([...virtualNotes]);
-        // intNodesHistory.add([...intNodes]);
+        transposeHistory.add(gloableTranspose.value);
       }
       selectedNote.value = null;
     } catch (e) {
@@ -408,8 +409,10 @@ class _HomePageState extends State<HomePage> {
       history.removeLast();
       virtualNotes = [...virtualNotesStep];
       virtualNotesHistory.removeLast();
-      // intNodes = [...intNodesStep];
-      // intNodesHistory.removeLast();
+
+      final transposeStep = transposeHistory[transposeHistory.length - 2];
+      gloableTranspose.value = transposeStep;
+      transposeHistory.removeLast();
     } catch (e) {
       // JS 是有可能执行出错的
       if (kDebugMode) print("😡 $e");
@@ -633,6 +636,7 @@ class _HomePageState extends State<HomePage> {
     final _inputNoteLength = inputNoteLength.value;
     final inputDotted = _inputNoteLength.dotted;
     noteName = noteName + noteLength.withDotted(inputDotted).end;
+    gloableTranspose.value = 0;
     virtualNotes.add(noteName);
     // intNodes.add(node);
 
@@ -704,6 +708,7 @@ class _HomePageState extends State<HomePage> {
     noteName = noteName + noteLength.end;
 
     // sbNoteCreate.write(noteName);
+    gloableTranspose.value = 0;
     virtualNotes.add(noteName);
     // intNodes.add(node);
 
@@ -766,19 +771,15 @@ class _HomePageState extends State<HomePage> {
     String transposed = transposeAbc(createPrompt, value);
     debugPrint('chenqi randomizeAbcStr==$transposed');
     String createPromptTmp = transposed.replaceAll("\n", "\\n");
-
     String sb =
         "setAbcString(\"%%MIDI program $midiProgramValue\\n$createPromptTmp\",false)";
+    virtualNotes =
+        virtualNotes.map((e) => transposeSingleNote(e, value)).toList();
     _change(sb);
     selectedNote.value = null;
     int index = transposed.indexOf('|');
     String promptStr = transposed.substring(index + 1);
     splitMeasureAndChord(promptStr);
-  }
-
-  // TODO: @halo waiting for chenqi
-  void _settle(int value) {
-    _transposeTo(0);
   }
 
   void _randomizeAbc() async {
@@ -1458,6 +1459,7 @@ class _HomePageState extends State<HomePage> {
   void resetToDefaulValueInCreateMode() {
     selectedNote.value = null;
     virtualNotes.clear();
+    gloableTranspose.value = 0;
     // intNodes.clear();
     timeSingnatureStr = "4/4";
     timeSignature.value = 2;

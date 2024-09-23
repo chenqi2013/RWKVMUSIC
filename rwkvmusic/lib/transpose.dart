@@ -103,6 +103,41 @@ List<String> semitoneLists = [
   "c'''"
 ];
 
+String transposeSingleNote(String note, int N) {
+  RegExp regex = RegExp(r'''([\-=]?)([\^_]?[A-Ga-gz][,\']*)(\d+)?(/(\d+)?)?''');
+  final findHeightRegex =
+      RegExp(r'''([\-]?)([=]?)([\^_]?[A-Ga-gz][,\']*)(\d+)?(/(\d+)?)?''');
+  Match? match = regex.firstMatch(note);
+
+  if (match != null) {
+    // 提取音符的音高部分 (如 ^A,,)
+    String originalPitch = match.group(2) ?? '';
+    // 在 semitone_lists 中找到该音高的索引
+    if (semitoneLists.contains(originalPitch)) {
+      int currentIndex = semitoneLists.indexOf(originalPitch);
+      int newIndex = currentIndex + N;
+
+      // 检查移调后的音高是否超出范围
+      if (0 <= newIndex && newIndex < semitoneLists.length) {
+        String newPitch = semitoneLists[newIndex];
+        // 使用新的音高替换原始音符中的音高部分
+        String transposedNote = note.replaceFirstMapped(findHeightRegex,
+            (Match m) => '${m[1] ?? ''}$newPitch${m[4] ?? ''}${m[5] ?? ''}');
+        return transposedNote;
+      } else {
+        // 如果移调超出范围，保持音符不变
+        return note;
+      }
+    } else {
+      // 如果音高不在 semitoneLists 中，保持不变
+      return note;
+    }
+  } else {
+    // 如果音符不匹配正则表达式，保持原样
+    return note;
+  }
+}
+
 String transposeAbc(String abcNotation, int N) {
   // 解析ABC notation，分离header和notes部分
   var parsedAbc = parseAbc(abcNotation);
