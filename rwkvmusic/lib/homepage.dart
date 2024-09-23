@@ -31,6 +31,7 @@ import 'package:rwkvmusic/state.dart';
 import 'package:rwkvmusic/store/config.dart';
 import 'package:rwkvmusic/style/color.dart';
 import 'package:rwkvmusic/style/style.dart';
+import 'package:rwkvmusic/transpose.dart';
 import 'package:rwkvmusic/utils/abchead.dart';
 import 'package:rwkvmusic/utils/audioplayer.dart';
 import 'package:rwkvmusic/utils/automeasure_randomizeabc.dart';
@@ -763,6 +764,25 @@ class _HomePageState extends State<HomePage> {
     resetLastNote();
   }
 
+  void _transposeTo(int value) async {
+    String transposed = transposeAbc(createPrompt, value);
+    debugPrint('chenqi randomizeAbcStr==$transposed');
+    String createPromptTmp = transposed.replaceAll("\n", "\\n");
+
+    String sb =
+        "setAbcString(\"%%MIDI program $midiProgramValue\\n$createPromptTmp\",false)";
+    _change(sb);
+    selectedNote.value = null;
+    int index = transposed.indexOf('|');
+    String promptStr = transposed.substring(index + 1);
+    splitMeasureAndChord(promptStr);
+  }
+
+  // TODO: @halo waiting for chenqi
+  void _settle(int value) {
+    _transposeTo(0);
+  }
+
   void _randomizeAbc() async {
     if (virtualNotes.isEmpty || intNodes.isEmpty) {
       Fluttertoast.showToast(msg: "Please play some notes before randomizing.");
@@ -1101,7 +1121,7 @@ class _HomePageState extends State<HomePage> {
                   return Visibility(
                     visible: selectstate.value == 1,
                     child: ChangeNote(
-                      onTapAtIndex: (context, key) {
+                      onTapKey: (context, key) {
                         final v = inputNoteLength.value;
                         final selected = selectedNote.value;
                         final noteSelected = selected != null;
@@ -1187,13 +1207,19 @@ class _HomePageState extends State<HomePage> {
                           case ChangeNoteKey.delete:
                             _delete();
                             break;
-                          default:
+                          case ChangeNoteKey.transposeUp:
+                          case ChangeNoteKey.transposeDown:
+                          case ChangeNoteKey.mergedZ:
+                          case ChangeNoteKey.transpose:
                             break;
                         }
                       },
                       onLongPress: (BuildContext context, ChangeNoteKey key) {
                         if (key != ChangeNoteKey.delete) return;
                         resetToDefaulValueInCreateMode();
+                      },
+                      onTapTranspose: (BuildContext context, int value) {
+                        _transposeTo(value);
                       },
                     ),
                   );

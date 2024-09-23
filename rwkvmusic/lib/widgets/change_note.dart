@@ -169,8 +169,9 @@ final _kAvailableTranspose = [
 ];
 
 class ChangeNote extends StatelessWidget {
-  final void Function(BuildContext context, ChangeNoteKey key) onTapAtIndex;
+  final void Function(BuildContext context, ChangeNoteKey key) onTapKey;
   final void Function(BuildContext context, ChangeNoteKey key) onLongPress;
+  final void Function(BuildContext context, int value) onTapTranspose;
 
   // TODO: @halo use it!
   static void emptyTransposeValue() {
@@ -179,8 +180,9 @@ class ChangeNote extends StatelessWidget {
 
   const ChangeNote({
     super.key,
-    required this.onTapAtIndex,
+    required this.onTapKey,
     required this.onLongPress,
+    required this.onTapTranspose,
   });
 
   void _onTapKey(BuildContext context, ChangeNoteKey key) async {
@@ -194,7 +196,7 @@ class ChangeNote extends StatelessWidget {
         _expandedZSelections.value = false;
         if (result != null) {
           latestUsedRest.value = result;
-          onTapAtIndex(context, result);
+          if (context.mounted) onTapKey(context, result);
         }
         break;
       case ChangeNoteKey.wholeZ:
@@ -205,11 +207,11 @@ class ChangeNote extends StatelessWidget {
         break;
       case ChangeNoteKey.transposeUp:
         _transpose.value = _transpose.value + 1;
-        // TODO: @halo do it!
+        onTapTranspose(context, _transpose.value);
         break;
       case ChangeNoteKey.transposeDown:
         _transpose.value = _transpose.value - 1;
-        // TODO: @halo do it!
+        onTapTranspose(context, _transpose.value);
         break;
       case ChangeNoteKey.transpose:
         if (kDebugMode) print("💬 Deal with it");
@@ -234,7 +236,7 @@ class ChangeNote extends StatelessWidget {
         // TODO: @halo do it!
         break;
       default:
-        onTapAtIndex(context, key);
+        onTapKey(context, key);
         break;
     }
   }
