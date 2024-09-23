@@ -461,37 +461,49 @@ class _HomePageState extends State<HomePage> {
     final _isPlay = isPlay.value;
     if (_selectstate != 1 || _isPlay) return;
 
-    isShowDialog = true;
     if (isShowOverlay) closeOverlay();
     if (isWindowsOrMac) isVisibleWebview.value = !isVisibleWebview.value;
 
     final json = jsonDecode(jsMessage.message);
 
-    final regExp = RegExp(r'\|\\"[ABCDEFGdim#7]+\\"');
-    final matches = regExp.allMatches(finalabcStringCreate).toList();
+    bool withSpace = false;
+
+    RegExp regExp = RegExp(r'\|\\"[ABCDEFGdim#7]+\\"');
+    List<RegExpMatch> matches =
+        regExp.allMatches(finalabcStringCreate).toList();
+
+    if (matches.isEmpty) {
+      withSpace = true;
+      regExp = RegExp(r'\| \\"[ABCDEFGdim#7]+\\"');
+      matches = regExp.allMatches(finalabcStringCreate).toList();
+    }
+
     if (matches.isEmpty) return;
+
     final index = int.parse(json["index"]) ~/ 4;
     final m = matches[index];
-    final text = finalabcStringCreate.substring(m.start + 3, m.end - 2);
+    final text = finalabcStringCreate.substring(
+        m.start + (withSpace ? 4 : 3), m.end - 2);
     final r = calculateRootAndType(text);
     selectedChordRoot.value = r.$1;
     selectedChordType.value = r.$2;
 
+    isShowDialog = true;
     final ok = await showDialog(
         context: context,
         builder: (BuildContext context) {
           return const ChordEditing();
         });
+    isShowDialog = false;
 
     _unselectAll();
 
-    isShowDialog = false;
     if (ok == null) return;
 
     final newChord = selectedChordRoot.value.abcNotationValue +
         selectedChordType.value.abcNotationValue;
-    finalabcStringCreate =
-        finalabcStringCreate.replaceRange(m.start + 3, m.end - 2, newChord);
+    finalabcStringCreate = finalabcStringCreate.replaceRange(
+        m.start + (withSpace ? 4 : 3), m.end - 2, newChord);
     await _change(finalabcStringCreate);
   }
 
@@ -1175,6 +1187,10 @@ class _HomePageState extends State<HomePage> {
                             break;
                           case ChangeNoteKey.delete:
                             _delete();
+                            break;
+                          case ChangeNoteKey.mergedZ:
+                            break;
+                          case ChangeNoteKey.transpose:
                             break;
                         }
                       },
