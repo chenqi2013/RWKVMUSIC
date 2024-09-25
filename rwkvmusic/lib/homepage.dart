@@ -71,6 +71,7 @@ final List<int> transposeHistory = [];
 
 RxDouble downloadProgress = 0.0.obs;
 RxBool isdownloading = false.obs;
+bool isFirstOpen = false;
 
 class _HomePageState extends State<HomePage> {
   /// 键盘 webview 控制器
@@ -315,6 +316,12 @@ class _HomePageState extends State<HomePage> {
           Future.delayed(const Duration(milliseconds: 1000), () {
             // isPlay.value = false;
             playOrPausePiano();
+            if (isFirstOpen) {
+              toastInfo(
+                  msg:
+                      'This content is AI-generated, please carefully discern!');
+              isFirstOpen = false;
+            }
           });
         }
       } else {
@@ -341,6 +348,7 @@ class _HomePageState extends State<HomePage> {
     if (Platform.isIOS || Platform.isAndroid) {
       if (!ConfigStore.to.isFirstOpen) {
         debugPrint('isFirstOpen');
+        isFirstOpen = true;
         Future.delayed(const Duration(milliseconds: 1000), () {
           showAgreementDialog(context);
         });

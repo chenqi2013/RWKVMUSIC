@@ -15,9 +15,9 @@ class AgreementPolicyPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    String url = 'http://www.baidu.com';
+    String url = 'https://www.rwkvos.com/rwkv-music/terms';
     if (type == 1) {
-      url = 'https://www.rwkvos.com/';
+      url = 'https://www.rwkvos.com/rwkv-music/terms?type=privacy';
     }
     controllerPiano = WebViewControllerPlus()
       ..setJavaScriptMode(JavaScriptMode.unrestricted);
