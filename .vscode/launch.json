@@ -59,6 +59,18 @@
             "type": "dart",
             "deviceId": "CCD64777-FF29-4DC0-99BB-14680702F70F"
         },
+        {
+            "name": "C++ Debugger (Windows)",
+            "type": "cppvsdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}\\rwkvmusic\\build\\windows\\x64\\runner\\Debug\\rwkvmusic.exe",
+            "cwd": "${workspaceFolder}\\rwkvmusic",
+            "externalConsole": false,
+            "logging": {
+              "moduleLoad": false,
+              "trace": true
+            },
+        },
     ],
     "compounds": [
         {
