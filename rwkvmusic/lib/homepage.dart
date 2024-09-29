@@ -355,7 +355,9 @@ class _HomePageState extends State<HomePage> {
     // if (Platform.isIOS || Platform.isAndroid) {
     if (!ConfigStore.to.isFirstOpen) {
       debugPrint('isFirstOpen');
-      isVisibleWebview.value = false;
+      if (Platform.isWindows) {
+        isVisibleWebview.value = false;
+      }
       Future.delayed(const Duration(milliseconds: 1000), () {
         showAgreementDialog(context);
       });
