@@ -97,6 +97,7 @@ class _HomePageState extends State<HomePage> {
   late MidiDeviceManage deviceManage;
   late String abcString;
   var isVisibleWebview = true.obs;
+
   String? exportMidiStr; //导出midi需要的字符串数据
   @override
   void initState() {
@@ -498,13 +499,18 @@ class _HomePageState extends State<HomePage> {
     selectedChordType.value = r.$2;
 
     isShowDialog = true;
+    if (isWindowsOrMac) {
+      isVisibleWebview.value = false;
+    }
     final ok = await showDialog(
         context: context,
         builder: (BuildContext context) {
           return const ChordEditing();
         });
     isShowDialog = false;
-
+    if (isWindowsOrMac) {
+      isVisibleWebview.value = true;
+    }
     _unselectAll();
 
     if (ok == null) return;
@@ -1086,6 +1092,7 @@ class _HomePageState extends State<HomePage> {
                                 if (isShowOverlay) {
                                   closeOverlay();
                                 }
+
                                 if (isWindowsOrMac) {
                                   isVisibleWebview.value =
                                       !isVisibleWebview.value;
@@ -1108,6 +1115,7 @@ class _HomePageState extends State<HomePage> {
                 SizedBox(
                   height: isWindowsOrMac ? 33.h : 15.h,
                 ),
+                // 琴谱
                 Obx(() => Flexible(
                       flex: isWindowsOrMac ? 2 : 2,
                       child: Visibility(
@@ -1238,7 +1246,8 @@ class _HomePageState extends State<HomePage> {
                   () => Flexible(
                       flex: isWindowsOrMac ? 6 : 4,
                       child: Visibility(
-                        visible: isVisibleWebview.value,
+                        visible: isVisibleWebview.value &&
+                            !showSelectStopSoHideWebviewInDesktop.value,
                         // maintainSize: true, // 保持占位空间
                         // maintainAnimation: true, // 保持动画
                         // maintainState: true,
@@ -2112,14 +2121,16 @@ class _HomePageState extends State<HomePage> {
       closeOverlay();
     }
     if (isWindowsOrMac) {
-      isVisibleWebview.value = !isVisibleWebview.value;
+      isVisibleWebview.value = false;
     }
     final index = await showDialog<int>(
         context: context,
         builder: (BuildContext context) {
           return const TimeChanging();
         });
-
+    if (isWindowsOrMac) {
+      isVisibleWebview.value = true;
+    }
     _unselectAll();
 
     isShowDialog = false;

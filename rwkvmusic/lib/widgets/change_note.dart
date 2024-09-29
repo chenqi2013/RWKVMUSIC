@@ -8,6 +8,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:halo/halo.dart';
 import 'package:rwkvmusic/gen/assets.gen.dart';
+import 'package:rwkvmusic/main.dart';
 import 'package:rwkvmusic/note_length.dart';
 import 'package:rwkvmusic/state.dart';
 import 'package:rwkvmusic/style/color.dart';
@@ -168,6 +169,8 @@ final _kAvailableTranspose = [
   7
 ];
 
+final showSelectStopSoHideWebviewInDesktop = false.obs;
+
 class ChangeNote extends StatelessWidget {
   final void Function(BuildContext context, ChangeNoteKey key) onTapKey;
   final void Function(BuildContext context, ChangeNoteKey key) onLongPress;
@@ -184,10 +187,16 @@ class ChangeNote extends StatelessWidget {
     switch (key) {
       case ChangeNoteKey.mergedZ:
         _expandedZSelections.value = true;
+        if (isWindowsOrMac) {
+          showSelectStopSoHideWebviewInDesktop.value = true;
+        }
         final result = await showDialog<ChangeNoteKey?>(
           context: context,
           builder: (context) => _ZSelections(),
         );
+        if (isWindowsOrMac) {
+          showSelectStopSoHideWebviewInDesktop.value = false;
+        }
         _expandedZSelections.value = false;
         if (result != null) {
           latestUsedRest.value = result;
@@ -685,13 +694,13 @@ class _ButtonState extends State<_Button> {
         });
       },
       onTapCancel: () async {
-        await wait(100);
+        await HF.wait(100);
         setState(() {
           tapped = false;
         });
       },
       onTapUp: (details) async {
-        await wait(100);
+        await HF.wait(100);
         setState(() {
           tapped = false;
         });
