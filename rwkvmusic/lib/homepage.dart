@@ -71,7 +71,7 @@ final List<int> transposeHistory = [];
 
 RxDouble downloadProgress = 0.0.obs;
 RxBool isdownloading = false.obs;
-bool isFirstOpen = false;
+bool isFirstOpen = true;
 
 class _HomePageState extends State<HomePage> {
   /// 键盘 webview 控制器
@@ -318,9 +318,15 @@ class _HomePageState extends State<HomePage> {
             // isPlay.value = false;
             playOrPausePiano();
             if (isFirstOpen) {
-              toastInfo(
-                  msg:
-                      'This content is AI-generated, please carefully discern!');
+              if (Platform.isWindows) {
+                Get.snackbar('tips',
+                    'This content is AI-generated, please carefully discern!');
+              } else {
+                toastInfo(
+                    msg:
+                        'This content is AI-generated, please carefully discern!');
+              }
+
               isFirstOpen = false;
             }
           });
@@ -346,15 +352,15 @@ class _HomePageState extends State<HomePage> {
       checkAppUpdate('android', context);
     }
 
-    if (Platform.isIOS || Platform.isAndroid) {
-      if (!ConfigStore.to.isFirstOpen) {
-        debugPrint('isFirstOpen');
-        isFirstOpen = true;
-        Future.delayed(const Duration(milliseconds: 1000), () {
-          showAgreementDialog(context);
-        });
-      }
+    // if (Platform.isIOS || Platform.isAndroid) {
+    if (!ConfigStore.to.isFirstOpen) {
+      debugPrint('isFirstOpen');
+      isVisibleWebview.value = false;
+      Future.delayed(const Duration(milliseconds: 1000), () {
+        showAgreementDialog(context);
+      });
     }
+    // }
   }
 
   /// 更改当前琴谱的 abc notation value
@@ -988,6 +994,12 @@ class _HomePageState extends State<HomePage> {
             ),
             child: Column(
               children: [
+                // Obx(() => Text(
+                //       dllPath.value + '\n' + binPath.value,
+                //       softWrap: true,
+                //       maxLines: null,
+                //       style: TextStyle(color: Colors.red),
+                //     )),
                 Expanded(
                   child: Container(
                     padding:
@@ -1136,7 +1148,7 @@ class _HomePageState extends State<HomePage> {
                 }),
                 Obx(() {
                   return Visibility(
-                    visible: selectstate.value == 1,
+                    visible: selectstate.value == 1 && isVisibleWebview.value,
                     child: ChangeNote(
                       onTapKey: (context, key) {
                         final v = inputNoteLength.value;
@@ -1689,23 +1701,23 @@ class _HomePageState extends State<HomePage> {
                       ],
                     ),
                   ),
-                  if (Platform.isIOS || Platform.isAndroid)
-                    SizedBox(
-                      height: 30.w,
+                  // if (Platform.isIOS || Platform.isAndroid)
+                  SizedBox(
+                    height: 30.w,
+                  ),
+                  // if (Platform.isIOS || Platform.isAndroid)
+                  Center(
+                    child: TextBtn(
+                      width: isWindowsOrMac ? 1000.w : 1000.w,
+                      height: isWindowsOrMac ? 113.h : 80.h,
+                      onPressed: () {
+                        Get.to(FeedbackPage());
+                      },
+                      text: 'FeedBack',
+                      linearColorStart: AppColor.color_805353,
+                      linearColorEnd: AppColor.color_5E1E1E,
                     ),
-                  if (Platform.isIOS || Platform.isAndroid)
-                    Center(
-                      child: TextBtn(
-                        width: isWindowsOrMac ? 1000.w : 1000.w,
-                        height: isWindowsOrMac ? 113.h : 80.h,
-                        onPressed: () {
-                          Get.to(FeedbackPage());
-                        },
-                        text: 'FeedBack',
-                        linearColorStart: AppColor.color_805353,
-                        linearColorEnd: AppColor.color_5E1E1E,
-                      ),
-                    ),
+                  ),
                   SizedBox(
                     height: isWindowsOrMac ? 60.h : 40.h,
                   ),
@@ -1994,23 +2006,23 @@ class _HomePageState extends State<HomePage> {
                                 text: 'Scan BlueTooth Device',
                               ),
                             ]),
-                        if (Platform.isIOS || Platform.isAndroid)
-                          SizedBox(
-                            height: 30.w,
+                        // if (Platform.isIOS || Platform.isAndroid)
+                        SizedBox(
+                          height: 30.w,
+                        ),
+                        // if (Platform.isIOS || Platform.isAndroid)
+                        Center(
+                          child: TextBtn(
+                            width: isWindowsOrMac ? 1000.w : 1000.w,
+                            height: isWindowsOrMac ? 113.h : 80.h,
+                            onPressed: () {
+                              Get.to(FeedbackPage());
+                            },
+                            text: 'FeedBack',
+                            linearColorStart: AppColor.color_805353,
+                            linearColorEnd: AppColor.color_5E1E1E,
                           ),
-                        if (Platform.isIOS || Platform.isAndroid)
-                          Center(
-                            child: TextBtn(
-                              width: isWindowsOrMac ? 1000.w : 1000.w,
-                              height: isWindowsOrMac ? 113.h : 80.h,
-                              onPressed: () {
-                                Get.to(FeedbackPage());
-                              },
-                              text: 'FeedBack',
-                              linearColorStart: AppColor.color_805353,
-                              linearColorEnd: AppColor.color_5E1E1E,
-                            ),
-                          ),
+                        ),
                         SizedBox(
                           height: isWindowsOrMac ? 60.h : 40.h,
                         ),

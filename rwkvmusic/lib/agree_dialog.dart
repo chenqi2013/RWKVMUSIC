@@ -59,6 +59,7 @@ void showAgreementDialog(BuildContext context) {
                         recognizer: TapGestureRecognizer()
                           ..onTap = () {
                             // 用户协议点击处理
+
                             _openUserAgreement();
                           },
                       ),
@@ -102,6 +103,7 @@ void showAgreementDialog(BuildContext context) {
                         textColor: AppColor.color_A1D632,
                         onPressed: () {
                           // 点击同意，关闭弹窗
+                          isVisibleWebview.value = true;
                           ConfigStore.to.saveAlreadyOpen();
                           Navigator.of(context).pop();
                         },
@@ -141,7 +143,7 @@ void _exitApp(BuildContext context) {
   print("退出应用");
   if (Platform.isAndroid) {
     SystemNavigator.pop();
-  } else if (Platform.isIOS) {
+  } else {
     exit(0);
   }
 }

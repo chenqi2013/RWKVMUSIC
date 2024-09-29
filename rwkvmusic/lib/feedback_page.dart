@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
@@ -109,12 +111,24 @@ class _FeedbackPageState extends State<FeedbackPage> {
                   onPressed: () async {
                     debugPrint('提交反馈');
                     if (_controller.text.isEmpty) {
-                      Fluttertoast.showToast(
-                          msg: "Please input your opinions or suggestions.");
+                      if (Platform.isWindows) {
+                        Get.snackbar('tips',
+                            'Please input your opinions or suggestions.',
+                            colorText: Colors.black);
+                      } else {
+                        Fluttertoast.showToast(
+                            msg: "Please input your opinions or suggestions.");
+                      }
                     } else {
-                      Fluttertoast.showToast(
-                          msg:
-                              "Thank you, we have received your suggestions and feedback.");
+                      if (Platform.isWindows) {
+                        Get.snackbar('tips',
+                            'Thank you, we have received your suggestions and feedback.',
+                            colorText: Colors.black);
+                      } else {
+                        Fluttertoast.showToast(
+                            msg:
+                                "Thank you, we have received your suggestions and feedback.");
+                      }
                     }
                   },
                   text: 'Submit',

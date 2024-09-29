@@ -162,15 +162,17 @@ ModelType currentModelType = ModelType.ncnn;
 bool isOnlyLoadFastModel = true; //提前模型初始化，加快生成速度
 String currentGeneratePrompt = '';
 RxString currentGeneratePromptTmp = ''.obs;
+var isVisibleWebview = true.obs;
+RxString dllPath = ''.obs;
+RxString binPath = ''.obs;
 
 void fetchABCDataByIsolate() async {
-  String? dllPath;
-  String? binPath;
   String? configPath;
   String? paramPath;
   if (Platform.isMacOS) {
-    dllPath = await CommonUtils.copyFileFromAssets('libfaster_rwkvd.dylib');
-    binPath = await CommonUtils.copyFileFromAssets(
+    dllPath.value =
+        await CommonUtils.copyFileFromAssets('libfaster_rwkvd.dylib');
+    binPath.value = await CommonUtils.copyFileFromAssets(
         'RWKV-5-ABC-82M-v1-20230901-ctx1024-ncnn.bin');
     configPath = await CommonUtils.copyFileFromAssets(
         'RWKV-5-ABC-82M-v1-20230901-ctx1024-ncnn.config');
@@ -188,8 +190,8 @@ void fetchABCDataByIsolate() async {
     // }
     // dllPath = frameworkpath;
     //ios 只要把.a放入工程目录并设置即可
-    dllPath = '';
-    binPath = await CommonUtils.copyFileFromAssets(
+    dllPath.value = '';
+    binPath.value = await CommonUtils.copyFileFromAssets(
         'RWKV-6-ABC-85M-v1-20240217-ctx1024-ncnn.bin');
     configPath = await CommonUtils.copyFileFromAssets(
         'RWKV-6-ABC-85M-v1-20240217-ctx1024-ncnn.config');
@@ -201,12 +203,13 @@ void fetchABCDataByIsolate() async {
     bool isFileExists = File(soPath).existsSync();
     if (isFileExists) {
       debugPrint('file exits');
-      dllPath = soPath;
+      dllPath.value = soPath;
     } else {
-      dllPath = await CommonUtils.copyFileFromAssets('libfaster_rwkvd.so');
+      dllPath.value =
+          await CommonUtils.copyFileFromAssets('libfaster_rwkvd.so');
     }
     if (currentModelType == ModelType.ncnn) {
-      binPath = await CommonUtils.copyFileFromAssets(
+      binPath.value = await CommonUtils.copyFileFromAssets(
           'RWKV-6-ABC-85M-v1-20240217-ctx1024-ncnn.bin');
       // binPath =
       //     await CommonUtils.copyFileFromAssets('rwkv.cpp-v6-ABC-85M-FP32.bin');
@@ -220,8 +223,8 @@ void fetchABCDataByIsolate() async {
       if (!isFileExists) {
         String sopath = await CommonUtils.copyFileFromAssets(
             'libRWKV-6-ABC-85M-v1-20240217-ctx1024-QNN.so');
-        binPath = "$sopath:$cachePath";
-        debugPrint('binPath==$binPath');
+        binPath.value = "$sopath:$cachePath";
+        // debugPrint('binPath==$binPath');
         for (String soName in qnnSoList) {
           //拷贝qnn so文件
           await CommonUtils.copyFileFromAssets(soName);
@@ -229,15 +232,15 @@ void fetchABCDataByIsolate() async {
       } else {
         String qnnsoPath =
             '$cachePath/libRWKV-6-ABC-85M-v1-20240217-ctx1024-QNN.so';
-        binPath = "$qnnsoPath:$cachePath";
-        debugPrint('file exits binpath==$binPath');
+        binPath.value = "$qnnsoPath:$cachePath";
+        // debugPrint('file exits binpath==$binPath');
       }
       configPath = await CommonUtils.copyFileFromAssets(
           'libRWKV-6-ABC-85M-v1-20240217-ctx1024-QNN.config');
       paramPath = await CommonUtils.copyFileFromAssets(
           'RWKV-6-ABC-85M-v1-20240217-ctx1024-ncnn.param');
     } else if (currentModelType == ModelType.mtk) {
-      binPath = await CommonUtils.copyFileFromAssets(
+      binPath.value = await CommonUtils.copyFileFromAssets(
           'RWKV-6-ABC-85M-v1-20240217-ctx1024-MTK-MT6989.dla');
       configPath = await CommonUtils.copyFileFromAssets(
           'RWKV-6-ABC-85M-v1-20240217-ctx1024-MTK-MT6989.config');
@@ -245,8 +248,8 @@ void fetchABCDataByIsolate() async {
           'RWKV-6-ABC-85M-v1-20240217-ctx1024-MTK-MT6989.emb');
     }
   } else if (Platform.isWindows) {
-    dllPath = await CommonUtils.getdllPath();
-    binPath = await CommonUtils.getBinPath();
+    dllPath.value = await CommonUtils.getdllPath();
+    binPath.value = await CommonUtils.getBinPath();
   }
 
   if (isUseCurrentTime) {
@@ -297,8 +300,8 @@ void fetchABCDataByIsolate() async {
     midiProgramValue,
     seed.value,
     randomness.value,
-    dllPath,
-    binPath,
+    dllPath.value,
+    binPath.value,
     fastmodel,
     isOnlyLoadFastModel,
     tempo.value
@@ -398,8 +401,19 @@ void getABCDataByLocalModel(var array) async {
   faster_rwkvd fastrwkv = faster_rwkvd(
       Platform.isIOS ? DynamicLibrary.process() : DynamicLibrary.open(dllPath));
   // Pointer<Char> strategy = 'ncnn fp32'.toNativeUtf8().cast<Char>();    // ncnn fp32
-  Pointer<Char> strategy = 'webgpu auto'.toNativeUtf8().cast<Char>();  // webgpu auto  (通用pc上和ios上可以webgpu auto)
+  Pointer<Char> strategy = 'webgpu auto'
+      .toNativeUtf8()
+      .cast<Char>(); // webgpu auto  (通用pc上和ios上可以webgpu auto)
   // Pointer<Char> strategy = 'rwkv.cpp auto'.toNativeUtf8().cast<Char>();
+  // Pointer<Char> strategy = 'ncnn fp32'.toNativeUtf8().cast<Char>();
+  // Pointer<Char> strategy = 'webgpu auto'
+  //     .toNativeUtf8()
+  //     .cast<Char>(); //ncnn fp32    webgpu auto  (通用pc上和ios上可以webgpu auto)
+  // strategy = 'rwkv.cpp auto'.toNativeUtf8().cast<Char>();
+  // Pointer<Char> strategy = 'ncnn fp32'.toNativeUtf8().cast<Char>();
+  // Pointer<Char> strategy = 'webgpu auto'
+  //     .toNativeUtf8()
+  //     .cast<Char>(); //ncnn fp32    webgpu auto  (通用pc上和ios上可以webgpu auto)
   if (currentModelType == ModelType.qnn) {
     strategy = 'qnn auto'.toNativeUtf8().cast<Char>();
   } else if (currentModelType == ModelType.mtk) {

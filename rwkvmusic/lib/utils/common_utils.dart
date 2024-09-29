@@ -42,10 +42,17 @@ class CommonUtils {
   static Future<String> getdllPath() async {
     var currentPath = Directory.current.absolute.path;
     String path = p.join(currentPath, 'lib/fastmodel/');
+
+    // 获取当前可执行文件的路径
+    String executablePath = Platform.resolvedExecutable;
+    // 获取安装目录
+    String installDir = p.dirname(executablePath); // 获取目录路径
+
     if (Platform.isMacOS) {
       path = p.join(path, 'faster_rwkvd.dylib');
     } else if (Platform.isWindows) {
       path = p.join(path, 'faster_rwkvd.dll');
+      path = p.join(installDir, 'lib/fastmodel/faster_rwkvd.dll');
     } else if (Platform.isAndroid || Platform.isIOS) {
       path = 'assets/fastmodel/libfaster_rwkvd.so';
     }
@@ -54,8 +61,12 @@ class CommonUtils {
   }
 
   static Future<String> getBinPath() async {
-    var currentPath = Directory.current.absolute.path;
-    String path = p.join(currentPath, 'lib/fastmodel/');
+    // var currentPath = Directory.current.absolute.path;
+    // 获取当前可执行文件的路径
+    String executablePath = Platform.resolvedExecutable;
+    // 获取安装目录
+    String installDir = p.dirname(executablePath); // 获取目录路径
+    String path = p.join(installDir, 'lib/fastmodel/');
     if (Platform.isAndroid || Platform.isIOS) {
       path = 'assets/fastmodel/RWKV-5-ABC-82M-v1-20230901-ctx1024-ncnn.bin';
     } else {
