@@ -4,6 +4,7 @@ import 'dart:typed_data';
 import 'package:app_installer/app_installer.dart';
 import 'package:archive/archive.dart';
 import 'package:device_info_plus/device_info_plus.dart';
+import 'package:flutter/foundation.dart';
 import 'package:isolated_download_manager/isolated_download_manager.dart';
 import 'package:path/path.dart' as p;
 import 'package:flutter/services.dart' show rootBundle;
@@ -40,11 +41,14 @@ class CommonUtils {
   }
 
   static Future<String> getdllPath() async {
-    var currentPath = Directory.current.absolute.path;
+    var currentPath = File(Platform.resolvedExecutable).parent.path;
     String path = p.join(currentPath, 'lib/fastmodel/');
     if (Platform.isMacOS) {
       path = p.join(path, 'faster_rwkvd.dylib');
     } else if (Platform.isWindows) {
+      if (kReleaseMode) {
+        path = p.join(currentPath, 'data/flutter_assets/assets/fastmodel');
+      }
       path = p.join(path, 'faster_rwkvd.dll');
     } else if (Platform.isAndroid || Platform.isIOS) {
       path = 'assets/fastmodel/libfaster_rwkvd.so';
@@ -54,12 +58,14 @@ class CommonUtils {
   }
 
   static Future<String> getBinPath() async {
-    var currentPath = Directory.current.absolute.path;
+    var currentPath = File(Platform.resolvedExecutable).parent.path;
     String path = p.join(currentPath, 'lib/fastmodel/');
     if (Platform.isAndroid || Platform.isIOS) {
       path = 'assets/fastmodel/RWKV-5-ABC-82M-v1-20230901-ctx1024-ncnn.bin';
     } else {
-      // String currentPath = Directory.current.absolute.path;
+      if (kReleaseMode) {
+        path = p.join(currentPath, 'data/flutter_assets/assets/fastmodel');
+      }
       path = p.join(path, 'RWKV-6-ABC-85M-v1-20240217-ctx1024-webrwkv.st');
     }
     debugPrint('getBinPath===$path');
