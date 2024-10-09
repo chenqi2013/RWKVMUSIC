@@ -400,20 +400,13 @@ void getABCDataByLocalModel(var array) async {
   Pointer<Char> promptChar = prompt.toNativeUtf8().cast<Char>();
   faster_rwkvd fastrwkv = faster_rwkvd(
       Platform.isIOS ? DynamicLibrary.process() : DynamicLibrary.open(dllPath));
-  // Pointer<Char> strategy = 'ncnn fp32'.toNativeUtf8().cast<Char>();    // ncnn fp32
   Pointer<Char> strategy = 'webgpu auto'
       .toNativeUtf8()
       .cast<Char>(); // webgpu auto  (通用pc上和ios上可以webgpu auto)
   // Pointer<Char> strategy = 'rwkv.cpp auto'.toNativeUtf8().cast<Char>();
-  // Pointer<Char> strategy = 'ncnn fp32'.toNativeUtf8().cast<Char>();
-  // Pointer<Char> strategy = 'webgpu auto'
-  //     .toNativeUtf8()
-  //     .cast<Char>(); //ncnn fp32    webgpu auto  (通用pc上和ios上可以webgpu auto)
-  // strategy = 'rwkv.cpp auto'.toNativeUtf8().cast<Char>();
-  // Pointer<Char> strategy = 'ncnn fp32'.toNativeUtf8().cast<Char>();
-  // Pointer<Char> strategy = 'webgpu auto'
-  //     .toNativeUtf8()
-  //     .cast<Char>(); //ncnn fp32    webgpu auto  (通用pc上和ios上可以webgpu auto)
+  if (Platform.isAndroid) {
+    strategy = 'ncnn fp32'.toNativeUtf8().cast<Char>();
+  }
   if (currentModelType == ModelType.qnn) {
     strategy = 'qnn auto'.toNativeUtf8().cast<Char>();
   } else if (currentModelType == ModelType.mtk) {
