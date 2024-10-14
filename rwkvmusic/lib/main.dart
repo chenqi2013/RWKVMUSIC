@@ -7,6 +7,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'package:rwkvmusic/langs/translation_service.dart';
 
 import 'package:rwkvmusic/services/storage.dart';
 import 'package:rwkvmusic/store/config.dart';
@@ -75,9 +76,12 @@ void main(List<String> args) async {
         designSize: Platform.isWindows
             ? const Size(2880, 1600)
             : const Size(2436, 1125), //812, 375
-        child: const GetMaterialApp(
+        child: GetMaterialApp(
           debugShowCheckedModeBanner: false,
           home: HomePage(),
+          locale: Locale('en', 'US'), // 默认语言
+          fallbackLocale: Locale('en', 'US'), // 回退语言
+          translations: TranslationService(), // 注册翻译类
         ),
       ),
     ),
