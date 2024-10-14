@@ -12,7 +12,7 @@ import 'package:rwkvmusic/mainwidget/text_item.dart';
 import 'package:rwkvmusic/store/config.dart';
 import 'package:rwkvmusic/style/color.dart';
 
-void showAgreementDialog(BuildContext context) {
+void showAgreementDialog(BuildContext context, Function() callBack) {
   showDialog(
     context: context,
     barrierDismissible: false, // 禁止点击外部关闭弹窗
@@ -103,9 +103,9 @@ void showAgreementDialog(BuildContext context) {
                         textColor: AppColor.color_A1D632,
                         onPressed: () {
                           // 点击同意，关闭弹窗
-                          isVisibleWebview.value = true;
                           ConfigStore.to.saveAlreadyOpen();
                           Navigator.of(context).pop();
+                          callBack();
                         },
                         text: 'Agree',
                       ),

@@ -13,6 +13,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:rwkvmusic/agree_dialog.dart';
+import 'package:rwkvmusic/duihuanma_dialog.dart';
 import 'package:rwkvmusic/feedback_page.dart';
 import 'package:rwkvmusic/main.dart';
 import 'package:rwkvmusic/mainwidget/custom_segment_controller.dart';
@@ -359,7 +360,28 @@ class _HomePageState extends State<HomePage> {
         isVisibleWebview.value = false;
       }
       Future.delayed(const Duration(milliseconds: 1000), () {
-        showAgreementDialog(context);
+        showAgreementDialog(context, () {
+          if (isExe && Platform.isWindows) {
+            showDuihuanmaDialog(context, (bool isSuccess) {
+              if (isSuccess) {
+                isVisibleWebview.value = true;
+              }
+            });
+          } else {
+            isVisibleWebview.value = true;
+          }
+        });
+      });
+    } else if (!ConfigStore.to.isValidDuihuanma &&
+        isExe &&
+        Platform.isWindows) {
+      isVisibleWebview.value = false;
+      Future.delayed(const Duration(milliseconds: 1000), () {
+        showDuihuanmaDialog(context, (bool isSuccess) {
+          if (isSuccess) {
+            isVisibleWebview.value = true;
+          }
+        });
       });
     }
     // }

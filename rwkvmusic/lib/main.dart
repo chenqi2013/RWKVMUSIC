@@ -159,6 +159,9 @@ int abcTokenizerAddress = 0;
 int samplerAddress = 0;
 bool isClicking = false;
 ModelType currentModelType = ModelType.ncnn;
+
+/// 打包时候需要修改这个开关
+bool isExe = false; //msix或者exe格式安装包
 bool isOnlyLoadFastModel = true; //提前模型初始化，加快生成速度
 String currentGeneratePrompt = '';
 RxString currentGeneratePromptTmp = ''.obs;

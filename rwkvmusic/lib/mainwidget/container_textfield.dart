@@ -12,7 +12,7 @@ class ContainerTextField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     TextEditingController controller =
-        TextEditingController(text: seed.toString());
+        TextEditingController(text: seed == 0 ? '' : seed.toString());
     return Container(
       padding: EdgeInsets.symmetric(
           horizontal: 15.w, vertical: isWindowsOrMac ? 25.h : 0.1.h),
@@ -50,10 +50,12 @@ class ContainerTextField extends StatelessWidget {
               fontWeight: FontWeight.w400),
           textAlign: TextAlign.right,
           controller: controller,
-          keyboardType: TextInputType.number,
-          inputFormatters: <TextInputFormatter>[
-            FilteringTextInputFormatter.allow(RegExp(r'[0-9]')), // 只允许输入数字
-          ],
+          keyboardType: seed != 0 ? TextInputType.number : TextInputType.text,
+          inputFormatters: seed != 0
+              ? <TextInputFormatter>[
+                  FilteringTextInputFormatter.allow(RegExp(r'[0-9]'))
+                ]
+              : <TextInputFormatter>[], // 只允许输入数字
           decoration: InputDecoration(
             isDense: true,
             contentPadding: EdgeInsets.symmetric(
