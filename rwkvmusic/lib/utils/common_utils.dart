@@ -4,6 +4,8 @@ import 'dart:typed_data';
 import 'package:app_installer/app_installer.dart';
 import 'package:archive/archive.dart';
 import 'package:device_info_plus/device_info_plus.dart';
+import 'package:dio/dio.dart';
+import 'package:get/get.dart' hide Response;
 import 'package:isolated_download_manager/isolated_download_manager.dart';
 import 'package:path/path.dart' as p;
 import 'package:flutter/services.dart' show rootBundle;
@@ -233,6 +235,126 @@ class CommonUtils {
       print("error $error");
       progressStatus(DownloadStatus.fail, -1);
     });
+  }
+
+  static Future<String> getWindowsDeviceId() async {
+    final deviceInfoPlugin = DeviceInfoPlugin();
+    final windowsInfo = await deviceInfoPlugin.windowsInfo;
+
+    // 组合硬件信息生成唯一编号
+    String uniqueId = windowsInfo.deviceId;
+    debugPrint('uuid=$uniqueId');
+    return uniqueId;
+  }
+
+  static Future<bool> checkDHM(
+      String encryptionKeyId, String deviceUuid) async {
+    Dio dio = Dio(BaseOptions(validateStatus: (status) {
+      return status! < 500; // 所有小于500的状态码都视为成功，包括4xx客户端错误
+    }));
+
+    int statusCode = -1;
+    bool isValid = false;
+    String url = 'https://api.rwkv.cn/rest/v1/rwkv_music_redeem_record';
+
+    Map<String, dynamic> data = {
+      'encryption_key_id': encryptionKeyId,
+      'device_uuid': deviceUuid,
+    };
+
+    // 设置 headers
+    dio.options.headers = {
+      'Content-Type': 'application/json',
+      'apikey':
+          ' eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.ewogICJyb2xlIjogImFub24iLAogICJpc3MiOiAic3VwYWJhc2UiLAogICJpYXQiOiAxNzIzMDQ2NDAwLAogICJleHAiOiAxODgwODEyODAwCn0.rcb3MeytmRZQFWx5cGAN2C7BOvVOuBFOQJbJRE4ygmw',
+      'Authorization':
+          'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.ewogICJyb2xlIjogImFub24iLAogICJpc3MiOiAic3VwYWJhc2UiLAogICJpYXQiOiAxNzIzMDQ2NDAwLAogICJleHAiOiAxODgwODEyODAwCn0.rcb3MeytmRZQFWx5cGAN2C7BOvVOuBFOQJbJRE4ygmw',
+    };
+
+    try {
+      Response response = await dio.post(url, data: data);
+      statusCode = response.statusCode!;
+      int subCode = 0;
+      debugPrint('statusCode=$statusCode,subCode=$subCode');
+      if (statusCode == 201) {
+        print('Response data:${response.data}');
+        Get.snackbar('提示', '激活成功，您可正常使用该软件', colorText: Colors.black);
+        isValid = true;
+      } else {
+        print('Request failed with status: ${response.data}');
+        subCode = int.parse(response.data['code']);
+        if (statusCode == 409) {
+          if (subCode == 23505) {
+            Get.snackbar('提示', '设备已经激活过了，可正常使用该软件', colorText: Colors.black);
+            isValid = true;
+          } else if (subCode == 23503) {
+            Get.snackbar('提示', '验证码不正确', colorText: Colors.black);
+          }
+        } else if (statusCode == 400) {
+          if (subCode == 45005) {
+            Get.snackbar('提示', '验证码已经注册五台设备', colorText: Colors.black);
+          }
+        }
+      }
+    } catch (e) {
+      print('checkDHM Error: $e');
+    }
+    return isValid;
+  }
+
+  static Future<bool> checkDeviceIsJihuo(String deviceUuid) async {
+    Dio dio = Dio(BaseOptions(validateStatus: (status) {
+      return status! < 500; // 所有小于500的状态码都视为成功，包括4xx客户端错误
+    }));
+
+    int statusCode = -1;
+    bool isValid = false;
+    String url = 'https://api.rwkv.cn/rest/v1/rpc/check_device_uuid_exists';
+
+    Map<String, dynamic> data = {
+      'device_uuid_input': deviceUuid,
+    };
+
+    // 设置 headers
+    dio.options.headers = {
+      'Content-Type': 'application/json',
+      'apikey':
+          ' eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.ewogICJyb2xlIjogImFub24iLAogICJpc3MiOiAic3VwYWJhc2UiLAogICJpYXQiOiAxNzIzMDQ2NDAwLAogICJleHAiOiAxODgwODEyODAwCn0.rcb3MeytmRZQFWx5cGAN2C7BOvVOuBFOQJbJRE4ygmw',
+      'Authorization':
+          'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.ewogICJyb2xlIjogImFub24iLAogICJpc3MiOiAic3VwYWJhc2UiLAogICJpYXQiOiAxNzIzMDQ2NDAwLAogICJleHAiOiAxODgwODEyODAwCn0.rcb3MeytmRZQFWx5cGAN2C7BOvVOuBFOQJbJRE4ygmw',
+    };
+
+    try {
+      Response response = await dio.post(url, data: data);
+      statusCode = response.statusCode!;
+      int subCode = 0;
+      debugPrint('statusCode=$statusCode,subCode=$subCode');
+      debugPrint('checkDeviceIsJihuo Response data:${response.data}');
+      isValid = response.data;
+      // if (statusCode == 201) {
+      //   print('Response data:${response.data}');
+      //   Get.snackbar('提示', '激活成功，您可正常使用该软件', colorText: Colors.black);
+      //   isValid = true;
+      // } else {
+      //   print('Request failed with status: ${response.data}');
+      //   subCode = int.parse(response.data['code']);
+      //   if (statusCode == 409) {
+      //     if (subCode == 23505) {
+      //       Get.snackbar('提示', '设备已经激活过了，可正常使用该软件', colorText: Colors.black);
+      //       isValid = true;
+      //     } else if (subCode == 23503) {
+      //       Get.snackbar('提示', '验证码不正确', colorText: Colors.black);
+      //     }
+      //   } else if (statusCode == 400) {
+      //     if (subCode == 45005) {
+      //       Get.snackbar('提示', '验证码已经注册五台设备', colorText: Colors.black);
+      //     }
+      //   }
+      // }
+    } catch (e) {
+      print('checkDeviceIsJihuo Error: $e');
+    }
+    return isValid;
   }
 
   // void getABCDataByAPI() async {

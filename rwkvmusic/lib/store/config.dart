@@ -9,6 +9,7 @@ class ConfigStore extends GetxController {
   static ConfigStore get to => Get.find();
 
   bool isFirstOpen = false;
+  bool isValidDuihuanma = false;
   PackageInfo? _platform;
   String get version => _platform?.version ?? '-';
   bool get isRelease => const bool.fromEnvironment("dart.vm.product");
@@ -22,6 +23,7 @@ class ConfigStore extends GetxController {
   void onInit() {
     super.onInit();
     isFirstOpen = StorageService.to.getBool(STORAGE_DEVICE_FIRST_OPEN_KEY);
+    isValidDuihuanma = StorageService.to.getBool(IS_VALID_DUIHUANMA);
   }
 
   Future<void> getPlatform() async {
@@ -31,6 +33,11 @@ class ConfigStore extends GetxController {
   // 标记用户已打开APP
   Future<bool> saveAlreadyOpen() {
     return StorageService.to.setBool(STORAGE_DEVICE_FIRST_OPEN_KEY, true);
+  }
+
+  // 标记用户已验证过兑换码
+  Future<bool> hasVlidDuihuanma() {
+    return StorageService.to.setBool(IS_VALID_DUIHUANMA, true);
   }
 
   Future<bool> savePromptsSelect(int selelct) {
