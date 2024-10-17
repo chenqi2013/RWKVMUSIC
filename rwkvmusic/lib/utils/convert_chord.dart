@@ -205,8 +205,12 @@ List<Map<String, dynamic>> analyzeNotes(String abcNotation) {
   }
 
   RegExp notePattern = RegExp(r'''([_^=]?[A-Ga-gzZ])([\',]*)?(\d*\/?\d*)?''');
+  RegExp tupletPattern = RegExp(r'\(3');
   List<Map<String, dynamic>> notes = [];
   double offset = 0;
+
+  int tupletCount = 0;
+  double tupletRatio = 1.0;
 
   for (String line in lines) {
     if (line.startsWith('X:') ||
@@ -218,46 +222,79 @@ List<Map<String, dynamic>> analyzeNotes(String abcNotation) {
       continue;
     }
 
-    Iterable<Match> matches = notePattern.allMatches(line);
-    for (Match match in matches) {
+    int index = 0;
+    while (index < line.length) {
+      // 检查是否有三连音符号
+      Match? tupletMatch = tupletPattern.matchAsPrefix(line, index);
+      if (tupletMatch != null) {
+        tupletCount = 3;
+        tupletRatio = 2 / 3;
+        index += tupletMatch.end - tupletMatch.start;
+        continue;
+      }
+
+      // 匹配音符
+      Match? match = notePattern.matchAsPrefix(line, index);
+      if (match == null) {
+        index += 1;
+        continue;
+      }
+
       String pitch = match.group(1)!;
       String? octaveModifier = match.group(2);
       String? lengthStr = match.group(3);
 
+      // 计算音符的实际时值
       double noteLength = defaultNoteLength;
       if (lengthStr != null && lengthStr.isNotEmpty) {
         if (lengthStr.contains('/')) {
-          List<String> lengthParts = lengthStr.split('/');
-          noteLength = lengthParts.length == 1
-              ? defaultNoteLength / 2
-              : (int.parse(lengthParts[0]) / int.parse(lengthParts[1])) *
-                  defaultNoteLength;
+          if (lengthStr == '/') {
+            noteLength = defaultNoteLength / 2;
+          } else {
+            List<String> lengthParts = lengthStr.split('/');
+            int numerator =
+                lengthParts[0].isEmpty ? 1 : int.parse(lengthParts[0]);
+            int denominator = int.parse(lengthParts[1]);
+            noteLength = (numerator / denominator) * defaultNoteLength;
+          }
         } else {
           noteLength = int.parse(lengthStr) * defaultNoteLength;
         }
       }
 
+      // 如果在三连音中，调整时值
+      if (tupletCount > 0) {
+        noteLength *= tupletRatio;
+        tupletCount -= 1;
+        if (tupletCount == 0) {
+          tupletRatio = 1.0; // 重置倍率
+        }
+      }
+
+      // 计算音符的实际音高
       if (pitch.toLowerCase() == 'z') {
         pitch = 'rest';
+      } else {
+        int octaveShift = 0;
+        if (octaveModifier != null && octaveModifier.isNotEmpty) {
+          if (pitch.toLowerCase() == pitch) {
+            octaveShift = 1;
+          }
+          octaveShift += "'".allMatches(octaveModifier).length;
+          octaveShift -= ",".allMatches(octaveModifier).length;
+        }
+        pitch = pitch.toUpperCase() + ("'" * octaveShift);
       }
-      // else {
-      //   int octaveShift = 0;
-      //   if (octaveModifier != null) {
-      //     if (pitch.toLowerCase() == pitch) {
-      //       octaveShift = 1;
-      //     }
-      //     octaveShift += "'".allMatches(octaveModifier).length;
-      //     octaveShift -= ",".allMatches(octaveModifier).length;
-      //   }
-      //   pitch = pitch.toUpperCase() + "'" * octaveShift;
-      // }
 
+      // 创建音符事件
       notes.add({
         'pitch': pitch,
         'offset': offset,
         'quarterLength': noteLength,
       });
       offset += noteLength;
+
+      index += match.end - match.start;
     }
   }
   return notes;
@@ -429,7 +466,7 @@ List<dynamic> analyzeChords(
   return out;
 }
 
-List<List<List<String>>> extractNotesAndMeasures(String abcNotation) {
+Map<String, dynamic> extractNotesAndMeasures(String abcNotation) {
   List<List<List<String>>> notesByMeasure = [];
 
   List<String> lines = abcNotation.split('\n');
@@ -459,6 +496,10 @@ List<List<List<String>>> extractNotesAndMeasures(String abcNotation) {
     '12/8': 12
   };
 
+  if (!beatDurations.containsKey(M) || !beatsPerMeasure.containsKey(M)) {
+    throw ArgumentError('Unsupported time signature');
+  }
+
   double beatDuration = beatDurations[M]!;
   int numBeats = beatsPerMeasure[M]!;
 
@@ -466,18 +507,17 @@ List<List<List<String>>> extractNotesAndMeasures(String abcNotation) {
   List<List<String>> beats = [];
 
   for (Map<String, dynamic> n in allNotes) {
-    int startBeat = (n['offset'] / beatDuration).floor();
-    int endBeat =
-        ((n['offset'] + n['quarterLength']) / beatDuration).ceil() - 1;
-    endBeat = max(endBeat, 0);
+    double startBeat = n['offset'] / beatDuration;
+    double endBeat = (n['offset'] + n['quarterLength']) / beatDuration;
 
-    for (int beatIndex = startBeat; beatIndex <= endBeat; beatIndex++) {
+    int startIndex = startBeat.floor();
+    int endIndex = endBeat.ceil();
+
+    for (int beatIndex = startIndex; beatIndex < endIndex; beatIndex++) {
       while (beats.length <= beatIndex) {
         beats.add([]);
       }
-      if (n['pitch'] != 'rest') {
-        beats[beatIndex].add(n['pitch']);
-      }
+      beats[beatIndex].add(n['pitch']);
     }
   }
 
@@ -490,18 +530,19 @@ List<List<List<String>>> extractNotesAndMeasures(String abcNotation) {
     notesByMeasure.add(measure);
   }
 
-  return notesByMeasure;
+  return {'notesByMeasure': notesByMeasure, 'M': M};
 }
 
 List<dynamic> generateChordAbcNotation(String abcNotation) {
   Key keySignature = analyzeKey(abcNotation);
   Map<int, List<int>> chordMap = generateChordMaps(keySignature);
   Map<int, String> chordNames = generateChordNames(keySignature);
-  List<List<List<String>>> notesByMeasure =
-      extractNotesAndMeasures(abcNotation);
+  Map<String, dynamic> extractionResult = extractNotesAndMeasures(abcNotation);
+  List<List<List<String>>> notesByMeasure = extractionResult['notesByMeasure'];
+  String M = extractionResult['M'];
 
   return [
-    analyzeChords(notesByMeasure, chordMap, chordNames, keySignature, '4/4'),
+    analyzeChords(notesByMeasure, chordMap, chordNames, keySignature, M),
     keySignature
   ];
 }
