@@ -20,38 +20,39 @@ List parseAbc(String abcNotation) {
     } else if (line.startsWith('K:')) {
       header['K'] = line.split(':')[1].trim();
     } else {
-      // Dart 正则表达式，相当于 Python 的 re.findall
+      // 更新正则表达式，支持连音符号 (3、(5 等
       RegExp regExp = RegExp(
-          r'''(?:[^\"]|\"[^\"]*\")*?([\-]?[\^_=]?[A-Ga-gz][,\']*[\d/]*)''');
+          r'''(?:[^\"]|\"[^\"]*\")*?(\([2-9][0-9]*|[\-]?[\^_=]?[A-Ga-gz][,\']*[\d/]*)''');
 
-      // 使用 allMatches 方法查找所有匹配项
       Iterable<Match> matches = regExp.allMatches(line);
 
-      // 提取匹配的音符事件并存储到列表中
-      notes = matches.map((match) => match.group(1)!).toList();
+      notes.addAll(matches.map((match) => match.group(1)!));
     }
   }
 
   return [header, notes];
 }
 
-Map<String, dynamic> parseNoteLength(String note) {
+Map<String, dynamic> parseNoteLength(String note, [Fraction? tupletRatio]) {
+  tupletRatio ??= Fraction(1, 1);
   RegExp regExp = RegExp(r'''([\-]?[\^_=]?[A-Ga-gz][,\']*)(\d+)?(/(\d+)?)?''');
   Match? match = regExp.firstMatch(note);
   if (match == null) {
     return {
       'note': note,
-      'length': Fraction(1, 1),
+      'length': Fraction(1, 1) * tupletRatio,
     };
   }
 
   String noteChar = match.group(1)!;
   String numerator = match.group(2) ?? '1';
   String denominator = match.group(4) ?? (match.group(3) != null ? '2' : '1');
+  Fraction noteLength =
+      Fraction(int.parse(numerator), int.parse(denominator)) * tupletRatio;
 
   return {
     'note': noteChar,
-    'length': Fraction(int.parse(numerator), int.parse(denominator)),
+    'length': noteLength,
   };
 }
 
@@ -66,18 +67,23 @@ Fraction calculateBarLength(String meter, String length) {
 
 List<String> splitNoteLength(String noteChar, Fraction noteLength) {
   List<String> splitNotes = [];
-  if (noteLength.denominator == 2 && noteLength.numerator >= 5) {
+  if (noteLength > Fraction(1, 1)) {
     int integerPart = noteLength.numerator ~/ noteLength.denominator;
-    // int remainder = noteLength.numerator - 2* integerPart;
-    splitNotes.add('$noteChar$integerPart');
-    splitNotes.add('-${noteChar}1/2');
-  } else if (noteLength.denominator == 4 && noteLength.numerator >= 5) {
-    int integerPart = noteLength.numerator ~/ noteLength.denominator;
-    int remainderNumerator = noteLength.numerator - integerPart * 4;
-    splitNotes.add('$noteChar$integerPart');
-    splitNotes.add('-$noteChar$remainderNumerator/4');
+    Fraction fractionalPart = noteLength - Fraction(integerPart, 1);
+    for (int i = 0; i < integerPart; i++) {
+      splitNotes.add(noteChar);
+    }
+    if (fractionalPart > Fraction(0, 1)) {
+      splitNotes.add('$noteChar$fractionalPart');
+    }
   } else {
-    splitNotes.add('$noteChar$noteLength');
+    if (noteLength == Fraction(1, 1)) {
+      splitNotes.add(noteChar);
+    } else if (noteLength == Fraction(1, 2)) {
+      splitNotes.add('$noteChar/');
+    } else {
+      splitNotes.add('$noteChar$noteLength');
+    }
   }
   return splitNotes;
 }
@@ -87,6 +93,11 @@ List<List<String>> checkAndSplitNotes(List<List<String>> bars) {
   for (List<String> bar in bars) {
     List<String> newBar = [];
     for (String note in bar) {
+      // 检查是否为连音符号
+      if (RegExp(r'\(\d+').hasMatch(note)) {
+        newBar.add(note);
+        continue;
+      }
       var parsedNote = parseNoteLength(note);
       String noteChar = parsedNote['note'];
       Fraction noteLength = parsedNote['length'];
@@ -104,25 +115,55 @@ List<List<String>> divideIntoBars(List<String> notes, Fraction barLength) {
   List<String> bar = [];
   List<List<String>> bars = [];
 
-  for (String note in notes) {
-    var parsedNote = parseNoteLength(note);
+  int tupletCount = 0;
+  int tupletNotes = 0;
+  Fraction tupletRatio = Fraction(1, 1);
+
+  int i = 0;
+  while (i < notes.length) {
+    String note = notes[i];
+
+    // 检查是否为连音符号
+    Match? tupletMatch = RegExp(r'\((\d+)').firstMatch(note);
+    if (tupletMatch != null) {
+      tupletNotes = int.parse(tupletMatch.group(1)!);
+      tupletCount = tupletNotes;
+      // 计算连音组的倍率，例如三连音倍率为 2/3
+      tupletRatio = Fraction(tupletNotes - 1, tupletNotes);
+      bar.add(note); // 保留连音符号
+      i += 1;
+      continue;
+    }
+
+    // 解析音符，考虑连音倍率
+    var parsedNote = parseNoteLength(note, tupletRatio);
     String noteChar = parsedNote['note'];
     Fraction noteLength = parsedNote['length'];
 
+    // 如果在连音组内，更新计数
+    if (tupletCount > 0) {
+      tupletCount -= 1;
+      if (tupletCount == 0) {
+        tupletRatio = Fraction(1, 1); // 重置倍率
+      }
+    }
+
+    // 检查是否需要拆分音符以适应小节长度
     if (currentLength + noteLength > barLength) {
       Fraction remainingLength = barLength - currentLength;
-      bar.add('$noteChar$remainingLength');
-      bars.add(bar);
-      Fraction partLength = noteLength - remainingLength;
-
-      while (partLength > barLength) {
-        bar = ['-$noteChar$barLength'];
-        bars.add(bar);
-        partLength -= barLength;
+      if (remainingLength > Fraction(0, 1)) {
+        // 将音符拆分，前一部分放入当前小节
+        bar.add('$noteChar$remainingLength');
+        // 使用连音线连接跨小节的音符
+        String nextNote = '-$noteChar${noteLength - remainingLength}';
+        notes.insert(i + 1, nextNote);
+      } else {
+        // 当前小节已满，音符全部放入下一小节
+        notes.insert(i + 1, note);
       }
-
-      bar = ['-$noteChar$partLength'];
-      currentLength = partLength;
+      bars.add(bar);
+      bar = [];
+      currentLength = Fraction(0, 1);
     } else {
       bar.add(note);
       currentLength += noteLength;
@@ -133,76 +174,31 @@ List<List<String>> divideIntoBars(List<String> notes, Fraction barLength) {
       bar = [];
       currentLength = Fraction(0, 1);
     }
+
+    i += 1;
   }
 
   if (bar.isNotEmpty) {
     bars.add(bar);
   }
 
+  // 调用检查和拆分函数
   return checkAndSplitNotes(bars);
-}
-
-String formatBarsTest(Map<String, String> header, List<List<String>> bars) {
-  String formattedAbc = "L:${header['L']}\nM:${header['M']}\n|";
-
-  for (List<String> bar in bars) {
-    List<String> accidentalNotes = []; // 储存带有升降号的音符
-    List<String> newBar = [];
-
-    for (String note in bar) {
-      var parsedNote = parseNoteLength(note);
-      String noteChar = parsedNote['note'];
-      Fraction noteLength = parsedNote['length'];
-
-      // 提取音符字母部分和升降号部分
-      RegExp accidentalRegex = RegExp(r'''[\^_=]?[A-Ga-gz][,\']*''');
-      RegExp baseNoteRegex = RegExp(r'''[\=]?[A-Ga-gz][,\']*''');
-      String accidental = accidentalRegex.firstMatch(noteChar)!.group(0)!;
-      String baseNote = baseNoteRegex.firstMatch(noteChar)!.group(0)!;
-
-      // 检查数组中是否已有相同的音符
-      String? matchedNote = accidentalNotes.firstWhere((x) => x == baseNote,
-          orElse: () => 'null');
-      if (matchedNote != 'null') {
-        // 如果当前音符不带升降号
-        if (accidental == baseNote) {
-          if (noteChar.startsWith('-')) {
-            newBar.add('-=$accidental$noteLength');
-          } else {
-            newBar.add('=$note');
-          }
-          accidentalNotes.remove(matchedNote);
-        }
-        // 如果当前音符带还原号
-        else if (accidental.startsWith('=')) {
-          newBar.add(note);
-          accidentalNotes.remove(matchedNote);
-        }
-        // 如果当前音符带升降号
-        else {
-          newBar.add(note);
-          accidentalNotes.remove(matchedNote);
-          accidentalNotes.add(baseNote);
-        }
-      } else {
-        if (accidental != baseNote) {
-          accidentalNotes.add(baseNote);
-        }
-        newBar.add(note);
-      }
-    }
-
-    formattedAbc += newBar.join(' ');
-    formattedAbc += ' |';
-  }
-
-  return formattedAbc.substring(0, formattedAbc.length - 2);
 }
 
 String formatBars(Map<String, String> header, List<List<String>> bars) {
   String formattedAbc = 'L:${header['L']}\nM:${header['M']}\n';
   for (int i = 0; i < bars.length; i++) {
-    formattedAbc += bars[i].join(' ');
+    String barStr = '';
+    for (String token in bars[i]) {
+      // 检查是否为连音符号
+      if (RegExp(r'\(\d+').hasMatch(token)) {
+        barStr += token; // 连音符号直接添加，不加空格
+      } else {
+        barStr += ' $token';
+      }
+    }
+    formattedAbc += barStr.trim();
     if (i < bars.length - 1) {
       formattedAbc += ' |';
     }
@@ -210,11 +206,68 @@ String formatBars(Map<String, String> header, List<List<String>> bars) {
   return formattedAbc.trim();
 }
 
+//修改后的formatBarsTest
+String formatBarsTest(Map<String, String> header, List<List<String>> bars) {
+  String formattedAbc = 'L:${header['L']}\nM:${header['M']}\n';
+  for (List<String> bar in bars) {
+    List<String> accidentalNotes = []; // 储存带有升降号的音符
+    List<String> newBar = [];
+    for (String note in bar) {
+      // 检查是否为连音符号
+      if (RegExp(r'\(\d+').hasMatch(note)) {
+        newBar.add(note);
+        continue;
+      }
+      var parsedNote = parseNoteLength(note);
+      String noteChar = parsedNote['note'];
+      Fraction noteLength = parsedNote['length'];
+
+      // 提取音符字母部分和升降号部分
+      RegExp accidentalRegex = RegExp(r'''(-?)([\^_=]?)([A-Ga-gz][,\']*)''');
+      Match? accidentalMatch = accidentalRegex.firstMatch(noteChar);
+      if (accidentalMatch == null) {
+        continue;
+      }
+      String accidental = accidentalMatch.group(2)!;
+      String baseNote = accidentalMatch.group(3)!;
+
+      // 检查数组中是否已有相同的音符
+      String? matchedNote =
+          accidentalNotes.firstWhere((x) => x == baseNote, orElse: () => '');
+
+      // 如果当前音符不带升降号
+      if (accidental == '') {
+        if (note.startsWith('-')) {
+          newBar.add('-=$baseNote$noteLength');
+        } else {
+          newBar.add('=$baseNote$noteLength');
+        }
+        accidentalNotes.remove(matchedNote);
+      }
+      // 如果当前音符带还原号
+      else if (accidental == '=') {
+        newBar.add(note);
+        accidentalNotes.remove(matchedNote);
+      }
+      // 如果当前音符带升降号
+      else {
+        newBar.add(note);
+        accidentalNotes.remove(matchedNote);
+        accidentalNotes.add(baseNote);
+      }
+    }
+    formattedAbc += newBar.join(' ');
+    formattedAbc += ' |';
+  }
+  return formattedAbc.substring(0, formattedAbc.length - 1).trim();
+}
+
+//修改后的formatBars1
 String formatBars1(Map<String, String> header, List<List<String>> bars) {
   String formattedAbc =
       "L:${header['L']}\nM:${header['M']}\nK:${header['K']}\n|";
 
-  // 从keytone_to_truetone字典中提取当前调性的音符转换规则
+  // 从 keytone_to_truetone 字典中提取当前调性的音符转换规则
   String? keytone = header['K'];
   keytone = shortToKey[keytone] ?? keytone;
   Map<String, String> conversionDict = keytoneToTruetone[keytone] ?? {};
@@ -224,6 +277,11 @@ String formatBars1(Map<String, String> header, List<List<String>> bars) {
     List<String> accidentalNotes = []; // 储存已还原的音符
 
     for (String note in bar) {
+      // 检查是否为连音符号
+      if (RegExp(r'\(\d+').hasMatch(note)) {
+        newBar.add(note);
+        continue;
+      }
       var parsedNote = parseNoteLength(note);
       String noteChar = parsedNote['note'];
       String noteLength = parsedNote['length'].toString();
@@ -232,46 +290,34 @@ String formatBars1(Map<String, String> header, List<List<String>> bars) {
         noteLength = '';
       } else if (noteLength == '1/2') {
         noteLength = '/';
-      } else if (noteLength == '1/4') {
-        noteLength = '/4';
-      } else if (noteLength == '1/8') {
-        noteLength = '/8';
-      } else if (noteLength == '1/16') {
-        noteLength = '/16';
       }
 
-      RegExp accidentalExp = RegExp(r'''[\^_=]?[A-Ga-g][,\']*''');
-      RegExp baseNoteExp = RegExp(r'''[A-Ga-g][,\']*''');
-      RegExp notevExp = RegExp(r'[A-Ga-g]');
+      // 提取音符字母部分和升降号部分
+      RegExp accidentalRegex = RegExp(r'''(-?)([\^_=]?)([A-Ga-g][,\']*)''');
+      Match? accidentalMatch = accidentalRegex.firstMatch(noteChar);
+      if (accidentalMatch == null) {
+        continue;
+      }
+      String accidental = accidentalMatch.group(2)!;
+      String baseNote = accidentalMatch.group(3)!;
+      String? notev = RegExp(r'[A-Ga-g]').firstMatch(noteChar)?.group(0);
 
-      String? accidental = accidentalExp.stringMatch(noteChar);
-      String? baseNote = baseNoteExp.stringMatch(noteChar);
-      String? notev = notevExp.stringMatch(noteChar);
+      String? matchedNote =
+          accidentalNotes.firstWhere((x) => x == baseNote, orElse: () => '');
 
-      String matchedNote = accidentalNotes.firstWhere((x) => x == baseNote,
-          orElse: () => "null");
-
-      if (matchedNote != 'null') {
-        if (accidental == baseNote) {
-          String correctedNoteChar =
-              noteChar.replaceFirst(notev!, conversionDict[notev] ?? notev);
-          newBar.add(correctedNoteChar + noteLength);
-          accidentalNotes.remove(matchedNote);
-        } else if (accidental!.startsWith('=')) {
-          newBar.add(noteChar + noteLength);
-        } else {
-          newBar.add(noteChar + noteLength);
-          accidentalNotes.remove(matchedNote);
-        }
+      if (accidental == baseNote || accidental == '') {
+        // 如果没有临时变音记号，需要根据调性进行转换
+        String correctedNoteChar =
+            noteChar.replaceFirst(notev!, conversionDict[notev] ?? notev);
+        newBar.add(correctedNoteChar + noteLength);
+        accidentalNotes.remove(matchedNote);
+      } else if (accidental.startsWith('=')) {
+        newBar.add(noteChar + noteLength);
+        accidentalNotes.remove(matchedNote);
       } else {
-        if (accidental != null &&
-            accidental.startsWith('=') &&
-            conversionDict.containsKey(notev)) {
-          accidentalNotes.add(baseNote!);
-          newBar.add(noteChar + noteLength);
-        } else {
-          newBar.add(noteChar + noteLength);
-        }
+        newBar.add(noteChar + noteLength);
+        accidentalNotes.remove(matchedNote);
+        accidentalNotes.add(baseNote);
       }
     }
 

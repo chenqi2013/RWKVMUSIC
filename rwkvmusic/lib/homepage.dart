@@ -13,6 +13,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:rwkvmusic/agree_dialog.dart';
+import 'package:rwkvmusic/duihuanma_dialog.dart';
 import 'package:rwkvmusic/feedback_page.dart';
 import 'package:rwkvmusic/main.dart';
 import 'package:rwkvmusic/mainwidget/custom_segment_controller.dart';
@@ -359,7 +360,28 @@ class _HomePageState extends State<HomePage> {
         isVisibleWebview.value = false;
       }
       Future.delayed(const Duration(milliseconds: 1000), () {
-        showAgreementDialog(context);
+        showAgreementDialog(context, () {
+          if (isExe && Platform.isWindows) {
+            showDuihuanmaDialog(context, (bool isSuccess) {
+              if (isSuccess) {
+                isVisibleWebview.value = true;
+              }
+            });
+          } else {
+            isVisibleWebview.value = true;
+          }
+        });
+      });
+    } else if (!ConfigStore.to.isValidDuihuanma &&
+        isExe &&
+        Platform.isWindows) {
+      isVisibleWebview.value = false;
+      Future.delayed(const Duration(milliseconds: 1000), () {
+        showDuihuanmaDialog(context, (bool isSuccess) {
+          if (isSuccess) {
+            isVisibleWebview.value = true;
+          }
+        });
       });
     }
     // }
@@ -993,7 +1015,7 @@ class _HomePageState extends State<HomePage> {
                           height: isWindowsOrMac ? 123.h : 104.h,
                           child: CustomSegmentControl(
                             selectedIndex: selectstate,
-                            segments: const ['Prompt Mode', 'Create Mode'],
+                            segments: ['Prompt Mode'.tr, 'Create Mode'.tr],
                             callBack: (int newValue) {
                               // 当选择改变时执行的操作
                               debugPrint('选择了选项 $newValue');
@@ -1009,7 +1031,7 @@ class _HomePageState extends State<HomePage> {
                                   ? BorderBottomBtn(
                                       width: 253.w,
                                       height: isWindowsOrMac ? 123.h : 96.h,
-                                      text: 'Prompt',
+                                      text: 'Prompt'.tr,
                                       icon: SvgPicture.asset(
                                         'assets/images/ic_arrowdown.svg',
                                         width: 28.w,
@@ -1024,7 +1046,7 @@ class _HomePageState extends State<HomePage> {
                                   : BorderBottomBtn(
                                       width: 372.w,
                                       height: isWindowsOrMac ? 123.h : 96.h,
-                                      text: 'Soft keyboard',
+                                      text: 'Soft keyboard'.tr,
                                       icon: SvgPicture.asset(
                                         'assets/images/ic_arrowdown.svg',
                                         width: 28.w,
@@ -1034,7 +1056,7 @@ class _HomePageState extends State<HomePage> {
                                         debugPrint("Simulate keyboard");
                                         showPromptDialog(
                                             context,
-                                            'Keyboard Options',
+                                            'Keyboard Options'.tr,
                                             keyboardOptions,
                                             STORAGE_KEYBOARD_SELECT);
                                       },
@@ -1047,7 +1069,7 @@ class _HomePageState extends State<HomePage> {
                               () => BorderBottomBtn(
                                 width: selectstate.value == 0 ? 357.w : 358.w,
                                 height: isWindowsOrMac ? 123.h : 96.h,
-                                text: 'Instrument',
+                                text: 'Instrument'.tr,
                                 icon: SvgPicture.asset(
                                   'assets/images/ic-${instruments[effectSelectedIndex.value]}.svg', //
                                   width: isWindowsOrMac ? 61.w : 52.w,
@@ -1056,8 +1078,8 @@ class _HomePageState extends State<HomePage> {
                                 onPressed: () {
                                   debugPrint("Sounds Effect");
                                   var list = soundEffect.keys.toList();
-                                  showPromptDialog(context, 'Instrument', list,
-                                      STORAGE_SOUNDSEFFECT_SELECT);
+                                  showPromptDialog(context, 'Instrument'.tr,
+                                      list, STORAGE_SOUNDSEFFECT_SELECT);
                                 },
                               ),
                             ),
@@ -1319,8 +1341,8 @@ class _HomePageState extends State<HomePage> {
                                           : (isWindowsOrMac ? 453.w : 354.w),
                                       height: isWindowsOrMac ? 123.h : 96.h,
                                       text: !isGenerating.value
-                                          ? 'AI Compose'
-                                          : 'Stop Compose',
+                                          ? 'AI Compose'.tr
+                                          : 'Stop Compose'.tr,
                                       icon: SvgPicture.asset(
                                         'assets/images/ic_generate.svg',
                                         width: isWindowsOrMac ? 68.w : 58.w,
@@ -1336,8 +1358,7 @@ class _HomePageState extends State<HomePage> {
                                         if (selectstate.value == 1 &&
                                             splitMeasure == null) {
                                           Fluttertoast.showToast(
-                                              msg:
-                                                  "Please input some notes before generating.");
+                                              msg: "generating tips".tr);
                                           return;
                                         }
                                         isClicking = true;
@@ -1377,8 +1398,8 @@ class _HomePageState extends State<HomePage> {
                                           width: isWindowsOrMac ? 257.w : 200.w,
                                           height: isWindowsOrMac ? 123.h : 96.h,
                                           text: !isCreateGenerate.value
-                                              ? 'Undo'
-                                              : 'Reset',
+                                              ? 'Undo'.tr
+                                              : 'Reset'.tr,
                                           icon: SvgPicture.asset(
                                             'assets/images/ic_undo.svg',
                                             width: isWindowsOrMac ? 61.w : 50.w,
@@ -1525,7 +1546,7 @@ class _HomePageState extends State<HomePage> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       TextTitle(
-                        text: 'Settings',
+                        text: 'Settings'.tr,
                       ),
                       InkWell(
                         child: Icon(
@@ -1551,7 +1572,7 @@ class _HomePageState extends State<HomePage> {
                     () => Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          TextItem(text: 'Randomness'),
+                          TextItem(text: 'Randomness'.tr),
                           Row(
                             children: [
                               SizedBox(
@@ -1578,7 +1599,7 @@ class _HomePageState extends State<HomePage> {
                   Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        TextItem(text: 'Seed'), //: ${seed.value}
+                        TextItem(text: 'Seed'.tr), //: ${seed.value}
                         ContainerTextField(
                           seed: seed.value,
                           onChanged: (String text) {
@@ -1595,7 +1616,7 @@ class _HomePageState extends State<HomePage> {
                     child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          TextItem(text: 'Auto Chord'),
+                          TextItem(text: 'Auto Chord'.tr),
                           Obx(() => SwitchItem(
                                 value: autoChord.value,
                                 onChanged: (newValue) {
@@ -1611,7 +1632,7 @@ class _HomePageState extends State<HomePage> {
                     child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          TextItem(text: 'Infinite Generation'),
+                          TextItem(text: 'Infinite Generation'.tr),
                           Obx(() => SwitchItem(
                                 value: infiniteGeneration.value,
                                 onChanged: (newValue) {
@@ -1648,14 +1669,14 @@ class _HomePageState extends State<HomePage> {
                             }
                             if (isWindowsOrMac) {
                               final file = DirectoryPicker()
-                                ..title = 'Select a directory';
+                                ..title = 'Select a directory'.tr;
                               final result = file.getDirectory();
                               if (result != null) {
                                 debugPrint('Select a directory=${result.path}');
                               }
                               await MidifileConvert.exportMidiFile(
                                   exportMidiStr!, result!.path);
-                              Get.snackbar('提示', '文件保存成功',
+                              Get.snackbar('tips'.tr, 'save file success'.tr,
                                   colorText: Colors.black);
                               // toastInfo(msg: '文件保存成功');
                             } else {
@@ -1668,7 +1689,7 @@ class _HomePageState extends State<HomePage> {
                               shareFile(path);
                             }
                           },
-                          text: 'Export Midi File',
+                          text: 'Export Midi File'.tr,
                         ),
                         SizedBox(
                           width: 30.w,
@@ -1679,7 +1700,7 @@ class _HomePageState extends State<HomePage> {
                           onPressed: () {
                             showBleDeviceOverlay(context, false);
                           },
-                          text: 'Scan BlueTooth Device',
+                          text: 'Scan BlueTooth Device'.tr,
                         ),
                       ],
                     ),
@@ -1696,7 +1717,7 @@ class _HomePageState extends State<HomePage> {
                       onPressed: () {
                         Get.to(FeedbackPage());
                       },
-                      text: 'FeedBack',
+                      text: 'FeedBack'.tr,
                       linearColorStart: AppColor.color_805353,
                       linearColorEnd: AppColor.color_5E1E1E,
                     ),
@@ -1758,7 +1779,7 @@ class _HomePageState extends State<HomePage> {
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
                             TextTitle(
-                              text: 'Settings',
+                              text: 'Settings'.tr,
                             ),
                             InkWell(
                               child: Icon(
@@ -1784,7 +1805,7 @@ class _HomePageState extends State<HomePage> {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           textBaseline: TextBaseline.alphabetic, // 指定基线对齐的基线
                           children: [
-                            TextItem(text: 'Time signature'),
+                            TextItem(text: 'Time signature'.tr),
                             Obx(() => DropButtonList(
                                   key: const ValueKey('Time'),
                                   items: timeSignatures,
@@ -1801,7 +1822,7 @@ class _HomePageState extends State<HomePage> {
                                 mainAxisAlignment:
                                     MainAxisAlignment.spaceBetween,
                                 children: [
-                                  TextItem(text: 'Randomness'),
+                                  TextItem(text: 'Randomness'.tr),
                                   Row(
                                     children: [
                                       SizedBox(
@@ -1827,7 +1848,7 @@ class _HomePageState extends State<HomePage> {
                         Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              TextItem(text: 'Seed'), //: ${seed.value}
+                              TextItem(text: 'Seed'.tr), //: ${seed.value}
                               ContainerTextField(
                                 seed: seed.value,
                                 onChanged: (String text) {
@@ -1842,7 +1863,7 @@ class _HomePageState extends State<HomePage> {
                           () => Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                TextItem(text: 'Tempo'),
+                                TextItem(text: 'Tempo'.tr),
                                 Row(
                                   children: [
                                     SizedBox(
@@ -1871,7 +1892,7 @@ class _HomePageState extends State<HomePage> {
                           child: Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                TextItem(text: 'Auto Chord'),
+                                TextItem(text: 'Auto Chord'.tr),
                                 Obx(
                                   () => SwitchItem(
                                     value: autoChord.value,
@@ -1889,7 +1910,7 @@ class _HomePageState extends State<HomePage> {
                           child: Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                TextItem(text: 'Infinite Generation'),
+                                TextItem(text: 'Infinite Generation'.tr),
                                 Obx(() => SwitchItem(
                                       value: infiniteGeneration.value,
                                       onChanged: (newValue) {
@@ -1905,7 +1926,7 @@ class _HomePageState extends State<HomePage> {
                           child: Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                TextItem(text: 'show Prompt'),
+                                TextItem(text: 'show Prompt'.tr),
                                 Obx(() => SwitchItem(
                                       value: showPrompt.value,
                                       onChanged: (newValue) {
@@ -1954,7 +1975,7 @@ class _HomePageState extends State<HomePage> {
                                   }
                                   if (isWindowsOrMac) {
                                     final file = DirectoryPicker()
-                                      ..title = 'Select a directory';
+                                      ..title = 'Select a directory'.tr;
                                     final result = file.getDirectory();
                                     if (result != null) {
                                       debugPrint(
@@ -1962,7 +1983,8 @@ class _HomePageState extends State<HomePage> {
                                     }
                                     await MidifileConvert.exportMidiFile(
                                         exportMidiStr!, result!.path);
-                                    Get.snackbar('提示', '文件保存成功',
+                                    Get.snackbar(
+                                        'tips'.tr, 'save file success'.tr,
                                         colorText: Colors.black);
                                     // toastInfo(msg: '文件保存成功');
                                   } else {
@@ -1975,7 +1997,7 @@ class _HomePageState extends State<HomePage> {
                                     shareFile(path);
                                   }
                                 },
-                                text: 'Export Midi File',
+                                text: 'Export Midi File'.tr,
                               ),
                               SizedBox(
                                 width: 30.w,
@@ -1986,7 +2008,7 @@ class _HomePageState extends State<HomePage> {
                                 onPressed: () {
                                   showBleDeviceOverlay(context, false);
                                 },
-                                text: 'Scan BlueTooth Device',
+                                text: 'Scan BlueTooth Device'.tr,
                               ),
                             ]),
                         // if (Platform.isIOS || Platform.isAndroid)
@@ -2001,7 +2023,7 @@ class _HomePageState extends State<HomePage> {
                             onPressed: () {
                               Get.to(FeedbackPage());
                             },
-                            text: 'FeedBack',
+                            text: 'FeedBack'.tr,
                             linearColorStart: AppColor.color_805353,
                             linearColorEnd: AppColor.color_5E1E1E,
                           ),
@@ -2028,9 +2050,8 @@ class _HomePageState extends State<HomePage> {
   }
 
   showConnectDialog(context) {
-    String title = 'Connect Midi Keyboard';
-    String msg =
-        'Please connect your midi keyboard first. Wireless connection is recommended.';
+    String title = 'Connect Midi Keyboard'.tr;
+    String msg = 'Connect Midi Keyboard tips'.tr;
     showDialog(
       context: context,
       builder: (BuildContext buildcontext) {
@@ -2076,7 +2097,7 @@ class _HomePageState extends State<HomePage> {
                           }
                           Navigator.of(buildcontext).pop();
                         },
-                        text: 'OK',
+                        text: 'OK'.tr,
                       ),
                       SizedBox(
                         width: 40.w,
@@ -2089,7 +2110,7 @@ class _HomePageState extends State<HomePage> {
                           Navigator.of(buildcontext).pop();
                           showBleDeviceOverlay(buildcontext, true);
                         },
-                        text: 'Bluetooth Connect',
+                        text: 'Bluetooth Connect'.tr,
                       ),
                     ],
                   )
@@ -2302,10 +2323,13 @@ class _HomePageState extends State<HomePage> {
                                           if (state ==
                                               BleConnectionState.connected) {
                                             if (isWindowsOrMac) {
-                                              Get.snackbar('提示', 'midi键盘已连接',
+                                              Get.snackbar('tips'.tr,
+                                                  'midi keyboard connected'.tr,
                                                   colorText: Colors.black);
                                             } else {
-                                              toastInfo(msg: 'midi键盘已连接');
+                                              toastInfo(
+                                                  msg: 'midi keyboard connected'
+                                                      .tr);
                                             }
                                           } else {
                                             showConnectDialog(context);
@@ -2405,7 +2429,7 @@ class _HomePageState extends State<HomePage> {
                     if (type != STORAGE_KEYBOARD_SELECT)
                       Obx(
                         () => CheckBoxItem(
-                          title: 'Remember Last Option',
+                          title: 'Remember Last Option'.tr,
                           isSelected: type == STORAGE_PROMPTS_SELECT
                               ? isRememberPrompt.value
                               : isRememberEffect.value,
@@ -2453,17 +2477,17 @@ class _HomePageState extends State<HomePage> {
     AvailabilityState state = await UniversalBle
         .getBluetoothAvailabilityState(); // e.g. poweredOff or poweredOn,
     if (state == AvailabilityState.unknown) {
-      tips = "系统蓝牙不可用";
+      tips = "Bluetooth unknown".tr;
     } else if (state == AvailabilityState.unsupported) {
-      tips = "不支持蓝牙";
+      tips = "Bluetooth unsupported".tr;
     } else if (state == AvailabilityState.unauthorized) {
-      tips = "蓝牙没有授权，请先授权";
+      tips = "Bluetooth unauthorized".tr;
     } else if (state == AvailabilityState.poweredOff) {
-      tips = "请先打开系统蓝牙";
+      tips = "Bluetooth poweredOff".tr;
     }
     if (tips != null) {
       if (isWindowsOrMac) {
-        Get.snackbar('提示', tips, colorText: Colors.red);
+        Get.snackbar('tips'.tr, tips, colorText: Colors.red);
       } else {
         toastInfo(msg: tips);
       }

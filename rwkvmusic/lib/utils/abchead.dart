@@ -107,7 +107,44 @@ class ABCHead {
     return 4;
   }
 
-  static String combineAbc_Chord(List<String> array, String inputString) {
+  static String combineAbc_Chord(List<String> chords, String input) {
+    // input =
+    //     'L:1/4\nM:4/4\nK:C\n| =D =E ^G =B |^c (3e e e |=A, ^D =G  A | B F =D';
+    debugPrint('combineAbc_Chord array=$chords,inputString=$input');
+    List<String> lines = input.split('\n'); // 将 inputString 拆分成多行
+    int length = 3;
+    int notel = 2;
+    if (input.contains('K:')) {
+      length = 4;
+      notel = 3;
+    }
+    if (lines.length >= length) {
+      String noteLine = lines[notel]; // 第三行是音符行
+      List<String> bars = noteLine.split('|'); // 按小节符号拆分
+      debugPrint('combineAbc_Chord bars=$bars');
+      if (bars[0].isEmpty) {
+        bars.removeAt(0);
+      }
+      // 创建新字符串并在每个小节前插入和弦
+      StringBuffer updatedLine = StringBuffer();
+      for (int i = 0; i < bars.length; i++) {
+        if (i < chords.length) {
+          updatedLine.write('\\"${chords[i]}\\" '); // 插入和弦
+        }
+        updatedLine.write(bars[i].trim()); // 插入小节内容
+        if (i < bars.length - 1) {
+          updatedLine.write(' | '); // 重新加上小节符号
+        }
+      }
+      lines[notel] = updatedLine.toString(); // 更新音符行
+    }
+    String result = lines.join('\n'); // 重新组合所
+    debugPrint('combineAbc_Chord result=$result');
+    return result;
+  }
+
+  static String combineAbc_Chord22(List<String> array, String inputString) {
+    debugPrint('combineAbc_Chord array=$array,inputString=$inputString');
     // 初始化数组和字符串
     // List<String> array = ['C#', 'D#m', 'C#'];
     // String inputString =
