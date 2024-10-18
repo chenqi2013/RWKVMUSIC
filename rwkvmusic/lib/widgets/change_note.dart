@@ -27,6 +27,7 @@ enum ChangeNoteKey {
   eighthZ,
   sixteenthZ,
   mergedZ,
+  triplet,
   randomGroove,
   transposeDown,
   transpose,

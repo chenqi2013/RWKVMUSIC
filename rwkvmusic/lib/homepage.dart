@@ -601,29 +601,7 @@ class _HomePageState extends State<HomePage> {
     String? noteSymbol,
   }) async {
     final selected = selectedNote.value;
-    if (selected == null) {
-      if (kDebugMode) print("😡 No selected note when update note");
-      // if (virtualNotes.isEmpty) return;
-      // late final String name;
-
-      // if (noteSymbol != null) {
-      //   name = noteSymbol;
-      // } else {
-      //   final last = virtualNotes.last as String;
-      //   if (last.startsWith("^")) {
-      //     name = last.substring(0, 2);
-      //   } else {
-      //     name = last.substring(0, 1);
-      //   }
-      // }
-
-      // final _selectedNote = SelectedNote()
-      //   ..index = virtualNotes.length - 1
-      //   ..name = name;
-      // selectedNote = _selectedNote;
-      // _updateNote(noteLengthIndex: noteLengthIndex);
-      return;
-    }
+    if (selected == null) return;
     final note = noteSymbol ?? selected.name;
     final noteIndex = selected.index;
     final inputDotted = inputNoteLength.value.dotted;
@@ -1242,6 +1220,9 @@ class _HomePageState extends State<HomePage> {
                           case ChangeNoteKey.transposeDown:
                           case ChangeNoteKey.mergedZ:
                           case ChangeNoteKey.transpose:
+                            break;
+                          case ChangeNoteKey.triplet:
+                            // TODO:
                             break;
                         }
                       },
