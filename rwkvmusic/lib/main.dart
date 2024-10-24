@@ -198,8 +198,10 @@ void fetchABCDataByIsolate() async {
     // dllPath = frameworkpath;
     //ios 只要把.a放入工程目录并设置即可
     dllPath.value = '';
+    // binPath.value = await CommonUtils.copyFileFromAssets(
+    //     'RWKV-6-ABC-85M-v1-20240217-ctx1024-ncnn.bin');
     binPath.value = await CommonUtils.copyFileFromAssets(
-        'RWKV-6-ABC-85M-v1-20240217-ctx1024-ncnn.bin');
+        'RWKV-6-ABC-85M-v1-20240217-ctx1024-webrwkv.st');
     configPath = await CommonUtils.copyFileFromAssets(
         'RWKV-6-ABC-85M-v1-20240217-ctx1024-ncnn.config');
     paramPath = await CommonUtils.copyFileFromAssets(

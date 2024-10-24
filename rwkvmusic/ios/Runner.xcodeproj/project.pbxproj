@@ -15,6 +15,7 @@
 		97C146FC1CF9000F007C117D /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FA1CF9000F007C117D /* Main.storyboard */; };
 		97C146FE1CF9000F007C117D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FD1CF9000F007C117D /* Assets.xcassets */; };
 		97C147011CF9000F007C117D /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FF1CF9000F007C117D /* LaunchScreen.storyboard */; };
+		C034AEFE2CCA316900B0AE4F /* libweb_rwkv_ffi.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C034AEFD2CCA316900B0AE4F /* libweb_rwkv_ffi.a */; };
 		C0C189702BBA89510084551C /* ncnn.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C0C1896D2BBA89510084551C /* ncnn.framework */; };
 		C0C189712BBA89510084551C /* openmp.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C0C1896E2BBA89510084551C /* openmp.framework */; };
 		C0C688D12BBD2C5800DF49CA /* libfaster_rwkv_static.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C0C69F232BB432C40035E139 /* libfaster_rwkv_static.a */; };
@@ -65,6 +66,8 @@
 		97C147001CF9000F007C117D /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		97C147021CF9000F007C117D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		9B7F914845200D99297E90E0 /* Pods-RunnerTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RunnerTests.debug.xcconfig"; path = "Target Support Files/Pods-RunnerTests/Pods-RunnerTests.debug.xcconfig"; sourceTree = "<group>"; };
+		C034AEFC2CCA312C00B0AE4F /* libweb_rwkv_ffi.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libweb_rwkv_ffi.a; path = Classes/libweb_rwkv_ffi.a; sourceTree = "<group>"; };
+		C034AEFD2CCA316900B0AE4F /* libweb_rwkv_ffi.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libweb_rwkv_ffi.a; sourceTree = "<group>"; };
 		C0C1896D2BBA89510084551C /* ncnn.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = ncnn.framework; sourceTree = "<group>"; };
 		C0C1896E2BBA89510084551C /* openmp.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = openmp.framework; sourceTree = "<group>"; };
 		C0C1897A2BBA98A30084551C /* libfaster_rwkv_static.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libfaster_rwkv_static.a; path = "../../../../Downloads/flutter demo/flutter_testlib/ios/libfaster_rwkv_static.a"; sourceTree = "<group>"; };
@@ -89,6 +92,7 @@
 			files = (
 				C0C688D12BBD2C5800DF49CA /* libfaster_rwkv_static.a in Frameworks */,
 				C0C189702BBA89510084551C /* ncnn.framework in Frameworks */,
+				C034AEFE2CCA316900B0AE4F /* libweb_rwkv_ffi.a in Frameworks */,
 				0346A20172FD7FCD06B646AD /* Pods_Runner.framework in Frameworks */,
 				C0C189712BBA89510084551C /* openmp.framework in Frameworks */,
 			);
@@ -121,6 +125,7 @@
 		63113B51BD11BC04BB5C81C6 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				C034AEFC2CCA312C00B0AE4F /* libweb_rwkv_ffi.a */,
 				C0C69F232BB432C40035E139 /* libfaster_rwkv_static.a */,
 				FAC9B17EB1E57FF6960ABCD0 /* Pods_Runner.framework */,
 				F9A3A5F1143C844F85020BAD /* Pods_RunnerTests.framework */,
@@ -179,6 +184,7 @@
 		C0B12F672BB51D4D00667A21 /* Classes */ = {
 			isa = PBXGroup;
 			children = (
+				C034AEFD2CCA316900B0AE4F /* libweb_rwkv_ffi.a */,
 				C0C1897A2BBA98A30084551C /* libfaster_rwkv_static.a */,
 				C0C1896D2BBA89510084551C /* ncnn.framework */,
 				C0C1896E2BBA89510084551C /* openmp.framework */,
