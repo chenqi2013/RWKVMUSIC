@@ -27,3 +27,4 @@ class NewNote {
     return name + length.withDotted(dotted).end;
   }
 }
+
