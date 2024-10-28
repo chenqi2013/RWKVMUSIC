@@ -14,6 +14,8 @@ enum DownloadStatus {
 
 const String appVersion = 'ncnn_1.5.0_20240906';
 
+const kTriplet = "(3";
+
 var qnnSoList = [
   'libQnnDspV66Skel.so',
   'libQnnHtp.so',

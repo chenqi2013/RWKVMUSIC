@@ -10,6 +10,7 @@ import 'package:get/get.dart';
 import 'package:rwkvmusic/langs/translation_service.dart';
 
 import 'package:rwkvmusic/services/storage.dart';
+import 'package:rwkvmusic/state.dart';
 import 'package:rwkvmusic/store/config.dart';
 import 'package:rwkvmusic/utils/abchead.dart';
 
@@ -60,6 +61,7 @@ void main(List<String> args) async {
   }
   await Get.putAsync<StorageService>(() => StorageService().init());
   Get.put<ConfigStore>(ConfigStore());
+  GlobalState.init();
   await Sentry.init(
     (options) {
       options.dsn =
@@ -116,8 +118,6 @@ MidiToABCConverter convertABC = MidiToABCConverter();
 int midiProgramValue = 0;
 
 RxInt timeSignature = 2.obs;
-@Deprecated("需求变更了，不要使用这个值了")
-RxInt noteLengthSelectedIndex = 0.obs;
 RxDouble randomness = 0.7.obs;
 RxInt seed = 22416.obs;
 bool isUseCurrentTime = true;
@@ -130,7 +130,11 @@ List midiNotes = [];
 // bool isNeedConvertMidiNotes = false;
 
 /// 虚拟键盘按键音符
-List virtualNotes = [];
+///
+/// (3 被包含在其中
+///
+/// z 被包含在其中
+List<String> virtualNotes = [];
 
 /// 计算和弦需要使用
 // List<int> intNodes = [];

@@ -394,12 +394,18 @@ class _HomePageState extends State<HomePage> {
     try {
       await controllerPiano.runJavaScript(javaScript);
       final inCreateMode = selectstate.value == 1;
+
       if (inCreateMode) {
         assert(javaScript.startsWith("setAbcString"));
+
+        // Add histories
         history.add(javaScript);
         virtualNotesHistory.add([...virtualNotes]);
         transposeHistory.add(gloableTranspose.value);
+
+        GlobalState.tripleting.value = tripletHighlighted();
       }
+
       selectedNote.value = null;
     } catch (e) {
       // JS 是有可能执行出错的
@@ -410,6 +416,7 @@ class _HomePageState extends State<HomePage> {
   Future<void> _unselectAll() async {
     if (selectstate.value != 1) return;
     selectedNote.value = null;
+    GlobalState.tripleting.value = tripletHighlighted();
     await controllerPiano.runJavaScript("unselectAll()");
   }
 
@@ -458,6 +465,7 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+  /// 琴谱节点点击 @w
   void _onClickNote(JavaScriptMessage jsMessage) {
     final json = jsonDecode(jsMessage.message);
 
@@ -473,7 +481,6 @@ class _HomePageState extends State<HomePage> {
           _s.index == int.parse(json["index"]) &&
           _s.length == noteLength;
       if (isSameNote) {
-        selectedNote.value = null;
         _unselectAll();
         return;
       }
@@ -495,7 +502,7 @@ class _HomePageState extends State<HomePage> {
       ..length = noteLength;
   }
 
-  /// 和弦点击
+  /// 和弦点击 @w
   void _onReceiveChordClick(JavaScriptMessage jsMessage) async {
     final _selectstate = selectstate.value;
     final _isPlay = isPlay.value;
@@ -579,22 +586,8 @@ class _HomePageState extends State<HomePage> {
     final selected = selectedNote.value;
     if (selected == null) {
       if (kDebugMode) print("😡 No selected note when update dotted");
-      // if (virtualNotes.isEmpty) return;
-      // String name = "";
-      // final last = virtualNotes.last as String;
-      // if (last.startsWith("^")) {
-      //   name = last.substring(0, 2);
-      // } else {
-      //   name = last.substring(0, 1);
-      // }
-      // selectedNote = SelectedNote()
-      //   ..index = virtualNotes.length - 1
-      //   ..name = name
-      //   ..duration = SelectedNote.durationFromString(last);
-      // _updateDottod();
       return;
     }
-    // final note = selected.name;
     final noteIndex = selected.index;
     final newNote = selected.notationWithDotted(!selected.length.dotted);
     NoteCalculator().noteMap[noteIndex] = newNote;
@@ -615,7 +608,7 @@ class _HomePageState extends State<HomePage> {
     selectedNote.value = null;
   }
 
-  /// 通过执行 JS 更新琴谱
+  /// 通过执行 JS 更新琴谱 @w
   ///
   /// TDOO: check selected note's dotted
   void _updateNote({
@@ -631,12 +624,10 @@ class _HomePageState extends State<HomePage> {
     String newNote = note + noteLength.withDotted(inputDotted).end;
     NoteCalculator().noteMap[noteIndex] = newNote;
     virtualNotes[noteIndex] = newNote;
-    StringBuffer sbff = StringBuffer();
-    for (String note in virtualNotes) {
-      sbff.write(note);
-      sbff.write(" ");
-    }
-    createPrompt = sbff.toString();
+
+    final virtualNotesStr = _virtualNotesToString();
+    createPrompt = virtualNotesStr;
+
     String splitMeasureAndChordStr = splitMeasureAndChord(createPrompt);
     createPrompt = splitMeasureAndChordStr.replaceAll("\\n", "\n");
     String sb =
@@ -647,56 +638,31 @@ class _HomePageState extends State<HomePage> {
     selectedNote.value = null;
   }
 
-  /// 插入休止符
+  String _virtualNotesToString() {
+    StringBuffer sbff = StringBuffer();
+    for (String note in virtualNotes) {
+      sbff.write(note);
+      sbff.write(" ");
+    }
+    return sbff.toString();
+  }
+
+  /// 插入休止符 @w
   void _inserOrUpdatetRest(NoteLength noteLength) async {
     if (selectedNote.value != null) {
       _updateNote(noteLength: noteLength, noteSymbol: "z");
       return;
     }
-    const node = 24;
     String noteName = "z";
     final _inputNoteLength = inputNoteLength.value;
     final inputDotted = _inputNoteLength.dotted;
     noteName = noteName + noteLength.withDotted(inputDotted).end;
     gloableTranspose.value = 0;
     virtualNotes.add(noteName);
-    // intNodes.add(node);
 
-    StringBuffer sbff = StringBuffer();
-    // List chordList = [];
-    // if (timeSignature.value == 2) {
-    //   String chordStr = ChordUtil.getChord(intNodes.toString());
-    //   chordList = jsonDecode(chordStr);
-    //   debugPrint('chordStr=${chordList.length}');
-    // }
-    // String timeSignatureStr = timeSignatures[timeSignature.value];
-    // final _noteLength = noteLengthFromString(noteName);
+    final virtualNotesStr = _virtualNotesToString();
+    createPrompt = virtualNotesStr;
 
-    for (int i = 0; i < virtualNotes.length; i++) {
-      String note = virtualNotes[i];
-      // if (timeSignatureStr == '4/4' && _noteLength == NoteLength.quarter) {
-      //   if (i % 4 == 0) {
-      //     int chordLenght = i ~/ 4;
-      //     if (chordList.length > chordLenght) {
-      //       //插入竖线和和弦
-      //       if (i == 0) {
-      //         sbff.write('\\"${chordList[chordLenght]}\\" ');
-      //       } else {
-      //         sbff.write('|\\"${chordList[chordLenght]}\\" ');
-      //       }
-      //     }
-      //   }
-      // } else {
-      // int postion =
-      //     ABCHead.insertMeasureLinePosition(timeSignatureStr, _noteLength);
-      // if (i % postion == 0 && i > 0) {
-      //   sbff.write('|');
-      // }
-      // }
-      sbff.write(note);
-      sbff.write(" ");
-    }
-    createPrompt = sbff.toString();
     String splitMeasureAndChordStr = splitMeasureAndChord(createPrompt);
     createPrompt = splitMeasureAndChordStr.replaceAll("\\n", "\n");
     String sb;
@@ -713,13 +679,47 @@ class _HomePageState extends State<HomePage> {
     selectedNote.value = null;
   }
 
-  /// 插入音符
+  /// 三连音按钮点击 @w
+  ///
+  /// ●在输入过程中，未选中音符情况下，按下按钮，则绿色指示灯高亮，并在abc notation中添加(3符号，表示当前属于三连音输入状态。在当前三连音输入完成（即输入三个音符）后自动熄灭
+  ///
+  /// ●如果选中某个音符，并按下该按钮，则在该音符前面加上"(3"，自动将该音符以及后续的两个音符形成三连音。如果后续不够两个音符，则绿色指示灯高亮，表明此时继续输入还会属于当前的三连音组合内，直至满三个音符
+  ///
+  /// ●去除逻辑：如果被点击的 note 在 (3 的 range 内，则三连音按钮高亮，此时点击按钮，会移除该 “(3 range”。如果再次点击该按钮，将会从当前音符开始构建三连音
+  void _onTripletTapped() async {
+    final alreadyInTriplet =
+        tripletHighlighted(nodeIndex: selectedNote.value?.index);
+    if (alreadyInTriplet) {
+      virtualNotes = removeTripletMark();
+    } else {
+      addTripletMark();
+    }
+
+    final virtualNotesStr = _virtualNotesToString();
+    createPrompt = virtualNotesStr;
+
+    String splitMeasureAndChordStr = splitMeasureAndChord(createPrompt);
+    createPrompt = splitMeasureAndChordStr.replaceAll("\\n", "\n");
+    String sb;
+    if (isChangeTempo) {
+      sb =
+          "setAbcString(\"Q:1/4=${tempo.value.toInt()}\\n$splitMeasureAndChordStr\",false)";
+    } else {
+      sb =
+          "setAbcString(\"%%MIDI program $midiProgramValue\\n$splitMeasureAndChordStr\",false)";
+    }
+    finalabcStringCreate = ABCHead.appendTempoParam(sb, tempo.value.toInt());
+    await _change(finalabcStringCreate);
+  }
+
+  /// 插入音符 @w
   ///
   /// 1. 通过按下虚拟键盘触发
   void updatePianoNote(int node) async {
     String noteName = MidiToABCConverter().getNoteName(node);
 
     final selected = selectedNote.value;
+
     if (selected != null) {
       _updateNote(noteSymbol: noteName);
       selectedNote.value = null;
@@ -729,20 +729,12 @@ class _HomePageState extends State<HomePage> {
     final noteLength = inputNoteLength.value;
     noteName = noteName + noteLength.end;
 
-    // sbNoteCreate.write(noteName);
     gloableTranspose.value = 0;
     virtualNotes.add(noteName);
-    // intNodes.add(node);
 
-    StringBuffer sbff = StringBuffer();
+    final virtualNotesStr = _virtualNotesToString();
+    createPrompt = virtualNotesStr;
 
-    for (int i = 0; i < virtualNotes.length; i++) {
-      String note = virtualNotes[i];
-      sbff.write(note);
-      sbff.write(" ");
-    }
-
-    createPrompt = sbff.toString();
     String splitMeasureAndChordStr = splitMeasureAndChord(createPrompt);
     createPrompt = splitMeasureAndChordStr.replaceAll("\\n", "\n");
     String sb;
@@ -852,35 +844,8 @@ class _HomePageState extends State<HomePage> {
       createPrompt = '';
     } else {
       StringBuffer sbff = StringBuffer();
-      // List chordList = [];
-      // if (timeSignature.value == 2) {
-      //   String chordStr = ChordUtil.getChord(intNodes.toString());
-      //   chordList = jsonDecode(chordStr);
-      //   debugPrint('chordStr=${chordList.length}');
-      // }
-      // String timeSignatureStr = timeSignatures[timeSignature.value];
-      // final noteLength = inputNoteLength.value;
       for (int i = 0; i < virtualNotes.length; i++) {
         String note = virtualNotes[i];
-        // if (timeSignatureStr == '4/4' && noteLength == NoteLength.quarter) {
-        //   if (i % 4 == 0) {
-        //     int chordLenght = i ~/ 4;
-        //     if (chordList.length > chordLenght) {
-        //       //插入竖线和和弦
-        //       if (i == 0) {
-        //         sbff.write('\\"${chordList[chordLenght]}\\" ');
-        //       } else {
-        //         sbff.write('|\\"${chordList[chordLenght]}\\" ');
-        //       }
-        //     }
-        //   }
-        // } else {
-        // int postion =
-        //     ABCHead.insertMeasureLinePosition(timeSignatureStr, noteLength);
-        // if (i % postion == 0 && i > 0) {
-        //   sbff.write('|');
-        // }
-        // }
         sbff.write(note);
         sbff.write(" ");
       }
@@ -914,27 +879,12 @@ class _HomePageState extends State<HomePage> {
         debugPrint(
             'playOrPausePiano isFinishABCEvent yes  resumePlay() keyboard');
         controllerKeyboard.runJavaScript('resumePlay()');
-        // createTimer();
       } else {
-        // String result = playAbcString
-        //     .replaceAll('setAbcString("%%', '')
-        //     .replaceAll('",false)', '');
-        // debugPrint('replace==$result');
-        // String encodedString = base64.encode(utf8.encode(result));
-        // print("Encoded string: $encodedString");
-        // String base64abctoEvents = "ABCtoEvents('$encodedString',false)";
         String base64abctoEvents = ABCHead.base64abctoEvents(
             ABCHead.appendTempoParam(playAbcString, tempo.value.toInt()));
         _change(base64abctoEvents);
         debugPrint('playOrPausePiano base64abctoEvents==$base64abctoEvents');
         controllerPiano.runJavaScript("startPlay()");
-
-        // String abcStringTmp =
-        //     playAbcString.replaceAll('setAbcString', 'ABCtoEvents');
-        // debugPrint('playOrPausePiano  ABCtoEvents==$abcStringTmp');
-        // controllerPiano.runJavaScript(abcStringTmp);
-        // // controllerPiano.runJavaScript(
-        // //     r'ABCtoEvents("L:1/4\nM:4/4\nK:D\n\"D\" A F F"),false');
       }
     } else {
       controllerKeyboard.runJavaScript('pausePlay()');
@@ -996,12 +946,6 @@ class _HomePageState extends State<HomePage> {
             ),
             child: Column(
               children: [
-                // Obx(() => Text(
-                //       dllPath.value + '\n' + binPath.value,
-                //       softWrap: true,
-                //       maxLines: null,
-                //       style: TextStyle(color: Colors.red),
-                //     )),
                 Expanded(
                   child: Container(
                     padding:
@@ -1097,12 +1041,6 @@ class _HomePageState extends State<HomePage> {
                               ),
                               onPressed: () {
                                 debugPrint('Settings');
-                                // String result = transposeAbc(
-                                //     "X:1\nL:1/4\nK:C\nE,,1/2 =F,, ^G, a/ ^f' g",
-                                //     7);
-                                // debugPrint('transposeAbc==$result');
-                                // result = splitMeasureAbc(result);
-                                // debugPrint('splitMeasureAbc==$result');
                                 if (isShowOverlay) {
                                   closeOverlay();
                                 }
@@ -1244,7 +1182,7 @@ class _HomePageState extends State<HomePage> {
                           case ChangeNoteKey.transpose:
                             break;
                           case ChangeNoteKey.triplet:
-                            // TODO:
+                            _onTripletTapped();
                             break;
                         }
                       },
