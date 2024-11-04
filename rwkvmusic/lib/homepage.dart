@@ -320,12 +320,15 @@ class _HomePageState extends State<HomePage> {
             playOrPausePiano();
             if (isFirstOpen) {
               if (Platform.isWindows) {
-                Get.snackbar('tips',
-                    'This content is AI-generated, please carefully discern!');
+                Get.snackbar(
+                    'tips'.tr,
+                    'This content is AI-generated, please carefully discern!'
+                        .tr);
               } else {
                 toastInfo(
                     msg:
-                        'This content is AI-generated, please carefully discern!');
+                        'This content is AI-generated, please carefully discern!'
+                            .tr);
               }
 
               isFirstOpen = false;
@@ -2527,7 +2530,7 @@ class _HomePageState extends State<HomePage> {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             TextTitle(
-                              text: 'Bluetooth Connect',
+                              text: 'Bluetooth Connect'.tr,
                             ),
                             InkWell(
                               child: Icon(
@@ -2634,7 +2637,7 @@ class _HomePageState extends State<HomePage> {
         status = await Permission.location.request();
         debugPrint('11Permission==$status');
         if (status != PermissionStatus.granted) {
-          toastInfo(msg: '需要开启定位权限');
+          toastInfo(msg: 'need to open location permission'.tr);
           // Get.snackbar('提示', '需要开启定位权限', colorText: Colors.red);
           return;
         }
@@ -2642,14 +2645,14 @@ class _HomePageState extends State<HomePage> {
         status = await Permission.bluetoothScan.request();
         debugPrint('22Permission==$status');
         if (status != PermissionStatus.granted) {
-          toastInfo(msg: '需要开启蓝牙扫描权限');
+          toastInfo(msg: 'need to open bluetooth scan permission'.tr);
           // Get.snackbar('提示', '需要开启蓝牙扫描权限', colorText: Colors.red);
           return;
         }
         status = await Permission.bluetoothConnect.request();
         debugPrint('33Permission==$status');
         if (status != PermissionStatus.granted) {
-          toastInfo(msg: '需要开启蓝牙连接权限');
+          toastInfo(msg: 'need to open bluetooth connect permission'.tr);
           // Get.snackbar('提示', '需要开启蓝牙连接权限', colorText: Colors.red);
           return;
         }
@@ -2681,9 +2684,10 @@ class _HomePageState extends State<HomePage> {
       if (state == BleConnectionState.connected) {
         connectDeviceId = device.deviceId;
         if (isWindowsOrMac) {
-          Get.snackbar(device.name!, '连接成功', colorText: Colors.black);
+          Get.snackbar(device.name!, 'device connected'.tr,
+              colorText: Colors.black);
         } else {
-          toastInfo(msg: 'device connected');
+          toastInfo(msg: 'device connected'.tr);
         }
         // Discover services of a specific device
         List<BleService> bleServices =
@@ -2716,9 +2720,10 @@ class _HomePageState extends State<HomePage> {
         }
       } else if (state == BleConnectionState.disconnected) {
         if (isWindowsOrMac) {
-          Get.snackbar(device.name!, '连接失败', colorText: Colors.red);
+          Get.snackbar(device.name!, 'device disconnected'.tr,
+              colorText: Colors.red);
         } else {
-          toastInfo(msg: 'device disconnected');
+          toastInfo(msg: 'device disconnected'.tr);
         }
       }
     };
@@ -2794,7 +2799,7 @@ class _HomePageState extends State<HomePage> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             TextItem(
-                              text: 'Version Update',
+                              text: 'Version Update'.tr,
                               fontSize: 48.sp,
                               fontWeight: FontWeight.bold,
                             ),
@@ -2839,7 +2844,7 @@ class _HomePageState extends State<HomePage> {
                                       onPressed: () {
                                         Navigator.of(context).pop();
                                       },
-                                      text: 'Cancel',
+                                      text: 'Cancel'.tr,
                                       linearColorStart: AppColor.color_805353,
                                       linearColorEnd: AppColor.color_5E1E1E,
                                     ),
@@ -2849,7 +2854,7 @@ class _HomePageState extends State<HomePage> {
                                     onPressed: () {
                                       downloadfile(context, downloadurl, md5);
                                     },
-                                    text: 'Update',
+                                    text: 'Update'.tr,
                                     // linearColorStart: AppColor.color_805353,
                                     // linearColorEnd: AppColor.color_5E1E1E,
                                   ).marginOnly(left: 40.w),
@@ -2907,7 +2912,7 @@ class _HomePageState extends State<HomePage> {
       } else if (status == DownloadStatus.downloading) {
         downloadProgress.value = progress;
       } else if (status == DownloadStatus.fail) {
-        Fluttertoast.showToast(msg: "please check network,download fail");
+        Fluttertoast.showToast(msg: "please check network,download fail".tr);
       }
     });
   }

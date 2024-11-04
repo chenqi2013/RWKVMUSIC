@@ -35,4 +35,17 @@ const Map<String, String> en_US = {
   'Bluetooth unsupported': 'Bluetooth unsupported',
   'Bluetooth unauthorized': 'Bluetooth unauthorized',
   'Bluetooth poweredOff': 'Bluetooth poweredOff',
+  'Version Update': 'Version Update',
+  'Cancel': 'Cancel',
+  'Update': 'Update',
+  'please check network,download fail': 'please check network,download fail',
+  'device disconnected': 'device disconnected',
+  'device connected': 'device connected',
+  'need to open location permission': 'need to open location permission',
+  'need to open bluetooth scan permission':
+      'need to open bluetooth scan permission',
+  'need to open bluetooth connect permission':
+      'need to open bluetooth connect permission',
+  'Simulate keyboard': 'Simulate keyboard',
+  'Midi keyboard': 'Midi keyboard',
 };
