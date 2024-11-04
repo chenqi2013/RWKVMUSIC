@@ -48,4 +48,6 @@ const Map<String, String> en_US = {
       'need to open bluetooth connect permission',
   'Simulate keyboard': 'Simulate keyboard',
   'Midi keyboard': 'Midi keyboard',
+  'This content is AI-generated, please carefully discern!':
+      'This content is AI-generated, please carefully discern!',
 };
