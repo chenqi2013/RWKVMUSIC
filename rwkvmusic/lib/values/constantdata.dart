@@ -1,3 +1,5 @@
+import 'package:get/get.dart';
+
 /// 当前使用的模型类型
 enum ModelType {
   ncnn, //iOS手机只有这个ncnn
@@ -48,8 +50,8 @@ const kNoteState = [
 ];
 
 List<String> keyboardOptions = [
-  'Simulate keyboard',
-  'Midi keyboard',
+  'Simulate keyboard'.tr,
+  'Midi keyboard'.tr,
 ];
 List<String> prompts = [
   "Lost time is never found again",
