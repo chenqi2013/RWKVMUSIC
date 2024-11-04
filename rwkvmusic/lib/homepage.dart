@@ -2735,8 +2735,14 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> checkAppUpdate(String type, BuildContext context) async {
+    String chipType = 'ncnn';
+    if (currentModelType == ModelType.qnn) {
+      chipType = 'qnn';
+    } else if (currentModelType == ModelType.mtk) {
+      chipType = 'mtk';
+    }
     var url =
-        'https://api.rwkv.cn/rest/v1/rwkv_music_version?select=*&type=eq.$type';
+        'https://api.rwkv.cn/rest/v1/rwkv_music_version?select=*&type=eq.$type&chip_type=eq.$chipType';
 
     try {
       // 创建 HttpClient 实例
@@ -2752,7 +2758,7 @@ class _HomePageState extends State<HomePage> {
       // 处理响应数据
       if (response.statusCode == 200) {
         final responseData = await response.transform(utf8.decoder).join();
-        List array = jsonDecode(responseData);
+        var array = jsonDecode(responseData);
         String downloadurl = array[0]['download_url'];
         String version = array[0]['version'];
         String description = array[0]['description'];

@@ -12,7 +12,7 @@ enum DownloadStatus {
   fail,
 }
 
-const String appVersion = 'ncnn_1.5.0_20240906';
+const String appVersion = 'ncnn_1.6.0_20241030';
 
 var qnnSoList = [
   'libQnnDspV66Skel.so',
