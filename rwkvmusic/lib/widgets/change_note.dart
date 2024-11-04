@@ -67,7 +67,14 @@ enum ChangeNoteKey {
         return Assets.images.changeNode.eighthZ;
       case ChangeNoteKey.sixteenthZ:
         return Assets.images.changeNode.sixteenthZ;
-      default:
+      case ChangeNoteKey.triplet:
+        return Assets.images.changeNode.triplet;
+      case ChangeNoteKey.mergedZ:
+      case ChangeNoteKey.randomGroove:
+      case ChangeNoteKey.transposeDown:
+      case ChangeNoteKey.transpose:
+      case ChangeNoteKey.transposeUp:
+      case ChangeNoteKey.delete:
         return null;
     }
   }
@@ -114,6 +121,8 @@ enum ChangeNoteKey {
         return const Size(6, 6);
       case ChangeNoteKey.halfZ:
         return const Size(6, 6);
+      case ChangeNoteKey.triplet:
+        return const Size(13, 13);
       default:
         return const Size(32, 32);
     }
@@ -298,9 +307,12 @@ class ChangeNote extends StatelessWidget {
                         .indexMap((index, k) {
                       return Obx(
                         () {
+                          // ignore: unused_local_variable
                           final latestUsedRestV = latestUsedRest.value;
+                          // ignore: unused_local_variable
                           final expandedZSelectionsV =
                               _expandedZSelections.value;
+                          final w2 = GlobalState.tripleting.value;
                           return _KeyWrapper(
                             onTapAtIndex: _onTapKey,
                             onLongPress: _onLongPress,
@@ -493,6 +505,13 @@ class _KeyWrapper extends StatelessWidget {
         if (k == ChangeNoteKey.dottodNote) highlight = highlighted;
       default:
         break;
+    }
+
+    if (k == ChangeNoteKey.triplet) {
+      final tripleting = GlobalState.tripleting.value;
+      if (tripleting) {
+        highlight = highlighted;
+      }
     }
 
     Widget selectedHighlight = C();

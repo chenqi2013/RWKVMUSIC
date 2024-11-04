@@ -47,10 +47,6 @@ class $AssetsDoctorGen {
 class $AssetsFastmodelGen {
   const $AssetsFastmodelGen();
 
-  /// File path: assets/fastmodel/RWKV-6-ABC-85M-v1-20240217-ctx1024-ncnn.bin
-  String get rWKV6ABC85MV120240217Ctx1024NcnnBin =>
-      'assets/fastmodel/RWKV-6-ABC-85M-v1-20240217-ctx1024-ncnn.bin';
-
   /// File path: assets/fastmodel/RWKV-6-ABC-85M-v1-20240217-ctx1024-ncnn.config
   String get rWKV6ABC85MV120240217Ctx1024NcnnConfig =>
       'assets/fastmodel/RWKV-6-ABC-85M-v1-20240217-ctx1024-ncnn.config';
@@ -64,7 +60,6 @@ class $AssetsFastmodelGen {
 
   /// List of all assets
   List<String> get values => [
-        rWKV6ABC85MV120240217Ctx1024NcnnBin,
         rWKV6ABC85MV120240217Ctx1024NcnnConfig,
         rWKV6ABC85MV120240217Ctx1024NcnnParam,
         libfasterRwkvd
@@ -904,6 +899,9 @@ class $AssetsImagesChangeNodeGen {
   AssetGenImage get tr =>
       const AssetGenImage('assets/images/change_node/tr.png');
 
+  /// File path: assets/images/change_node/triplet.svg
+  String get triplet => 'assets/images/change_node/triplet.svg';
+
   /// File path: assets/images/change_node/whole.svg
   String get whole => 'assets/images/change_node/whole.svg';
 
@@ -929,6 +927,7 @@ class $AssetsImagesChangeNodeGen {
         thirtySecond,
         tl,
         tr,
+        triplet,
         whole,
         wholeZ
       ];
@@ -2871,7 +2870,7 @@ class AssetGenImage {
     ImageRepeat repeat = ImageRepeat.noRepeat,
     Rect? centerSlice,
     bool matchTextDirection = false,
-    bool gaplessPlayback = false,
+    bool gaplessPlayback = true,
     bool isAntiAlias = false,
     String? package,
     FilterQuality filterQuality = FilterQuality.low,

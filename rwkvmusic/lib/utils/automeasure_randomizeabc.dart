@@ -67,23 +67,18 @@ Fraction calculateBarLength(String meter, String length) {
 
 List<String> splitNoteLength(String noteChar, Fraction noteLength) {
   List<String> splitNotes = [];
-  if (noteLength > Fraction(1, 1)) {
+  if (noteLength.denominator == 2 && noteLength.numerator >= 5) {
     int integerPart = noteLength.numerator ~/ noteLength.denominator;
-    Fraction fractionalPart = noteLength - Fraction(integerPart, 1);
-    for (int i = 0; i < integerPart; i++) {
-      splitNotes.add(noteChar);
-    }
-    if (fractionalPart > Fraction(0, 1)) {
-      splitNotes.add('$noteChar$fractionalPart');
-    }
+    // int remainder = noteLength.numerator - 2* integerPart;
+    splitNotes.add('$noteChar$integerPart');
+    splitNotes.add('-${noteChar}1/2');
+  } else if (noteLength.denominator == 4 && noteLength.numerator >= 5) {
+    int integerPart = noteLength.numerator ~/ noteLength.denominator;
+    int remainderNumerator = noteLength.numerator - integerPart * 4;
+    splitNotes.add('$noteChar$integerPart');
+    splitNotes.add('-$noteChar$remainderNumerator/4');
   } else {
-    if (noteLength == Fraction(1, 1)) {
-      splitNotes.add(noteChar);
-    } else if (noteLength == Fraction(1, 2)) {
-      splitNotes.add('$noteChar/');
-    } else {
-      splitNotes.add('$noteChar$noteLength');
-    }
+    splitNotes.add('$noteChar$noteLength');
   }
   return splitNotes;
 }
@@ -208,10 +203,12 @@ String formatBars(Map<String, String> header, List<List<String>> bars) {
 
 //修改后的formatBarsTest
 String formatBarsTest(Map<String, String> header, List<List<String>> bars) {
-  String formattedAbc = 'L:${header['L']}\nM:${header['M']}\n';
+  String formattedAbc = "L:${header['L']}\nM:${header['M']}\n|";
+
   for (List<String> bar in bars) {
     List<String> accidentalNotes = []; // 储存带有升降号的音符
     List<String> newBar = [];
+
     for (String note in bar) {
       // 检查是否为连音符号
       if (RegExp(r'\(\d+').hasMatch(note)) {
@@ -223,43 +220,48 @@ String formatBarsTest(Map<String, String> header, List<List<String>> bars) {
       Fraction noteLength = parsedNote['length'];
 
       // 提取音符字母部分和升降号部分
-      RegExp accidentalRegex = RegExp(r'''(-?)([\^_=]?)([A-Ga-gz][,\']*)''');
-      Match? accidentalMatch = accidentalRegex.firstMatch(noteChar);
-      if (accidentalMatch == null) {
-        continue;
-      }
-      String accidental = accidentalMatch.group(2)!;
-      String baseNote = accidentalMatch.group(3)!;
+      RegExp accidentalRegex = RegExp(r'''[\^_=]?[A-Ga-gz][,\']*''');
+      RegExp baseNoteRegex = RegExp(r'''[\=]?[A-Ga-gz][,\']*''');
+      String accidental = accidentalRegex.firstMatch(noteChar)!.group(0)!;
+      String baseNote = baseNoteRegex.firstMatch(noteChar)!.group(0)!;
 
       // 检查数组中是否已有相同的音符
-      String? matchedNote =
-          accidentalNotes.firstWhere((x) => x == baseNote, orElse: () => '');
-
-      // 如果当前音符不带升降号
-      if (accidental == '') {
-        if (note.startsWith('-')) {
-          newBar.add('-=$baseNote$noteLength');
-        } else {
-          newBar.add('=$baseNote$noteLength');
+      String? matchedNote = accidentalNotes.firstWhere((x) => x == baseNote,
+          orElse: () => 'null');
+      if (matchedNote != 'null') {
+        // 如果当前音符不带升降号
+        if (accidental == baseNote) {
+          if (noteChar.startsWith('-')) {
+            newBar.add('-=$accidental$noteLength');
+          } else {
+            newBar.add('=$note');
+          }
+          accidentalNotes.remove(matchedNote);
         }
-        accidentalNotes.remove(matchedNote);
-      }
-      // 如果当前音符带还原号
-      else if (accidental == '=') {
+        // 如果当前音符带还原号
+        else if (accidental.startsWith('=')) {
+          newBar.add(note);
+          accidentalNotes.remove(matchedNote);
+        }
+        // 如果当前音符带升降号
+        else {
+          newBar.add(note);
+          accidentalNotes.remove(matchedNote);
+          accidentalNotes.add(baseNote);
+        }
+      } else {
+        if (accidental != baseNote) {
+          accidentalNotes.add(baseNote);
+        }
         newBar.add(note);
-        accidentalNotes.remove(matchedNote);
-      }
-      // 如果当前音符带升降号
-      else {
-        newBar.add(note);
-        accidentalNotes.remove(matchedNote);
-        accidentalNotes.add(baseNote);
       }
     }
+
     formattedAbc += newBar.join(' ');
     formattedAbc += ' |';
   }
-  return formattedAbc.substring(0, formattedAbc.length - 1).trim();
+
+  return formattedAbc.substring(0, formattedAbc.length - 2);
 }
 
 //修改后的formatBars1
