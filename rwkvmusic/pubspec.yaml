@@ -30,6 +30,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  flutter_sound_record: ^3.3.2 
   app_installer: ^1.2.0
   isolated_download_manager: ^1.0.3
   webview_windows: ^0.4.0

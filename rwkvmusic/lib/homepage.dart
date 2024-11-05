@@ -8,6 +8,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_sound_record/flutter_sound_record.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
@@ -100,6 +101,8 @@ class _HomePageState extends State<HomePage> {
   var isVisibleWebview = true.obs;
 
   String? exportMidiStr; //导出midi需要的字符串数据
+  final FlutterSoundRecord audioRecorder = FlutterSoundRecord();
+
   @override
   void initState() {
     super.initState();
@@ -1042,8 +1045,14 @@ class _HomePageState extends State<HomePage> {
                                 width: isWindowsOrMac ? 61.w : 52.w,
                                 height: isWindowsOrMac ? 61.h : 52.h,
                               ),
-                              onPressed: () {
+                              onPressed: () async {
                                 debugPrint('Settings');
+                                // if (await audioRecorder.isRecording()) {
+                                //   stopRecording();
+                                // } else {
+                                //   recordAudio();
+                                // }
+                                // return;
                                 if (isShowOverlay) {
                                   closeOverlay();
                                 }
@@ -2853,5 +2862,27 @@ class _HomePageState extends State<HomePage> {
         Fluttertoast.showToast(msg: "please check network,download fail".tr);
       }
     });
+  }
+
+  Future<void> recordAudio() async {
+    bool result = await audioRecorder.hasPermission();
+    if (result) {
+      Directory tempDir = await getApplicationCacheDirectory();
+      await audioRecorder.start(
+        path: '${tempDir.path}/myFile.m4a', // required
+        encoder: AudioEncoder.AAC, // by default
+        bitRate: 128000, // by default
+        samplingRate: 44100, // by default
+      );
+    } else {
+      debugPrint('no permission to record');
+    }
+  }
+
+  Future<void> stopRecording() async {
+    bool isRecording = await audioRecorder.isRecording();
+    if (isRecording) {
+      await audioRecorder.stop();
+    }
   }
 }
