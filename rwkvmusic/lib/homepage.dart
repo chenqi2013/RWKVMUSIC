@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'package:app_installer/app_installer.dart';
+import 'package:audio_waveforms/audio_waveforms.dart';
 import 'package:crypto/crypto.dart';
 import 'package:filepicker_windows/filepicker_windows.dart';
 import 'package:flutter/foundation.dart';
@@ -101,8 +102,9 @@ class _HomePageState extends State<HomePage> {
   var isVisibleWebview = true.obs;
 
   String? exportMidiStr; //导出midi需要的字符串数据
-  final FlutterSoundRecord audioRecorder = FlutterSoundRecord();
-
+  // final FlutterSoundRecord audioRecorder = FlutterSoundRecord();
+  final RecorderController recorderController =
+      RecorderController(); // Initialise
   @override
   void initState() {
     super.initState();
@@ -1047,7 +1049,7 @@ class _HomePageState extends State<HomePage> {
                               ),
                               onPressed: () async {
                                 debugPrint('Settings');
-                                // if (await audioRecorder.isRecording()) {
+                                // if (recorderController.isRecording) {
                                 //   stopRecording();
                                 // } else {
                                 //   recordAudio();
@@ -2865,24 +2867,46 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> recordAudio() async {
-    bool result = await audioRecorder.hasPermission();
-    if (result) {
-      Directory tempDir = await getApplicationCacheDirectory();
-      await audioRecorder.start(
-        path: '${tempDir.path}/myFile.m4a', // required
-        encoder: AudioEncoder.AAC, // by default
-        bitRate: 128000, // by default
-        samplingRate: 44100, // by default
-      );
+    Directory tempDir = await getApplicationCacheDirectory();
+    // bool result = await audioRecorder.hasPermission();
+    // if (result) {
+    //   await audioRecorder.start(
+    //     path: '${tempDir.path}/myFile.m4a', // required
+    //     encoder: AudioEncoder.AAC, // by default
+    //     bitRate: 128000, // by default
+    //     samplingRate: 44100, // by default
+    //   );
+    // } else {
+    //   debugPrint('no permission to record');
+    // }
+
+    final hasPermission = await recorderController
+        .checkPermission(); // Check mic permission (also called during record)
+    if (hasPermission) {
+      debugPrint('has permission to start record');
+      await recorderController.record(
+          path: '${tempDir.path}/recordaudio.wav'); // Record (path is optional)
     } else {
       debugPrint('no permission to record');
+      toastInfo(msg: 'no permission to record');
     }
   }
 
   Future<void> stopRecording() async {
-    bool isRecording = await audioRecorder.isRecording();
-    if (isRecording) {
-      await audioRecorder.stop();
+    // bool isRecording = await audioRecorder.isRecording();
+    // if (isRecording) {
+    //   await audioRecorder.stop();
+    // }
+
+    // await recorderController.pause(); // Pause recording
+    if (recorderController.isRecording) {
+      final path =
+          await recorderController.stop(); // Stop recording and get the path
+      // recorderController.refresh(); // Refresh waveform to original position
+      recorderController.dispose(); // Dispose controller
+      debugPrint('stopRecording path=$path');
+    } else {
+      debugPrint('no recording');
     }
   }
 }
