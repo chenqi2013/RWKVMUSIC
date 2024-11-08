@@ -787,6 +787,10 @@ class _HomePageState extends State<HomePage> {
   void _transposeTo(int value) async {
     String transposed = transposeAbc(createPrompt, value);
     debugPrint('chenqi randomizeAbcStr==$transposed');
+    String jiepai = transposed.substring(
+        transposed.indexOf('M:') + 2, transposed.indexOf('M:') + 5);
+    debugPrint('randomizeAbcStr jiepai==$jiepai');
+    timeSingnatureStr = jiepai;
     String createPromptTmp = transposed.replaceAll("\n", "\\n");
     String sb =
         "setAbcString(\"%%MIDI program $midiProgramValue\\n$createPromptTmp\",false)";
@@ -809,6 +813,10 @@ class _HomePageState extends State<HomePage> {
     // String randomizeAbcStr = randomizeAbc(createPrompt);
     String randomizeAbcStr = await randomizeNoteLengths(createPrompt);
     debugPrint('chenqi randomizeAbcStr==$randomizeAbcStr');
+    String jiepai = randomizeAbcStr.substring(
+        randomizeAbcStr.indexOf('M:') + 2, randomizeAbcStr.indexOf('M:') + 5);
+    debugPrint('randomizeAbcStr jiepai==$jiepai');
+    timeSingnatureStr = jiepai;
     String createPromptTmp = randomizeAbcStr.replaceAll("\n", "\\n");
 
     String sb =
