@@ -2271,6 +2271,7 @@ class _HomePageState extends State<HomePage> {
                                           }
                                           if (state ==
                                               BleConnectionState.connected) {
+                                            isShowDialog = false;
                                             if (isWindowsOrMac) {
                                               Get.snackbar('tips'.tr,
                                                   'midi keyboard connected'.tr,
@@ -2628,6 +2629,7 @@ class _HomePageState extends State<HomePage> {
         (String deviceId, BleConnectionState state) async {
       debugPrint('OnConnectionChanged $deviceId, $state');
       if (state == BleConnectionState.connected) {
+        isShowDialog = false;
         connectDeviceId = device.deviceId;
         if (isWindowsOrMac) {
           Get.snackbar(device.name!, 'device connected'.tr,
