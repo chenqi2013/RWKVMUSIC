@@ -181,12 +181,14 @@ class CommonUtils {
     });
   }
 
-  static Future<String> getDeviceName() async {
+  static Future<String> getHardware() async {
     DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
     if (Platform.isAndroid) {
       AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
-      print('Running on ${androidInfo.model}'); // e.g. "Moto G (4)"
-      return androidInfo.model;
+      print(
+          'Running on ${androidInfo.board},---${androidInfo.bootloader},---${androidInfo.brand},---${androidInfo.device},---${androidInfo.display},---${androidInfo.fingerprint},---${androidInfo.hardware},---${androidInfo.host},---${androidInfo.id},${androidInfo.isLowRamDevice},${androidInfo.isPhysicalDevice},${androidInfo.manufacturer},${androidInfo.model},${androidInfo.product},${androidInfo.serialNumber},${androidInfo.tags},${androidInfo.type},${androidInfo.version},${androidInfo.systemFeatures}'); // e.g. "Moto G (4)"
+      print('hardware :${androidInfo.hardware}');
+      return androidInfo.hardware;
     } else if (Platform.isIOS) {
       IosDeviceInfo iosInfo = await deviceInfo.iosInfo;
       print('Running on ${iosInfo.utsname.machine}');

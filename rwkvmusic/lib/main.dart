@@ -317,7 +317,8 @@ void fetchABCDataByIsolate() async {
     binPath.value,
     fastmodel,
     isOnlyLoadFastModel,
-    tempo.value
+    tempo.value,
+    currentModelType,
   ]);
 
   mainReceivePort.listen((data) {
@@ -345,6 +346,15 @@ void fetchABCDataByIsolate() async {
       isGenerating.value = false;
       eventBus.fire('finish');
       isClicking = false;
+    } else if (data == "load model fail") {
+      //加载模型失败,使用ncnn模型
+      mainReceivePort.close(); // 操作完成后，关闭 ReceivePort
+      userIsolate!.kill(priority: Isolate.immediate);
+      userIsolate = null;
+      debugPrint('load model fail,userIsolate!.kill()');
+      ConfigStore.to.saveDeviceOnlyNCNN();
+      currentModelType = ModelType.ncnn;
+      fetchABCDataByIsolate();
     } else if (data.toString().startsWith('tokens')) {
       isClicking = false;
       eventBus.fire(data);
@@ -386,6 +396,7 @@ void getABCDataByLocalModel(var array) async {
   var falstmodel = array[7];
   var isOnlyLoadFastModeltmep = array[8];
   double tempo = array[9];
+  ModelType currentModelType = array[10];
   int eosId = 3;
   String prompt = currentPrompt;
   debugPrint('promptprompt==$currentPrompt');
@@ -425,6 +436,7 @@ void getABCDataByLocalModel(var array) async {
   } else if (currentModelType == ModelType.mtk) {
     strategy = 'mtk auto'.toNativeUtf8().cast<Char>();
   }
+  debugPrint('currentModelType==$currentModelType');
   if (!falstmodel.isNotEmpty) {
     model = fastrwkv.rwkv_model_create(
         binPath.toNativeUtf8().cast<Char>(), strategy);
@@ -439,6 +451,10 @@ void getABCDataByLocalModel(var array) async {
   }
   debugPrint(
       'model address=${model.address},abcTokenizer address==${abcTokenizer.address},sampler address==${sampler.address}');
+  if (model.address == 0 || abcTokenizer.address == 0 || sampler.address == 0) {
+    sendPort.send('load model fail');
+    return;
+  }
   sendPort.send(isolateReceivePort.sendPort);
   sendPort.send(eventBus);
   sendPort.send([model.address, abcTokenizer.address, sampler.address]);

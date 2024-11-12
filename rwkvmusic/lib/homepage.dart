@@ -73,6 +73,9 @@ final List<int> transposeHistory = [];
 RxDouble downloadProgress = 0.0.obs;
 RxBool isdownloading = false.obs;
 bool isFirstOpen = true;
+bool isOnlyNCNN = false;
+
+String appVersion = 'ncnn_1.6.1_20241108';
 
 class _HomePageState extends State<HomePage> {
   /// 键盘 webview 控制器
@@ -100,6 +103,23 @@ class _HomePageState extends State<HomePage> {
   var isVisibleWebview = true.obs;
 
   String? exportMidiStr; //导出midi需要的字符串数据
+
+  void getAppVersion() async {
+    String hardWare = await CommonUtils.getHardware();
+    if (hardWare.contains('mt')) {
+      appVersion = 'mtk_1.6.1_20241108';
+      currentModelType = ModelType.mtk;
+    } else if (hardWare.contains('qcom')) {
+      appVersion = 'qnn_1.6.1_20241108';
+      currentModelType = ModelType.qnn;
+    }
+    if (ConfigStore.to.isOnlyNCNN) {
+      appVersion = 'ncnn_1.6.1_20241108';
+      currentModelType = ModelType.ncnn;
+    }
+    debugPrint('appVersion==$appVersion,currentModelType==$currentModelType');
+  }
+
   @override
   void initState() {
     super.initState();
@@ -107,6 +127,7 @@ class _HomePageState extends State<HomePage> {
     isRememberPrompt.value = ConfigStore.to.getRemberPromptSelect();
     isRememberEffect.value = ConfigStore.to.getRemberEffectSelect();
     isAutoSwitch.value = ConfigStore.to.getAutoNextSelect();
+    getAppVersion();
     if (midiProgramValue == -1) {
       midiProgramValue = 0;
       debugPrint('set midiprogramvalue = 0');
@@ -353,7 +374,18 @@ class _HomePageState extends State<HomePage> {
       fetchABCDataByIsolate();
     }
     if (Platform.isAndroid) {
-      checkAppUpdate('android', context);
+      CommonUtils.getHardware().then((value) {
+        if (value.contains('mt')) {
+          currentModelType = ModelType.mtk;
+        } else if (value.contains('qcom')) {
+          currentModelType = ModelType.qnn;
+        }
+        if (ConfigStore.to.isOnlyNCNN) {
+          currentModelType = ModelType.ncnn;
+        }
+        checkAppUpdate('android', context);
+        debugPrint('currentModelType==$currentModelType');
+      });
     }
 
     // if (Platform.isIOS || Platform.isAndroid) {
@@ -2694,6 +2726,9 @@ class _HomePageState extends State<HomePage> {
     } else if (currentModelType == ModelType.mtk) {
       chipType = 'mtk';
     }
+    debugPrint(
+        'appVersion==$appVersion,currentModelType==$currentModelType,chipType==$chipType');
+
     var url =
         'https://api.rwkv.cn/rest/v1/rwkv_music_version?select=*&type=eq.$type&chip_type=eq.$chipType';
 

@@ -14,7 +14,7 @@ enum DownloadStatus {
   fail,
 }
 
-const String appVersion = 'ncnn_1.6.0_20241030';
+// const String appVersion = 'mtk_1.6.1_20241108';
 
 const kTriplet = "(3";
 
@@ -32,6 +32,9 @@ var qnnSoList = [
   'libQnnHtpV75Skel.so',
   'libQnnHtpV75Stub.so',
   'libQnnSystem.so',
+  'libQnnCpu.so',
+  'libQnnGpu.so',
+  'libQnnGpuNetRunExtensions.so',
 ];
 
 const kNoteState = [
