@@ -354,6 +354,7 @@ void fetchABCDataByIsolate() async {
       debugPrint('load model fail,userIsolate!.kill()');
       ConfigStore.to.saveDeviceOnlyNCNN();
       currentModelType = ModelType.ncnn;
+      appVersion = 'ncnn_1.6.1_20241108';
       fetchABCDataByIsolate();
     } else if (data.toString().startsWith('tokens')) {
       isClicking = false;

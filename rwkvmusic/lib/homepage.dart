@@ -382,6 +382,7 @@ class _HomePageState extends State<HomePage> {
         }
         if (ConfigStore.to.isOnlyNCNN) {
           currentModelType = ModelType.ncnn;
+          appVersion = 'ncnn_1.6.1_20241108';
         }
         checkAppUpdate('android', context);
         debugPrint('currentModelType==$currentModelType');
@@ -2754,7 +2755,13 @@ class _HomePageState extends State<HomePage> {
         String md5 = array[0]['md5'];
 
         if (kDebugMode) print('checkAppUpdate: $array');
-        if (version != appVersion) {
+        chipType = 'ncnn';
+        if (currentModelType == ModelType.qnn) {
+          chipType = 'qnn';
+        } else if (currentModelType == ModelType.mtk) {
+          chipType = 'mtk';
+        }
+        if (version != appVersion && version.contains(chipType)) {
           // 下载新版本
           showDialog(
             context: context,
