@@ -1,5 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
+// ignore: unused_import
+import 'dart:developer';
 import 'dart:io';
 import 'package:app_installer/app_installer.dart';
 import 'package:crypto/crypto.dart';
@@ -105,6 +107,7 @@ class _HomePageState extends State<HomePage> {
   String? exportMidiStr; //导出midi需要的字符串数据
 
   void getAppVersion() async {
+    // debugger();
     String hardWare = await CommonUtils.getHardware();
     if (hardWare.contains('mt')) {
       appVersion = 'mtk_1.6.1_20241108';
@@ -374,6 +377,7 @@ class _HomePageState extends State<HomePage> {
       fetchABCDataByIsolate();
     }
     if (Platform.isAndroid) {
+      // debugger();
       CommonUtils.getHardware().then((value) {
         if (value.contains('mt')) {
           currentModelType = ModelType.mtk;
