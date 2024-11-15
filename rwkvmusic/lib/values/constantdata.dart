@@ -76,7 +76,6 @@ List<String> prompts = [
   "Sudden Shower",
   "Age Of Peace",
   "Recalling the past",
-  "Parade welcome",
   "I want to tell you",
   "Plotting",
   "When the clouds part",
@@ -293,15 +292,6 @@ L:1/8
 M:3/4
 K:none
  ec |"Am" A4''',
-  r'''
-S:2
-B:9
-E:6
-B:9
-L:1/8
-M:4/4
-K:G
- (3def''',
   r'''
 S:2
 B:9
