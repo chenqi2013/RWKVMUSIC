@@ -41,7 +41,8 @@ jobs:
           mkdir build/windows/x64/runner/Release/lib/fastmodel
           Copy-Item -Path ../runtime/* -Destination build/windows/x64/runner/Release/lib/fastmodel -Recurse
           Copy-Item -Path ../weights/* -Destination build/windows/x64/runner/Release/lib/fastmodel -Recurse
-          7z a -r ../rwkvmusic-windows-x64-${{env.VERSION}}.zip build/windows/x64/runner/Release
+          cd build/windows/x64/runner/
+          7z a -r ../../../../../rwkvmusic-windows-x64-${{env.VERSION}}.zip Release
       - name: Upload Windows x64
         uses: actions/upload-artifact@v3
         with:
