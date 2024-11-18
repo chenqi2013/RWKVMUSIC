@@ -6,11 +6,14 @@ import 'package:get/get.dart';
 /// 2. Android 上使用 qnn， mtk 或者 ncnn监测到处理器是高通，用 qnn，监测到处理器 mtk，都没有检测到的话，降级为 ncnn
 /// 3. iOS 上使用 WebRWKV，使用 .st 结尾的 权重文件
 ///
-/// 均适用 libfaster_rwkvd.so 作为运行时
+/// 均是用 libfaster_rwkvd.so 作为运行时
+///
+/// TODO: 如何理解 LLM 的运行时？
+/// TODO: 运行时均为 .so 吗？是不是仅仅针对 Android 系统呢？
 enum ModelType {
   /// 仅在 Android 手机上使用，ncnn 使用的是 android 手机上的 CPU
   ///
-  /// 使用 ncnn.bin 作为权重，使用
+  /// 使用 ncnn.bin 作为权重
   ncnn,
 
   /// 高通，仅仅在 Android 手机上使用，使用 NPU 作为推理硬件
