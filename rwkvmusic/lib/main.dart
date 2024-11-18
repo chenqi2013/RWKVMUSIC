@@ -1,3 +1,5 @@
+// ignore: unused_import
+import 'dart:developer';
 import 'dart:ffi' hide Size;
 import 'dart:isolate';
 import 'package:ffi/ffi.dart';
@@ -221,6 +223,7 @@ void fetchABCDataByIsolate() async {
       dllPath.value =
           await CommonUtils.copyFileFromAssets('libfaster_rwkvd.so');
     }
+    // debugger();
     if (currentModelType == ModelType.ncnn) {
       binPath.value = await CommonUtils.copyFileFromAssets(
           'RWKV-6-ABC-85M-v1-20240217-ctx1024-ncnn.bin');

@@ -1,0 +1,50 @@
+name: Build
+
+on: [push, pull_request, workflow_dispatch]
+
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+    outputs:
+      VERSION: ${{ steps.get_version.outputs.VERSION }}
+    steps:
+    - name: get-version
+      id: get_version
+      run: echo "VERSION=$(echo $GITHUB_SHA | cut -c1-7)" >> $GITHUB_OUTPUT
+
+  windows-x64-vs2022:
+    needs: [setup]
+    runs-on: windows-latest
+    env:
+      VERSION: ${{ needs.setup.outputs.VERSION }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Flutter SDK
+        uses: flutter-actions/setup-flutter@v3
+        with:
+          channel: stable
+      - name: Install dependencies
+        run: |
+          cd rwkvmusic
+          flutter pub get
+      - name: Build Windows x64
+        run: |
+          cd rwkvmusic
+          flutter build windows
+      - name: Package Windows x64
+        run: |
+          C:\msys64\usr\bin\wget.exe https://uwuhome.momosan.cc:3000/molly/rwkvmusic-models/releases/download/master/release-windows-x64.zip
+          7z x release-windows-x64.zip
+          cd rwkvmusic
+          mkdir build/windows/x64/runner/Release/lib/
+          mkdir build/windows/x64/runner/Release/lib/fastmodel
+          Copy-Item -Path ../runtime/* -Destination build/windows/x64/runner/Release/lib/fastmodel -Recurse
+          Copy-Item -Path ../weights/* -Destination build/windows/x64/runner/Release/lib/fastmodel -Recurse
+          cd build/windows/x64/runner/
+          7z a -r ../../../../../rwkvmusic-windows-x64-${{env.VERSION}}.zip Release
+      - name: Upload Windows x64
+        uses: actions/upload-artifact@v3
+        with:
+          name: rwkvmusic-windows-x64-${{env.VERSION}}
+          path: rwkvmusic-windows-x64-${{env.VERSION}}.zip

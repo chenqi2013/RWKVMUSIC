@@ -1,10 +1,32 @@
 import 'package:get/get.dart';
 
 /// 当前使用的模型类型
+///
+/// 1. Windows(x86_64) 上使用 WebRWKV，使用 .st 结尾的 权重文件
+/// 2. Android 上使用 qnn， mtk 或者 ncnn监测到处理器是高通，用 qnn，监测到处理器 mtk，都没有检测到的话，降级为 ncnn
+/// 3. iOS 上使用 WebRWKV，使用 .st 结尾的 权重文件
+///
+/// 均适用 libfaster_rwkvd.so 作为运行时
 enum ModelType {
-  ncnn, //iOS手机只有这个ncnn
-  qnn, //pc端包括ncnn和qnn
-  mtk, // android手机包括三者
+  /// 仅在 Android 手机上使用，ncnn 使用的是 android 手机上的 CPU
+  ///
+  /// 使用 ncnn.bin 作为权重，使用
+  ncnn,
+
+  /// 高通，仅仅在 Android 手机上使用，使用 NPU 作为推理硬件
+  ///
+  /// 使用一众 qnn 的权重 / .so 文件
+  qnn,
+
+  /// 联发科，仅在 Android 手机上使用，使用 NPU 作为推理硬件
+  ///
+  /// 使用一众 MTK 的权重
+  mtk,
+
+  /// 仅在 Windows 和 iOS 上使用，使用 GPU 作为推理硬件
+  ///
+  /// 使用 .st 结尾的权重文件
+  webgpu,
 }
 
 enum DownloadStatus {
@@ -18,7 +40,7 @@ enum DownloadStatus {
 
 const kTriplet = "(3";
 
-var qnnSoList = [
+const qnnSoList = [
   'libQnnDspV66Skel.so',
   'libQnnHtp.so',
   'libQnnHtpNetRunExtensions.so',

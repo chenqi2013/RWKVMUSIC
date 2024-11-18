@@ -1,5 +1,8 @@
 import 'dart:async';
 import 'dart:convert';
+// ignore: unused_import
+import 'dart:developer';
+import 'dart:ffi';
 import 'dart:io';
 import 'package:app_installer/app_installer.dart';
 import 'package:crypto/crypto.dart';
@@ -75,7 +78,8 @@ RxBool isdownloading = false.obs;
 bool isFirstOpen = true;
 bool isOnlyNCNN = false;
 
-String appVersion = 'ncnn_1.6.1_20241108';
+String appVersionNumber = '_1.6.1_20241108';
+String appVersion = 'ncnn' + appVersionNumber;
 
 class _HomePageState extends State<HomePage> {
   /// 键盘 webview 控制器
@@ -105,17 +109,30 @@ class _HomePageState extends State<HomePage> {
   String? exportMidiStr; //导出midi需要的字符串数据
 
   void getAppVersion() async {
-    String hardWare = await CommonUtils.getHardware();
-    if (hardWare.contains('mt')) {
-      appVersion = 'mtk_1.6.1_20241108';
-      currentModelType = ModelType.mtk;
-    } else if (hardWare.contains('qcom')) {
-      appVersion = 'qnn_1.6.1_20241108';
-      currentModelType = ModelType.qnn;
-    }
-    if (ConfigStore.to.isOnlyNCNN) {
-      appVersion = 'ncnn_1.6.1_20241108';
-      currentModelType = ModelType.ncnn;
+    // debugger();
+    if (Platform.isAndroid) {
+      String hardWare = await CommonUtils.getHardware();
+      if (hardWare.contains('mt')) {
+        appVersion = 'mtk' + appVersionNumber;
+        currentModelType = ModelType.mtk;
+      } else if (hardWare.contains('qcom')) {
+        appVersion = 'qnn' + appVersionNumber;
+        currentModelType = ModelType.qnn;
+      }
+      if (ConfigStore.to.isOnlyNCNN) {
+        appVersion = 'ncnn' + appVersionNumber;
+        currentModelType = ModelType.ncnn;
+      }
+    } else if (Platform.isWindows) {
+      if (Abi.current() == Abi.windowsArm64) {
+        appVersion = 'qnn' + appVersionNumber;
+        currentModelType = ModelType.qnn;
+      } else {
+        appVersion = 'webgpu' + appVersionNumber;
+        currentModelType = ModelType.webgpu;
+      }
+    } else if (Platform.isIOS) {
+      appVersion = 'webgpu' + appVersionNumber;
     }
     debugPrint('appVersion==$appVersion,currentModelType==$currentModelType');
   }
@@ -374,19 +391,8 @@ class _HomePageState extends State<HomePage> {
       fetchABCDataByIsolate();
     }
     if (Platform.isAndroid) {
-      CommonUtils.getHardware().then((value) {
-        if (value.contains('mt')) {
-          currentModelType = ModelType.mtk;
-        } else if (value.contains('qcom')) {
-          currentModelType = ModelType.qnn;
-        }
-        if (ConfigStore.to.isOnlyNCNN) {
-          currentModelType = ModelType.ncnn;
-          appVersion = 'ncnn_1.6.1_20241108';
-        }
-        checkAppUpdate('android', context);
-        debugPrint('currentModelType==$currentModelType');
-      });
+      // debugger();
+      checkAppUpdate('android', context);
     }
 
     // if (Platform.isIOS || Platform.isAndroid) {
