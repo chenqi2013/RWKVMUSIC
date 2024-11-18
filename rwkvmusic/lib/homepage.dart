@@ -129,7 +129,7 @@ class _HomePageState extends State<HomePage> {
         currentModelType = ModelType.qnn;
       } else {
         appVersion = 'webgpu' + appVersionNumber;
-        currentModelType = ModelType.ncnn;
+        currentModelType = ModelType.webgpu;
       }
     } else if (Platform.isIOS) {
       appVersion = 'webgpu' + appVersionNumber;
@@ -392,19 +392,7 @@ class _HomePageState extends State<HomePage> {
     }
     if (Platform.isAndroid) {
       // debugger();
-      CommonUtils.getHardware().then((value) {
-        if (value.contains('mt')) {
-          currentModelType = ModelType.mtk;
-        } else if (value.contains('qcom')) {
-          currentModelType = ModelType.qnn;
-        }
-        if (ConfigStore.to.isOnlyNCNN) {
-          currentModelType = ModelType.ncnn;
-          appVersion = 'ncnn_1.6.1_20241108';
-        }
-        checkAppUpdate('android', context);
-        debugPrint('currentModelType==$currentModelType');
-      });
+      checkAppUpdate('android', context);
     }
 
     // if (Platform.isIOS || Platform.isAndroid) {

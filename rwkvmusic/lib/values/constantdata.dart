@@ -22,6 +22,11 @@ enum ModelType {
   ///
   /// 使用一众 MTK 的权重
   mtk,
+
+  /// 仅在 Windows 和 iOS 上使用，使用 GPU 作为推理硬件
+  ///
+  /// 使用 .st 结尾的权重文件
+  webgpu,
 }
 
 enum DownloadStatus {
