@@ -8,8 +8,9 @@ import 'package:get/get.dart';
 ///
 /// 均是用 libfaster_rwkvd.so 作为运行时
 ///
-/// TODO: 如何理解 LLM 的运行时？
-/// TODO: 运行时均为 .so 吗？是不是仅仅针对 Android 系统呢？
+/// Android: 在 Android 设备上, 我们的运行时是以 .so 文件为结尾的
+///
+/// iOS: 在 iOS 设备上, 我们的运行时是以 .a 文件为结尾的
 enum ModelType {
   /// 仅在 Android 手机上使用，ncnn 使用的是 android 手机上的 CPU
   ///
