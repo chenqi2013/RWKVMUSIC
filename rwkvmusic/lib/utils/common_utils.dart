@@ -75,8 +75,18 @@ class CommonUtils {
     } else {
       // String currentPath = Directory.current.absolute.path;
       if (currentModelType == ModelType.qnn) {
-        path = p.join(
-            path, 'RWKV-6-ABC-85M-v1-20240217-ctx1024-QNN2.26-XElite.bin');
+        // QNN Windows会在传入dll格式模型加载成功后，保存model_cache.bin和model_cache.config
+        // 到同一个文件夹下，用于后续加载模型时提升加载速度
+        // dll模型格式能兼容多个高通平台
+
+        // 新高通平台设备在初次加载模型时，需要等待dll模型加载一段时间
+        // TODO: 初次运行增加一个正在加载模型的弹窗提示，以防用户以为软件卡死
+        String modelCachePath = p.join(path, 'model_cache.bin');
+        if (File(modelCachePath).existsSync()) {
+          path = modelCachePath;
+        } else {
+          path = p.join(path, 'RWKV-6-ABC-85M-v1-20240217-ctx1024-QNN2.26.dll');
+        }
       } else {
         path = p.join(path, 'RWKV-6-ABC-85M-v1-20240217-ctx1024-webrwkv.st');
       }
