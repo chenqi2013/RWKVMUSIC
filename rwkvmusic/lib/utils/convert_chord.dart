@@ -283,7 +283,7 @@ List<Map<String, dynamic>> analyzeNotes(String abcNotation) {
           octaveShift += "'".allMatches(octaveModifier).length;
           octaveShift -= ",".allMatches(octaveModifier).length;
         }
-        pitch = pitch.toUpperCase() + ("'" * octaveShift);
+        pitch = pitch.toUpperCase();
       }
 
       // 创建音符事件
