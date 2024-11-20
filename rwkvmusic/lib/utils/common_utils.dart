@@ -5,6 +5,7 @@ import 'package:app_installer/app_installer.dart';
 import 'package:archive/archive.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:get/get.dart' hide Response;
 import 'package:isolated_download_manager/isolated_download_manager.dart';
 import 'package:path/path.dart' as p;
@@ -124,7 +125,7 @@ class CommonUtils {
       // DynamicLibrary dll = DynamicLibrary.open(dllFilePath);
       return dllFilePath;
     } catch (e) {
-      print('Error loading DLL file: $e');
+      if (kDebugMode) print('😡 Error loading DLL file: $e');
       return ''; // 返回空值或者其他默认值
     }
   }

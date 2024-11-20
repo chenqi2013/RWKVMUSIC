@@ -60,6 +60,8 @@ android {
             signingConfig signingConfigs.debug
         }
     }
+
+    assetPacks = [':install_time_asset_pack']
 }
 
 flutter {

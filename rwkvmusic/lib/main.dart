@@ -10,6 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:rwkvmusic/langs/translation_service.dart';
+import 'package:rwkvmusic/manage_play_assets_delivery.dart';
 
 import 'package:rwkvmusic/services/storage.dart';
 import 'package:rwkvmusic/state.dart';
@@ -213,56 +214,7 @@ void fetchABCDataByIsolate() async {
     paramPath = await CommonUtils.copyFileFromAssets(
         'RWKV-6-ABC-85M-v1-20240217-ctx1024-ncnn.param');
   } else if (Platform.isAndroid) {
-    String cachePath = await CommonUtils.getCachePath();
-    String soPath = '$cachePath/libfaster_rwkvd.so';
-    bool isFileExists = File(soPath).existsSync();
-    if (isFileExists) {
-      debugPrint('file exits');
-      dllPath.value = soPath;
-    } else {
-      dllPath.value =
-          await CommonUtils.copyFileFromAssets('libfaster_rwkvd.so');
-    }
-    // debugger();
-    if (currentModelType == ModelType.ncnn) {
-      binPath.value = await CommonUtils.copyFileFromAssets(
-          'RWKV-6-ABC-85M-v1-20240217-ctx1024-ncnn.bin');
-      // binPath =
-      //     await CommonUtils.copyFileFromAssets('rwkv.cpp-v6-ABC-85M-FP32.bin');
-      configPath = await CommonUtils.copyFileFromAssets(
-          'RWKV-6-ABC-85M-v1-20240217-ctx1024-ncnn.config');
-      // configPath = await CommonUtils.copyFileFromAssets(
-      //     'rwkv.cpp-v6-ABC-85M-FP32.config');
-      paramPath = await CommonUtils.copyFileFromAssets(
-          'RWKV-6-ABC-85M-v1-20240217-ctx1024-ncnn.param');
-    } else if (currentModelType == ModelType.qnn) {
-      if (!isFileExists) {
-        String sopath = await CommonUtils.copyFileFromAssets(
-            'libRWKV-6-ABC-85M-v1-20240217-ctx1024-QNN.so');
-        binPath.value = "$sopath:$cachePath";
-        // debugPrint('binPath==$binPath');
-        for (String soName in qnnSoList) {
-          //拷贝qnn so文件
-          await CommonUtils.copyFileFromAssets(soName);
-        }
-      } else {
-        String qnnsoPath =
-            '$cachePath/libRWKV-6-ABC-85M-v1-20240217-ctx1024-QNN.so';
-        binPath.value = "$qnnsoPath:$cachePath";
-        // debugPrint('file exits binpath==$binPath');
-      }
-      configPath = await CommonUtils.copyFileFromAssets(
-          'libRWKV-6-ABC-85M-v1-20240217-ctx1024-QNN.config');
-      paramPath = await CommonUtils.copyFileFromAssets(
-          'RWKV-6-ABC-85M-v1-20240217-ctx1024-ncnn.param');
-    } else if (currentModelType == ModelType.mtk) {
-      binPath.value = await CommonUtils.copyFileFromAssets(
-          'RWKV-6-ABC-85M-v1-20240217-ctx1024-MTK-MT6989.dla');
-      configPath = await CommonUtils.copyFileFromAssets(
-          'RWKV-6-ABC-85M-v1-20240217-ctx1024-MTK-MT6989.config');
-      paramPath = await CommonUtils.copyFileFromAssets(
-          'RWKV-6-ABC-85M-v1-20240217-ctx1024-MTK-MT6989.emb');
-    }
+    await ManagePlayAssetsDelivery.initStack();
   } else if (Platform.isWindows) {
     dllPath.value = await CommonUtils.getdllPath();
     binPath.value = await CommonUtils.getBinPath();

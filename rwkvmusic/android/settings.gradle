@@ -27,3 +27,4 @@ plugins {
 }
 
 include ":app"
+include ":install_time_asset_pack"
