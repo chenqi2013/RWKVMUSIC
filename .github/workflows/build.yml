@@ -67,9 +67,11 @@ jobs:
           flutter build windows
       - name: Package Windows arm64
         run: |
+          Invoke-WebRequest -Uri https://uwuhome.momosan.cc:3000/molly/rwkvmusic-models/releases/download/master/release-windows-arm64.zip -OutFile release-windows-arm64.zip
+          7z x release-windows-arm64.zip
           cd rwkvmusic
-          mkdir build/windows/arm64/runner/Release/lib/
-          mkdir build/windows/arm64/runner/Release/lib/fastmodel
+          Copy-Item -Path ../runtime/* -Destination build/windows/arm64/runner/Release/ -Recurse
+          Copy-Item -Path ../weights/* -Destination build/windows/arm64/runner/Release/lib/fastmodel -Recurse
           cd build/windows/arm64/runner/
           7z a -r ../../../../../rwkvmusic-windows-arm64-${{env.VERSION}}.zip Release
       - name: Upload Windows arm64
