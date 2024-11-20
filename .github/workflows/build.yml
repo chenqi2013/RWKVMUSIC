@@ -48,6 +48,35 @@ jobs:
         with:
           name: rwkvmusic-windows-x64-${{env.VERSION}}
           path: rwkvmusic-windows-x64-${{env.VERSION}}.zip
+
+  windows-arm64-vs2022:
+    needs: [setup]
+    runs-on: [self-hosted, windows, ARM64]
+    env:
+      VERSION: ${{ needs.setup.outputs.VERSION }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Install dependencies
+        run: |
+          cd rwkvmusic
+          flutter pub get
+      - name: Build Windows arm64
+        run: |
+          cd rwkvmusic
+          flutter build windows
+      - name: Package Windows arm64
+        run: |
+          cd rwkvmusic
+          mkdir build/windows/arm64/runner/Release/lib/
+          mkdir build/windows/arm64/runner/Release/lib/fastmodel
+          cd build/windows/arm64/runner/
+          7z a -r ../../../../../rwkvmusic-windows-arm64-${{env.VERSION}}.zip Release
+      - name: Upload Windows arm64
+        uses: actions/upload-artifact@v3
+        with:
+          name: rwkvmusic-windows-arm64-${{env.VERSION}}
+          path: rwkvmusic-windows-arm64-${{env.VERSION}}.zip
   
   android:
     needs: [setup]
