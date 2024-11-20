@@ -44,24 +44,23 @@ enum DownloadStatus {
 
 const kTriplet = "(3";
 
-const qnnSoList = [
-  'libQnnDspV66Skel.so',
+const qnnSoList = {
+  'libQnnCpu.so',
+  'libQnnGpu.so',
+  'libQnnGpuNetRunExtensions.so',
   'libQnnHtp.so',
   'libQnnHtpNetRunExtensions.so',
   'libQnnHtpPrepare.so',
   'libQnnHtpV68Skel.so',
   'libQnnHtpV68Stub.so',
   'libQnnHtpV69Skel.so',
-  'libQnnHtpV69Skel.so',
+  'libQnnHtpV69Stub.so',
   'libQnnHtpV73Skel.so',
   'libQnnHtpV73Stub.so',
   'libQnnHtpV75Skel.so',
   'libQnnHtpV75Stub.so',
   'libQnnSystem.so',
-  'libQnnCpu.so',
-  'libQnnGpu.so',
-  'libQnnGpuNetRunExtensions.so',
-];
+};
 
 const kNoteState = [
   "4",
