@@ -78,34 +78,34 @@ jobs:
           name: rwkvmusic-windows-arm64-${{env.VERSION}}
           path: rwkvmusic-windows-arm64-${{env.VERSION}}.zip
   
-  android:
-    needs: [setup]
-    runs-on: ubuntu-latest
-    env:
-      VERSION: ${{ needs.setup.outputs.VERSION }}
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      - name: Set Up Java
-        uses: actions/setup-java@v3.12.0
-        with:
-          distribution: 'oracle'
-          java-version: '17'
-      - name: Setup Flutter SDK
-        uses: flutter-actions/setup-flutter@v3
-        with:
-          channel: stable
-      - name: Install dependencies
-        run: |
-          cd rwkvmusic
-          flutter pub get
-      - name: Build APK
-        run: |
-          cd rwkvmusic
-          flutter build apk --release
-      - name: Upload Artifacts
-        uses: actions/upload-artifact@v3
-        with:
-          name: rwkvmusic-android-${{env.VERSION}}
-          path: |
-            rwkvmusic/build/app/outputs/flutter-apk/app-release.apk
+  # android:
+  #   needs: [setup]
+  #   runs-on: ubuntu-latest
+  #   env:
+  #     VERSION: ${{ needs.setup.outputs.VERSION }}
+  #   steps:
+  #     - name: Checkout
+  #       uses: actions/checkout@v4
+  #     - name: Set Up Java
+  #       uses: actions/setup-java@v3.12.0
+  #       with:
+  #         distribution: 'oracle'
+  #         java-version: '17'
+  #     - name: Setup Flutter SDK
+  #       uses: flutter-actions/setup-flutter@v3
+  #       with:
+  #         channel: stable
+  #     - name: Install dependencies
+  #       run: |
+  #         cd rwkvmusic
+  #         flutter pub get
+  #     - name: Build APK
+  #       run: |
+  #         cd rwkvmusic
+  #         flutter build apk --release
+  #     - name: Upload Artifacts
+  #       uses: actions/upload-artifact@v3
+  #       with:
+  #         name: rwkvmusic-android-${{env.VERSION}}
+  #         path: |
+  #           rwkvmusic/build/app/outputs/flutter-apk/app-release.apk
