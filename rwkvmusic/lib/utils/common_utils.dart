@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
-import 'package:app_installer/app_installer.dart';
 import 'package:archive/archive.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:dio/dio.dart';
@@ -243,7 +242,7 @@ class CommonUtils {
           // Navigator.of(context).pop();
           progressStatus(DownloadStatus.finish, 1.0);
 
-          AppInstaller.installApk('$downloadPath/$name');
+          // AppInstaller.installApk('$downloadPath/$name');
         }
       } else if (event is double) {
         // progress.value = event;

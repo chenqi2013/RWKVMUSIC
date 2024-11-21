@@ -4,7 +4,6 @@ import 'dart:convert';
 import 'dart:developer';
 import 'dart:ffi';
 import 'dart:io';
-import 'package:app_installer/app_installer.dart';
 import 'package:crypto/crypto.dart';
 import 'package:filepicker_windows/filepicker_windows.dart';
 import 'package:flutter/foundation.dart';
@@ -2727,6 +2726,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> checkAppUpdate(String type, BuildContext context) async {
+    return;
     String chipType = 'ncnn';
     if (currentModelType == ModelType.qnn) {
       chipType = 'qnn';
@@ -2893,7 +2893,7 @@ class _HomePageState extends State<HomePage> {
       if (kDebugMode) print('MD5 hash: ${md5Digest.toString()}');
       if (md5Digest.toString() == md5Str) {
         Get.back();
-        AppInstaller.installApk(filePath);
+        // AppInstaller.installApk(filePath);
         return;
       }
     }
@@ -2904,7 +2904,7 @@ class _HomePageState extends State<HomePage> {
         if (kDebugMode) print('downloadfile finished');
         // CommonUtils.setIsdownload(true);
         Get.back();
-        AppInstaller.installApk(filePath);
+        // AppInstaller.installApk(filePath);
       } else if (status == DownloadStatus.downloading) {
         downloadProgress.value = progress;
       } else if (status == DownloadStatus.fail) {
