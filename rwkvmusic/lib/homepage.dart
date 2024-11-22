@@ -78,7 +78,7 @@ RxBool isdownloading = false.obs;
 bool isFirstOpen = true;
 bool isOnlyNCNN = false;
 
-String appVersionNumber = '_1.6.1_20241119';
+String appVersionNumber = '_1.6.2_20241122';
 String appVersion = 'ncnn' + appVersionNumber;
 
 class _HomePageState extends State<HomePage> {
@@ -2771,7 +2771,10 @@ class _HomePageState extends State<HomePage> {
         } else if (currentModelType == ModelType.mtk) {
           chipType = 'mtk';
         }
-        if (version != appVersion && version.contains(chipType)) {
+        String versionNum = version.split('_')[1];
+        String appVersionNum = appVersion.split('_')[1];
+        debugPrint('versionNum==$versionNum,appVersionNum==$appVersionNum');
+        if (double.parse(versionNum) > double.parse(appVersionNum)) {
           // 下载新版本
           showDialog(
             context: context,
