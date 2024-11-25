@@ -17,6 +17,25 @@ import 'package:rwkvmusic/model_md5_config.dart';
 import 'package:rwkvmusic/values/values.dart';
 
 class CommonUtils {
+  static void writeLogFile(String content) async {
+    String downloadPath = await CommonUtils.getCachePath();
+    String filePath = '$downloadPath/model.log';
+    File file = File(filePath);
+    file.writeAsString(content, mode: FileMode.append);
+  }
+
+  static void readLogFile() async {
+    String downloadPath = await CommonUtils.getCachePath();
+    String filePath = '$downloadPath/model.log';
+    File file = File(filePath);
+    if (file.existsSync()) {
+      var content = await file.readAsString();
+      debugPrint('readLogFile content=$content');
+    } else {
+      debugPrint('readLogFile file not exists');
+    }
+  }
+
   static Future<String?> getFileChecksum(File file) async {
     final stream = file.openRead();
     final res = await FileMD5.get(stream: stream, size: await file.length());
