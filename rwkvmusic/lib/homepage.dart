@@ -272,6 +272,10 @@ class _HomePageState extends State<HomePage> {
           resetPianoAndKeyboard();
           debugPrint('resetPianoAndKeyboard');
         }
+        if (infiniteGeneration.value) {
+          //无限生成
+          generateABC();
+        }
         // // isNeedRestart = true;
         // if (isAutoSwitch.value) {
         //   //自动切换下一个prompt
@@ -1341,42 +1345,7 @@ class _HomePageState extends State<HomePage> {
                                         height: isWindowsOrMac ? 75.h : 64.h,
                                       ),
                                       onPressed: () {
-                                        debugPrint('Generate');
-                                        if (isClicking || isOnlyLoadFastModel) {
-                                          debugPrint(
-                                              'isClicking || isOnlyLoadFastModel');
-                                          return;
-                                        }
-                                        if (selectstate.value == 1 &&
-                                            splitMeasure == null) {
-                                          Fluttertoast.showToast(
-                                              msg: "generating tips".tr);
-                                          return;
-                                        }
-                                        isClicking = true;
-                                        isGenerating.value =
-                                            !isGenerating.value;
-                                        if (isGenerating.value) {
-                                          resetPianoAndKeyboard();
-
-                                          // if (isWindowsOrMac) {
-                                          fetchABCDataByIsolate();
-                                          // } else {
-                                          //   getABCDataByAPI();
-                                          // }
-
-                                          isFinishABCEvent = false;
-                                          if (selectstate.value == 1) {
-                                            isCreateGenerate.value = true;
-                                            controllerKeyboard
-                                                .loadFlutterAssetServer(
-                                                    filePathKeyboardAnimation);
-                                          }
-                                        } else {
-                                          // isolateSendPort.send('stop Generating');
-                                          isolateEventBus
-                                              .fire("stop Generating");
-                                        }
+                                        generateABC();
                                       },
                                     ),
                                   ),
@@ -1417,6 +1386,38 @@ class _HomePageState extends State<HomePage> {
             ),
           ),
         ));
+  }
+
+  void generateABC() {
+    debugPrint('Generate');
+    if (isClicking || isOnlyLoadFastModel) {
+      debugPrint('isClicking || isOnlyLoadFastModel');
+      return;
+    }
+    if (selectstate.value == 1 && splitMeasure == null) {
+      Fluttertoast.showToast(msg: "generating tips".tr);
+      return;
+    }
+    isClicking = true;
+    isGenerating.value = !isGenerating.value;
+    if (isGenerating.value) {
+      resetPianoAndKeyboard();
+
+      // if (isWindowsOrMac) {
+      fetchABCDataByIsolate();
+      // } else {
+      //   getABCDataByAPI();
+      // }
+
+      isFinishABCEvent = false;
+      if (selectstate.value == 1) {
+        isCreateGenerate.value = true;
+        controllerKeyboard.loadFlutterAssetServer(filePathKeyboardAnimation);
+      }
+    } else {
+      // isolateSendPort.send('stop Generating');
+      isolateEventBus.fire("stop Generating");
+    }
   }
 
   void playOrPausePiano() {
