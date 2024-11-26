@@ -1,5 +1,8 @@
 import 'dart:async';
 import 'dart:convert';
+// ignore: unused_import
+import 'dart:developer';
+import 'dart:ffi';
 import 'dart:io';
 import 'package:app_installer/app_installer.dart';
 import 'package:audio_waveforms/audio_waveforms.dart';
@@ -75,6 +78,10 @@ final List<int> transposeHistory = [];
 RxDouble downloadProgress = 0.0.obs;
 RxBool isdownloading = false.obs;
 bool isFirstOpen = true;
+bool isOnlyNCNN = false;
+
+String appVersionNumber = '_1.6.2_20241122';
+String appVersion = 'ncnn' + appVersionNumber;
 
 class _HomePageState extends State<HomePage> {
   /// 键盘 webview 控制器
@@ -105,6 +112,37 @@ class _HomePageState extends State<HomePage> {
   // final FlutterSoundRecord audioRecorder = FlutterSoundRecord();
   final RecorderController recorderController =
       RecorderController(); // Initialise
+
+  void getAppVersion(Function callback) async {
+    // debugger();
+    if (Platform.isAndroid) {
+      String hardWare = await CommonUtils.getHardware();
+      if (hardWare.contains('mt')) {
+        appVersion = 'mtk' + appVersionNumber;
+        currentModelType = ModelType.mtk;
+      } else if (hardWare.contains('qcom')) {
+        appVersion = 'qnn' + appVersionNumber;
+        currentModelType = ModelType.qnn;
+      }
+      if (ConfigStore.to.isOnlyNCNN) {
+        appVersion = 'ncnn' + appVersionNumber;
+        currentModelType = ModelType.ncnn;
+      }
+    } else if (Platform.isWindows) {
+      if (Abi.current() == Abi.windowsArm64) {
+        appVersion = 'qnn' + appVersionNumber;
+        currentModelType = ModelType.qnn;
+      } else {
+        appVersion = 'webgpu' + appVersionNumber;
+        currentModelType = ModelType.webgpu;
+      }
+    } else if (Platform.isIOS) {
+      appVersion = 'webgpu' + appVersionNumber;
+    }
+    debugPrint('appVersion==$appVersion,currentModelType==$currentModelType');
+    callback();
+  }
+
   @override
   void initState() {
     super.initState();
@@ -112,6 +150,7 @@ class _HomePageState extends State<HomePage> {
     isRememberPrompt.value = ConfigStore.to.getRemberPromptSelect();
     isRememberEffect.value = ConfigStore.to.getRemberEffectSelect();
     isAutoSwitch.value = ConfigStore.to.getAutoNextSelect();
+
     if (midiProgramValue == -1) {
       midiProgramValue = 0;
       debugPrint('set midiprogramvalue = 0');
@@ -238,6 +277,10 @@ class _HomePageState extends State<HomePage> {
           resetPianoAndKeyboard();
           debugPrint('resetPianoAndKeyboard');
         }
+        if (infiniteGeneration.value) {
+          //无限生成
+          generateABC();
+        }
         // // isNeedRestart = true;
         // if (isAutoSwitch.value) {
         //   //自动切换下一个prompt
@@ -354,13 +397,17 @@ class _HomePageState extends State<HomePage> {
         // controllerPiano.runJavaScript(event);
       }
     });
-    if (isOnlyLoadFastModel && modelAddress == 0) {
-      fetchABCDataByIsolate();
-    }
-    if (Platform.isAndroid) {
-      checkAppUpdate('android', context);
-    }
 
+    ///重要！！！获取设备类型及版本号再去load model和版本检测。
+    getAppVersion(() {
+      if (isOnlyLoadFastModel && modelAddress == 0) {
+        fetchABCDataByIsolate();
+      }
+      if (Platform.isAndroid) {
+        // debugger();
+        checkAppUpdate('android', context);
+      }
+    });
     // if (Platform.isIOS || Platform.isAndroid) {
     if (!ConfigStore.to.isFirstOpen) {
       debugPrint('isFirstOpen');
@@ -792,6 +839,10 @@ class _HomePageState extends State<HomePage> {
   void _transposeTo(int value) async {
     String transposed = transposeAbc(createPrompt, value);
     debugPrint('chenqi randomizeAbcStr==$transposed');
+    String jiepai = transposed.substring(
+        transposed.indexOf('M:') + 2, transposed.indexOf('M:') + 5);
+    debugPrint('randomizeAbcStr jiepai==$jiepai');
+    timeSingnatureStr = jiepai;
     String createPromptTmp = transposed.replaceAll("\n", "\\n");
     String sb =
         "setAbcString(\"%%MIDI program $midiProgramValue\\n$createPromptTmp\",false)";
@@ -814,6 +865,10 @@ class _HomePageState extends State<HomePage> {
     // String randomizeAbcStr = randomizeAbc(createPrompt);
     String randomizeAbcStr = await randomizeNoteLengths(createPrompt);
     debugPrint('chenqi randomizeAbcStr==$randomizeAbcStr');
+    String jiepai = randomizeAbcStr.substring(
+        randomizeAbcStr.indexOf('M:') + 2, randomizeAbcStr.indexOf('M:') + 5);
+    debugPrint('randomizeAbcStr jiepai==$jiepai');
+    timeSingnatureStr = jiepai;
     String createPromptTmp = randomizeAbcStr.replaceAll("\n", "\\n");
 
     String sb =
@@ -1301,42 +1356,7 @@ class _HomePageState extends State<HomePage> {
                                         height: isWindowsOrMac ? 75.h : 64.h,
                                       ),
                                       onPressed: () {
-                                        debugPrint('Generate');
-                                        if (isClicking || isOnlyLoadFastModel) {
-                                          debugPrint(
-                                              'isClicking || isOnlyLoadFastModel');
-                                          return;
-                                        }
-                                        if (selectstate.value == 1 &&
-                                            splitMeasure == null) {
-                                          Fluttertoast.showToast(
-                                              msg: "generating tips".tr);
-                                          return;
-                                        }
-                                        isClicking = true;
-                                        isGenerating.value =
-                                            !isGenerating.value;
-                                        if (isGenerating.value) {
-                                          resetPianoAndKeyboard();
-
-                                          // if (isWindowsOrMac) {
-                                          fetchABCDataByIsolate();
-                                          // } else {
-                                          //   getABCDataByAPI();
-                                          // }
-
-                                          isFinishABCEvent = false;
-                                          if (selectstate.value == 1) {
-                                            isCreateGenerate.value = true;
-                                            controllerKeyboard
-                                                .loadFlutterAssetServer(
-                                                    filePathKeyboardAnimation);
-                                          }
-                                        } else {
-                                          // isolateSendPort.send('stop Generating');
-                                          isolateEventBus
-                                              .fire("stop Generating");
-                                        }
+                                        generateABC();
                                       },
                                     ),
                                   ),
@@ -1377,6 +1397,38 @@ class _HomePageState extends State<HomePage> {
             ),
           ),
         ));
+  }
+
+  void generateABC() {
+    debugPrint('Generate');
+    if (isClicking || isOnlyLoadFastModel) {
+      debugPrint('isClicking || isOnlyLoadFastModel');
+      return;
+    }
+    if (selectstate.value == 1 && splitMeasure == null) {
+      Fluttertoast.showToast(msg: "generating tips".tr);
+      return;
+    }
+    isClicking = true;
+    isGenerating.value = !isGenerating.value;
+    if (isGenerating.value) {
+      resetPianoAndKeyboard();
+
+      // if (isWindowsOrMac) {
+      fetchABCDataByIsolate();
+      // } else {
+      //   getABCDataByAPI();
+      // }
+
+      isFinishABCEvent = false;
+      if (selectstate.value == 1) {
+        isCreateGenerate.value = true;
+        controllerKeyboard.loadFlutterAssetServer(filePathKeyboardAnimation);
+      }
+    } else {
+      // isolateSendPort.send('stop Generating');
+      isolateEventBus.fire("stop Generating");
+    }
   }
 
   void playOrPausePiano() {
@@ -2274,6 +2326,7 @@ class _HomePageState extends State<HomePage> {
                                           }
                                           if (state ==
                                               BleConnectionState.connected) {
+                                            isShowDialog = false;
                                             if (isWindowsOrMac) {
                                               Get.snackbar('tips'.tr,
                                                   'midi keyboard connected'.tr,
@@ -2631,6 +2684,7 @@ class _HomePageState extends State<HomePage> {
         (String deviceId, BleConnectionState state) async {
       debugPrint('OnConnectionChanged $deviceId, $state');
       if (state == BleConnectionState.connected) {
+        isShowDialog = false;
         connectDeviceId = device.deviceId;
         if (isWindowsOrMac) {
           Get.snackbar(device.name!, 'device connected'.tr,
@@ -2695,6 +2749,9 @@ class _HomePageState extends State<HomePage> {
     } else if (currentModelType == ModelType.mtk) {
       chipType = 'mtk';
     }
+    debugPrint(
+        'appVersion==$appVersion,currentModelType==$currentModelType,chipType==$chipType');
+
     var url =
         'https://api.rwkv.cn/rest/v1/rwkv_music_version?select=*&type=eq.$type&chip_type=eq.$chipType';
 
@@ -2720,7 +2777,16 @@ class _HomePageState extends State<HomePage> {
         String md5 = array[0]['md5'];
 
         if (kDebugMode) print('checkAppUpdate: $array');
-        if (version != appVersion) {
+        chipType = 'ncnn';
+        if (currentModelType == ModelType.qnn) {
+          chipType = 'qnn';
+        } else if (currentModelType == ModelType.mtk) {
+          chipType = 'mtk';
+        }
+        String versionNum = version.split('_')[1];
+        String appVersionNum = appVersion.split('_')[1];
+        debugPrint('versionNum==$versionNum,appVersionNum==$appVersionNum');
+        if (double.parse(versionNum) > double.parse(appVersionNum)) {
           // 下载新版本
           showDialog(
             context: context,

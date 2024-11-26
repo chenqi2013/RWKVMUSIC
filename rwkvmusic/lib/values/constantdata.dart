@@ -1,10 +1,36 @@
 import 'package:get/get.dart';
 
 /// 当前使用的模型类型
+///
+/// 1. Windows(x86_64) 上使用 WebRWKV，使用 .st 结尾的 权重文件
+/// 2. Android 上使用 qnn， mtk 或者 ncnn监测到处理器是高通，用 qnn，监测到处理器 mtk，都没有检测到的话，降级为 ncnn
+/// 3. iOS 上使用 WebRWKV，使用 .st 结尾的 权重文件
+///
+/// 均是用 libfaster_rwkvd.so 作为运行时
+///
+/// Android: 在 Android 设备上, 我们的运行时是以 .so 文件为结尾的
+///
+/// iOS: 在 iOS 设备上, 我们的运行时是以 .a 文件为结尾的
 enum ModelType {
-  ncnn, //iOS手机只有这个ncnn
-  qnn, //pc端包括ncnn和qnn
-  mtk, // android手机包括三者
+  /// 仅在 Android 手机上使用，ncnn 使用的是 android 手机上的 CPU
+  ///
+  /// 使用 ncnn.bin 作为权重
+  ncnn,
+
+  /// 高通，仅仅在 Android 手机上使用，使用 NPU 作为推理硬件
+  ///
+  /// 使用一众 qnn 的权重 / .so 文件
+  qnn,
+
+  /// 联发科，仅在 Android 手机上使用，使用 NPU 作为推理硬件
+  ///
+  /// 使用一众 MTK 的权重
+  mtk,
+
+  /// 仅在 Windows 和 iOS 上使用，使用 GPU 作为推理硬件
+  ///
+  /// 使用 .st 结尾的权重文件
+  webgpu,
 }
 
 enum DownloadStatus {
@@ -14,25 +40,27 @@ enum DownloadStatus {
   fail,
 }
 
-const String appVersion = 'ncnn_1.6.0_20241030';
+// const String appVersion = 'mtk_1.6.1_20241108';
 
 const kTriplet = "(3";
 
-var qnnSoList = [
-  'libQnnDspV66Skel.so',
+const qnnSoList = {
+  'libQnnCpu.so',
+  'libQnnGpu.so',
+  'libQnnGpuNetRunExtensions.so',
   'libQnnHtp.so',
   'libQnnHtpNetRunExtensions.so',
   'libQnnHtpPrepare.so',
   'libQnnHtpV68Skel.so',
   'libQnnHtpV68Stub.so',
   'libQnnHtpV69Skel.so',
-  'libQnnHtpV69Skel.so',
+  'libQnnHtpV69Stub.so',
   'libQnnHtpV73Skel.so',
   'libQnnHtpV73Stub.so',
   'libQnnHtpV75Skel.so',
   'libQnnHtpV75Stub.so',
   'libQnnSystem.so',
-];
+};
 
 const kNoteState = [
   "4",
@@ -73,7 +101,6 @@ List<String> prompts = [
   "Sudden Shower",
   "Age Of Peace",
   "Recalling the past",
-  "Parade welcome",
   "I want to tell you",
   "Plotting",
   "When the clouds part",
@@ -290,15 +317,6 @@ L:1/8
 M:3/4
 K:none
  ec |"Am" A4''',
-  r'''
-S:2
-B:9
-E:6
-B:9
-L:1/8
-M:4/4
-K:G
- (3def''',
   r'''
 S:2
 B:9

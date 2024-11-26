@@ -295,14 +295,14 @@ String formatBars1(Map<String, String> header, List<List<String>> bars) {
       }
 
       // 提取音符字母部分和升降号部分
-      RegExp accidentalRegex = RegExp(r'''(-?)([\^_=]?)([A-Ga-g][,\']*)''');
+      RegExp accidentalRegex = RegExp(r'''(-?)([\^_=]?)([A-Ga-gzZ][,\']*)''');
       Match? accidentalMatch = accidentalRegex.firstMatch(noteChar);
       if (accidentalMatch == null) {
         continue;
       }
       String accidental = accidentalMatch.group(2)!;
       String baseNote = accidentalMatch.group(3)!;
-      String? notev = RegExp(r'[A-Ga-g]').firstMatch(noteChar)?.group(0);
+      String? notev = RegExp(r'[A-Ga-gzZ]').firstMatch(noteChar)?.group(0);
 
       String? matchedNote =
           accidentalNotes.firstWhere((x) => x == baseNote, orElse: () => '');

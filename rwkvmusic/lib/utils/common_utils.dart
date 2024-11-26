@@ -5,15 +5,45 @@ import 'package:app_installer/app_installer.dart';
 import 'package:archive/archive.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:dio/dio.dart';
+import 'package:file_md5/file_md5.dart';
 import 'package:get/get.dart' hide Response;
 import 'package:isolated_download_manager/isolated_download_manager.dart';
 import 'package:path/path.dart' as p;
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:rwkvmusic/main.dart';
+import 'package:rwkvmusic/model_md5_config.dart';
 import 'package:rwkvmusic/values/values.dart';
 
 class CommonUtils {
+  static void writeLogFile(String content) async {
+    String downloadPath = await CommonUtils.getCachePath();
+    String filePath = '$downloadPath/model.log';
+    File file = File(filePath);
+    file.writeAsString(content, mode: FileMode.append);
+  }
+
+  static void readLogFile() async {
+    String downloadPath = await CommonUtils.getCachePath();
+    String filePath = '$downloadPath/model.log';
+    File file = File(filePath);
+    if (file.existsSync()) {
+      var content = await file.readAsString();
+      debugPrint('readLogFile content=$content');
+    } else {
+      debugPrint('readLogFile file not exists');
+    }
+  }
+
+  static Future<String?> getFileChecksum(File file) async {
+    final stream = file.openRead();
+    final res = await FileMD5.get(stream: stream, size: await file.length());
+    String md5 = res.toString();
+    debugPrint('md5=$md5');
+    return md5;
+  }
+
   static String? extractTextValue(String jsonData) {
     // 正则表达式匹配 "text" 字段的值
     RegExp regExp = RegExp(r'"text":\s*"(.*?)"');
@@ -73,7 +103,22 @@ class CommonUtils {
       path = 'assets/fastmodel/RWKV-5-ABC-82M-v1-20230901-ctx1024-ncnn.bin';
     } else {
       // String currentPath = Directory.current.absolute.path;
-      path = p.join(path, 'RWKV-6-ABC-85M-v1-20240217-ctx1024-webrwkv.st');
+      if (currentModelType == ModelType.qnn) {
+        // QNN Windows会在传入dll格式模型加载成功后，保存model_cache.bin和model_cache.config
+        // 到同一个文件夹下，用于后续加载模型时提升加载速度
+        // dll模型格式能兼容多个高通平台
+
+        // 新高通平台设备在初次加载模型时，需要等待dll模型加载一段时间
+        // TODO: 初次运行增加一个正在加载模型的弹窗提示，以防用户以为软件卡死
+        String modelCachePath = p.join(path, 'model_cache.bin');
+        if (File(modelCachePath).existsSync()) {
+          path = modelCachePath;
+        } else {
+          path = p.join(path, 'RWKV-6-ABC-85M-v1-20240217-ctx1024-QNN2.26.dll');
+        }
+      } else {
+        path = p.join(path, 'RWKV-6-ABC-85M-v1-20240217-ctx1024-webrwkv.st');
+      }
     }
     debugPrint('getBinPath===$path');
     return path;
@@ -85,30 +130,72 @@ class CommonUtils {
       Directory tempDir = await getApplicationCacheDirectory();
       tempDirPath = tempDir.path;
     } catch (e) {
-      print('Error getCachePath: $e');
+      debugPrint('Error getCachePath: $e');
     }
     return tempDirPath;
   }
 
-  static Future<String> copyFileFromAssets(String dllFileName) async {
+  static Future<Map<String, dynamic>?> getCacheModelMd5Config(
+      String fileName) async {
+    Map<String, dynamic>? map;
     try {
-      Directory tempDir = await getApplicationCacheDirectory();
-      String tempDirPath = tempDir.path;
-      // 构建DLL文件的路径
-      String dllFilePath = '$tempDirPath/$dllFileName';
-      // 将DLL文件写入临时目录
-      File dllFile = File(dllFilePath);
-      if (await dllFile.exists()) {
+      Directory cacheDir = await getApplicationCacheDirectory();
+      String cacheDirPath = cacheDir.path;
+      String filePath = '$cacheDirPath/$fileName';
+      File file = File(filePath);
+      if (await file.exists()) {
+        String str = await file.readAsString();
+        // debugPrint('getCacheModeMd5Config str=$str');
+        map = jsonDecode(str);
+        cacheModelMd5Config = map;
       } else {
-        // 加载assets下DLL文件的内容
-        ByteData data = await rootBundle.load('assets/fastmodel/$dllFileName');
-        await dllFile.writeAsBytes(data.buffer.asUint8List(), flush: true);
+        debugPrint('getCacheModeMd5Config file not exists');
       }
-      // 加载DLL文件
-      // DynamicLibrary dll = DynamicLibrary.open(dllFilePath);
-      return dllFilePath;
     } catch (e) {
-      print('Error loading DLL file: $e');
+      debugPrint('getCacheModeMd5Config error: $e');
+    }
+    // debugPrint('getCacheModeMd5Config map=$map');
+    return map;
+  }
+
+  static Future<void> writeCacheModeMd5Config(String fileName) async {
+    try {
+      Directory cacheDir = await getApplicationCacheDirectory();
+      String cacheDirPath = cacheDir.path;
+      String filePath = '$cacheDirPath/$fileName';
+      File file = File(filePath);
+      await file.writeAsString(jsonEncode(modelMd5Config));
+      debugPrint('CacheModeMd5Config saved to cache at: $filePath');
+    } catch (e) {
+      debugPrint('writeCacheModeMd5Config error: $e');
+      // 返回空值或者其他默认值
+    }
+  }
+
+  static Future<String> copyFileFromAssets(String fileName) async {
+    try {
+      Directory cacheDir = await getApplicationCacheDirectory();
+      String cacheDirPath = cacheDir.path;
+      String filePath = '$cacheDirPath/$fileName';
+      if (cacheModelMd5Config != null &&
+          cacheModelMd5Config![fileName] == modelMd5Config[fileName]) {
+        //await file.exists() &&
+        debugPrint('$fileName file exists && isSame');
+      } else {
+        File file = File(filePath);
+        // 加载assets下文件的内容
+        ByteData data = await rootBundle.load('assets/fastmodel/$fileName');
+        await file.writeAsBytes(data.buffer.asUint8List(), flush: true);
+        debugPrint('$fileName file not exists && need copy');
+        isNeedUpdateCacheMd5Config = true;
+        // String? fileMd5 = await CommonUtils.getFileChecksum(file);
+        // if (fileMd5 != null) {
+        //   debugPrint('$fileName fileMd5=$fileMd5');
+        // }
+      }
+      return filePath;
+    } catch (e) {
+      debugPrint('Error loading file: $e');
       return ''; // 返回空值或者其他默认值
     }
   }
@@ -175,18 +262,20 @@ class CommonUtils {
     });
   }
 
-  static Future<String> getDeviceName() async {
+  static Future<String> getHardware() async {
     DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
     if (Platform.isAndroid) {
       AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
-      print('Running on ${androidInfo.model}'); // e.g. "Moto G (4)"
-      return androidInfo.model;
+      // print(
+      //     'Running on ${androidInfo.board},---${androidInfo.bootloader},---${androidInfo.brand},---${androidInfo.device},---${androidInfo.display},---${androidInfo.fingerprint},---${androidInfo.hardware},---${androidInfo.host},---${androidInfo.id},${androidInfo.isLowRamDevice},${androidInfo.isPhysicalDevice},${androidInfo.manufacturer},${androidInfo.model},${androidInfo.product},${androidInfo.serialNumber},${androidInfo.tags},${androidInfo.type},${androidInfo.version},${androidInfo.systemFeatures}'); // e.g. "Moto G (4)"
+      debugPrint('hardware :${androidInfo.hardware}');
+      return androidInfo.hardware;
     } else if (Platform.isIOS) {
       IosDeviceInfo iosInfo = await deviceInfo.iosInfo;
-      print('Running on ${iosInfo.utsname.machine}');
+      // print('Running on ${iosInfo.utsname.machine}');
       return iosInfo.utsname.machine;
     }
-    print('getDeviceName=unknown');
+    debugPrint('getDeviceName=unknown');
     return 'unknown';
   }
 
@@ -208,18 +297,18 @@ class CommonUtils {
 
     Uri uri = Uri.parse(downloadurl);
     var name = uri.pathSegments.last;
-    print('file name=$name');
+    debugPrint('file name=$name');
     var request = DownloadManager.instance
         .download(downloadurl, path: '$downloadPath/$name');
 
     // Listen
     request.events.listen((event) {
       if (event is DownloadState) {
-        print("event: $event");
+        debugPrint("event: $event");
         if (event == DownloadState.started) {
           progressStatus(DownloadStatus.start, 0);
         } else if (event == DownloadState.finished) {
-          print('finished');
+          debugPrint('finished');
           // CommonUtils.setIsdownload(true);
           // Navigator.of(context).pop();
           progressStatus(DownloadStatus.finish, 1.0);
@@ -228,11 +317,11 @@ class CommonUtils {
         }
       } else if (event is double) {
         // progress.value = event;
-        print("progress: ${(event * 100.0).toStringAsFixed(0)}%");
+        debugPrint("progress: ${(event * 100.0).toStringAsFixed(0)}%");
         progressStatus(DownloadStatus.downloading, event);
       }
     }, onError: (error) {
-      print("error $error");
+      debugPrint("error $error");
       progressStatus(DownloadStatus.fail, -1);
     });
   }
@@ -277,11 +366,11 @@ class CommonUtils {
       int subCode = 0;
       debugPrint('statusCode=$statusCode,subCode=$subCode');
       if (statusCode == 201) {
-        print('Response data:${response.data}');
+        debugPrint('Response data:${response.data}');
         Get.snackbar('提示', '激活成功，您可正常使用该软件', colorText: Colors.black);
         isValid = true;
       } else {
-        print('Request failed with status: ${response.data}');
+        debugPrint('Request failed with status: ${response.data}');
         subCode = int.parse(response.data['code']);
         if (statusCode == 409) {
           if (subCode == 23505) {
@@ -297,7 +386,7 @@ class CommonUtils {
         }
       }
     } catch (e) {
-      print('checkDHM Error: $e');
+      debugPrint('checkDHM Error: $e');
     }
     return isValid;
   }
@@ -352,7 +441,7 @@ class CommonUtils {
       //   }
       // }
     } catch (e) {
-      print('checkDeviceIsJihuo Error: $e');
+      debugPrint('checkDeviceIsJihuo Error: $e');
     }
     return isValid;
   }

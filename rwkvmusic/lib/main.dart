@@ -1,3 +1,5 @@
+// ignore: unused_import
+import 'dart:developer';
 import 'dart:ffi' hide Size;
 import 'dart:isolate';
 import 'package:ffi/ffi.dart';
@@ -8,6 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:rwkvmusic/langs/translation_service.dart';
+import 'package:rwkvmusic/model_md5_config.dart';
 
 import 'package:rwkvmusic/services/storage.dart';
 import 'package:rwkvmusic/state.dart';
@@ -177,6 +180,11 @@ var isVisibleWebview = true.obs;
 RxString dllPath = ''.obs;
 RxString binPath = ''.obs;
 
+Map<String, dynamic>? cacheModelMd5Config;
+
+///是否需要更新cache modell md5 config
+bool isNeedUpdateCacheMd5Config = false;
+
 void fetchABCDataByIsolate() async {
   String? configPath;
   String? paramPath;
@@ -189,8 +197,9 @@ void fetchABCDataByIsolate() async {
         'RWKV-5-ABC-82M-v1-20230901-ctx1024-ncnn.config');
     paramPath = await CommonUtils.copyFileFromAssets(
         'RWKV-5-ABC-82M-v1-20230901-ctx1024-ncnn.param');
-  }
-  if (Platform.isIOS) {
+  } else if (Platform.isIOS) {
+    cacheModelMd5Config ??=
+        await CommonUtils.getCacheModelMd5Config('model_md5_config.json');
     // String frameworkpath = await CommonUtils.frameworkpath();
     // if (!(await File(frameworkpath).exists())) {
     //   dllPath = await CommonUtils.loadDllFromAssets('libfaster_rwkvddebug.zip');
@@ -210,17 +219,27 @@ void fetchABCDataByIsolate() async {
         'RWKV-6-ABC-85M-v1-20240217-ctx1024-ncnn.config');
     paramPath = await CommonUtils.copyFileFromAssets(
         'RWKV-6-ABC-85M-v1-20240217-ctx1024-ncnn.param');
+    if (cacheModelMd5Config == null || isNeedUpdateCacheMd5Config) {
+      await CommonUtils.writeCacheModeMd5Config('model_md5_config.json');
+      isNeedUpdateCacheMd5Config = false;
+      cacheModelMd5Config = modelMd5Config;
+    } else {
+      debugPrint('cacheModeMd5Config is not null');
+    }
   } else if (Platform.isAndroid) {
     String cachePath = await CommonUtils.getCachePath();
     String soPath = '$cachePath/libfaster_rwkvd.so';
-    bool isFileExists = File(soPath).existsSync();
-    if (isFileExists) {
-      debugPrint('file exits');
-      dllPath.value = soPath;
-    } else {
-      dllPath.value =
-          await CommonUtils.copyFileFromAssets('libfaster_rwkvd.so');
-    }
+    cacheModelMd5Config ??=
+        await CommonUtils.getCacheModelMd5Config('model_md5_config.json');
+    // bool isFileExists = File(soPath).existsSync();
+    // if (cacheModeMd5Config == modelMd5Config) {
+    //   debugPrint('libfaster_rwkvd.so file exits');
+    //   dllPath.value = soPath;
+    // } else {
+    dllPath.value = await CommonUtils.copyFileFromAssets('libfaster_rwkvd.so');
+    //说明是第一次安装使用，把modelMd5Config写入cache目录
+    // }
+    // debugger();
     if (currentModelType == ModelType.ncnn) {
       binPath.value = await CommonUtils.copyFileFromAssets(
           'RWKV-6-ABC-85M-v1-20240217-ctx1024-ncnn.bin');
@@ -233,21 +252,22 @@ void fetchABCDataByIsolate() async {
       paramPath = await CommonUtils.copyFileFromAssets(
           'RWKV-6-ABC-85M-v1-20240217-ctx1024-ncnn.param');
     } else if (currentModelType == ModelType.qnn) {
-      if (!isFileExists) {
-        String sopath = await CommonUtils.copyFileFromAssets(
-            'libRWKV-6-ABC-85M-v1-20240217-ctx1024-QNN.so');
-        binPath.value = "$sopath:$cachePath";
-        // debugPrint('binPath==$binPath');
-        for (String soName in qnnSoList) {
-          //拷贝qnn so文件
-          await CommonUtils.copyFileFromAssets(soName);
-        }
-      } else {
-        String qnnsoPath =
-            '$cachePath/libRWKV-6-ABC-85M-v1-20240217-ctx1024-QNN.so';
-        binPath.value = "$qnnsoPath:$cachePath";
-        // debugPrint('file exits binpath==$binPath');
+      // if (cacheModeMd5Config != modelMd5Config) {
+      String sopath = await CommonUtils.copyFileFromAssets(
+          'libRWKV-6-ABC-85M-v1-20240217-ctx1024-QNN.so');
+      binPath.value = "$sopath:$cachePath";
+      for (String soName in qnnSoList) {
+        //拷贝qnn so文件
+        await CommonUtils.copyFileFromAssets(soName);
       }
+      // debugPrint('binPath==$binPath');
+      // } else {
+      //   String qnnsoPath =
+      //       '$cachePath/libRWKV-6-ABC-85M-v1-20240217-ctx1024-QNN.so';
+      //   binPath.value = "$qnnsoPath:$cachePath";
+      //   // debugPrint('file exits binpath==$binPath');
+      // }
+
       configPath = await CommonUtils.copyFileFromAssets(
           'libRWKV-6-ABC-85M-v1-20240217-ctx1024-QNN.config');
       paramPath = await CommonUtils.copyFileFromAssets(
@@ -259,6 +279,13 @@ void fetchABCDataByIsolate() async {
           'RWKV-6-ABC-85M-v1-20240217-ctx1024-MTK-MT6989.config');
       paramPath = await CommonUtils.copyFileFromAssets(
           'RWKV-6-ABC-85M-v1-20240217-ctx1024-MTK-MT6989.emb');
+    }
+    if (cacheModelMd5Config == null || isNeedUpdateCacheMd5Config) {
+      await CommonUtils.writeCacheModeMd5Config('model_md5_config.json');
+      isNeedUpdateCacheMd5Config = false;
+      cacheModelMd5Config = modelMd5Config;
+    } else {
+      debugPrint('cacheModeMd5Config is not null');
     }
   } else if (Platform.isWindows) {
     dllPath.value = await CommonUtils.getdllPath();
@@ -317,7 +344,8 @@ void fetchABCDataByIsolate() async {
     binPath.value,
     fastmodel,
     isOnlyLoadFastModel,
-    tempo.value
+    tempo.value,
+    currentModelType,
   ]);
 
   mainReceivePort.listen((data) {
@@ -345,6 +373,16 @@ void fetchABCDataByIsolate() async {
       isGenerating.value = false;
       eventBus.fire('finish');
       isClicking = false;
+    } else if (data == "load model fail") {
+      //加载模型失败,使用ncnn模型
+      mainReceivePort.close(); // 操作完成后，关闭 ReceivePort
+      userIsolate!.kill(priority: Isolate.immediate);
+      userIsolate = null;
+      debugPrint('load model fail,userIsolate!.kill()');
+      ConfigStore.to.saveDeviceOnlyNCNN();
+      currentModelType = ModelType.ncnn;
+      appVersion = 'ncnn' + appVersionNumber;
+      fetchABCDataByIsolate();
     } else if (data.toString().startsWith('tokens')) {
       isClicking = false;
       eventBus.fire(data);
@@ -386,6 +424,7 @@ void getABCDataByLocalModel(var array) async {
   var falstmodel = array[7];
   var isOnlyLoadFastModeltmep = array[8];
   double tempo = array[9];
+  ModelType currentModelType = array[10];
   int eosId = 3;
   String prompt = currentPrompt;
   debugPrint('promptprompt==$currentPrompt');
@@ -425,6 +464,7 @@ void getABCDataByLocalModel(var array) async {
   } else if (currentModelType == ModelType.mtk) {
     strategy = 'mtk auto'.toNativeUtf8().cast<Char>();
   }
+  debugPrint('currentModelType==$currentModelType');
   if (!falstmodel.isNotEmpty) {
     model = fastrwkv.rwkv_model_create(
         binPath.toNativeUtf8().cast<Char>(), strategy);
@@ -439,6 +479,10 @@ void getABCDataByLocalModel(var array) async {
   }
   debugPrint(
       'model address=${model.address},abcTokenizer address==${abcTokenizer.address},sampler address==${sampler.address}');
+  if (model.address == 0 || abcTokenizer.address == 0 || sampler.address == 0) {
+    sendPort.send('load model fail');
+    return;
+  }
   sendPort.send(isolateReceivePort.sendPort);
   sendPort.send(eventBus);
   sendPort.send([model.address, abcTokenizer.address, sampler.address]);
