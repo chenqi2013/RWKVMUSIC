@@ -418,12 +418,18 @@ List<dynamic> analyzeChords(
           beatIndex < notesByMeasure[i].length;
           beatIndex++) {
         List<String> beat = notesByMeasure[i][beatIndex];
+
+        // 检查是否包含和弦音符
         bool containsChordNote = beat.any((n) =>
+            n != 'rest' && // 排除 'rest'
             (NOTE_TO_SEMITONE[n]! - keySignature.tonic.semitone) % 12 ==
-            chordMap[c]![0]);
+                chordMap[c]![0]);
+
+        // 检查是否包含根音
         bool containsRootNote = beat.any((n) =>
+            n != 'rest' && // 排除 'rest'
             (NOTE_TO_SEMITONE[n]! - keySignature.tonic.semitone) % 12 ==
-            chordMap[c]![0]);
+                chordMap[c]![0]);
 
         if (containsChordNote) {
           score[i][c] = (score[i][c] ?? 0) + 1;
