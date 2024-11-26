@@ -33,6 +33,8 @@ enum ModelType {
   webgpu,
 }
 
+const listJiepai = ['1', '2', '4', '8', '16'];
+
 enum DownloadStatus {
   start,
   downloading,

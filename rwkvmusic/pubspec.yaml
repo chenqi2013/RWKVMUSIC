@@ -30,9 +30,11 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+
+  sound_effect: ^0.0.2
+  wheel_picker: ^0.1.0
   flutter_sound_record: ^3.3.2 
   audio_waveforms: ^1.1.1
-
   file_md5: ^0.0.1
   app_installer: ^1.2.0
   isolated_download_manager: ^1.0.3
@@ -166,7 +168,7 @@ flutter:
 
     - assets/images/
     - assets/fonts/
-    # - assets/sounds/
+    - assets/sounds/
     - assets/player/soundfont/acoustic_grand_piano-mp3/
     - assets/player/soundfont/acoustic_guitar_steel-mp3/
     - assets/player/soundfont/cello-mp3/

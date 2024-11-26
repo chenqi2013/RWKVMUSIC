@@ -20,6 +20,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:rwkvmusic/agree_dialog.dart';
 import 'package:rwkvmusic/duihuanma_dialog.dart';
 import 'package:rwkvmusic/feedback_page.dart';
+import 'package:rwkvmusic/jiepai/jiepaiqi.dart';
 import 'package:rwkvmusic/main.dart';
 import 'package:rwkvmusic/mainwidget/custom_segment_controller.dart';
 import 'package:rwkvmusic/mainwidget/play_progressbar.dart';
@@ -990,6 +991,18 @@ class _HomePageState extends State<HomePage> {
     await NotesDatabase.instance.create(note);
   }
 
+  void showJiepai() async {
+    var result = await showModalBottomSheet(
+      context: context,
+      builder: (BuildContext context) {
+        return const JiePaiQi();
+      },
+      isDismissible: false,
+    );
+    // currentJiePaiStr.value = result;
+    debugPrint('result=$result');
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -1104,6 +1117,7 @@ class _HomePageState extends State<HomePage> {
                               ),
                               onPressed: () async {
                                 debugPrint('Settings');
+                                // showJiepai();
                                 // if (recorderController.isRecording) {
                                 //   stopRecording();
                                 // } else {
@@ -2711,6 +2725,8 @@ class _HomePageState extends State<HomePage> {
               Uint8List sublist = value.sublist(2);
               debugPrint(
                   'onValueChanged $deviceId, $characteristicId, $sublist');
+              int timestampMilliseconds = DateTime.now().millisecondsSinceEpoch;
+              debugPrint('当前时间戳（毫秒）: $timestampMilliseconds');
               var result = convertABC.midiToABC(sublist, false);
               debugPrint('convertdata=$result');
               if ((result[0] as String).isNotEmpty) {
