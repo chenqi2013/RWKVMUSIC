@@ -1,5 +1,5 @@
 const modelMd5Config = {
-  "libfaster_rwkvd.so": "e88b085de44abc0a2c82960a1097f803",
+  "libfaster_rwkvd.so": "ba3544a47cbf058e0d8782e96a30a7f8",
   "libQnnCpu.so": "f58e80afaadc6d7a3e1a2dadf9928042",
   "libQnnDspV66Skel.so": "c2d1ab38f3175a7eb5ca2382fd234596",
   "libQnnGpu.so": "b6f2fef1d9c6cfa8429e22713064f5ad",
