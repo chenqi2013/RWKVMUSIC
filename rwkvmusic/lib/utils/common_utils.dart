@@ -177,12 +177,13 @@ class CommonUtils {
       Directory cacheDir = await getApplicationCacheDirectory();
       String cacheDirPath = cacheDir.path;
       String filePath = '$cacheDirPath/$fileName';
+      File file = File(filePath);
       if (cacheModelMd5Config != null &&
-          cacheModelMd5Config![fileName] == modelMd5Config[fileName]) {
+          cacheModelMd5Config![fileName] == modelMd5Config[fileName] &&
+          file.existsSync()) {
         //await file.exists() &&
         debugPrint('$fileName file exists && isSame');
       } else {
-        File file = File(filePath);
         // 加载assets下文件的内容
         ByteData data = await rootBundle.load('assets/fastmodel/$fileName');
         await file.writeAsBytes(data.buffer.asUint8List(), flush: true);
