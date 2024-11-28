@@ -78,7 +78,7 @@ RxBool isdownloading = false.obs;
 bool isFirstOpen = true;
 bool isOnlyNCNN = false;
 
-String appVersionNumber = '_1.6.2_20241122';
+String appVersionNumber = '_1.6.2_20241128';
 String appVersion = 'ncnn' + appVersionNumber;
 
 class _HomePageState extends State<HomePage> {
@@ -309,6 +309,7 @@ class _HomePageState extends State<HomePage> {
           onMessageReceived: _flutterOnTapEmptyReceived)
       ..addJavaScriptChannel("flutterOnClickChord",
           onMessageReceived: _onReceiveChordClick);
+    controllerPiano.enableZoom(false);
 
     controllerKeyboard = WebViewControllerPlus()
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
@@ -346,6 +347,7 @@ class _HomePageState extends State<HomePage> {
         playNoteMp3(name);
         updatePianoNote(int.parse(jsMessage.message));
       });
+    controllerKeyboard.enableZoom(false);
     controllerKeyboard.loadFlutterAssetServer(filePathKeyboardAnimation);
     // controllerKeyboard.loadRequest(Uri.parse(filePathKeyboardAnimation));
 
@@ -968,9 +970,18 @@ class _HomePageState extends State<HomePage> {
 
   @override
   void dispose() {
+    debugPrint('homepage dispose');
+    clear();
     timer?.cancel();
     httpClient.close();
     super.dispose();
+  }
+
+  void clear() {
+    controllerKeyboard.clearCache();
+    controllerKeyboard.clearLocalStorage();
+    controllerPiano.clearCache();
+    controllerPiano.clearLocalStorage();
   }
 
   Future addNote() async {
