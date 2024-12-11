@@ -3046,7 +3046,7 @@ class _HomePageState extends State<HomePage> {
             encoder: AudioEncoder.wav,
             sampleRate: 22050,
           ),
-          path: '${tempDir.path}/myFile.wav');
+          path: '${tempDir.path}/hengchang.wav');
     }
 
     // bool result = await audioRecorder.hasPermission();
@@ -3118,13 +3118,22 @@ class _HomePageState extends State<HomePage> {
     // path = '/data/user/0/com.rwkvos.rwkvmusic/cache/myFile.wav';
     if (File(path).existsSync()) {
       debugPrint('$path exists');
+      resetToDefaulValueInCreateMode();
       final audioData = await File(path).readAsBytes();
       final noteEvents = await basicPitchInstance.predictBytes(audioData);
       debugPrint('noteEvents=${noteEvents.length}');
-      for (var note in noteEvents) {
+      if (noteEvents.isEmpty) {
+        toastInfo(msg: '无法识别当前哼唱内容，请重新录制');
+      }
+      for (int i = noteEvents.length - 1; i >= 0; i--) {
+        var note = noteEvents[i];
         print(
             "start: ${note['start']}, end: ${note['end']}, pitch: ${note['pitch']}");
         pitchs.add(int.parse('${note['pitch']}'));
+        String name = MidiToABCConverter()
+            .getNoteMp3Path(int.parse(note['pitch'].toString()));
+        // playNoteMp3(name);
+        updatePianoNote(int.parse(note['pitch'].toString()));
       }
       basicPitchInstance.release();
     } else {
