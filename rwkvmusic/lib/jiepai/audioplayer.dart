@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:sound_effect/sound_effect.dart';
 
@@ -16,6 +17,9 @@ class AudioPlayerManage {
   RxDouble volume = 1.0.obs;
   RxBool isPlay = false.obs;
 
+  /// 小节数为2开始计算接收midi数据的时间戳
+  int measureCount = 0;
+  Function? callback;
   AudioPlayerManage._internal() {
     loadAll();
   }
@@ -41,8 +45,16 @@ class AudioPlayerManage {
       if (now.isAfter(nextTick) || now.isAtSameMomentAs(nextTick)) {
         playSound();
         beatCount = (beatCount % beatsPerBar.value) + 1;
+        if (beatCount == beatsPerBar.value) {
+          measureCount++;
+          if (measureCount == 2) {
+            // measureCount = 0;
+            callback!();
+          }
+        }
         // 计算下一个节拍的时间
         nextTick = nextTick.add(Duration(milliseconds: interval));
+        // debugPrint('beatCount=$beatCount');
       }
     });
   }

@@ -5,8 +5,8 @@ import 'package:rwkvmusic/jiepai/jiepai_wheel.dart';
 import 'package:rwkvmusic/values/constantdata.dart';
 
 class JiePaiQi extends StatefulWidget {
-  const JiePaiQi({super.key});
-
+  JiePaiQi({super.key, required this.jiepaiCallback});
+  Function jiepaiCallback;
   @override
   State<JiePaiQi> createState() => _JiePaiQiState();
 }
@@ -28,6 +28,10 @@ class _JiePaiQiState extends State<JiePaiQi> {
   @override
   void initState() {
     super.initState();
+    audioPlayerManage.callback = () {
+      debugPrint('jiepai callback');
+      widget.jiepaiCallback();
+    };
     // loadAll();
   }
 

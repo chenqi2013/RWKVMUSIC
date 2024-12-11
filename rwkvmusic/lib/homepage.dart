@@ -1,22 +1,27 @@
 import 'dart:async';
-import 'dart:convert';
+import 'dart:convert' hide Codec;
 // ignore: unused_import
 import 'dart:developer';
 import 'dart:ffi';
 import 'dart:io';
 import 'package:app_installer/app_installer.dart';
-import 'package:audio_waveforms/audio_waveforms.dart';
+// import 'package:audio_waveforms/audio_waveforms.dart';
 import 'package:crypto/crypto.dart';
 import 'package:filepicker_windows/filepicker_windows.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flutter_sound_record/flutter_sound_record.dart';
+// import 'package:flutter_sound/flutter_sound.dart';
+// import 'package:flutter_sound/public/flutter_sound_recorder.dart';
+// import 'package:flutter_sound_record/flutter_sound_record.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:record/record.dart';
+// import 'package:record/record.dart';
+import 'package:rwkvmusic/RhythmAnalysis.dart';
 import 'package:rwkvmusic/agree_dialog.dart';
 import 'package:rwkvmusic/duihuanma_dialog.dart';
 import 'package:rwkvmusic/feedback_page.dart';
@@ -65,6 +70,7 @@ import 'package:webview_flutter_plus/webview_flutter_plus.dart';
 
 import 'package:permission_handler/permission_handler.dart';
 import 'package:share_extend/share_extend.dart';
+import 'package:basic_pitch_flutter/basic_pitch_flutter.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -83,6 +89,10 @@ bool isOnlyNCNN = false;
 
 String appVersionNumber = '_1.6.2_20241128';
 String appVersion = 'ncnn' + appVersionNumber;
+
+///是否专业输入模式
+bool isZhuanyeMode = false;
+List<List<int>> midiEvents = [];
 
 class _HomePageState extends State<HomePage> {
   /// 键盘 webview 控制器
@@ -111,8 +121,14 @@ class _HomePageState extends State<HomePage> {
 
   String? exportMidiStr; //导出midi需要的字符串数据
   // final FlutterSoundRecord audioRecorder = FlutterSoundRecord();
-  final RecorderController recorderController =
-      RecorderController(); // Initialise
+  // final FlutterSoundRecorder recorderController =
+  //     FlutterSoundRecorder(); // Initialise
+
+  ///节拍器开启后第二小节起始时间
+  int secondMeasureStartTimStamp = 0;
+  String? recordAudioPath;
+  RxBool isRecording = false.obs;
+  AudioRecorder? audioRecord;
 
   void getAppVersion(Function callback) async {
     // debugger();
@@ -1006,7 +1022,12 @@ class _HomePageState extends State<HomePage> {
     var result = await showModalBottomSheet(
       context: context,
       builder: (BuildContext context) {
-        return const JiePaiQi();
+        return JiePaiQi(
+          jiepaiCallback: () {
+            debugPrint('jiepaiCallback');
+            secondMeasureStartTimStamp = DateTime.now().millisecondsSinceEpoch;
+          },
+        );
       },
       isDismissible: false,
     );
@@ -1057,6 +1078,48 @@ class _HomePageState extends State<HomePage> {
                         ),
                         Row(
                           children: [
+                            Obx(
+                              () => selectstate.value == 1
+                                  ? BorderBottomBtn(
+                                      width: 372.w,
+                                      height: isWindowsOrMac ? 123.h : 96.h,
+                                      text: '专业输入模式'.tr,
+                                      icon: SvgPicture.asset(
+                                        'assets/images/ic_arrowdown.svg',
+                                        width: 28.w,
+                                        height: 21.h,
+                                      ),
+                                      onPressed: () {
+                                        debugPrint("专业输入模式");
+                                        showJiepai();
+                                        isZhuanyeMode = !isZhuanyeMode;
+                                      },
+                                    ).marginOnly(right: 4)
+                                  : SizedBox.shrink(),
+                            ),
+                            Obx(() => BorderBottomBtn(
+                                  width: 372.w,
+                                  height: isWindowsOrMac ? 123.h : 96.h,
+                                  text:
+                                      isRecording.value ? '结束录音'.tr : '开始录音'.tr,
+                                  icon: SvgPicture.asset(
+                                    'assets/images/ic_arrowdown.svg',
+                                    width: 28.w,
+                                    height: 21.h,
+                                  ),
+                                  onPressed: () {
+                                    debugPrint("开始录音");
+                                    if (isRecording.value) {
+                                      isRecording.value = false;
+                                      toastInfo(msg: '结束录音，开始分析'.tr);
+                                      stopRecording();
+                                    } else {
+                                      isRecording.value = true;
+                                      recordAudio();
+                                      toastInfo(msg: '开始录音'.tr);
+                                    }
+                                  },
+                                ).marginOnly(right: 4)),
                             Obx(
                               () => selectstate.value == 0
                                   ? BorderBottomBtn(
@@ -1128,12 +1191,7 @@ class _HomePageState extends State<HomePage> {
                               ),
                               onPressed: () async {
                                 debugPrint('Settings');
-                                // showJiepai();
-                                // if (recorderController.isRecording) {
-                                //   stopRecording();
-                                // } else {
-                                //   recordAudio();
-                                // }
+                                // testMidiToABCConverter();
                                 // return;
                                 if (isShowOverlay) {
                                   closeOverlay();
@@ -2733,13 +2791,33 @@ class _HomePageState extends State<HomePage> {
               if (selectstate.value == 0) {
                 return;
               }
-              Uint8List sublist = value.sublist(2);
-              debugPrint(
-                  'onValueChanged $deviceId, $characteristicId, $sublist');
-              int timestampMilliseconds = DateTime.now().millisecondsSinceEpoch;
-              debugPrint('当前时间戳（毫秒）: $timestampMilliseconds');
-              var result = convertABC.midiToABC(sublist, false);
-              debugPrint('convertdata=$result');
+              debugPrint('all=$value');
+              List<dynamic> result = [];
+              if (!isZhuanyeMode) {
+                Uint8List sublist = value.sublist(2);
+                debugPrint(
+                    'onValueChanged $deviceId, $characteristicId, $sublist');
+                result = convertABC.midiToABC(sublist, false);
+                debugPrint('222convertdata=$result');
+              } else {
+                Uint8List sublist = value.sublist(2, 4);
+                int timestampGap = DateTime.now().millisecondsSinceEpoch -
+                    secondMeasureStartTimStamp;
+                debugPrint('当前时间戳间隔（毫秒）: $timestampGap');
+                List<int> newList = List.from(sublist);
+                newList.add(timestampGap);
+                debugPrint(
+                    'onValueChanged $deviceId, $characteristicId, $newList');
+                if (sublist[0] == 144) {
+                  midiEvents.clear();
+                  midiEvents.add(newList);
+                } else {
+                  midiEvents.add(newList);
+                  debugPrint('midiEvents=$midiEvents');
+                  // result = rhythmAnalysisTest(midiEvents).split('/');
+                  debugPrint('333convertdata=$result');
+                }
+              }
               if ((result[0] as String).isNotEmpty) {
                 String path = convertABC.getNoteMp3Path(result[1]);
                 updatePianoNote(result[1]);
@@ -2961,6 +3039,16 @@ class _HomePageState extends State<HomePage> {
 
   Future<void> recordAudio() async {
     Directory tempDir = await getApplicationCacheDirectory();
+    audioRecord ??= AudioRecorder();
+    if (await audioRecord!.hasPermission()) {
+      await audioRecord!.start(
+          RecordConfig(
+            encoder: AudioEncoder.wav,
+            sampleRate: 22050,
+          ),
+          path: '${tempDir.path}/myFile.wav');
+    }
+
     // bool result = await audioRecorder.hasPermission();
     // if (result) {
     //   await audioRecorder.start(
@@ -2973,33 +3061,75 @@ class _HomePageState extends State<HomePage> {
     //   debugPrint('no permission to record');
     // }
 
-    final hasPermission = await recorderController
-        .checkPermission(); // Check mic permission (also called during record)
-    if (hasPermission) {
-      debugPrint('has permission to start record');
-      await recorderController.record(
-          path: '${tempDir.path}/recordaudio.wav'); // Record (path is optional)
-    } else {
-      debugPrint('no permission to record');
-      toastInfo(msg: 'no permission to record');
-    }
+    // final hasPermission = await recorderController
+    //     .checkPermission(); // Check mic permission (also called during record)
+    // if (hasPermission) {
+    //   debugPrint('has permission to start record');
+    //   await recorderController.record(
+    //       sampleRate: 22050,
+    //       bitRate: 128000,
+    //       path: '${tempDir.path}/recordaudio.wav'); // Record (path is optional)
+    // } else {
+    //   debugPrint('no permission to record');
+    //   toastInfo(msg: 'no permission to record');
+    // }
+    // await recorderController.openRecorder();
+    // await recorderController.startRecorder(
+    //   toFile: 'recordaudio.wav',
+    //   codec: Codec.pcm16WAV,
+    //   sampleRate: 22050,
+    //   numChannels: 1,
+    // );
   }
 
   Future<void> stopRecording() async {
+    if (await audioRecord!.isRecording()) {
+      recordAudioPath = await audioRecord!.stop();
+      // audioRecord!.cancel();
+      // audioRecord!.dispose();
+      // audioRecord = null;
+      debugPrint('stopRecording path=$recordAudioPath');
+      basicPitch(recordAudioPath!);
+    }
+
     // bool isRecording = await audioRecorder.isRecording();
     // if (isRecording) {
     //   await audioRecorder.stop();
     // }
 
     // await recorderController.pause(); // Pause recording
-    if (recorderController.isRecording) {
-      final path =
-          await recorderController.stop(); // Stop recording and get the path
-      // recorderController.refresh(); // Refresh waveform to original position
-      recorderController.dispose(); // Dispose controller
-      debugPrint('stopRecording path=$path');
+    // if (recorderController.isRecording) {
+    //   recordAudioPath = await recorderController
+    //       .stopRecorder(); // Stop recording and get the path
+    //   // recorderController.refresh(); // Refresh waveform to original position
+    //   debugPrint('stopRecording path=$recordAudioPath');
+    //   basicPitch(recordAudioPath!);
+    // } else {
+    //   debugPrint('no recording');
+    // }
+  }
+
+  Future<List<int>> basicPitch(String path) async {
+    var pitchs = <int>[];
+    final basicPitchInstance = BasicPitch();
+    basicPitchInstance.init();
+    // path = await CommonUtils.copyFileFromAssets('test_audio.wav');
+    // path = await CommonUtils.copyFileFromAssets('test_audio1.wav');
+    // path = '/data/user/0/com.rwkvos.rwkvmusic/cache/myFile.wav';
+    if (File(path).existsSync()) {
+      debugPrint('$path exists');
+      final audioData = await File(path).readAsBytes();
+      final noteEvents = await basicPitchInstance.predictBytes(audioData);
+      debugPrint('noteEvents=${noteEvents.length}');
+      for (var note in noteEvents) {
+        print(
+            "start: ${note['start']}, end: ${note['end']}, pitch: ${note['pitch']}");
+        pitchs.add(int.parse('${note['pitch']}'));
+      }
+      basicPitchInstance.release();
     } else {
-      debugPrint('no recording');
+      debugPrint('$path not exists');
     }
+    return pitchs;
   }
 }

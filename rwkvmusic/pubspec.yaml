@@ -30,10 +30,15 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-
+    
+  fraction: ^5.0.3
+  basic_pitch_flutter:
+    git:
+      url: https://github.com/MollySophia/basic_pitch_flutter.git
   sound_effect: ^0.0.2
   wheel_picker: ^0.1.0
-  flutter_sound_record: ^3.3.2 
+  # flutter_sound_record: ^3.3.2 
+  record: ^5.2.0
   audio_waveforms: ^1.1.1
   file_md5: ^0.0.1
   app_installer: ^1.2.0

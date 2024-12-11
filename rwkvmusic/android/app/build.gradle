@@ -66,4 +66,8 @@ flutter {
     source '../..'
 }
 
-dependencies {}
+dependencies {
+    implementation('org.jetbrains.kotlin:kotlin-stdlib:1.8.20') {
+        exclude group: 'org.jetbrains.kotlin', module: 'kotlin-stdlib-jdk8'  // 排除 jdk8
+    }
+}
