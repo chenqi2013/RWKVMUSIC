@@ -25,6 +25,7 @@ import 'package:rwkvmusic/RhythmAnalysis.dart';
 import 'package:rwkvmusic/agree_dialog.dart';
 import 'package:rwkvmusic/duihuanma_dialog.dart';
 import 'package:rwkvmusic/feedback_page.dart';
+import 'package:rwkvmusic/jiepai/jiepai_audioplayer.dart';
 import 'package:rwkvmusic/jiepai/jiepaiqi.dart';
 import 'package:rwkvmusic/main.dart';
 import 'package:rwkvmusic/mainwidget/custom_segment_controller.dart';
@@ -91,8 +92,9 @@ String appVersionNumber = '_1.6.2_20241128';
 String appVersion = 'ncnn' + appVersionNumber;
 
 ///是否专业输入模式
-bool isZhuanyeMode = false;
+RxBool isZhuanyeMode = false.obs;
 List<List<int>> midiEvents = [];
+int testi = 0;
 
 class _HomePageState extends State<HomePage> {
   /// 键盘 webview 控制器
@@ -364,8 +366,7 @@ class _HomePageState extends State<HomePage> {
           debugPrint('isShowDialog return');
           return;
         }
-        String name =
-            MidiToABCConverter().getNoteMp3Path(int.parse(jsMessage.message));
+        String name = convertABC.getNoteMp3Path(int.parse(jsMessage.message));
         playNoteMp3(name);
         updatePianoNote(int.parse(jsMessage.message));
       });
@@ -790,7 +791,7 @@ class _HomePageState extends State<HomePage> {
   ///
   /// 1. 通过按下虚拟键盘触发
   void updatePianoNote(int node) async {
-    String noteName = MidiToABCConverter().getNoteName(node);
+    String noteName = convertABC.getNoteName(node);
 
     final selected = selectedNote.value;
 
@@ -803,6 +804,27 @@ class _HomePageState extends State<HomePage> {
     final noteLength = inputNoteLength.value;
     noteName = noteName + noteLength.end;
 
+    gloableTranspose.value = 0;
+    virtualNotes.add(noteName);
+
+    final virtualNotesStr = _virtualNotesToString();
+    createPrompt = virtualNotesStr;
+
+    String splitMeasureAndChordStr = splitMeasureAndChord(createPrompt);
+    createPrompt = splitMeasureAndChordStr.replaceAll("\\n", "\n");
+    String sb;
+    if (isChangeTempo) {
+      sb =
+          "setAbcString(\"Q:1/4=${tempo.value.toInt()}\\n$splitMeasureAndChordStr\",false)";
+    } else {
+      sb =
+          "setAbcString(\"%%MIDI program $midiProgramValue\\n$splitMeasureAndChordStr\",false)";
+    }
+    finalabcStringCreate = ABCHead.appendTempoParam(sb, tempo.value.toInt());
+    await _change(finalabcStringCreate);
+  }
+
+  void updateMidiNote(String noteName) async {
     gloableTranspose.value = 0;
     virtualNotes.add(noteName);
 
@@ -1081,9 +1103,11 @@ class _HomePageState extends State<HomePage> {
                             Obx(
                               () => selectstate.value == 1
                                   ? BorderBottomBtn(
-                                      width: 372.w,
+                                      width: 250.w,
                                       height: isWindowsOrMac ? 123.h : 96.h,
-                                      text: '专业输入模式'.tr,
+                                      text: !isZhuanyeMode.value
+                                          ? '开始专业输入'
+                                          : '结束专业输入',
                                       icon: SvgPicture.asset(
                                         'assets/images/ic_arrowdown.svg',
                                         width: 28.w,
@@ -1091,35 +1115,60 @@ class _HomePageState extends State<HomePage> {
                                       ),
                                       onPressed: () {
                                         debugPrint("专业输入模式");
-                                        showJiepai();
-                                        isZhuanyeMode = !isZhuanyeMode;
+                                        isZhuanyeMode.value =
+                                            !isZhuanyeMode.value;
+                                        if (isZhuanyeMode.value) {
+                                          midiEvents.clear();
+                                          JiepaiAudioPlayerManage()
+                                              .startMetronome();
+                                        } else {
+                                          JiepaiAudioPlayerManage().stopAudio();
+                                        }
                                       },
                                     ).marginOnly(right: 4)
                                   : SizedBox.shrink(),
                             ),
-                            Obx(() => BorderBottomBtn(
-                                  width: 372.w,
-                                  height: isWindowsOrMac ? 123.h : 96.h,
-                                  text:
-                                      isRecording.value ? '结束录音'.tr : '开始录音'.tr,
-                                  icon: SvgPicture.asset(
-                                    'assets/images/ic_arrowdown.svg',
-                                    width: 28.w,
-                                    height: 21.h,
-                                  ),
-                                  onPressed: () {
-                                    debugPrint("开始录音");
-                                    if (isRecording.value) {
-                                      isRecording.value = false;
-                                      toastInfo(msg: '结束录音，开始分析'.tr);
-                                      stopRecording();
-                                    } else {
-                                      isRecording.value = true;
-                                      recordAudio();
-                                      toastInfo(msg: '开始录音'.tr);
-                                    }
-                                  },
-                                ).marginOnly(right: 4)),
+                            Obx(() => selectstate.value == 1
+                                ? BorderBottomBtn(
+                                    width: 180.w,
+                                    height: isWindowsOrMac ? 123.h : 96.h,
+                                    text: '节拍器',
+                                    icon: SvgPicture.asset(
+                                      'assets/images/ic_arrowdown.svg',
+                                      width: 28.w,
+                                      height: 21.h,
+                                    ),
+                                    onPressed: () {
+                                      showJiepai();
+                                    },
+                                  ).marginOnly(right: 4)
+                                : SizedBox.shrink()),
+                            Obx(() => selectstate.value == 1
+                                ? Obx(() => BorderBottomBtn(
+                                      width: 230.w,
+                                      height: isWindowsOrMac ? 123.h : 96.h,
+                                      text: isRecording.value
+                                          ? '结束录音'.tr
+                                          : '开始录音'.tr,
+                                      icon: SvgPicture.asset(
+                                        'assets/images/ic_arrowdown.svg',
+                                        width: 28.w,
+                                        height: 21.h,
+                                      ),
+                                      onPressed: () {
+                                        debugPrint("开始录音");
+                                        if (isRecording.value) {
+                                          isRecording.value = false;
+                                          toastInfo(msg: '结束录音，开始分析'.tr);
+                                          stopRecording();
+                                        } else {
+                                          isRecording.value = true;
+                                          recordAudio();
+                                          toastInfo(msg: '开始录音'.tr);
+                                        }
+                                      },
+                                    ).marginOnly(right: 4))
+                                : SizedBox.shrink()),
                             Obx(
                               () => selectstate.value == 0
                                   ? BorderBottomBtn(
@@ -1191,8 +1240,22 @@ class _HomePageState extends State<HomePage> {
                               ),
                               onPressed: () async {
                                 debugPrint('Settings');
-                                // testMidiToABCConverter();
-                                // return;
+                                testi++;
+                                if (testi % 2 == 0) {
+                                  midiDataToABCConverter(<List<int>>[
+                                    [144, 67, 23],
+                                    [128, 67, 500],
+                                  ]);
+                                } else {
+                                  midiDataToABCConverter(<List<int>>[
+                                    [144, 67, 23],
+                                    [128, 67, 500],
+                                    [144, 62, 550],
+                                    [128, 62, 1000],
+                                  ]);
+                                }
+
+                                return;
                                 if (isShowOverlay) {
                                   closeOverlay();
                                 }
@@ -2793,12 +2856,17 @@ class _HomePageState extends State<HomePage> {
               }
               debugPrint('all=$value');
               List<dynamic> result = [];
-              if (!isZhuanyeMode) {
+              if (!isZhuanyeMode.value) {
                 Uint8List sublist = value.sublist(2);
                 debugPrint(
                     'onValueChanged $deviceId, $characteristicId, $sublist');
                 result = convertABC.midiToABC(sublist, false);
                 debugPrint('222convertdata=$result');
+                if ((result[0] as String).isNotEmpty) {
+                  String path = convertABC.getNoteMp3Path(result[1]);
+                  updatePianoNote(result[1]);
+                  playNoteMp3(path);
+                }
               } else {
                 Uint8List sublist = value.sublist(2, 4);
                 int timestampGap = DateTime.now().millisecondsSinceEpoch -
@@ -2809,19 +2877,15 @@ class _HomePageState extends State<HomePage> {
                 debugPrint(
                     'onValueChanged $deviceId, $characteristicId, $newList');
                 if (sublist[0] == 144) {
-                  midiEvents.clear();
                   midiEvents.add(newList);
+                  String name = convertABC
+                      .getNoteMp3Path(int.parse(sublist[1].toString()));
+                  playNoteMp3(name);
                 } else {
                   midiEvents.add(newList);
                   debugPrint('midiEvents=$midiEvents');
-                  // result = rhythmAnalysisTest(midiEvents).split('/');
-                  debugPrint('333convertdata=$result');
+                  midiDataToABCConverter(midiEvents);
                 }
-              }
-              if ((result[0] as String).isNotEmpty) {
-                String path = convertABC.getNoteMp3Path(result[1]);
-                updatePianoNote(result[1]);
-                playNoteMp3(path);
               }
             };
           }
@@ -3130,8 +3194,8 @@ class _HomePageState extends State<HomePage> {
         print(
             "start: ${note['start']}, end: ${note['end']}, pitch: ${note['pitch']}");
         pitchs.add(int.parse('${note['pitch']}'));
-        String name = MidiToABCConverter()
-            .getNoteMp3Path(int.parse(note['pitch'].toString()));
+        // String name = convertABC
+        //     .getNoteMp3Path(int.parse(note['pitch'].toString()));
         // playNoteMp3(name);
         updatePianoNote(int.parse(note['pitch'].toString()));
       }
@@ -3140,5 +3204,34 @@ class _HomePageState extends State<HomePage> {
       debugPrint('$path not exists');
     }
     return pitchs;
+  }
+
+  void midiDataToABCConverter(List<List<int>> midiEvents) {
+    MidiDataToABCConverter converter =
+        MidiDataToABCConverter(bpm: 120, precision: "1/16", tolerance: 0.1);
+
+    // midiEvents = [
+    //   [144, 67, 23],
+    //   [128, 67, 500],
+    //   [144, 62, 550],
+    //   [128, 62, 1000],
+    //   [144, 64, 1000],
+    //   [128, 64, 1500],
+    //   [144, 65, 1500],
+    //   [128, 65, 2000],
+    //   [144, 67, 2000],
+    //   [128, 67, 2500],
+    //   [144, 69, 2500],
+    //   [128, 69, 3000],
+    //   [144, 71, 3000],
+    //   [128, 71, 3500],
+    //   [144, 72, 3500],
+    //   [128, 72, 4000],
+    // ];
+
+    for (var event in midiEvents) {
+      updateMidiNote(converter.processMidiEvent(event));
+      Future.delayed(Duration(milliseconds: 530)); // 模拟实时处理的延迟
+    }
   }
 }

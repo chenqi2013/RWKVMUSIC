@@ -49,7 +49,7 @@ class MidiDataToABCConverter {
     return "L:1/4\nM:$timeSignature\nQ:1/4=$bpm\n";
   }
 
-  void processMidiEvent(List<int> event) {
+  String processMidiEvent(List<int> event) {
     int status = event[0];
     int pitch = event[1];
     double timestamp = event[2] / 1000.0; // 转换为秒
@@ -72,7 +72,7 @@ class MidiDataToABCConverter {
       }
     }
 
-    outputAbcNotation();
+    return outputAbcNotation();
   }
 
   void forceEndNote(int pitch, double timestamp) {
@@ -143,39 +143,10 @@ class MidiDataToABCConverter {
     return lengthStr;
   }
 
-  void outputAbcNotation() {
+  String outputAbcNotation() {
     String abcBody = processedNotes.join(' ');
     String abcNotation = header + abcBody;
     print(abcBody);
-  }
-}
-
-// 示例使用
-void testMidiToABCConverter() {
-  MidiDataToABCConverter converter =
-      MidiDataToABCConverter(bpm: 120, precision: "1/16", tolerance: 0.1);
-
-  List<List<int>> midiEvents = [
-    [144, 67, 23],
-    [128, 67, 500],
-    [144, 62, 550],
-    [128, 62, 1000],
-    [144, 64, 1000],
-    [128, 64, 1500],
-    [144, 65, 1500],
-    [128, 65, 2000],
-    [144, 67, 2000],
-    [128, 67, 2500],
-    [144, 69, 2500],
-    [128, 69, 3000],
-    [144, 71, 3000],
-    [128, 71, 3500],
-    [144, 72, 3500],
-    [128, 72, 4000],
-  ];
-
-  for (var event in midiEvents) {
-    converter.processMidiEvent(event);
-    Future.delayed(Duration(milliseconds: 530)); // 模拟实时处理的延迟
+    return abcBody;
   }
 }

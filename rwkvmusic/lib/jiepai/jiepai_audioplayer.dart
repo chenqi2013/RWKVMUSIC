@@ -4,9 +4,10 @@ import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:sound_effect/sound_effect.dart';
 
-class AudioPlayerManage {
-  static final AudioPlayerManage _instance = AudioPlayerManage._internal();
-  factory AudioPlayerManage() => _instance;
+class JiepaiAudioPlayerManage {
+  static final JiepaiAudioPlayerManage _instance =
+      JiepaiAudioPlayerManage._internal();
+  factory JiepaiAudioPlayerManage() => _instance;
   late SoundEffect? _soundEffect;
   int beatCount = 0;
   RxInt beatsPerBar = 3.obs; // 每小节拍数 (3/4 拍)
@@ -20,7 +21,7 @@ class AudioPlayerManage {
   /// 小节数为2开始计算接收midi数据的时间戳
   int measureCount = 0;
   Function? callback;
-  AudioPlayerManage._internal() {
+  JiepaiAudioPlayerManage._internal() {
     loadAll();
   }
 

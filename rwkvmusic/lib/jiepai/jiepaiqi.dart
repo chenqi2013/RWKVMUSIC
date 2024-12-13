@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:rwkvmusic/jiepai/audioplayer.dart';
+import 'package:rwkvmusic/jiepai/jiepai_audioplayer.dart';
 import 'package:rwkvmusic/jiepai/jiepai_wheel.dart';
 import 'package:rwkvmusic/values/constantdata.dart';
 
@@ -24,7 +24,7 @@ class _JiePaiQiState extends State<JiePaiQi> {
   // // final int bpm = 60; // 设置每分钟节拍数 (BPM)
   // RxInt beatsPerBar = 3.obs; // 每小节拍数 (3/4 拍)
 
-  AudioPlayerManage audioPlayerManage = AudioPlayerManage();
+  JiepaiAudioPlayerManage audioPlayerManage = JiepaiAudioPlayerManage();
   @override
   void initState() {
     super.initState();
