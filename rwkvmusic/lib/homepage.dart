@@ -303,7 +303,8 @@ class _HomePageState extends State<HomePage> {
       ..addJavaScriptChannel("flutterOnTapEmpty",
           onMessageReceived: _flutterOnTapEmptyReceived)
       ..addJavaScriptChannel("flutterOnClickChord",
-          onMessageReceived: _onReceiveChordClick);
+          onMessageReceived: _onReceiveChordClick)
+      ..enableZoom(false);
 
     controllerKeyboard = WebViewControllerPlus()
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
@@ -342,6 +343,7 @@ class _HomePageState extends State<HomePage> {
         updatePianoNote(int.parse(jsMessage.message));
       });
     controllerKeyboard.loadFlutterAssetServer(filePathKeyboardAnimation);
+    controllerKeyboard.enableZoom(false);
     // controllerKeyboard.loadRequest(Uri.parse(filePathKeyboardAnimation));
 
     eventBus.on().listen((event) {
