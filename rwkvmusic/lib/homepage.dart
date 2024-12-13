@@ -799,10 +799,13 @@ class _HomePageState extends State<HomePage> {
     // ABCHead.testchord_split(needSplitStr);
     splitMeasure = splitMeasureAbc(needSplitStr);
     if (kDebugMode) print('splitMeasureAbcStr---$splitMeasure');
-    // 每一节生成一个和弦
-    chords = generateChordAbcNotation(splitMeasure!);
-    if (kDebugMode) print('generateChordAbcNotation---$chords');
-    String combineabcChord = ABCHead.combineAbc_Chord(chords[0], splitMeasure!);
+    String combineabcChord = splitMeasure!;
+    if (autoChord.value) {
+      // 每一节生成一个和弦
+      chords = generateChordAbcNotation(splitMeasure!);
+      if (kDebugMode) print('generateChordAbcNotation---$chords');
+      combineabcChord = ABCHead.combineAbc_Chord(chords[0], splitMeasure!);
+    }
     if (kDebugMode) print('combineAbc_Chord---$combineabcChord');
     needSplitStr = combineabcChord.replaceAll("\n", "\\n");
     return needSplitStr;
