@@ -33,6 +33,19 @@ enum ModelType {
   webgpu,
 }
 
+// 1. 定义一个类来存储音符事件
+class NoteEvent {
+  final int pitch;
+  final double onsetTime; // 以秒为单位
+  double offsetTime; // 以秒为单位
+
+  NoteEvent({
+    required this.pitch,
+    required this.onsetTime,
+    required this.offsetTime,
+  });
+}
+
 const listJiepai = ['1', '2', '4', '8', '16'];
 
 enum DownloadStatus {

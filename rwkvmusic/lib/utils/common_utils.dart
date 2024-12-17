@@ -447,6 +447,36 @@ class CommonUtils {
     return isValid;
   }
 
+  /// 3. 合并相邻的同音音符
+  static List<NoteEvent> mergeAdjacentNotes(List<NoteEvent> notes,
+      {double gapThreshold = 0.05}) {
+    if (notes.isEmpty) {
+      return [];
+    }
+
+    // 按照起始时间排序
+    notes.sort((a, b) => a.onsetTime.compareTo(b.onsetTime));
+
+    List<NoteEvent> mergedNotes = [notes.first];
+
+    for (int i = 1; i < notes.length; i++) {
+      NoteEvent currentNote = notes[i];
+      NoteEvent lastMergedNote = mergedNotes.last;
+
+      // 检查是否为同音且间隔小于等于阈值
+      if (currentNote.pitch == lastMergedNote.pitch &&
+          (currentNote.onsetTime - lastMergedNote.offsetTime) <= gapThreshold) {
+        // 合并音符：更新最后一个音符的结束时间
+        lastMergedNote.offsetTime = currentNote.offsetTime;
+      } else {
+        // 否则，添加新的音符
+        mergedNotes.add(currentNote);
+      }
+    }
+
+    return mergedNotes;
+  }
+
   // void getABCDataByAPI() async {
   //   var dic = {
   //     "frequency_penalty": 0.4,

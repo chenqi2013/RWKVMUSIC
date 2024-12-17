@@ -3177,33 +3177,59 @@ class _HomePageState extends State<HomePage> {
     var pitchs = <int>[];
     final basicPitchInstance = BasicPitch();
     basicPitchInstance.init();
+
+    // 复制音频文件并获取新路径
     // path = await CommonUtils.copyFileFromAssets('test_audio.wav');
-    // path = await CommonUtils.copyFileFromAssets('test_audio1.wav');
-    // path = '/data/user/0/com.rwkvos.rwkvmusic/cache/myFile.wav';
+
     if (File(path).existsSync()) {
       debugPrint('$path exists');
       resetToDefaulValueInCreateMode();
       final audioData = await File(path).readAsBytes();
       final noteEvents = await basicPitchInstance.predictBytes(audioData);
       debugPrint('noteEvents=${noteEvents.length}');
+
       if (noteEvents.isEmpty) {
         toastInfo(msg: '无法识别当前哼唱内容，请重新录制');
       }
+
+      // 2. 收集音符事件
+      List<NoteEvent> noteEventsList = [];
       for (int i = noteEvents.length - 1; i >= 0; i--) {
         var note = noteEvents[i];
         print(
             "start: ${note['start']}, end: ${note['end']}, pitch: ${note['pitch']}");
-        pitchs.add(int.parse('${note['pitch']}'));
-        // String name = convertABC
-        //     .getNoteMp3Path(int.parse(note['pitch'].toString()));
-        // playNoteMp3(name);
-        updatePianoNote(int.parse(note['pitch'].toString()));
+        int pitch = int.parse('${note['pitch']}');
+        double onsetTime =
+            double.parse(note['start'].toString()); // 'start' 以秒为单位
+        double offsetTime = double.parse(note['end'].toString()); // 'end' 以秒为单位
+
+        noteEventsList.add(NoteEvent(
+          pitch: pitch,
+          onsetTime: onsetTime,
+          offsetTime: offsetTime,
+        ));
       }
+
       basicPitchInstance.release();
+
+      // 3. 合并相邻的同音音符
+      List<NoteEvent> mergedNotes =
+          CommonUtils.mergeAdjacentNotes(noteEventsList, gapThreshold: 0.05);
+
+      // 4. 生成最终的音高列表
+      pitchs = mergedNotes.map((note) => note.pitch).toList();
+
+      // 更新钢琴键或执行其他操作
+      for (var note in mergedNotes) {
+        updatePianoNote(note.pitch);
+        // 如果需要，可以在这里播放音符或进行其他处理
+      }
+
+      return pitchs;
     } else {
       debugPrint('$path not exists');
+      return [];
     }
-    return pitchs;
   }
 
   void midiDataToABCConverter(List<List<int>> midiEvents) {
