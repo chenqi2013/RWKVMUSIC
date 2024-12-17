@@ -146,7 +146,6 @@ class MidiDataToABCConverter {
   String outputAbcNotation() {
     String abcBody = processedNotes.join(' ');
     String abcNotation = header + abcBody;
-    print(abcBody);
     return abcBody;
   }
 }

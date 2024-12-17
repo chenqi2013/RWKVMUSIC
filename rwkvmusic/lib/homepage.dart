@@ -1121,6 +1121,9 @@ class _HomePageState extends State<HomePage> {
                                           midiEvents.clear();
                                           JiepaiAudioPlayerManage()
                                               .startMetronome();
+                                          secondMeasureStartTimStamp =
+                                              DateTime.now()
+                                                  .millisecondsSinceEpoch;
                                         } else {
                                           JiepaiAudioPlayerManage().stopAudio();
                                         }
@@ -2901,6 +2904,25 @@ class _HomePageState extends State<HomePage> {
     };
   }
 
+  void clearCreateModeData() {
+    selectedNote.value = null;
+    virtualNotes.clear();
+    gloableTranspose.value = 0;
+    // intNodes.clear();
+    timeSingnatureStr = "4/4";
+    timeSignature.value = 2;
+    finalabcStringCreate =
+        "setAbcString(\"${ABCHead.getABCWithInstrument('L:1/4\\nM:$timeSingnatureStr\\nK:C\\n|', midiProgramValue)}\",false)";
+    finalabcStringCreate =
+        ABCHead.appendTempoParam(finalabcStringCreate, tempo.value.toInt());
+    // _change(finalabcStringCreate);
+    // controllerPiano.runJavaScript("setPromptNoteNumberCount(0)");
+    // controllerPiano.runJavaScript("setStyle()");
+    // controllerKeyboard.loadFlutterAssetServer(filePathKeyboard);
+    // // controllerKeyboard.runJavaScript('resetPlay()');
+    createPrompt = '';
+  }
+
   Future<void> shareFile(String filepath) async {
     if (kDebugMode) print('shareFile path=$filepath');
     ShareExtend.share(filepath, "file");
@@ -3237,6 +3259,21 @@ class _HomePageState extends State<HomePage> {
         MidiDataToABCConverter(bpm: 120, precision: "1/16", tolerance: 0.1);
 
     // midiEvents = [
+    //   [144, 59, 1377],
+    //   [128, 59, 1446],
+    //   [144, 57, 1632],
+    //   [128, 57, 1717],
+    //   [144, 55, 2070],
+    //   [128, 55, 2114],
+    //   [144, 53, 2416],
+    //   [128, 53, 2482],
+    //   [144, 59, 2809],
+    //   [128, 59, 2876],
+    //   [144, 60, 3092],
+    //   [128, 60, 3193]
+    // ];
+
+    // midiEvents = [
     //   [144, 67, 23],
     //   [128, 67, 500],
     //   [144, 62, 550],
@@ -3256,8 +3293,10 @@ class _HomePageState extends State<HomePage> {
     // ];
 
     for (var event in midiEvents) {
-      updateMidiNote(converter.processMidiEvent(event));
-      Future.delayed(Duration(milliseconds: 530)); // 模拟实时处理的延迟
+      String noteName = converter.processMidiEvent(event);
+      debugPrint('noteName:$noteName');
+      clearCreateModeData();
+      updateMidiNote(noteName);
     }
   }
 }
