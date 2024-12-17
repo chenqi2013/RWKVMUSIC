@@ -94,7 +94,6 @@ String appVersion = 'ncnn' + appVersionNumber;
 ///是否专业输入模式
 RxBool isZhuanyeMode = false.obs;
 List<List<int>> midiEvents = [];
-int testi = 0;
 
 class _HomePageState extends State<HomePage> {
   /// 键盘 webview 控制器
@@ -1243,22 +1242,6 @@ class _HomePageState extends State<HomePage> {
                               ),
                               onPressed: () async {
                                 debugPrint('Settings');
-                                testi++;
-                                if (testi % 2 == 0) {
-                                  midiDataToABCConverter(<List<int>>[
-                                    [144, 67, 23],
-                                    [128, 67, 500],
-                                  ]);
-                                } else {
-                                  midiDataToABCConverter(<List<int>>[
-                                    [144, 67, 23],
-                                    [128, 67, 500],
-                                    [144, 62, 550],
-                                    [128, 62, 1000],
-                                  ]);
-                                }
-
-                                return;
                                 if (isShowOverlay) {
                                   closeOverlay();
                                 }
