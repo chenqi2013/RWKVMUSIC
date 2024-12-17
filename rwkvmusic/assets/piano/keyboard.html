@@ -207,7 +207,7 @@
       // 设置钢琴键盘的宽度
       document.getElementById("keyboard").style.width = `${keyboardWidth}px`;
 
-      // JavaScript 代码用于动态创建钢琴键盘
+      // JavaScript 代码���于动态创建钢琴键盘
       window.setPiano = function (start, end) {
         start = 24; // 修改起始键为C1(24)
         end = 84; // 修改结束键为C6(84)
@@ -272,7 +272,7 @@
             const whichGroup = parseInt(renderMidiKey / 12);
             const currentNum = renderMidiKey % 12;
 
-            // 每七个白键为一组，分别为ABCDEFG，这里要展示C键和第几组
+            // 每白键为一组，分别为ABCDEFG，这里要展示C键和第几组
             if (currentNum === 4) {
               key.innerText = `C${whichGroup + 1}`;
             }
@@ -359,9 +359,9 @@
         }
       };
       setPiano(24, 84);
-      const key55 = document.querySelector('.key[data-midikey="55"]');
-      console.log(key55);
-      key55.scrollIntoView({
+      const keyC4 = document.querySelector('.key[data-midikey="60"]');
+      console.log(keyC4);
+      keyC4.scrollIntoView({
         behavior: "smooth",
         block: "center",
         inline: "center",
