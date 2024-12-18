@@ -2315,16 +2315,7 @@ class _HomePageState extends State<HomePage> {
                                           }
                                           if (state ==
                                               BleConnectionState.connected) {
-                                            isShowDialog = false;
-                                            if (isWindowsOrMac) {
-                                              Get.snackbar('tips'.tr,
-                                                  'midi keyboard connected'.tr,
-                                                  colorText: Colors.black);
-                                            } else {
-                                              toastInfo(
-                                                  msg: 'midi keyboard connected'
-                                                      .tr);
-                                            }
+                                            connectedLogic(connectDeviceId!);
                                           } else {
                                             showConnectDialog(context);
                                           }
@@ -2673,43 +2664,7 @@ class _HomePageState extends State<HomePage> {
         (String deviceId, BleConnectionState state) async {
       debugPrint('OnConnectionChanged $deviceId, $state');
       if (state == BleConnectionState.connected) {
-        isShowDialog = false;
-        connectDeviceId = device.deviceId;
-        if (isWindowsOrMac) {
-          Get.snackbar(device.name!, 'device connected'.tr,
-              colorText: Colors.black);
-        } else {
-          toastInfo(msg: 'device connected'.tr);
-        }
-        // Discover services of a specific device
-        List<BleService> bleServices =
-            await UniversalBle.discoverServices(deviceId);
-        for (BleService service in bleServices) {
-          debugPrint('ble serviceid==${service.uuid}');
-          debugPrint('ble BleCharacteristic==${service.characteristics}');
-          for (BleCharacteristic characteristic in service.characteristics) {
-            // Subscribe to a characteristic
-            UniversalBle.setNotifiable(deviceId, service.uuid,
-                characteristic.uuid, BleInputProperty.notification);
-            // Get characteristic updates in `onValueChanged`
-            UniversalBle.onValueChanged =
-                (String deviceId, String characteristicId, Uint8List value) {
-              if (selectstate.value == 0) {
-                return;
-              }
-              Uint8List sublist = value.sublist(2);
-              debugPrint(
-                  'onValueChanged $deviceId, $characteristicId, $sublist');
-              var result = convertABC.midiToABC(sublist, false);
-              debugPrint('convertdata=$result');
-              if ((result[0] as String).isNotEmpty) {
-                String path = convertABC.getNoteMp3Path(result[1]);
-                updatePianoNote(result[1]);
-                playNoteMp3(path);
-              }
-            };
-          }
-        }
+        connectedLogic(device.deviceId);
       } else if (state == BleConnectionState.disconnected) {
         if (isWindowsOrMac) {
           Get.snackbar(device.name!, 'device disconnected'.tr,
@@ -2719,6 +2674,44 @@ class _HomePageState extends State<HomePage> {
         }
       }
     };
+  }
+
+  void connectedLogic(String deviceId) async {
+    isShowDialog = false;
+    connectDeviceId = deviceId;
+    if (isWindowsOrMac) {
+      Get.snackbar('', 'device connected'.tr, colorText: Colors.black);
+    } else {
+      toastInfo(msg: 'device connected'.tr);
+    }
+    // Discover services of a specific device
+    List<BleService> bleServices =
+        await UniversalBle.discoverServices(deviceId);
+    for (BleService service in bleServices) {
+      debugPrint('ble serviceid==${service.uuid}');
+      debugPrint('ble BleCharacteristic==${service.characteristics}');
+      for (BleCharacteristic characteristic in service.characteristics) {
+        // Subscribe to a characteristic
+        UniversalBle.setNotifiable(deviceId, service.uuid, characteristic.uuid,
+            BleInputProperty.notification);
+        // Get characteristic updates in `onValueChanged`
+        UniversalBle.onValueChanged =
+            (String deviceId, String characteristicId, Uint8List value) {
+          if (selectstate.value == 0) {
+            return;
+          }
+          Uint8List sublist = value.sublist(2);
+          debugPrint('onValueChanged $deviceId, $characteristicId, $sublist');
+          var result = convertABC.midiToABC(sublist, false);
+          debugPrint('convertdata=$result');
+          if ((result[0] as String).isNotEmpty) {
+            String path = convertABC.getNoteMp3Path(result[1]);
+            updatePianoNote(result[1]);
+            playNoteMp3(path);
+          }
+        };
+      }
+    }
   }
 
   Future<void> shareFile(String filepath) async {
