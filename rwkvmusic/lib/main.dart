@@ -341,20 +341,20 @@ void fetchABCDataByIsolate() async {
       }
     } else if (data is EventBus) {
       isolateEventBus = data;
-    } else if (data == "finish") {
+    } else if (data == kFinish) {
       mainReceivePort.close(); // 操作完成后，关闭 ReceivePort
       userIsolate!.kill(priority: Isolate.immediate);
       userIsolate = null;
       debugPrint('userIsolate!.kill()');
       isGenerating.value = false;
-      eventBus.fire('finish');
+      eventBus.fire(kFinish);
       isClicking = false;
-    } else if (data == "load model fail") {
+    } else if (data == kLoadModelFail) {
       //加载模型失败,使用ncnn模型
       mainReceivePort.close(); // 操作完成后，关闭 ReceivePort
       userIsolate!.kill(priority: Isolate.immediate);
       userIsolate = null;
-      debugPrint('load model fail,userIsolate!.kill()');
+      debugPrint('$kLoadModelFail,userIsolate!.kill()');
       ConfigStore.to.saveDeviceOnlyNCNN();
       currentModelType = ModelType.ncnn;
       appVersion = 'ncnn' + appVersionNumber;
@@ -418,7 +418,7 @@ void getABCDataByLocalModel(var array) async {
   eventBus.on().listen((event) {
     debugPrint('isolateReceivePort22==$event');
     isStopGenerating = true;
-    sendPort.send('finish');
+    sendPort.send(kFinish);
   });
 
   Pointer<Void> model;
@@ -456,7 +456,7 @@ void getABCDataByLocalModel(var array) async {
   debugPrint(
       'model address=${model.address},abcTokenizer address==${abcTokenizer.address},sampler address==${sampler.address}');
   if (model.address == 0 || abcTokenizer.address == 0 || sampler.address == 0) {
-    sendPort.send('load model fail');
+    sendPort.send(kLoadModelFail);
     return;
   }
   sendPort.send(isolateReceivePort.sendPort);
@@ -544,6 +544,6 @@ void getABCDataByLocalModel(var array) async {
   isGenerating.value = false;
 
   sendPort.send(abcString.toString());
-  sendPort.send('finish');
+  sendPort.send(kFinish);
   debugPrint('getABCDataByLocalModel all data=${stringBuffer.toString()}');
 }

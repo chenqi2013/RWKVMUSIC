@@ -44,6 +44,10 @@ enum DownloadStatus {
 
 const kTriplet = "(3";
 
+const kFinish = "finish";
+
+const kLoadModelFail = "load model fail";
+
 const qnnSoList = {
   'libQnnCpu.so',
   'libQnnGpu.so',
