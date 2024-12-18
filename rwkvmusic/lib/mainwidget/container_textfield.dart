@@ -5,14 +5,15 @@ import 'package:rwkvmusic/style/color.dart';
 import 'package:flutter/src/services/text_formatter.dart';
 
 class ContainerTextField extends StatelessWidget {
-  const ContainerTextField(
-      {super.key, required this.onChanged, required this.seed});
+  ContainerTextField(
+      {super.key, required this.onChanged, required this.seed, this.text});
   final int seed;
+  String? text;
   final Function(String text) onChanged;
   @override
   Widget build(BuildContext context) {
     TextEditingController controller =
-        TextEditingController(text: seed == 0 ? '' : seed.toString());
+        TextEditingController(text: seed == 0 ? text : seed.toString());
     return Container(
       padding: EdgeInsets.symmetric(
           horizontal: 15.w, vertical: isWindowsOrMac ? 25.h : 0.1.h),

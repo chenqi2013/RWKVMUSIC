@@ -1242,6 +1242,8 @@ class _HomePageState extends State<HomePage> {
                               ),
                               onPressed: () async {
                                 debugPrint('Settings');
+                                // midiDataToABCConverter([]);
+                                // return;
                                 if (isShowOverlay) {
                                   closeOverlay();
                                 }
@@ -1992,6 +1994,38 @@ class _HomePageState extends State<HomePage> {
                                   seed.value = int.parse(text);
                                   debugPrint('Current text: ');
                                   isUseCurrentTime = false;
+                                },
+                              ),
+                            ]),
+                        SizedBox(
+                          height: 20.h,
+                        ),
+                        Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              TextItem(text: 'tolerance'.tr),
+                              ContainerTextField(
+                                seed: 0,
+                                text: tolerance,
+                                onChanged: (String text) {
+                                  tolerance = text;
+                                  debugPrint('tolerance: $tolerance');
+                                },
+                              ),
+                            ]),
+                        SizedBox(
+                          height: 20.h,
+                        ),
+                        Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              TextItem(text: 'precision'.tr),
+                              ContainerTextField(
+                                seed: 0,
+                                text: precision,
+                                onChanged: (String text) {
+                                  precision = text;
+                                  debugPrint('precision: $precision');
                                 },
                               ),
                             ]),
@@ -3238,10 +3272,18 @@ class _HomePageState extends State<HomePage> {
   }
 
   void midiDataToABCConverter(List<List<int>> midiEvents) {
-    MidiDataToABCConverter converter =
-        MidiDataToABCConverter(bpm: 120, precision: "1/16", tolerance: 0.1);
+    MidiDataToABCConverter converter = MidiDataToABCConverter(
+        bpm: tempo.value.toInt(),
+        precision: precision,
+        tolerance: double.parse(tolerance),
+        timeSignature: timeSingnatureStr);
 
     // midiEvents = [
+    //   [144, 67, 23],
+    //   [128, 67, 500],
+    //   [144, 62, 550],
+    //   [128, 62, 1000],
+    //   [144, 64, 1000],
     //   [144, 59, 1377],
     //   [128, 59, 1446],
     //   [144, 57, 1632],
