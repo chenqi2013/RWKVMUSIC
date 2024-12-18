@@ -4,6 +4,7 @@ import 'dart:convert' hide Codec;
 import 'dart:developer';
 import 'dart:ffi';
 import 'dart:io';
+import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:app_installer/app_installer.dart';
 // import 'package:audio_waveforms/audio_waveforms.dart';
 import 'package:crypto/crypto.dart';
@@ -1655,7 +1656,7 @@ class _HomePageState extends State<HomePage> {
       // barrierColor: Colors.transparent,
       barrierDismissible: isWindowsOrMac ? false : false,
       context: context,
-      builder: (BuildContext context) {
+      builder: (BuildContext dialogContext) {
         // 返回一个Dialog
         return Dialog(
           backgroundColor: Colors.transparent,
@@ -2502,6 +2503,7 @@ class _HomePageState extends State<HomePage> {
                                                   msg: 'midi keyboard connected'
                                                       .tr);
                                             }
+                                            showZhuanyeModeDialog(context);
                                           } else {
                                             showConnectDialog(context);
                                           }
@@ -2668,7 +2670,7 @@ class _HomePageState extends State<HomePage> {
     debugPrint('showBleDeviceOverlay');
     startScan();
     overlayEntry = OverlayEntry(
-      builder: (context) => Positioned(
+      builder: (overlayContext) => Positioned(
         bottom: 0.0,
         right: 0.0,
         left: 0.0,
@@ -2724,7 +2726,7 @@ class _HomePageState extends State<HomePage> {
                       child: Obx(
                         () => ListView.builder(
                           itemCount: bleList.length,
-                          itemBuilder: (context, index) {
+                          itemBuilder: (subContext, index) {
                             return InkWell(
                               onTap: () {
                                 debugPrint('stopScanstopScan');
@@ -2735,7 +2737,7 @@ class _HomePageState extends State<HomePage> {
                                 UniversalBle.stopScan();
                                 debugPrint(
                                     'isVisibleWebview.value = $isVisible');
-                                conectDevice(bleList[index]);
+                                conectDevice(bleList[index], context);
                                 overlayEntry!.remove();
                                 isShowOverlay = false;
                               },
@@ -2844,12 +2846,13 @@ class _HomePageState extends State<HomePage> {
     UniversalBle.startScan();
   }
 
-  void conectDevice(BleScanResult device) {
+  void conectDevice(BleScanResult device, BuildContext context) {
     UniversalBle.connect(device.deviceId);
     UniversalBle.onConnectionChanged =
         (String deviceId, BleConnectionState state) async {
       debugPrint('OnConnectionChanged $deviceId, $state');
       if (state == BleConnectionState.connected) {
+        showZhuanyeModeDialog(context);
         isShowDialog = false;
         connectDeviceId = device.deviceId;
         if (isWindowsOrMac) {
@@ -2919,6 +2922,35 @@ class _HomePageState extends State<HomePage> {
         }
       }
     };
+  }
+
+  void showZhuanyeModeDialog(BuildContext context) {
+    debugPrint('showZhuanyeModeDialog');
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('提示'),
+          content: Text('是否开启专业输入模式'),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                isZhuanyeMode.value = true;
+                Navigator.of(context).pop(); // 关闭对话框
+              },
+              child: Text('开启'),
+            ),
+            TextButton(
+              onPressed: () {
+                isZhuanyeMode.value = false;
+                Navigator.of(context).pop(); // 关闭对话框
+              },
+              child: Text('取消'),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   void clearCreateModeData() {
