@@ -131,6 +131,7 @@ class _HomePageState extends State<HomePage> {
   String? recordAudioPath;
   RxBool isRecording = false.obs;
   AudioRecorder? audioRecord;
+  BuildContext? superContext;
 
   void getAppVersion(Function callback) async {
     // debugger();
@@ -1059,6 +1060,7 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    superContext = context;
     return Scaffold(
         resizeToAvoidBottomInset: false,
         body: GestureDetector(
@@ -2404,7 +2406,7 @@ class _HomePageState extends State<HomePage> {
                       child: ListView.builder(
                         controller: controller,
                         itemCount: list.length,
-                        itemBuilder: (BuildContext context, int index) {
+                        itemBuilder: (BuildContext subContext, int index) {
                           if (type == STORAGE_PROMPTS_SELECT &&
                               isRememberPrompt.value) {
                             promptSelectedIndex.value =
@@ -2474,9 +2476,9 @@ class _HomePageState extends State<HomePage> {
                                     } else if (index == 1) {
                                       //切换midi键盘，先判断有没有连接上
                                       debugPrint('deviceId==$connectDeviceId');
-                                      Navigator.of(context).pop();
+                                      Navigator.of(subContext).pop();
                                       if (connectDeviceId == null) {
-                                        showConnectDialog(context);
+                                        showConnectDialog(subContext);
                                       } else {
                                         debugPrint('onConnectionChanged');
                                         if (isWindowsOrMac) {
@@ -2503,7 +2505,8 @@ class _HomePageState extends State<HomePage> {
                                                   msg: 'midi keyboard connected'
                                                       .tr);
                                             }
-                                            showZhuanyeModeDialog(context);
+                                            showZhuanyeModeDialog(
+                                                superContext!);
                                           } else {
                                             showConnectDialog(context);
                                           }
@@ -2852,7 +2855,7 @@ class _HomePageState extends State<HomePage> {
         (String deviceId, BleConnectionState state) async {
       debugPrint('OnConnectionChanged $deviceId, $state');
       if (state == BleConnectionState.connected) {
-        showZhuanyeModeDialog(context);
+        showZhuanyeModeDialog(superContext!);
         isShowDialog = false;
         connectDeviceId = device.deviceId;
         if (isWindowsOrMac) {
@@ -2936,6 +2939,9 @@ class _HomePageState extends State<HomePage> {
             TextButton(
               onPressed: () {
                 isZhuanyeMode.value = true;
+                secondMeasureStartTimStamp =
+                    DateTime.now().millisecondsSinceEpoch;
+                JiepaiAudioPlayerManage().startMetronome();
                 Navigator.of(context).pop(); // 关闭对话框
               },
               child: Text('开启'),
@@ -2943,6 +2949,7 @@ class _HomePageState extends State<HomePage> {
             TextButton(
               onPressed: () {
                 isZhuanyeMode.value = false;
+                JiepaiAudioPlayerManage().stopAudio();
                 Navigator.of(context).pop(); // 关闭对话框
               },
               child: Text('取消'),
