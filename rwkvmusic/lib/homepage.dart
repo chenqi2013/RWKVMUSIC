@@ -2032,6 +2032,74 @@ class _HomePageState extends State<HomePage> {
                                 },
                               ),
                             ]),
+                        SizedBox(
+                          height: 20.h,
+                        ),
+                        Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              TextItem(text: 'onsetThreshold'.tr),
+                              ContainerTextField(
+                                seed: 0,
+                                text: onsetThreshold,
+                                onChanged: (String text) {
+                                  onsetThreshold = text;
+                                  debugPrint('onsetThreshold: $onsetThreshold');
+                                },
+                              ),
+                            ]),
+                        SizedBox(
+                          height: 20.h,
+                        ),
+                        Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              TextItem(text: 'frameThreshold'.tr),
+                              ContainerTextField(
+                                seed: 0,
+                                text: frameThreshold,
+                                onChanged: (String text) {
+                                  frameThreshold = text;
+                                  debugPrint('frameThreshold: $frameThreshold');
+                                },
+                              ),
+                            ]),
+                        SizedBox(
+                          height: 20.h,
+                        ),
+                        Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              TextItem(text: 'minimalNoteLength'.tr),
+                              ContainerTextField(
+                                seed: 0,
+                                text: minimalNoteLength,
+                                onChanged: (String text) {
+                                  minimalNoteLength = text;
+                                  debugPrint(
+                                      'minimalNoteLength: $minimalNoteLength');
+                                },
+                              ),
+                            ]),
+                        SizedBox(
+                          height: 20.h,
+                        ),
+                        Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              TextItem(text: 'gapThreshold'.tr),
+                              ContainerTextField(
+                                seed: 0,
+                                text: gapThreshold,
+                                onChanged: (String text) {
+                                  gapThreshold = text;
+                                  debugPrint('gapThreshold: $gapThreshold');
+                                },
+                              ),
+                            ]),
+                        SizedBox(
+                          height: 20.h,
+                        ),
                         Obx(
                           () => Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -3263,7 +3331,12 @@ class _HomePageState extends State<HomePage> {
       debugPrint('$path exists');
       resetToDefaulValueInCreateMode();
       final audioData = await File(path).readAsBytes();
-      final noteEvents = await basicPitchInstance.predictBytes(audioData);
+      final noteEvents = await basicPitchInstance.predictBytes(
+        audioData,
+        onsetThreshold: double.parse(onsetThreshold),
+        frameThreshold: double.parse(frameThreshold),
+        minimalNoteLength: double.parse(minimalNoteLength),
+      );
       debugPrint('noteEvents=${noteEvents.length}');
 
       if (noteEvents.isEmpty) {
@@ -3291,8 +3364,9 @@ class _HomePageState extends State<HomePage> {
       basicPitchInstance.release();
 
       // 3. 合并相邻的同音音符
-      List<NoteEvent> mergedNotes =
-          CommonUtils.mergeAdjacentNotes(noteEventsList, gapThreshold: 0.05);
+      List<NoteEvent> mergedNotes = CommonUtils.mergeAdjacentNotes(
+          noteEventsList,
+          gapThreshold: double.parse(gapThreshold));
 
       // 4. 生成最终的音高列表
       pitchs = mergedNotes.map((note) => note.pitch).toList();

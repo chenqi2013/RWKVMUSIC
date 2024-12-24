@@ -125,6 +125,12 @@ RxDouble randomness = 0.7.obs;
 RxInt seed = 22416.obs;
 String tolerance = '0.1';
 String precision = '1/16';
+
+String onsetThreshold = '0.5';
+String frameThreshold = '0.3';
+String minimalNoteLength = '200';
+String gapThreshold = '0.05';
+
 bool isUseCurrentTime = true;
 RxDouble tempo = 180.0.obs;
 bool isChangeTempo = false;
