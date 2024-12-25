@@ -34,11 +34,11 @@
 		<true/>
 	</dict>
 	<key>NSBluetoothAlwaysUsageDescription</key>
-	<string>需要使用蓝牙功能以连接外部设备。</string>
+	<string>Bluetooth is required to connect MIDI devices and play piano。</string>
 	<key>NSBluetoothPeripheralUsageDescription</key>
-	<string>需要使用蓝牙功能以连接外部设备。</string>
+	<string>Bluetooth is required to connect MIDI devices and play piano。</string>
 	<key>NSMicrophoneUsageDescription</key>
-	<string>播放语音</string>
+	<string>record voice and play audio。</string>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
 	<key>UILaunchStoryboardName</key>
@@ -47,14 +47,6 @@
 	<string>Main</string>
 	<key>UISupportedInterfaceOrientations</key>
 	<array>
-		<string>UIInterfaceOrientationPortrait</string>
-		<string>UIInterfaceOrientationLandscapeLeft</string>
-		<string>UIInterfaceOrientationLandscapeRight</string>
-	</array>
-	<key>UISupportedInterfaceOrientations~ipad</key>
-	<array>
-		<string>UIInterfaceOrientationPortrait</string>
-		<string>UIInterfaceOrientationPortraitUpsideDown</string>
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
