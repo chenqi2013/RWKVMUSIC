@@ -11,4 +11,10 @@ class AppDelegate: FlutterAppDelegate {
     GeneratedPluginRegistrant.register(with: self)
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)
   }
+    
+//    override  func application(_ application: UIApplication, supportedInterfaceOrientationsFor window: UIWindow?) -> UIInterfaceOrientationMask {
+//        // 限制为横屏
+//        return .landscape
+//    }
+
 }
