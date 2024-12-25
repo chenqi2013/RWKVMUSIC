@@ -2971,6 +2971,7 @@ class _HomePageState extends State<HomePage> {
                 debugPrint(
                     'onValueChanged $deviceId, $characteristicId, $newList');
                 if (sublist[0] == 144) {
+                  midiEvents.clear();
                   midiEvents.add(newList);
                   String name = convertABC
                       .getNoteMp3Path(int.parse(sublist[1].toString()));
@@ -3433,7 +3434,7 @@ class _HomePageState extends State<HomePage> {
     for (var event in midiEvents) {
       String noteName = converter.processMidiEvent(event);
       debugPrint('noteName:$noteName');
-      clearCreateModeData();
+      // clearCreateModeData();
       updateMidiNote(noteName);
     }
   }
