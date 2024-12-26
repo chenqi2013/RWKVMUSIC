@@ -94,6 +94,8 @@ String appVersion = 'ncnn' + appVersionNumber;
 
 ///是否专业输入模式
 RxBool isZhuanyeMode = false.obs;
+RxBool isMetronomeOn = false.obs;
+
 List<List<int>> midiEvents = [];
 
 class _HomePageState extends State<HomePage> {
@@ -1121,13 +1123,9 @@ class _HomePageState extends State<HomePage> {
                                             !isZhuanyeMode.value;
                                         if (isZhuanyeMode.value) {
                                           midiEvents.clear();
-                                          JiepaiAudioPlayerManage()
-                                              .startMetronome();
                                           secondMeasureStartTimStamp =
                                               DateTime.now()
                                                   .millisecondsSinceEpoch;
-                                        } else {
-                                          JiepaiAudioPlayerManage().stopAudio();
                                         }
                                       },
                                     ).marginOnly(right: 4)
@@ -1135,18 +1133,37 @@ class _HomePageState extends State<HomePage> {
                             ),
                             Obx(() => selectstate.value == 1
                                 ? BorderBottomBtn(
-                                    width: 180.w,
+                                    width: 230.w,
                                     height: isWindowsOrMac ? 123.h : 96.h,
-                                    text: '节拍器',
+                                    text: isMetronomeOn.value ? '关闭节拍器' : '节拍器',
                                     icon: SvgPicture.asset(
                                       'assets/images/ic_arrowdown.svg',
                                       width: 28.w,
                                       height: 21.h,
                                     ),
                                     onPressed: () {
-                                      showJiepai();
+                                      isMetronomeOn.value =
+                                          !(isMetronomeOn.value);
+                                      if (isMetronomeOn.value) {
+                                        JiepaiAudioPlayerManage()
+                                            .startMetronome();
+                                      } else {
+                                        JiepaiAudioPlayerManage().stopAudio();
+                                      }
                                     },
                                   ).marginOnly(right: 4)
+                                : SizedBox.shrink()),
+                            Obx(() => selectstate.value == 1
+                                ? InkWell(
+                                    child: SvgPicture.asset(
+                                      'assets/images/metronome_off.svg',
+                                      // width: 48.w,
+                                      height: 70.h,
+                                    ).marginOnly(right: 4),
+                                    onTap: () {
+                                      showJiepai();
+                                    },
+                                  )
                                 : SizedBox.shrink()),
                             Obx(() => selectstate.value == 1
                                 ? Obx(() => BorderBottomBtn(
@@ -1192,7 +1209,7 @@ class _HomePageState extends State<HomePage> {
                                       },
                                     )
                                   : BorderBottomBtn(
-                                      width: 372.w,
+                                      width: 302.w,
                                       height: isWindowsOrMac ? 123.h : 96.h,
                                       text: 'Soft keyboard'.tr,
                                       icon: SvgPicture.asset(
@@ -1215,7 +1232,7 @@ class _HomePageState extends State<HomePage> {
                             ),
                             Obx(
                               () => BorderBottomBtn(
-                                width: selectstate.value == 0 ? 357.w : 358.w,
+                                width: 300.w,
                                 height: isWindowsOrMac ? 123.h : 96.h,
                                 text: 'Instrument'.tr,
                                 icon: SvgPicture.asset(

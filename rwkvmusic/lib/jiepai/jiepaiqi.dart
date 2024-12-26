@@ -101,40 +101,40 @@ class _JiePaiQiState extends State<JiePaiQi> {
                 ),
               ),
             ).marginOnly(bottom: 15),
-            Row(
-              children: [
-                const Text('开启节拍器'),
-                const SizedBox(
-                  width: 15,
-                ),
-                GestureDetector(
-                  onTap: () {
-                    audioPlayerManage.isPlay.value =
-                        !audioPlayerManage.isPlay.value;
-                    if (!audioPlayerManage.isPlay.value) {
-                      // _beatCount = 0;
-                      // _timer?.cancel();
-                      audioPlayerManage.stopAudio();
-                    } else {
-                      // startMetronome();
-                      audioPlayerManage.startMetronome();
-                    }
-                  },
-                  child: Obx(() {
-                    return Image.asset(
-                      !audioPlayerManage.isPlay.value
-                          ? 'assets/images/bpmstart.png'
-                          : 'assets/images/bpmpause.png',
-                      width: 15,
-                      height: 15,
-                    );
-                  }),
-                ),
-              ],
-            ),
-            const SizedBox(
-              height: 20,
-            ),
+            // Row(
+            //   children: [
+            //     const Text('开启节拍器'),
+            //     const SizedBox(
+            //       width: 15,
+            //     ),
+            //     GestureDetector(
+            //       onTap: () {
+            //         audioPlayerManage.isPlay.value =
+            //             !audioPlayerManage.isPlay.value;
+            //         if (!audioPlayerManage.isPlay.value) {
+            //           // _beatCount = 0;
+            //           // _timer?.cancel();
+            //           audioPlayerManage.stopAudio();
+            //         } else {
+            //           // startMetronome();
+            //           audioPlayerManage.startMetronome();
+            //         }
+            //       },
+            //       child: Obx(() {
+            //         return Image.asset(
+            //           !audioPlayerManage.isPlay.value
+            //               ? 'assets/images/bpmstart.png'
+            //               : 'assets/images/bpmpause.png',
+            //           width: 15,
+            //           height: 15,
+            //         );
+            //       }),
+            //     ),
+            //   ],
+            // ),
+            // const SizedBox(
+            //   height: 20,
+            // ),
             Row(
               children: [
                 const Text('请选择节拍'),
