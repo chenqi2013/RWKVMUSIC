@@ -3393,6 +3393,10 @@ class _HomePageState extends State<HomePage> {
         timeSignature: timeSingnatureStr);
 
     // midiEvents = [
+    //   [144, 63, 13292],
+    //   [128, 63, 13398],
+    // [144, 61, 27861],
+    // [128, 61, 27955],
     //   [144, 67, 23],
     //   [128, 67, 500],
     //   [144, 62, 550],
