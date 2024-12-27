@@ -23,6 +23,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:record/record.dart';
 // import 'package:record/record.dart';
 import 'package:rwkvmusic/RhythmAnalysis.dart';
+import 'package:rwkvmusic/RhythmAnalysis33.dart';
 import 'package:rwkvmusic/agree_dialog.dart';
 import 'package:rwkvmusic/duihuanma_dialog.dart';
 import 'package:rwkvmusic/feedback_page.dart';
@@ -3414,8 +3415,8 @@ class _HomePageState extends State<HomePage> {
   }
 
   void midiDataToABCConverter(List<List<int>> midiEvents) {
-    MidiDataToABCConverter converter = MidiDataToABCConverter(
-        bpm: tempo.value.toInt(),
+    MidiToABCConverter33 converter = MidiToABCConverter33(
+        bpm: tempo.value.toDouble(),
         precision: precision,
         tolerance: double.parse(tolerance),
         timeSignature: timeSingnatureStr);
@@ -3423,13 +3424,12 @@ class _HomePageState extends State<HomePage> {
     // midiEvents = [
     //   [144, 63, 13292],
     //   [128, 63, 13398],
-    // [144, 61, 27861],
-    // [128, 61, 27955],
+    //   [144, 61, 27861],
+    //   [128, 61, 27955],
     //   [144, 67, 23],
     //   [128, 67, 500],
     //   [144, 62, 550],
     //   [128, 62, 1000],
-    //   [144, 64, 1000],
     //   [144, 59, 1377],
     //   [128, 59, 1446],
     //   [144, 57, 1632],
@@ -3465,9 +3465,13 @@ class _HomePageState extends State<HomePage> {
 
     for (var event in midiEvents) {
       String noteName = converter.processMidiEvent(event);
-      debugPrint('noteName:$noteName');
-      // clearCreateModeData();
-      updateMidiNote(noteName);
+      if (noteName.trim().isNotEmpty) {
+        // clearCreateModeData();
+        debugPrint('noteName:$noteName');
+        updateMidiNote(noteName);
+      } else {
+        debugPrint('noteName.isEmpty');
+      }
     }
   }
 }
