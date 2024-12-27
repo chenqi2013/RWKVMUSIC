@@ -68,7 +68,7 @@ class JiepaiAudioPlayerManage {
     }
   }
 
-  void stopAudio() {
+  void stopMetronome() {
     _timer?.cancel();
     beatCount = 0;
     _timer = null;

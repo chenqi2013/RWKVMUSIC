@@ -209,7 +209,7 @@ class _JiePaiQiState extends State<JiePaiQi> {
                       audioPlayerManage.bpm.value = 20;
                     }
                     if (audioPlayerManage.isPlay.value) {
-                      audioPlayerManage.stopAudio();
+                      audioPlayerManage.stopMetronome();
                       audioPlayerManage.startMetronome();
                     }
                   },
@@ -231,7 +231,7 @@ class _JiePaiQiState extends State<JiePaiQi> {
                         onChanged: (double value) {
                           audioPlayerManage.bpm.value = value.toInt();
                           if (audioPlayerManage.isPlay.value) {
-                            audioPlayerManage.stopAudio();
+                            audioPlayerManage.stopMetronome();
                             audioPlayerManage.startMetronome();
                             // _timer?.cancel();
                             // startMetronome();
@@ -252,7 +252,7 @@ class _JiePaiQiState extends State<JiePaiQi> {
                       audioPlayerManage.bpm.value = 200;
                     }
                     if (audioPlayerManage.isPlay.value) {
-                      audioPlayerManage.stopAudio();
+                      audioPlayerManage.stopMetronome();
                       audioPlayerManage.startMetronome();
                       // _beatCount = 0;
                       // _timer?.cancel();

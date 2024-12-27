@@ -1051,7 +1051,7 @@ class _HomePageState extends State<HomePage> {
           jiepaiCallback: () {
             debugPrint('jiepaiCallback');
             if (isNeedPlay) {
-              JiepaiAudioPlayerManage().stopAudio(); //链接midi键盘后响2节后停止节拍器
+              JiepaiAudioPlayerManage().stopMetronome(); //链接midi键盘后响2节后停止节拍器
               isMetronomeOn.value = false;
             }
             // secondMeasureStartTimStamp = DateTime.now().millisecondsSinceEpoch;
@@ -1156,7 +1156,8 @@ class _HomePageState extends State<HomePage> {
                                         JiepaiAudioPlayerManage()
                                             .startMetronome();
                                       } else {
-                                        JiepaiAudioPlayerManage().stopAudio();
+                                        JiepaiAudioPlayerManage()
+                                            .stopMetronome();
                                       }
                                     },
                                   ).marginOnly(right: 4)
@@ -3044,7 +3045,7 @@ class _HomePageState extends State<HomePage> {
             TextButton(
               onPressed: () {
                 isZhuanyeMode.value = false;
-                JiepaiAudioPlayerManage().stopAudio();
+                JiepaiAudioPlayerManage().stopMetronome();
                 isMetronomeOn.value = false;
                 Navigator.of(context).pop(); // 关闭对话框
               },
