@@ -73,6 +73,7 @@ class JiepaiAudioPlayerManage {
     beatCount = 0;
     _timer = null;
     isPlay.value = false;
+    measureCount = 0;
     // _soundEffect?.release();
   }
 }

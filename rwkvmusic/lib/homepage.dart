@@ -129,7 +129,7 @@ class _HomePageState extends State<HomePage> {
   //     FlutterSoundRecorder(); // Initialise
 
   ///节拍器开启后第二小节起始时间
-  int secondMeasureStartTimStamp = 0;
+  // int secondMeasureStartTimStamp = 0;
   String? recordAudioPath;
   RxBool isRecording = false.obs;
   AudioRecorder? audioRecord;
@@ -1043,14 +1043,18 @@ class _HomePageState extends State<HomePage> {
     await NotesDatabase.instance.create(note);
   }
 
-  void showJiepai() async {
+  void showJiepai(bool isNeedPlay) async {
     var result = await showModalBottomSheet(
       context: context,
       builder: (BuildContext context) {
         return JiePaiQi(
           jiepaiCallback: () {
             debugPrint('jiepaiCallback');
-            secondMeasureStartTimStamp = DateTime.now().millisecondsSinceEpoch;
+            if (isNeedPlay) {
+              JiepaiAudioPlayerManage().stopAudio(); //链接midi键盘后响2节后停止节拍器
+              isMetronomeOn.value = false;
+            }
+            // secondMeasureStartTimStamp = DateTime.now().millisecondsSinceEpoch;
           },
         );
       },
@@ -1058,6 +1062,10 @@ class _HomePageState extends State<HomePage> {
     );
     // currentJiePaiStr.value = result;
     debugPrint('result=$result');
+    if (isNeedPlay) {
+      JiepaiAudioPlayerManage().startMetronome();
+      isMetronomeOn.value = true;
+    }
   }
 
   @override
@@ -1123,9 +1131,9 @@ class _HomePageState extends State<HomePage> {
                                             !isZhuanyeMode.value;
                                         if (isZhuanyeMode.value) {
                                           midiEvents.clear();
-                                          secondMeasureStartTimStamp =
-                                              DateTime.now()
-                                                  .millisecondsSinceEpoch;
+                                          // secondMeasureStartTimStamp =
+                                          //     DateTime.now()
+                                          //         .millisecondsSinceEpoch;
                                         }
                                       },
                                     ).marginOnly(right: 4)
@@ -1161,7 +1169,7 @@ class _HomePageState extends State<HomePage> {
                                       height: 70.h,
                                     ).marginOnly(right: 4),
                                     onTap: () {
-                                      showJiepai();
+                                      showJiepai(false);
                                     },
                                   )
                                 : SizedBox.shrink()),
@@ -2576,7 +2584,7 @@ class _HomePageState extends State<HomePage> {
                                                 BleConnectionState state) {
                                           if (kDebugMode) {
                                             print(
-                                                'OnConnectionChanged $deviceId, $state');
+                                                '22OnConnectionChanged $deviceId, $state');
                                           }
                                           if (state ==
                                               BleConnectionState.connected) {
@@ -2938,7 +2946,7 @@ class _HomePageState extends State<HomePage> {
     UniversalBle.connect(device.deviceId);
     UniversalBle.onConnectionChanged =
         (String deviceId, BleConnectionState state) async {
-      debugPrint('OnConnectionChanged $deviceId, $state');
+      debugPrint('11OnConnectionChanged $deviceId, $state');
       if (state == BleConnectionState.connected) {
         showZhuanyeModeDialog(superContext!);
         isShowDialog = false;
@@ -2980,11 +2988,11 @@ class _HomePageState extends State<HomePage> {
                 }
               } else {
                 Uint8List sublist = value.sublist(2, 4);
-                int timestampGap = DateTime.now().millisecondsSinceEpoch -
-                    secondMeasureStartTimStamp;
-                debugPrint('当前时间戳间隔（毫秒）: $timestampGap');
+                // int timestampGap = DateTime.now().millisecondsSinceEpoch -
+                //     secondMeasureStartTimStamp;
+                // debugPrint('当前时间戳间隔（毫秒）: $timestampGap');
                 List<int> newList = List.from(sublist);
-                newList.add(timestampGap);
+                newList.add(DateTime.now().millisecondsSinceEpoch);
                 debugPrint(
                     'onValueChanged $deviceId, $characteristicId, $newList');
                 if (sublist[0] == 144) {
@@ -3025,10 +3033,11 @@ class _HomePageState extends State<HomePage> {
             TextButton(
               onPressed: () {
                 isZhuanyeMode.value = true;
-                secondMeasureStartTimStamp =
-                    DateTime.now().millisecondsSinceEpoch;
-                JiepaiAudioPlayerManage().startMetronome();
+                // secondMeasureStartTimStamp =
+                //     DateTime.now().millisecondsSinceEpoch;
+                // JiepaiAudioPlayerManage().startMetronome();
                 Navigator.of(context).pop(); // 关闭对话框
+                showJiepai(true);
               },
               child: Text('开启'),
             ),
@@ -3036,6 +3045,7 @@ class _HomePageState extends State<HomePage> {
               onPressed: () {
                 isZhuanyeMode.value = false;
                 JiepaiAudioPlayerManage().stopAudio();
+                isMetronomeOn.value = false;
                 Navigator.of(context).pop(); // 关闭对话框
               },
               child: Text('取消'),
