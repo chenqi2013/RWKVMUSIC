@@ -49,8 +49,11 @@ class JiepaiAudioPlayerManage {
         if (beatCount == beatsPerBar.value) {
           measureCount++;
           if (measureCount == 2) {
-            // measureCount = 0;
-            callback!();
+            measureCount = 0;
+            if (callback != null) {
+              callback!();
+              callback = null;
+            }
           }
         }
         // 计算下一个节拍的时间
