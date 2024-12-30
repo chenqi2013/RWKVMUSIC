@@ -3359,7 +3359,7 @@ class _HomePageState extends State<HomePage> {
 
     if (File(path).existsSync()) {
       debugPrint('$path exists');
-      resetToDefaulValueInCreateMode();
+      // resetToDefaulValueInCreateMode();
       final audioData = await File(path).readAsBytes();
       final noteEvents = await basicPitchInstance.predictBytes(
         audioData,
