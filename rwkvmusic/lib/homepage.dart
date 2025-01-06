@@ -2254,7 +2254,9 @@ class _HomePageState extends State<HomePage> {
                                         : type == STORAGE_SOUNDSEFFECT_SELECT
                                             ? effectSelectedIndex.value == index
                                             : 0 == index),
-                                title: list[index],
+                                title: type == STORAGE_PROMPTS_SELECT
+                                    ? 'Prompt#${index + 1}'
+                                    : list[index],
                                 onChanged: (value) {
                                   if (type == STORAGE_PROMPTS_SELECT) {
                                     promptSelectedIndex.value = value;
