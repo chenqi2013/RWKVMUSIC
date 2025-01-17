@@ -9,7 +9,7 @@ class ConfigStore extends GetxController {
   static ConfigStore get to => Get.find();
 
   bool isFirstOpen = false;
-  bool isOnlyNCNN = false;
+  bool isOnlyCPU = false;
   bool isValidDuihuanma = false;
   PackageInfo? _platform;
   String get version => _platform?.version ?? '-';
@@ -24,7 +24,7 @@ class ConfigStore extends GetxController {
   void onInit() {
     super.onInit();
     isFirstOpen = StorageService.to.getBool(STORAGE_DEVICE_FIRST_OPEN_KEY);
-    isOnlyNCNN = StorageService.to.getBool(DEVICE_ONLY_NCNN);
+    isOnlyCPU = StorageService.to.getBool(DEVICE_ONLY_CPU);
 
     isValidDuihuanma = StorageService.to.getBool(IS_VALID_DUIHUANMA);
   }
@@ -38,9 +38,9 @@ class ConfigStore extends GetxController {
     return StorageService.to.setBool(STORAGE_DEVICE_FIRST_OPEN_KEY, true);
   }
 
-  // 标记设置设备只支持ncnn
-  Future<bool> saveDeviceOnlyNCNN() {
-    return StorageService.to.setBool(DEVICE_ONLY_NCNN, true);
+  // 标记设置设备只支持cpu
+  Future<bool> saveDeviceOnlyCPU() {
+    return StorageService.to.setBool(DEVICE_ONLY_CPU, true);
   }
 
   // 标记用户已验证过兑换码

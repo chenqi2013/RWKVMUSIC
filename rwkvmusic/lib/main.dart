@@ -168,7 +168,8 @@ int modelAddress = 0;
 int abcTokenizerAddress = 0;
 int samplerAddress = 0;
 bool isClicking = false;
-ModelType currentModelType = ModelType.ncnn;
+// ModelType currentModelType = ModelType.ncnn;
+ModelType currentModelType = ModelType.rwkvcpp;
 
 /// 打包时候需要修改这个开关
 bool isExe = false; //msix或者exe格式安装包
@@ -227,14 +228,15 @@ void fetchABCDataByIsolate() async {
     if (currentModelType == ModelType.ncnn) {
       binPath.value = await CommonUtils.copyFileFromAssets(
           'RWKV-6-ABC-85M-v1-20240217-ctx1024-ncnn.bin');
-      // binPath =
-      //     await CommonUtils.copyFileFromAssets('rwkv.cpp-v6-ABC-85M-FP32.bin');
       configPath = await CommonUtils.copyFileFromAssets(
           'RWKV-6-ABC-85M-v1-20240217-ctx1024-ncnn.config');
-      // configPath = await CommonUtils.copyFileFromAssets(
-      //     'rwkv.cpp-v6-ABC-85M-FP32.config');
       paramPath = await CommonUtils.copyFileFromAssets(
           'RWKV-6-ABC-85M-v1-20240217-ctx1024-ncnn.param');
+    } else if (currentModelType == ModelType.rwkvcpp) {
+      binPath.value = await CommonUtils.copyFileFromAssets(
+          'rwkv-7-abc-rwkvcpp.bin');
+      configPath = await CommonUtils.copyFileFromAssets(
+          'rwkv-7-abc-rwkvcpp.config');
     } else if (currentModelType == ModelType.qnn) {
       if (!isFileExists) {
         String sopath = await CommonUtils.copyFileFromAssets(
@@ -350,14 +352,15 @@ void fetchABCDataByIsolate() async {
       eventBus.fire(kFinish);
       isClicking = false;
     } else if (data == kLoadModelFail) {
-      //加载模型失败,使用ncnn模型
+      //加载模型失败,使用ncnn/rwkv.cpp模型
       mainReceivePort.close(); // 操作完成后，关闭 ReceivePort
       userIsolate!.kill(priority: Isolate.immediate);
       userIsolate = null;
       debugPrint('$kLoadModelFail,userIsolate!.kill()');
-      ConfigStore.to.saveDeviceOnlyNCNN();
-      currentModelType = ModelType.ncnn;
-      appVersion = 'ncnn' + appVersionNumber;
+      ConfigStore.to.saveDeviceOnlyCPU();
+      // currentModelType = ModelType.ncnn;
+      currentModelType = ModelType.rwkvcpp;
+      appVersion = 'rwkv.cpp' + appVersionNumber;
       fetchABCDataByIsolate();
     } else if (data.toString().startsWith('tokens')) {
       isClicking = false;
@@ -433,7 +436,8 @@ void getABCDataByLocalModel(var array) async {
       .cast<Char>(); // webgpu auto  (通用pc上和ios上可以webgpu auto)
   // Pointer<Char> strategy = 'rwkv.cpp auto'.toNativeUtf8().cast<Char>();
   if (Platform.isAndroid) {
-    strategy = 'ncnn fp32'.toNativeUtf8().cast<Char>();
+    // strategy = 'ncnn fp32'.toNativeUtf8().cast<Char>();
+    strategy = 'rwkv.cpp fp32'.toNativeUtf8().cast<Char>();
   }
   if (currentModelType == ModelType.qnn) {
     strategy = 'qnn auto'.toNativeUtf8().cast<Char>();

@@ -35,5 +35,5 @@ const String STORAGE_AutoNext_SELECT = 'STORAGE_AutoNext_SELECT';
 /// 选择音符
 const STORAGE_note_SELECT = "STORAGE_note_SELECT";
 
-/// 当前设备是否只支持ncnn
-const String DEVICE_ONLY_NCNN = 'DEVICE_ONLY_NCNN';
+/// 当前设备是否只支持cpu
+const String DEVICE_ONLY_CPU = 'DEVICE_ONLY_CPU';

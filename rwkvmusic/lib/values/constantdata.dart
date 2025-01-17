@@ -31,6 +31,10 @@ enum ModelType {
   ///
   /// 使用 .st 结尾的权重文件
   webgpu,
+
+  /// Android上替代ncnn的CPU推理方案，用于RWKV v7模型
+  /// （NCNN v7还没做）
+  rwkvcpp,
 }
 
 enum DownloadStatus {

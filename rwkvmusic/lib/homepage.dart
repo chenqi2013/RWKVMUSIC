@@ -76,7 +76,7 @@ final List<int> transposeHistory = [];
 RxDouble downloadProgress = 0.0.obs;
 RxBool isdownloading = false.obs;
 bool isFirstOpen = true;
-bool isOnlyNCNN = false;
+bool isOnlyCPU = false;
 
 String appVersionNumber = '_1.6.1_20241223';
 String appVersion = 'ncnn' + appVersionNumber;
@@ -119,9 +119,11 @@ class _HomePageState extends State<HomePage> {
         appVersion = 'qnn' + appVersionNumber;
         currentModelType = ModelType.qnn;
       }
-      if (ConfigStore.to.isOnlyNCNN) {
-        appVersion = 'ncnn' + appVersionNumber;
-        currentModelType = ModelType.ncnn;
+      if (ConfigStore.to.isOnlyCPU) {
+        // appVersion = 'ncnn' + appVersionNumber;
+        // currentModelType = ModelType.ncnn;
+        appVersion = 'rwkv.cpp' + appVersionNumber;
+        currentModelType = ModelType.rwkvcpp;
       }
     } else if (Platform.isWindows) {
       if (Abi.current() == Abi.windowsArm64) {

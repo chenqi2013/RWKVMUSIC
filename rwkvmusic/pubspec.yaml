@@ -38,7 +38,7 @@ dependencies:
   cookie_jar: ^4.0.8
   crypto: ^3.0.3
   cupertino_icons: ^1.0.2
-  device_info:
+  # device_info:
   dio: ^5.4.1
   dio_cookie_manager: ^3.1.1
   event_bus: ^2.0.0
@@ -47,10 +47,10 @@ dependencies:
   flutter_inappwebview: ^6.0.0
   webview_dart: ^1.0.1
   flutter_localization: ^0.2.0
-  flutter_midi_command: ^0.4.15
-  flutter_midi_command_platform_interface: ^0.4.1
+  flutter_midi_command: ^0.5.3
+  flutter_midi_command_platform_interface:
   # flutter_midi_command_linux: ^0.3.0
-  flutter_midi_command_windows: ^0.0.1-dev.9
+  flutter_midi_command_windows:
 
   flutter_screenutil: ^5.0.0+2
   fluttertoast: ^8.2.4
@@ -60,7 +60,7 @@ dependencies:
   loading_animations: ^2.2.0
   on_popup_window_widget: ^0.0.6
   on_process_button_widget: ^2.0.2
-  package_info: ^2.0.0
+  package_info:
   permission_handler: ^11.3.0
   pull_to_refresh: ^2.0.0
   sentry: ^8.8.0
