@@ -226,12 +226,13 @@ void fetchABCDataByIsolate() async {
     }
     // debugger();
     if (currentModelType == ModelType.ncnn) {
-      binPath.value = await CommonUtils.copyFileFromAssets(
-          'RWKV-6-ABC-85M-v1-20240217-ctx1024-ncnn.bin');
-      configPath = await CommonUtils.copyFileFromAssets(
-          'RWKV-6-ABC-85M-v1-20240217-ctx1024-ncnn.config');
-      paramPath = await CommonUtils.copyFileFromAssets(
-          'RWKV-6-ABC-85M-v1-20240217-ctx1024-ncnn.param');
+      // 没做v7 ncnn，用rwkv.cpp代替
+      // binPath.value = await CommonUtils.copyFileFromAssets(
+      //     'RWKV-6-ABC-85M-v1-20240217-ctx1024-ncnn.bin');
+      // configPath = await CommonUtils.copyFileFromAssets(
+      //     'RWKV-6-ABC-85M-v1-20240217-ctx1024-ncnn.config');
+      // paramPath = await CommonUtils.copyFileFromAssets(
+      //     'RWKV-6-ABC-85M-v1-20240217-ctx1024-ncnn.param');
     } else if (currentModelType == ModelType.rwkvcpp) {
       binPath.value = await CommonUtils.copyFileFromAssets(
           'rwkv-7-abc-rwkvcpp.bin');
@@ -240,7 +241,7 @@ void fetchABCDataByIsolate() async {
     } else if (currentModelType == ModelType.qnn) {
       if (!isFileExists) {
         String sopath = await CommonUtils.copyFileFromAssets(
-            'libRWKV-6-ABC-85M-v1-20240217-ctx1024-QNN.so');
+            'libRWKV-7-ABC-2024-11-22-QNN.so');
         binPath.value = "$sopath:$cachePath";
         // debugPrint('binPath==$binPath');
         for (String soName in qnnSoList) {
@@ -248,22 +249,27 @@ void fetchABCDataByIsolate() async {
           await CommonUtils.copyFileFromAssets(soName);
         }
       } else {
-        String qnnsoPath =
-            '$cachePath/libRWKV-6-ABC-85M-v1-20240217-ctx1024-QNN.so';
-        binPath.value = "$qnnsoPath:$cachePath";
+        if (File('$cachePath/model_cache.bin').existsSync()) {
+          // QNN加载成功过一次.so模型后，会生成model_cache.bin文件
+          // 之后加载模型时，加载model_cache.bin加载时间会短很多
+          String qnnsoPath = '$cachePath/model_cache.bin';
+          binPath.value = "$qnnsoPath:$cachePath";
+        } else {
+          String qnnsoPath =
+            '$cachePath/libRWKV-7-ABC-2024-11-22-QNN.so';
+          binPath.value = "$qnnsoPath:$cachePath";
+        }
         // debugPrint('file exits binpath==$binPath');
       }
       configPath = await CommonUtils.copyFileFromAssets(
-          'libRWKV-6-ABC-85M-v1-20240217-ctx1024-QNN.config');
-      paramPath = await CommonUtils.copyFileFromAssets(
-          'RWKV-6-ABC-85M-v1-20240217-ctx1024-ncnn.param');
+          'libRWKV-7-ABC-2024-11-22-QNN.config');
     } else if (currentModelType == ModelType.mtk) {
       binPath.value = await CommonUtils.copyFileFromAssets(
-          'RWKV-6-ABC-85M-v1-20240217-ctx1024-MTK-MT6989.dla');
+          'RWKV-7-ABC-2024-11-22-15-50-00-MTK-MT6989.dla');
       configPath = await CommonUtils.copyFileFromAssets(
-          'RWKV-6-ABC-85M-v1-20240217-ctx1024-MTK-MT6989.config');
+          'RWKV-7-ABC-2024-11-22-15-50-00-MTK-MT6989.config');
       paramPath = await CommonUtils.copyFileFromAssets(
-          'RWKV-6-ABC-85M-v1-20240217-ctx1024-MTK-MT6989.emb');
+          'RWKV-7-ABC-2024-11-22-15-50-00-MTK-MT6989.emb');
     }
   } else if (Platform.isWindows) {
     dllPath.value = await CommonUtils.getdllPath();

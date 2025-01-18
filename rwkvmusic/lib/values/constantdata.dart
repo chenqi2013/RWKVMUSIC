@@ -44,8 +44,6 @@ enum DownloadStatus {
   fail,
 }
 
-// const String appVersion = 'mtk_1.6.1_20241108';
-
 const kTriplet = "(3";
 
 const kFinish = "finish";
