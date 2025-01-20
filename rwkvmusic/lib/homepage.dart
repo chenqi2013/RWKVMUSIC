@@ -42,6 +42,7 @@ import 'package:rwkvmusic/mainwidget/text_btn.dart';
 import 'package:rwkvmusic/mainwidget/text_item.dart';
 import 'package:rwkvmusic/mainwidget/text_title.dart';
 import 'package:rwkvmusic/note_length.dart';
+import 'package:rwkvmusic/record_dialog.dart';
 import 'package:rwkvmusic/state.dart';
 import 'package:rwkvmusic/store/config.dart';
 import 'package:rwkvmusic/style/color.dart';
@@ -131,11 +132,10 @@ class _HomePageState extends State<HomePage> {
 
   ///节拍器开启后第二小节起始时间
   // int secondMeasureStartTimStamp = 0;
-  String? recordAudioPath;
-  RxBool isRecording = false.obs;
-  AudioRecorder? audioRecord;
+  // String? recordAudioPath;
+  // RxBool isRecording = false.obs;
+  // AudioRecorder? audioRecord;
   BuildContext? superContext;
-
   void getAppVersion(Function callback) async {
     // debugger();
     if (Platform.isAndroid) {
@@ -289,6 +289,13 @@ class _HomePageState extends State<HomePage> {
         // debugPrint('result==>>>>$result');
         abc = base64.encode(utf8.encode(result));
         controllerPiano.runJavaScript("exportMidiFile('$abc')");
+      })
+      ..addJavaScriptChannel("flutteronNativePlay",
+          onMessageReceived: (JavaScriptMessage jsMessage) {
+        // String name = '${pitchToNoteName[int.parse(jsMessage.message)]!}.mp3';
+        // debugPrint(
+        //     'flutteronNativePlay onMessageReceived=${jsMessage.message},,$name');
+        // playNoteMp3(name);
       })
       ..addJavaScriptChannel("flutteronPlayFinish",
           onMessageReceived: (JavaScriptMessage jsMessage) {
@@ -1047,6 +1054,7 @@ class _HomePageState extends State<HomePage> {
   void showJiepai(bool isNeedPlay) async {
     var result = await showModalBottomSheet(
       context: context,
+      backgroundColor: Colors.transparent,
       builder: (BuildContext context) {
         return JiePaiQi(
           jiepaiCallback: () {
@@ -1137,70 +1145,53 @@ class _HomePageState extends State<HomePage> {
                                           //         .millisecondsSinceEpoch;
                                         }
                                       },
-                                    ).marginOnly(right: 4)
+                                    ).marginOnly(right: 8)
                                   : SizedBox.shrink(),
                             ),
-                            Obx(() => selectstate.value == 1
-                                ? BorderBottomBtn(
-                                    width: 230.w,
-                                    height: isWindowsOrMac ? 123.h : 96.h,
-                                    text: isMetronomeOn.value ? '关闭节拍器' : '节拍器',
-                                    icon: SvgPicture.asset(
-                                      'assets/images/ic_arrowdown.svg',
-                                      width: 28.w,
-                                      height: 21.h,
-                                    ),
-                                    onPressed: () {
-                                      isMetronomeOn.value =
-                                          !(isMetronomeOn.value);
-                                      if (isMetronomeOn.value) {
-                                        JiepaiAudioPlayerManage()
-                                            .startMetronome();
-                                      } else {
-                                        JiepaiAudioPlayerManage()
-                                            .stopMetronome();
-                                      }
-                                    },
-                                  ).marginOnly(right: 4)
-                                : SizedBox.shrink()),
-                            Obx(() => selectstate.value == 1
-                                ? InkWell(
-                                    child: SvgPicture.asset(
-                                      'assets/images/metronome_off.svg',
-                                      // width: 48.w,
-                                      height: 70.h,
-                                    ).marginOnly(right: 4),
-                                    onTap: () {
-                                      showJiepai(false);
-                                    },
-                                  )
-                                : SizedBox.shrink()),
-                            Obx(() => selectstate.value == 1
-                                ? Obx(() => BorderBottomBtn(
-                                      width: 230.w,
+                            Obx(
+                              () => selectstate.value == 1
+                                  ? BorderBottomBtn(
+                                      width: isWindowsOrMac ? 123.h : 96.h,
                                       height: isWindowsOrMac ? 123.h : 96.h,
-                                      text: isRecording.value
-                                          ? '结束录音'.tr
-                                          : '开始录音'.tr,
+                                      text: '',
                                       icon: SvgPicture.asset(
-                                        'assets/images/ic_arrowdown.svg',
-                                        width: 28.w,
-                                        height: 21.h,
+                                        isMetronomeOn.value
+                                            ? 'assets/images/metronome_on.svg'
+                                            : 'assets/images/metronome_off.svg',
+                                        width: isWindowsOrMac ? 61.w : 52.w,
+                                        height: isWindowsOrMac ? 61.h : 52.h,
                                       ),
-                                      onPressed: () {
-                                        debugPrint("开始录音");
-                                        if (isRecording.value) {
-                                          isRecording.value = false;
-                                          toastInfo(msg: '结束录音，开始分析'.tr);
-                                          stopRecording();
+                                      onPressed: () async {
+                                        isMetronomeOn.value =
+                                            !(isMetronomeOn.value);
+                                        if (isMetronomeOn.value) {
+                                          JiepaiAudioPlayerManage()
+                                              .startMetronome();
                                         } else {
-                                          isRecording.value = true;
-                                          recordAudio();
-                                          toastInfo(msg: '开始录音'.tr);
+                                          JiepaiAudioPlayerManage()
+                                              .stopMetronome();
                                         }
                                       },
-                                    ).marginOnly(right: 4))
-                                : SizedBox.shrink()),
+                                    )
+                                  : SizedBox.shrink(),
+                            ).marginOnly(right: 8),
+                            Obx(
+                              () => selectstate.value == 1
+                                  ? BorderBottomBtn(
+                                      width: isWindowsOrMac ? 123.h : 96.h,
+                                      height: isWindowsOrMac ? 123.h : 96.h,
+                                      text: '',
+                                      icon: SvgPicture.asset(
+                                        'assets/images/metronome_setting.svg',
+                                        width: isWindowsOrMac ? 61.w : 52.w,
+                                        height: isWindowsOrMac ? 61.h : 52.h,
+                                      ),
+                                      onPressed: () async {
+                                        showJiepai(false);
+                                      },
+                                    )
+                                  : SizedBox.shrink(),
+                            ).marginOnly(right: 8),
                             Obx(
                               () => selectstate.value == 0
                                   ? BorderBottomBtn(
@@ -1408,6 +1399,19 @@ class _HomePageState extends State<HomePage> {
                             break;
                           case ChangeNoteKey.delete:
                             _delete();
+                            break;
+                          case ChangeNoteKey.record:
+                            {
+                              showDialog(
+                                context: context,
+                                barrierDismissible: false, // 禁止点击外部关闭弹窗
+                                builder: (BuildContext context) {
+                                  return RecordDialog(callBack: (pitch) {
+                                    updatePianoNote(pitch);
+                                  });
+                                },
+                              );
+                            }
                             break;
                           case ChangeNoteKey.transposeUp:
                           case ChangeNoteKey.transposeDown:
@@ -3275,143 +3279,6 @@ class _HomePageState extends State<HomePage> {
         Fluttertoast.showToast(msg: "please check network,download fail".tr);
       }
     });
-  }
-
-  Future<void> recordAudio() async {
-    Directory tempDir = await getApplicationCacheDirectory();
-    audioRecord ??= AudioRecorder();
-    if (await audioRecord!.hasPermission()) {
-      await audioRecord!.start(
-          RecordConfig(
-            encoder: AudioEncoder.wav,
-            sampleRate: 22050,
-          ),
-          path: '${tempDir.path}/hengchang.wav');
-    }
-
-    // bool result = await audioRecorder.hasPermission();
-    // if (result) {
-    //   await audioRecorder.start(
-    //     path: '${tempDir.path}/myFile.m4a', // required
-    //     encoder: AudioEncoder.AAC, // by default
-    //     bitRate: 128000, // by default
-    //     samplingRate: 44100, // by default
-    //   );
-    // } else {
-    //   debugPrint('no permission to record');
-    // }
-
-    // final hasPermission = await recorderController
-    //     .checkPermission(); // Check mic permission (also called during record)
-    // if (hasPermission) {
-    //   debugPrint('has permission to start record');
-    //   await recorderController.record(
-    //       sampleRate: 22050,
-    //       bitRate: 128000,
-    //       path: '${tempDir.path}/recordaudio.wav'); // Record (path is optional)
-    // } else {
-    //   debugPrint('no permission to record');
-    //   toastInfo(msg: 'no permission to record');
-    // }
-    // await recorderController.openRecorder();
-    // await recorderController.startRecorder(
-    //   toFile: 'recordaudio.wav',
-    //   codec: Codec.pcm16WAV,
-    //   sampleRate: 22050,
-    //   numChannels: 1,
-    // );
-  }
-
-  Future<void> stopRecording() async {
-    if (await audioRecord!.isRecording()) {
-      recordAudioPath = await audioRecord!.stop();
-      // audioRecord!.cancel();
-      // audioRecord!.dispose();
-      // audioRecord = null;
-      debugPrint('stopRecording path=$recordAudioPath');
-      basicPitch(recordAudioPath!);
-    }
-
-    // bool isRecording = await audioRecorder.isRecording();
-    // if (isRecording) {
-    //   await audioRecorder.stop();
-    // }
-
-    // await recorderController.pause(); // Pause recording
-    // if (recorderController.isRecording) {
-    //   recordAudioPath = await recorderController
-    //       .stopRecorder(); // Stop recording and get the path
-    //   // recorderController.refresh(); // Refresh waveform to original position
-    //   debugPrint('stopRecording path=$recordAudioPath');
-    //   basicPitch(recordAudioPath!);
-    // } else {
-    //   debugPrint('no recording');
-    // }
-  }
-
-  Future<List<int>> basicPitch(String path) async {
-    var pitchs = <int>[];
-    final basicPitchInstance = BasicPitch();
-    basicPitchInstance.init();
-
-    // 复制音频文件并获取新路径
-    // path = await CommonUtils.copyFileFromAssets('test_audio.wav');
-
-    if (File(path).existsSync()) {
-      debugPrint('$path exists');
-      // resetToDefaulValueInCreateMode();
-      final audioData = await File(path).readAsBytes();
-      final noteEvents = await basicPitchInstance.predictBytes(
-        audioData,
-        onsetThreshold: double.parse(onsetThreshold),
-        frameThreshold: double.parse(frameThreshold),
-        minimalNoteLength: double.parse(minimalNoteLength),
-      );
-      debugPrint('noteEvents=${noteEvents.length}');
-
-      if (noteEvents.isEmpty) {
-        toastInfo(msg: '无法识别当前哼唱内容，请重新录制');
-      }
-
-      // 2. 收集音符事件
-      List<NoteEvent> noteEventsList = [];
-      for (int i = noteEvents.length - 1; i >= 0; i--) {
-        var note = noteEvents[i];
-        print(
-            "start: ${note['start']}, end: ${note['end']}, pitch: ${note['pitch']}");
-        int pitch = int.parse('${note['pitch']}');
-        double onsetTime =
-            double.parse(note['start'].toString()); // 'start' 以秒为单位
-        double offsetTime = double.parse(note['end'].toString()); // 'end' 以秒为单位
-
-        noteEventsList.add(NoteEvent(
-          pitch: pitch,
-          onsetTime: onsetTime,
-          offsetTime: offsetTime,
-        ));
-      }
-
-      basicPitchInstance.release();
-
-      // 3. 合并相邻的同音音符
-      List<NoteEvent> mergedNotes = CommonUtils.mergeAdjacentNotes(
-          noteEventsList,
-          gapThreshold: double.parse(gapThreshold));
-
-      // 4. 生成最终的音高列表
-      pitchs = mergedNotes.map((note) => note.pitch).toList();
-
-      // 更新钢琴键或执行其他操作
-      for (var note in mergedNotes) {
-        updatePianoNote(note.pitch);
-        // 如果需要，可以在这里播放音符或进行其他处理
-      }
-
-      return pitchs;
-    } else {
-      debugPrint('$path not exists');
-      return [];
-    }
   }
 
   void midiDataToABCConverter(List<List<int>> midiEvents) {

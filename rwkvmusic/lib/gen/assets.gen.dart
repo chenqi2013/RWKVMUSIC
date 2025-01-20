@@ -55,6 +55,68 @@ class $AssetsFastmodelGen {
   String get rWKV6ABC85MV120240217Ctx1024NcnnParam =>
       'assets/fastmodel/RWKV-6-ABC-85M-v1-20240217-ctx1024-ncnn.param';
 
+  /// File path: assets/fastmodel/RWKV-6-ABC-85M-v1-20240217-ctx1024-webrwkv.st
+  String get rWKV6ABC85MV120240217Ctx1024Webrwkv =>
+      'assets/fastmodel/RWKV-6-ABC-85M-v1-20240217-ctx1024-webrwkv.st';
+
+  /// File path: assets/fastmodel/libQnnCpu.so
+  String get libQnnCpu => 'assets/fastmodel/libQnnCpu.so';
+
+  /// File path: assets/fastmodel/libQnnDspV66Skel.so
+  String get libQnnDspV66Skel => 'assets/fastmodel/libQnnDspV66Skel.so';
+
+  /// File path: assets/fastmodel/libQnnGpu.so
+  String get libQnnGpu => 'assets/fastmodel/libQnnGpu.so';
+
+  /// File path: assets/fastmodel/libQnnGpuNetRunExtensions.so
+  String get libQnnGpuNetRunExtensions =>
+      'assets/fastmodel/libQnnGpuNetRunExtensions.so';
+
+  /// File path: assets/fastmodel/libQnnHtp.so
+  String get libQnnHtp => 'assets/fastmodel/libQnnHtp.so';
+
+  /// File path: assets/fastmodel/libQnnHtpNetRunExtensions.so
+  String get libQnnHtpNetRunExtensions =>
+      'assets/fastmodel/libQnnHtpNetRunExtensions.so';
+
+  /// File path: assets/fastmodel/libQnnHtpPrepare.so
+  String get libQnnHtpPrepare => 'assets/fastmodel/libQnnHtpPrepare.so';
+
+  /// File path: assets/fastmodel/libQnnHtpV68Skel.so
+  String get libQnnHtpV68Skel => 'assets/fastmodel/libQnnHtpV68Skel.so';
+
+  /// File path: assets/fastmodel/libQnnHtpV68Stub.so
+  String get libQnnHtpV68Stub => 'assets/fastmodel/libQnnHtpV68Stub.so';
+
+  /// File path: assets/fastmodel/libQnnHtpV69Skel.so
+  String get libQnnHtpV69Skel => 'assets/fastmodel/libQnnHtpV69Skel.so';
+
+  /// File path: assets/fastmodel/libQnnHtpV69Stub.so
+  String get libQnnHtpV69Stub => 'assets/fastmodel/libQnnHtpV69Stub.so';
+
+  /// File path: assets/fastmodel/libQnnHtpV73Skel.so
+  String get libQnnHtpV73Skel => 'assets/fastmodel/libQnnHtpV73Skel.so';
+
+  /// File path: assets/fastmodel/libQnnHtpV73Stub.so
+  String get libQnnHtpV73Stub => 'assets/fastmodel/libQnnHtpV73Stub.so';
+
+  /// File path: assets/fastmodel/libQnnHtpV75Skel.so
+  String get libQnnHtpV75Skel => 'assets/fastmodel/libQnnHtpV75Skel.so';
+
+  /// File path: assets/fastmodel/libQnnHtpV75Stub.so
+  String get libQnnHtpV75Stub => 'assets/fastmodel/libQnnHtpV75Stub.so';
+
+  /// File path: assets/fastmodel/libQnnSystem.so
+  String get libQnnSystem => 'assets/fastmodel/libQnnSystem.so';
+
+  /// File path: assets/fastmodel/libRWKV-6-ABC-85M-v1-20240217-ctx1024-QNN.config
+  String get libRWKV6ABC85MV120240217Ctx1024QNNConfig =>
+      'assets/fastmodel/libRWKV-6-ABC-85M-v1-20240217-ctx1024-QNN.config';
+
+  /// File path: assets/fastmodel/libRWKV-6-ABC-85M-v1-20240217-ctx1024-QNN.so
+  String get libRWKV6ABC85MV120240217Ctx1024QNNSo =>
+      'assets/fastmodel/libRWKV-6-ABC-85M-v1-20240217-ctx1024-QNN.so';
+
   /// File path: assets/fastmodel/libfaster_rwkvd.so
   String get libfasterRwkvd => 'assets/fastmodel/libfaster_rwkvd.so';
 
@@ -62,6 +124,25 @@ class $AssetsFastmodelGen {
   List<String> get values => [
         rWKV6ABC85MV120240217Ctx1024NcnnConfig,
         rWKV6ABC85MV120240217Ctx1024NcnnParam,
+        rWKV6ABC85MV120240217Ctx1024Webrwkv,
+        libQnnCpu,
+        libQnnDspV66Skel,
+        libQnnGpu,
+        libQnnGpuNetRunExtensions,
+        libQnnHtp,
+        libQnnHtpNetRunExtensions,
+        libQnnHtpPrepare,
+        libQnnHtpV68Skel,
+        libQnnHtpV68Stub,
+        libQnnHtpV69Skel,
+        libQnnHtpV69Stub,
+        libQnnHtpV73Skel,
+        libQnnHtpV73Stub,
+        libQnnHtpV75Skel,
+        libQnnHtpV75Stub,
+        libQnnSystem,
+        libRWKV6ABC85MV120240217Ctx1024QNNConfig,
+        libRWKV6ABC85MV120240217Ctx1024QNNSo,
         libfasterRwkvd
       ];
 }
@@ -107,12 +188,31 @@ class $AssetsImagesGen {
   AssetGenImage get accountHeader =>
       const AssetGenImage('assets/images/account_header.png');
 
+  /// File path: assets/images/addbpm.png
+  AssetGenImage get addbpm => const AssetGenImage('assets/images/addbpm.png');
+
+  /// File path: assets/images/arrowdown.png
+  AssetGenImage get arrowdown =>
+      const AssetGenImage('assets/images/arrowdown.png');
+
   /// File path: assets/images/backgroundbg.jpg
   AssetGenImage get backgroundbg =>
       const AssetGenImage('assets/images/backgroundbg.jpg');
 
   /// File path: assets/images/bodystop.svg
   String get bodystop => 'assets/images/bodystop.svg';
+
+  /// File path: assets/images/bpmpause.png
+  AssetGenImage get bpmpause =>
+      const AssetGenImage('assets/images/bpmpause.png');
+
+  /// File path: assets/images/bpmstart.png
+  AssetGenImage get bpmstart =>
+      const AssetGenImage('assets/images/bpmstart.png');
+
+  /// File path: assets/images/bpmvolume.png
+  AssetGenImage get bpmvolume =>
+      const AssetGenImage('assets/images/bpmvolume.png');
 
   /// File path: assets/images/btn_create_generate.svg
   String get btnCreateGenerate => 'assets/images/btn_create_generate.svg';
@@ -259,8 +359,20 @@ class $AssetsImagesGen {
   AssetGenImage get iconsTwitter =>
       const AssetGenImage('assets/images/icons-twitter.png');
 
+  /// File path: assets/images/jianbpm.png
+  AssetGenImage get jianbpm => const AssetGenImage('assets/images/jianbpm.png');
+
   /// File path: assets/images/logo.png
   AssetGenImage get logo => const AssetGenImage('assets/images/logo.png');
+
+  /// File path: assets/images/metronome_off.svg
+  String get metronomeOff => 'assets/images/metronome_off.svg';
+
+  /// File path: assets/images/metronome_on.svg
+  String get metronomeOn => 'assets/images/metronome_on.svg';
+
+  /// File path: assets/images/metronome_setting.svg
+  String get metronomeSetting => 'assets/images/metronome_setting.svg';
 
   /// File path: assets/images/music.jpg
   AssetGenImage get music => const AssetGenImage('assets/images/music.jpg');
@@ -270,6 +382,12 @@ class $AssetsImagesGen {
 
   /// File path: assets/images/play.jpg
   AssetGenImage get play => const AssetGenImage('assets/images/play.jpg');
+
+  /// File path: assets/images/play_pause.svg
+  String get playPause => 'assets/images/play_pause.svg';
+
+  /// File path: assets/images/play_start.svg
+  String get playStart => 'assets/images/play_start.svg';
 
   /// File path: assets/images/playerbg.svg
   String get playerbg => 'assets/images/playerbg.svg';
@@ -281,6 +399,15 @@ class $AssetsImagesGen {
   /// File path: assets/images/radio_unselect.png
   AssetGenImage get radioUnselect =>
       const AssetGenImage('assets/images/radio_unselect.png');
+
+  /// File path: assets/images/record_pause.svg
+  String get recordPause => 'assets/images/record_pause.svg';
+
+  /// File path: assets/images/record_start.svg
+  String get recordStart => 'assets/images/record_start.svg';
+
+  /// File path: assets/images/record_voice.svg
+  String get recordVoice => 'assets/images/record_voice.svg';
 
   /// File path: assets/images/setting.jpg
   AssetGenImage get setting => const AssetGenImage('assets/images/setting.jpg');
@@ -319,8 +446,13 @@ class $AssetsImagesGen {
   /// List of all assets
   List<dynamic> get values => [
         accountHeader,
+        addbpm,
+        arrowdown,
         backgroundbg,
         bodystop,
+        bpmpause,
+        bpmstart,
+        bpmvolume,
         btnCreateGenerate,
         btnGenerate,
         btnInstrument,
@@ -362,13 +494,22 @@ class $AssetsImagesGen {
         iconsFacebook,
         iconsGoogle,
         iconsTwitter,
+        jianbpm,
         logo,
+        metronomeOff,
+        metronomeOn,
+        metronomeSetting,
         music,
         pause,
         play,
+        playPause,
+        playStart,
         playerbg,
         radioSelect,
         radioUnselect,
+        recordPause,
+        recordStart,
+        recordVoice,
         setting,
         settingbg,
         stopgenerate,
@@ -444,6 +585,9 @@ class $AssetsPlayerGen {
   /// File path: assets/player/abcjs-basic.js
   String get abcjsBasic => 'assets/player/abcjs-basic.js';
 
+  /// File path: assets/player/audio.min.js
+  String get audioMin => 'assets/player/audio.min.js';
+
   /// File path: assets/player/examples-styles.css
   String get examplesStyles => 'assets/player/examples-styles.css';
 
@@ -454,19 +598,13 @@ class $AssetsPlayerGen {
   String get midiplayer => 'assets/player/midiplayer.js';
 
   /// File path: assets/player/player.html
-  String get playerHtml => 'assets/player/player.html';
-
-  /// File path: assets/player/player_副本.html
-  String get playerHtml_ => 'assets/player/player_副本.html';
-
-  /// File path: assets/player/player11.html
-  String get player11 => 'assets/player/player11.html';
-
-  /// File path: assets/player/player22.html
-  String get player22 => 'assets/player/player22.html';
+  String get player => 'assets/player/player.html';
 
   /// Directory path: assets/player/soundfont
   $AssetsPlayerSoundfontGen get soundfont => const $AssetsPlayerSoundfontGen();
+
+  /// File path: assets/player/test.mp3
+  String get test => 'assets/player/test.mp3';
 
   /// List of all assets
   List<String> get values => [
@@ -474,13 +612,12 @@ class $AssetsPlayerGen {
         abcjsHtml,
         abcjsAudio,
         abcjsBasic,
+        audioMin,
         examplesStyles,
         index,
         midiplayer,
-        playerHtml,
-        playerHtml_,
-        player11,
-        player22
+        player,
+        test
       ];
 }
 
@@ -492,6 +629,25 @@ class $AssetsPromptsGen {
 
   /// List of all assets
   List<String> get values => [prompts];
+}
+
+class $AssetsSoundsGen {
+  const $AssetsSoundsGen();
+
+  /// File path: assets/sounds/audio2.mp3
+  String get audio2 => 'assets/sounds/audio2.mp3';
+
+  /// File path: assets/sounds/bpmvoice1.wav
+  String get bpmvoice1 => 'assets/sounds/bpmvoice1.wav';
+
+  /// File path: assets/sounds/bpmvoice2.wav
+  String get bpmvoice2 => 'assets/sounds/bpmvoice2.wav';
+
+  /// File path: assets/sounds/test_audio.wav
+  String get testAudio => 'assets/sounds/test_audio.wav';
+
+  /// List of all assets
+  List<String> get values => [audio2, bpmvoice1, bpmvoice2, testAudio];
 }
 
 class $AssetsDoctorPngListGen {
@@ -984,6 +1140,20 @@ class $AssetsPlayerSoundfontGen {
 class $AssetsDoctorStaticCssGen {
   const $AssetsDoctorStaticCssGen();
 
+  /// File path: assets/doctor/static/css/main.8b4546bf.css
+  String get main8b4546bf => 'assets/doctor/static/css/main.8b4546bf.css';
+
+  /// File path: assets/doctor/static/css/main.8b4546bf.css.map
+  String get main8b4546bfCss =>
+      'assets/doctor/static/css/main.8b4546bf.css.map';
+
+  /// File path: assets/doctor/static/css/main.a8e42e9e.css
+  String get mainA8e42e9e => 'assets/doctor/static/css/main.a8e42e9e.css';
+
+  /// File path: assets/doctor/static/css/main.a8e42e9e.css.map
+  String get mainA8e42e9eCss =>
+      'assets/doctor/static/css/main.a8e42e9e.css.map';
+
   /// File path: assets/doctor/static/css/main.c79c7b97.css
   String get mainC79c7b97 => 'assets/doctor/static/css/main.c79c7b97.css';
 
@@ -992,7 +1162,14 @@ class $AssetsDoctorStaticCssGen {
       'assets/doctor/static/css/main.c79c7b97.css.map';
 
   /// List of all assets
-  List<String> get values => [mainC79c7b97, mainC79c7b97Css];
+  List<String> get values => [
+        main8b4546bf,
+        main8b4546bfCss,
+        mainA8e42e9e,
+        mainA8e42e9eCss,
+        mainC79c7b97,
+        mainC79c7b97Css
+      ];
 }
 
 class $AssetsDoctorStaticJsGen {
@@ -1002,6 +1179,20 @@ class $AssetsDoctorStaticJsGen {
   String get a4536ef17f8eChunk =>
       'assets/doctor/static/js/453.6ef17f8e.chunk.js';
 
+  /// File path: assets/doctor/static/js/453.6ef17f8e.chunk.js.map
+  String get a4536ef17f8eChunkJs =>
+      'assets/doctor/static/js/453.6ef17f8e.chunk.js.map';
+
+  /// File path: assets/doctor/static/js/main.068ec1c7.js
+  String get main068ec1c7 => 'assets/doctor/static/js/main.068ec1c7.js';
+
+  /// File path: assets/doctor/static/js/main.068ec1c7.js.LICENSE.txt
+  String get main068ec1c7JsLICENSE =>
+      'assets/doctor/static/js/main.068ec1c7.js.LICENSE.txt';
+
+  /// File path: assets/doctor/static/js/main.068ec1c7.js.map
+  String get main068ec1c7Js => 'assets/doctor/static/js/main.068ec1c7.js.map';
+
   /// File path: assets/doctor/static/js/main.8c758f0e.js
   String get main8c758f0e => 'assets/doctor/static/js/main.8c758f0e.js';
 
@@ -1010,8 +1201,15 @@ class $AssetsDoctorStaticJsGen {
       'assets/doctor/static/js/main.8c758f0e.js.LICENSE.txt';
 
   /// List of all assets
-  List<String> get values =>
-      [a4536ef17f8eChunk, main8c758f0e, main8c758f0eJsLICENSE];
+  List<String> get values => [
+        a4536ef17f8eChunk,
+        a4536ef17f8eChunkJs,
+        main068ec1c7,
+        main068ec1c7JsLICENSE,
+        main068ec1c7Js,
+        main8c758f0e,
+        main8c758f0eJsLICENSE
+      ];
 }
 
 class $AssetsPlayerSoundfontAcousticGrandPianoMp3Gen {
@@ -2838,6 +3036,7 @@ class Assets {
   static const $AssetsPianoGen piano = $AssetsPianoGen();
   static const $AssetsPlayerGen player = $AssetsPlayerGen();
   static const $AssetsPromptsGen prompts = $AssetsPromptsGen();
+  static const $AssetsSoundsGen sounds = $AssetsSoundsGen();
 }
 
 class AssetGenImage {
@@ -2870,7 +3069,7 @@ class AssetGenImage {
     ImageRepeat repeat = ImageRepeat.noRepeat,
     Rect? centerSlice,
     bool matchTextDirection = false,
-    bool gaplessPlayback = true,
+    bool gaplessPlayback = false,
     bool isAntiAlias = false,
     String? package,
     FilterQuality filterQuality = FilterQuality.low,

@@ -32,6 +32,7 @@ enum ChangeNoteKey {
   transposeDown,
   transpose,
   transposeUp,
+  record,
   delete;
 
   bool get isMain =>
@@ -69,6 +70,8 @@ enum ChangeNoteKey {
         return Assets.images.changeNode.sixteenthZ;
       case ChangeNoteKey.triplet:
         return Assets.images.changeNode.triplet;
+      case ChangeNoteKey.record:
+        return Assets.images.recordVoice;
       case ChangeNoteKey.mergedZ:
       case ChangeNoteKey.randomGroove:
       case ChangeNoteKey.transposeDown:

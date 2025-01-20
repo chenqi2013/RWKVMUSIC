@@ -38,9 +38,9 @@ dependencies:
   onnxruntime: ^1.4.1
   sound_effect: ^0.0.2
   wheel_picker: ^0.1.0
+  audio_waveforms: ^1.2.0
   # flutter_sound_record: ^3.3.2 
   record: ^5.2.0
-  audio_waveforms: ^1.1.1
   file_md5: ^0.0.1
   app_installer: ^1.2.0
   isolated_download_manager: ^1.0.3

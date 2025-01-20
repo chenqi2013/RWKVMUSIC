@@ -55,6 +55,13 @@ enum DownloadStatus {
   fail,
 }
 
+enum RecordStatus {
+  start,
+  stop,
+  play,
+  pause,
+}
+
 // const String appVersion = 'mtk_1.6.1_20241108';
 
 const kTriplet = "(3";

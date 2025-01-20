@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:rwkvmusic/jiepai/jiepai_audioplayer.dart';
 import 'package:rwkvmusic/jiepai/jiepai_wheel.dart';
+import 'package:rwkvmusic/main.dart';
+import 'package:rwkvmusic/mainwidget/drop_button_down.dart';
+import 'package:rwkvmusic/mainwidget/text_item.dart';
 import 'package:rwkvmusic/values/constantdata.dart';
 
 class JiePaiQi extends StatefulWidget {
@@ -80,8 +84,19 @@ class _JiePaiQiState extends State<JiePaiQi> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 290,
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.all(Radius.circular(30.w)),
+        color: Colors.transparent,
+        image: const DecorationImage(
+          image: AssetImage('assets/images/backgroundbg.jpg'), // 替换为你的背景图片路径
+          fit: BoxFit.cover,
+        ),
+      ),
+      width: isWindowsOrMac ? 1400.w : 1200.w,
+      // height: isWindowsOrMac ? 1000.h : 910.h,
+      padding: EdgeInsets.symmetric(
+          horizontal: isWindowsOrMac ? 60.w : 40.w,
+          vertical: isWindowsOrMac ? 40.h : 20.h),
       child: SingleChildScrollView(
         child: Column(
           children: [
@@ -93,7 +108,7 @@ class _JiePaiQiState extends State<JiePaiQi> {
                       '${audioPlayerManage.bpm.value} ${audioPlayerManage.beatsPerBar.value}/${listJiepai[audioPlayerManage.rightIndex.value]}');
                 },
                 child: const Text(
-                  '确定',
+                  'confirm',
                   style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.bold,
@@ -136,8 +151,26 @@ class _JiePaiQiState extends State<JiePaiQi> {
             //   height: 20,
             // ),
             Row(
+              crossAxisAlignment: CrossAxisAlignment.baseline,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              textBaseline: TextBaseline.alphabetic, // 指定基线对齐的基线
               children: [
-                const Text('请选择节拍'),
+                TextItem(text: 'Time signature'.tr),
+                Obx(() => DropButtonList(
+                      key: const ValueKey('Time'),
+                      items: timeSignatures,
+                      index: timeSignature.value,
+                      onChanged: (index) {
+                        timeSignature.value = index;
+                        timeSingnatureStr = timeSignatures[index];
+                        // updateTimeSignature();
+                      },
+                    )),
+              ],
+            ),
+            Row(
+              children: [
+                const Text('Beat'),
                 const SizedBox(
                   width: 20,
                 ),
@@ -272,7 +305,7 @@ class _JiePaiQiState extends State<JiePaiQi> {
             ),
             Row(
               children: [
-                const Text('节拍器音量'),
+                const Text('BPM Volume'),
                 const SizedBox(
                   width: 20,
                 ),
