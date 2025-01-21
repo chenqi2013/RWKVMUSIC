@@ -30,6 +30,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  flutter_easyloading: ^3.0.5
   app_installer: ^1.2.0
   isolated_download_manager: ^1.0.3
   webview_windows: ^0.4.0
@@ -43,7 +44,6 @@ dependencies:
   dio_cookie_manager: ^3.1.1
   event_bus: ^2.0.0
   flutter_cache_manager: null
-  flutter_easyloading: ^3.0.3
   flutter_inappwebview: ^6.0.0
   webview_dart: ^1.0.1
   flutter_localization: ^0.2.0

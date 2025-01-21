@@ -7,6 +7,7 @@ import 'package:flutter/foundation.dart';
 import 'dart:io';
 import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:rwkvmusic/langs/translation_service.dart';
@@ -83,6 +84,7 @@ void main(List<String> args) async {
         child: GetMaterialApp(
           debugShowCheckedModeBanner: false,
           home: HomePage(),
+          builder: EasyLoading.init(),
           locale: Locale('en', 'US'), // 默认语言
           fallbackLocale: Locale('en', 'US'), // 回退语言
           translations: TranslationService(), // 注册翻译类
@@ -234,10 +236,10 @@ void fetchABCDataByIsolate() async {
       // paramPath = await CommonUtils.copyFileFromAssets(
       //     'RWKV-6-ABC-85M-v1-20240217-ctx1024-ncnn.param');
     } else if (currentModelType == ModelType.rwkvcpp) {
-      binPath.value = await CommonUtils.copyFileFromAssets(
-          'rwkv-7-abc-rwkvcpp.bin');
-      configPath = await CommonUtils.copyFileFromAssets(
-          'rwkv-7-abc-rwkvcpp.config');
+      binPath.value =
+          await CommonUtils.copyFileFromAssets('rwkv-7-abc-rwkvcpp.bin');
+      configPath =
+          await CommonUtils.copyFileFromAssets('rwkv-7-abc-rwkvcpp.config');
     } else if (currentModelType == ModelType.qnn) {
       if (!isFileExists) {
         String sopath = await CommonUtils.copyFileFromAssets(
@@ -255,8 +257,7 @@ void fetchABCDataByIsolate() async {
           String qnnsoPath = '$cachePath/model_cache.bin';
           binPath.value = "$qnnsoPath:$cachePath";
         } else {
-          String qnnsoPath =
-            '$cachePath/libRWKV-7-ABC-2024-11-22-QNN.so';
+          String qnnsoPath = '$cachePath/libRWKV-7-ABC-2024-11-22-QNN.so';
           binPath.value = "$qnnsoPath:$cachePath";
         }
         // debugPrint('file exits binpath==$binPath');
@@ -346,6 +347,7 @@ void fetchABCDataByIsolate() async {
         userIsolate!.kill(priority: Isolate.immediate);
         userIsolate = null;
         debugPrint('userIsolate!.kill()');
+        EasyLoading.dismiss();
       }
     } else if (data is EventBus) {
       isolateEventBus = data;
