@@ -1052,9 +1052,9 @@ class _HomePageState extends State<HomePage> {
   }
 
   void showJiepai(bool isNeedPlay) async {
-    var result = await showModalBottomSheet(
+    var result = await showDialog(
       context: context,
-      backgroundColor: Colors.transparent,
+      barrierDismissible: false,
       builder: (BuildContext context) {
         return JiePaiQi(
           jiepaiCallback: () {
@@ -1067,7 +1067,6 @@ class _HomePageState extends State<HomePage> {
           },
         );
       },
-      isDismissible: false,
     );
     // currentJiePaiStr.value = result;
     debugPrint('result=$result');
@@ -1210,7 +1209,7 @@ class _HomePageState extends State<HomePage> {
                                       },
                                     )
                                   : BorderBottomBtn(
-                                      width: 302.w,
+                                      width: 332.w,
                                       height: isWindowsOrMac ? 123.h : 96.h,
                                       text: 'Soft keyboard'.tr,
                                       icon: SvgPicture.asset(
@@ -3027,37 +3026,74 @@ class _HomePageState extends State<HomePage> {
     };
   }
 
-  void showZhuanyeModeDialog(BuildContext context) {
-    debugPrint('showZhuanyeModeDialog');
+  showZhuanyeModeDialog(context) {
+    String title = 'tips'.tr;
+    String msg = 'Do you want to activate the professional input mode'.tr;
     showDialog(
       context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('提示'),
-          content: Text('是否开启专业输入模式'),
-          actions: <Widget>[
-            TextButton(
-              onPressed: () {
-                isZhuanyeMode.value = true;
-                // secondMeasureStartTimStamp =
-                //     DateTime.now().millisecondsSinceEpoch;
-                // JiepaiAudioPlayerManage().startMetronome();
-                Navigator.of(context).pop(); // 关闭对话框
-                showJiepai(true);
-              },
-              child: Text('开启'),
-            ),
-            TextButton(
-              onPressed: () {
-                isZhuanyeMode.value = false;
-                JiepaiAudioPlayerManage().stopMetronome();
-                isMetronomeOn.value = false;
-                Navigator.of(context).pop(); // 关闭对话框
-              },
-              child: Text('取消'),
-            ),
-          ],
-        );
+      builder: (BuildContext buildcontext) {
+        return Dialog(
+            backgroundColor: Colors.transparent,
+            child: Container(
+              padding: EdgeInsets.all(30.w),
+              width: isWindowsOrMac ? 1400.w : 1200.w,
+              height: isWindowsOrMac ? 630.h : 500.h,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.all(Radius.circular(30.w)),
+                color: Colors.transparent,
+                image: const DecorationImage(
+                  image: AssetImage(
+                      'assets/images/backgroundbg.jpg'), // 替换为你的背景图片路径
+                  fit: BoxFit.cover,
+                ),
+              ),
+              child: Column(
+                children: [
+                  // backgroundColor: Colors.transparent,
+                  TextTitle(text: title),
+                  SizedBox(
+                    height: 30.h,
+                  ),
+                  TextItem(text: msg),
+
+                  SizedBox(
+                    height: 100.h,
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      TextBtn(
+                        width: 500.w,
+                        height: 113.h,
+                        onPressed: () {
+                          isZhuanyeMode.value = true;
+                          // secondMeasureStartTimStamp =
+                          //     DateTime.now().millisecondsSinceEpoch;
+                          // JiepaiAudioPlayerManage().startMetronome();
+                          Navigator.of(context).pop(); // 关闭对话框
+                          showJiepai(true);
+                        },
+                        text: 'OK'.tr,
+                      ),
+                      SizedBox(
+                        width: 40.w,
+                      ),
+                      TextBtn(
+                        width: 500.w,
+                        height: 113.h,
+                        onPressed: () {
+                          isZhuanyeMode.value = false;
+                          JiepaiAudioPlayerManage().stopMetronome();
+                          isMetronomeOn.value = false;
+                          Navigator.of(context).pop(); // 关闭对话框
+                        },
+                        text: 'Cancel'.tr,
+                      ),
+                    ],
+                  )
+                ],
+              ),
+            ));
       },
     );
   }

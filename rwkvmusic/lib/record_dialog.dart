@@ -9,6 +9,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:record/record.dart';
+import 'package:rwkvmusic/half_heart_painter.dart';
 import 'package:rwkvmusic/main.dart';
 import 'package:rwkvmusic/mainwidget/text_btn.dart';
 import 'package:rwkvmusic/style/color.dart';
@@ -192,48 +193,71 @@ class _RecordDialogState extends State<RecordDialog> {
                   playerWaveStyle: playerWaveStyle,
                   backgroundColor: Colors.green,
                 ),
-              InkWell(
-                child: SvgPicture.asset(
-                  'assets/images/${recordStatus == 0 ? 'record_start.svg' : recordStatus == 1 ? 'record_pause.svg' : recordStatus == 2 ? 'play_start.svg' : 'play_pause.svg'}',
-                  height: 156.h,
-                ).marginOnly(top: 30.h, bottom: 30.h),
-                onTap: () async {
-                  if (recordStatus == RecordStatus.start.index) {
-                    recordStatus = RecordStatus.stop.index;
-                    recordAudio();
-                    await _startOrStopRecording();
-                    setState(() {});
-                  } else if (recordStatus == RecordStatus.stop.index) {
-                    await stopRecording(context);
-                    await _startOrStopRecording();
-                    path = recordAudioPath!;
-                    controller.preparePlayer(
-                      path: path!,
-                      shouldExtractWaveform: true,
-                    );
-                    // Extracting waveform separately if index is odd.
-                    controller
-                        .extractWaveformData(
-                          path: path!,
-                          noOfSamples: playerWaveStyle.getSamplesForWidth(200),
-                        )
-                        .then((waveformData) =>
-                            debugPrint(waveformData.toString()));
-                    recordStatus = RecordStatus.play.index;
-                    setState(() {});
-                  } else if (recordStatus == RecordStatus.play.index ||
-                      recordStatus == RecordStatus.pause.index) {
-                    if (controller.playerState.isPlaying) {
-                      await controller.pausePlayer();
-                      recordStatus = RecordStatus.play.index;
-                    } else {
-                      await controller.startPlayer();
-                      recordStatus = RecordStatus.pause.index;
-                    }
-                    controller.setFinishMode(finishMode: FinishMode.loop);
-                    setState(() {});
-                  }
-                },
+              Stack(
+                children: [
+                  // 自定义的半心圆
+                  if (recordStatus == RecordStatus.start.index ||
+                      recordStatus == RecordStatus.stop.index)
+                    Align(
+                      alignment: Alignment.center,
+                      child: CustomPaint(
+                        size: Size(120, 120), // 自定义画布的大小
+                        painter: HalfHeartPainter(),
+                      ),
+                    ),
+                  // 图片居中显示
+                  Align(
+                    alignment: Alignment.center, // 确保对齐到中心
+                    child: InkWell(
+                      child: SvgPicture.asset(
+                        'assets/images/${recordStatus == 0 ? 'record_start.svg' : recordStatus == 1 ? 'record_pause.svg' : recordStatus == 2 ? 'play_start.svg' : 'play_pause.svg'}',
+                        height: 44, // 确保图标大小合适
+                      ).marginOnly(
+                          top: 38,
+                          bottom: (recordStatus == RecordStatus.start.index ||
+                                  recordStatus == RecordStatus.stop.index)
+                              ? 0
+                              : 35),
+                      onTap: () async {
+                        if (recordStatus == RecordStatus.start.index) {
+                          recordStatus = RecordStatus.stop.index;
+                          recordAudio();
+                          await _startOrStopRecording();
+                          setState(() {});
+                        } else if (recordStatus == RecordStatus.stop.index) {
+                          await stopRecording(context);
+                          await _startOrStopRecording();
+                          path = recordAudioPath!;
+                          controller.preparePlayer(
+                            path: path!,
+                            shouldExtractWaveform: true,
+                          );
+                          controller
+                              .extractWaveformData(
+                                path: path!,
+                                noOfSamples:
+                                    playerWaveStyle.getSamplesForWidth(200),
+                              )
+                              .then((waveformData) =>
+                                  debugPrint(waveformData.toString()));
+                          recordStatus = RecordStatus.play.index;
+                          setState(() {});
+                        } else if (recordStatus == RecordStatus.play.index ||
+                            recordStatus == RecordStatus.pause.index) {
+                          if (controller.playerState.isPlaying) {
+                            await controller.pausePlayer();
+                            recordStatus = RecordStatus.play.index;
+                          } else {
+                            await controller.startPlayer();
+                            recordStatus = RecordStatus.pause.index;
+                          }
+                          controller.setFinishMode(finishMode: FinishMode.loop);
+                          setState(() {});
+                        }
+                      },
+                    ),
+                  ),
+                ],
               ),
               if (recordStatus == RecordStatus.play.index ||
                   recordStatus == RecordStatus.pause.index)
@@ -258,8 +282,9 @@ class _RecordDialogState extends State<RecordDialog> {
                         basicPitch(recordAudioPath!);
                       },
                       text: 'Recognition'.tr,
-                      // linearColorStart: AppColor.color_805353,
-                      // linearColorEnd: AppColor.color_5E1E1E,
+                      textColor: AppColor.color_A1D632,
+                      // linearColorStart: AppColor.color_A1D632,
+                      // linearColorEnd: AppColor.color_EBFEC1,
                     ),
                   ],
                 )
