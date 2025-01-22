@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
+import 'package:rwkvmusic/main.dart';
 import 'package:sound_effect/sound_effect.dart';
 
 class JiepaiAudioPlayerManage {
@@ -36,6 +37,8 @@ class JiepaiAudioPlayerManage {
   }
 
   void startMetronome() {
+    beatsPerBar.value = int.parse(timeSingnatureStr.split('/')[0]);
+    debugPrint('beatsPerBar=${beatsPerBar.value}');
     int interval = (60000 / bpm.value).round();
 
     // 使用高精度时间戳来管理节拍
