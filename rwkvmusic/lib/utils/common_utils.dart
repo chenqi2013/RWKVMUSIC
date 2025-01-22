@@ -229,6 +229,19 @@ class CommonUtils {
     }
   }
 
+  static String formatDuration(int seconds) {
+    final int hours = seconds ~/ 3600; // 小时数
+    final int minutes = (seconds % 3600) ~/ 60; // 分钟数
+    final int secs = seconds % 60; // 秒数
+
+    // 格式化为两位数并返回
+    final String formattedTime = '${hours.toString().padLeft(2, '0')}:'
+        '${minutes.toString().padLeft(2, '0')}:'
+        '${secs.toString().padLeft(2, '0')}';
+
+    return formattedTime;
+  }
+
   static void establishSSEConnection() async {
     var dic = {
       'temperature': 0.5,

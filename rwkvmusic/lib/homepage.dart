@@ -1122,18 +1122,12 @@ class _HomePageState extends State<HomePage> {
                           children: [
                             Obx(
                               () => selectstate.value == 1
-                                  ? BorderBottomBtn(
-                                      width: 250.w,
-                                      height: isWindowsOrMac ? 123.h : 96.h,
-                                      text: !isZhuanyeMode.value
-                                          ? '开始专业输入'
-                                          : '结束专业输入',
-                                      icon: SvgPicture.asset(
-                                        'assets/images/ic_arrowdown.svg',
-                                        width: 28.w,
-                                        height: 21.h,
-                                      ),
-                                      onPressed: () {
+                                  ? CheckBoxItem(
+                                      width: 80.w,
+                                      title: '',
+                                      // visualDensity: VisualDensity.compact, // 去除空白间距
+                                      isSelected: isZhuanyeMode.value,
+                                      onChanged: (bool? value) {
                                         debugPrint("专业输入模式");
                                         isZhuanyeMode.value =
                                             !isZhuanyeMode.value;
@@ -1144,9 +1138,36 @@ class _HomePageState extends State<HomePage> {
                                           //         .millisecondsSinceEpoch;
                                         }
                                       },
-                                    ).marginOnly(right: 8)
+                                    )
                                   : SizedBox.shrink(),
-                            ),
+                            ).marginOnly(right: 15),
+                            // Obx(
+                            //   () => selectstate.value == 1
+                            //       ? BorderBottomBtn(
+                            //           width: 250.w,
+                            //           height: isWindowsOrMac ? 123.h : 96.h,
+                            //           text: !isZhuanyeMode.value
+                            //               ? '开始专业输入'
+                            //               : '结束专业输入',
+                            //           icon: SvgPicture.asset(
+                            //             'assets/images/ic_arrowdown.svg',
+                            //             width: 28.w,
+                            //             height: 21.h,
+                            //           ),
+                            //           onPressed: () {
+                            //             debugPrint("专业输入模式");
+                            //             isZhuanyeMode.value =
+                            //                 !isZhuanyeMode.value;
+                            //             if (isZhuanyeMode.value) {
+                            //               midiEvents.clear();
+                            //               // secondMeasureStartTimStamp =
+                            //               //     DateTime.now()
+                            //               //         .millisecondsSinceEpoch;
+                            //             }
+                            //           },
+                            //         ).marginOnly(right: 8)
+                            //       : SizedBox.shrink(),
+                            // ),
                             Obx(
                               () => selectstate.value == 1
                                   ? BorderBottomBtn(

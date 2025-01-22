@@ -87,6 +87,7 @@ class _JiePaiQiState extends State<JiePaiQi> {
   @override
   Widget build(BuildContext context) {
     return Dialog(
+      backgroundColor: Colors.transparent,
       child: Container(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.all(Radius.circular(30.w)),
@@ -100,7 +101,7 @@ class _JiePaiQiState extends State<JiePaiQi> {
         // height: isWindowsOrMac ? 1000.h : 910.h,
         padding: EdgeInsets.symmetric(
             horizontal: isWindowsOrMac ? 60.w : 40.w,
-            vertical: isWindowsOrMac ? 40.h : 20.h),
+            vertical: isWindowsOrMac ? 40.h : 60.h),
         child: SingleChildScrollView(
           child: Column(
             children: [

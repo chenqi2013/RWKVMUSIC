@@ -43,7 +43,9 @@ class _RecordDialogState extends State<RecordDialog> {
   bool isRecordingCompleted = false;
   bool isLoading = true;
   late Directory appDirectory;
-
+  var recordDuration = 0;
+  var recordDurationStr = "".obs;
+  Timer? timer;
   @override
   void initState() {
     super.initState();
@@ -136,13 +138,15 @@ class _RecordDialogState extends State<RecordDialog> {
                       color: AppColor.color_D9D9D9),
                 ),
               if (recordStatus == RecordStatus.stop.index)
-                Text(
-                  '00:08:72',
-                  style: TextStyle(
-                      fontSize: 30.sp,
-                      fontWeight: FontWeight.normal,
-                      color: AppColor.color_999999),
-                ),
+                Obx(() {
+                  return Text(
+                    recordDurationStr.value,
+                    style: TextStyle(
+                        fontSize: 30.sp,
+                        fontWeight: FontWeight.normal,
+                        color: AppColor.color_999999),
+                  );
+                }),
               if (recordStatus == RecordStatus.stop.index)
                 AudioWaveforms(
                   enableGesture: true,
@@ -177,13 +181,13 @@ class _RecordDialogState extends State<RecordDialog> {
                       color: AppColor.color_D9D9D9),
                 ),
               if (recordStatus == RecordStatus.pause.index)
-                Text(
-                  '00:08:72',
-                  style: TextStyle(
-                      fontSize: 30.sp,
-                      fontWeight: FontWeight.normal,
-                      color: AppColor.color_999999),
-                ),
+                Obx(() => Text(
+                      recordDurationStr.value,
+                      style: TextStyle(
+                          fontSize: 30.sp,
+                          fontWeight: FontWeight.normal,
+                          color: AppColor.color_999999),
+                    )),
               if (recordStatus == RecordStatus.pause.index)
                 AudioFileWaveforms(
                   size: Size(MediaQuery.of(context).size.width / 2, 30),
@@ -222,9 +226,11 @@ class _RecordDialogState extends State<RecordDialog> {
                         if (recordStatus == RecordStatus.start.index) {
                           recordStatus = RecordStatus.stop.index;
                           recordAudio();
+                          calRecordTime();
                           await _startOrStopRecording();
                           setState(() {});
                         } else if (recordStatus == RecordStatus.stop.index) {
+                          stopRecordTimer();
                           await stopRecording(context);
                           await _startOrStopRecording();
                           path = recordAudioPath!;
@@ -293,6 +299,22 @@ class _RecordDialogState extends State<RecordDialog> {
         ),
       ),
     );
+  }
+
+  void calRecordTime() {
+    recordDuration = 0;
+    timer = Timer.periodic(Duration(seconds: 1), (timer) {
+      recordDuration++;
+      print('Elapsed time: $recordDuration seconds');
+      recordDurationStr.value = CommonUtils.formatDuration(recordDuration);
+    });
+  }
+
+  void stopRecordTimer() {
+    if (timer != null) {
+      timer!.cancel();
+      timer = null;
+    }
   }
 
   Future<void> _startOrStopRecording() async {
