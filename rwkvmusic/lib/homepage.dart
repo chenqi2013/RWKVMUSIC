@@ -108,7 +108,7 @@ class _HomePageState extends State<HomePage> {
 
   String? exportMidiStr; //导出midi需要的字符串数据
 
-  void getAppVersion() async {
+  void getAppVersion(Function() callBack) async {
     // debugger();
     if (Platform.isAndroid) {
       String hardWare = await CommonUtils.getHardware();
@@ -135,6 +135,7 @@ class _HomePageState extends State<HomePage> {
       appVersion = 'webgpu' + appVersionNumber;
     }
     debugPrint('appVersion==$appVersion,currentModelType==$currentModelType');
+    callBack();
   }
 
   @override
@@ -144,7 +145,7 @@ class _HomePageState extends State<HomePage> {
     isRememberPrompt.value = ConfigStore.to.getRemberPromptSelect();
     isRememberEffect.value = ConfigStore.to.getRemberEffectSelect();
     isAutoSwitch.value = ConfigStore.to.getAutoNextSelect();
-    getAppVersion();
+
     if (midiProgramValue == -1) {
       midiProgramValue = 0;
       debugPrint('set midiprogramvalue = 0');
@@ -389,14 +390,15 @@ class _HomePageState extends State<HomePage> {
         // controllerPiano.runJavaScript(event);
       }
     });
-    if (isOnlyLoadFastModel && modelAddress == 0) {
-      fetchABCDataByIsolate();
-    }
-    if (Platform.isAndroid) {
-      // debugger();
-      checkAppUpdate('android', context);
-    }
-
+    getAppVersion(() {
+      if (isOnlyLoadFastModel && modelAddress == 0) {
+        fetchABCDataByIsolate();
+      }
+      if (Platform.isAndroid) {
+        // debugger();
+        checkAppUpdate('android', context);
+      }
+    });
     // if (Platform.isIOS || Platform.isAndroid) {
     if (!ConfigStore.to.isFirstOpen) {
       debugPrint('isFirstOpen');
