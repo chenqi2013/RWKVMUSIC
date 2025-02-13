@@ -356,7 +356,7 @@ class _JiePaiQiState extends State<JiePaiQi> {
                   Container(
                     padding:
                         EdgeInsets.symmetric(horizontal: 15.w, vertical: 5.h),
-                    width: isWindowsOrMac ? 1163.w : 784.w,
+                    width: isWindowsOrMac ? 963.w : 784.w,
                     height: isWindowsOrMac ? 113.h : 96.h,
                     decoration: BoxDecoration(
                       color: AppColor.color_2C2C2C,

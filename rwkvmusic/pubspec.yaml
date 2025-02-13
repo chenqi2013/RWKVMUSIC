@@ -30,8 +30,9 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  flutter_soloud: ^2.0.2
   soundpool: ^2.4.1
-  fraction: ^5.0.3
+  fraction: ^5.0.2
   basic_pitch_flutter:
     git:
       url: https://github.com/MollySophia/basic_pitch_flutter.git

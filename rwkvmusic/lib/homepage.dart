@@ -344,7 +344,6 @@ class _HomePageState extends State<HomePage> {
           onMessageReceived: _flutterOnTapEmptyReceived)
       ..addJavaScriptChannel("flutterOnClickChord",
           onMessageReceived: _onReceiveChordClick);
-    controllerPiano.enableZoom(false);
 
     controllerKeyboard = WebViewControllerPlus()
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
@@ -381,7 +380,7 @@ class _HomePageState extends State<HomePage> {
         playNoteMp3(name);
         updatePianoNote(int.parse(jsMessage.message));
       });
-    controllerKeyboard.enableZoom(false);
+    // controllerKeyboard.enableZoom(false);
     controllerKeyboard.loadFlutterAssetServer(filePathKeyboardAnimation);
     // controllerKeyboard.loadRequest(Uri.parse(filePathKeyboardAnimation));
 
@@ -1074,6 +1073,9 @@ class _HomePageState extends State<HomePage> {
       JiepaiAudioPlayerManage().startMetronome();
       isMetronomeOn.value = true;
     }
+    if (isWindowsOrMac) {
+      isVisibleWebview.value = !isVisibleWebview.value;
+    }
   }
 
   @override
@@ -1207,6 +1209,10 @@ class _HomePageState extends State<HomePage> {
                                         height: isWindowsOrMac ? 61.h : 52.h,
                                       ),
                                       onPressed: () async {
+                                        if (isWindowsOrMac) {
+                                          isVisibleWebview.value =
+                                              !isVisibleWebview.value;
+                                        }
                                         showJiepai(false);
                                       },
                                     )
@@ -1230,7 +1236,7 @@ class _HomePageState extends State<HomePage> {
                                       },
                                     )
                                   : BorderBottomBtn(
-                                      width: 332.w,
+                                      width: isWindowsOrMac ? 370.w : 332.w,
                                       height: isWindowsOrMac ? 123.h : 96.h,
                                       text: 'Soft keyboard'.tr,
                                       icon: SvgPicture.asset(
@@ -1253,7 +1259,7 @@ class _HomePageState extends State<HomePage> {
                             ),
                             Obx(
                               () => BorderBottomBtn(
-                                width: 300.w,
+                                width: isWindowsOrMac ? 350.w : 300.w,
                                 height: isWindowsOrMac ? 123.h : 96.h,
                                 text: 'Instrument'.tr,
                                 icon: SvgPicture.asset(

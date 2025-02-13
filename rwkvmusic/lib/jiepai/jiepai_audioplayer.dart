@@ -1,6 +1,8 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter_soloud/flutter_soloud.dart';
 import 'package:get/get.dart';
 import 'package:rwkvmusic/main.dart';
 import 'package:sound_effect/sound_effect.dart';
@@ -22,18 +24,27 @@ class JiepaiAudioPlayerManage {
   /// 小节数为2开始计算接收midi数据的时间戳
   int measureCount = 0;
   Function? callback;
+  SoLoud? soloud;
+  AudioSource? source1, source2;
   JiepaiAudioPlayerManage._internal() {
     loadAll();
   }
 
   void loadAll() async {
-    _soundEffect = SoundEffect();
-    _soundEffect?.initialize();
+    if (Platform.isWindows) {
+      soloud = SoLoud.instance;
+      await soloud!.init();
+      source1 = await soloud!.loadAsset('assets/sounds/bpmvoice1.wav');
+      source2 = await soloud!.loadAsset('assets/sounds/bpmvoice2.wav');
+    } else {
+      _soundEffect = SoundEffect();
+      _soundEffect?.initialize();
 
-    Future.microtask(() async {
-      _soundEffect?.load('bpmvoice1', "assets/sounds/bpmvoice1.wav");
-      _soundEffect?.load('bpmvoice2', "assets/sounds/bpmvoice2.wav");
-    });
+      Future.microtask(() async {
+        _soundEffect?.load('bpmvoice1', "assets/sounds/bpmvoice1.wav");
+        _soundEffect?.load('bpmvoice2', "assets/sounds/bpmvoice2.wav");
+      });
+    }
   }
 
   void startMetronome() {
@@ -67,10 +78,18 @@ class JiepaiAudioPlayerManage {
   }
 
   void playSound() async {
-    if (beatCount == 1) {
-      _soundEffect?.play('bpmvoice2', volume: volume.value);
+    if (Platform.isWindows) {
+      if (beatCount == 1) {
+        await soloud!.play(source2!);
+      } else {
+        await soloud!.play(source1!);
+      }
     } else {
-      _soundEffect?.play('bpmvoice1', volume: volume.value);
+      if (beatCount == 1) {
+        _soundEffect?.play('bpmvoice2', volume: volume.value);
+      } else {
+        _soundEffect?.play('bpmvoice1', volume: volume.value);
+      }
     }
   }
 
