@@ -81,7 +81,7 @@ class CommonUtils {
 
         // 新高通平台设备在初次加载模型时，需要等待dll模型加载一段时间
         // TODO: 初次运行增加一个正在加载模型的弹窗提示，以防用户以为软件卡死
-        String modelCachePath = p.join(path, 'model_cache.bin');
+        String modelCachePath = p.join(installDir, 'model_cache.bin');
         if (File(modelCachePath).existsSync()) {
           path = modelCachePath;
         } else {
