@@ -50,12 +50,12 @@ class ContainerTextField extends StatelessWidget {
               fontWeight: FontWeight.w400),
           textAlign: TextAlign.right,
           controller: controller,
-          keyboardType: seed != 0 ? TextInputType.number : TextInputType.text,
-          inputFormatters: seed != 0
-              ? <TextInputFormatter>[
-                  FilteringTextInputFormatter.allow(RegExp(r'[0-9]'))
-                ]
-              : <TextInputFormatter>[], // 只允许输入数字
+          // keyboardType: seed != 0 ? TextInputType.number : TextInputType.text,
+          // inputFormatters: seed != 0
+          //     ? <TextInputFormatter>[
+          //         FilteringTextInputFormatter.allow(RegExp(r'[0-9]'))
+          //       ]
+          //     : <TextInputFormatter>[], // 只允许输入数字
           decoration: InputDecoration(
             isDense: true,
             contentPadding: EdgeInsets.symmetric(
@@ -67,7 +67,7 @@ class ContainerTextField extends StatelessWidget {
           onChanged: (text) {
             // 当文本字段内容变化时调用
             // seed.value = int.parse(text);
-            controller.text = text;
+            // controller.text = text;
             debugPrint('Current text: $text');
             onChanged(text);
           },

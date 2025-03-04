@@ -424,24 +424,24 @@ class _HomePageState extends State<HomePage> {
     //   });
     // }
 
-    Future.delayed(const Duration(milliseconds: 1000), () {
-      isVisibleWebview.value = false;
-      showStartPwdDialog(context, (bool isSuccess) {
-        if (isSuccess) {
-          isVisibleWebview.value = true;
-          getAppVersion(() {
-            if (isOnlyLoadFastModel && modelAddress == 0) {
-              fetchABCDataByIsolate();
-              showLoading();
-            }
-            if (Platform.isAndroid) {
-              // debugger();
-              checkAppUpdate('android', context);
-            }
-          });
-        }
-      });
-    });
+    // Future.delayed(const Duration(milliseconds: 1000), () {
+    //   isVisibleWebview.value = false;
+    //   showStartPwdDialog(context, (bool isSuccess) {
+    //     if (isSuccess) {
+    //       isVisibleWebview.value = true;
+    //       getAppVersion(() {
+    //         if (isOnlyLoadFastModel && modelAddress == 0) {
+    //           fetchABCDataByIsolate();
+    //           showLoading();
+    //         }
+    //         if (Platform.isAndroid) {
+    //           // debugger();
+    //           checkAppUpdate('android', context);
+    //         }
+    //       });
+    //     }
+    //   });
+    // });
 
     // }
   }
