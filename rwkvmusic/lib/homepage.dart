@@ -2622,7 +2622,7 @@ class _HomePageState extends State<HomePage> {
 
   void showLoading() {
     EasyLoading.show(
-      status: 'Loading side model, please wait...',
+      status: 'Loading local model, please wait...',
       maskType: EasyLoadingMaskType.black,
       indicator: Image.asset(
         'assets/images/RWKV-Loading.gif',
