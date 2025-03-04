@@ -145,6 +145,12 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
+    eventBus.on().listen((event) {
+      debugPrint('listen event ==$event');
+      if (event == 'EasyLoading dismiss') {
+        isVisibleWebview.value = true;
+      }
+    });
     midiProgramValue = ConfigStore.to.getMidiProgramSelect();
     isRememberPrompt.value = ConfigStore.to.getRemberPromptSelect();
     isRememberEffect.value = ConfigStore.to.getRemberEffectSelect();
@@ -425,10 +431,11 @@ class _HomePageState extends State<HomePage> {
     // }
 
     Future.delayed(const Duration(milliseconds: 1000), () {
-      isVisibleWebview.value = false;
+      if (Platform.isWindows) {
+        isVisibleWebview.value = false;
+      }
       showStartPwdDialog(context, (bool isSuccess) {
         if (isSuccess) {
-          isVisibleWebview.value = true;
           getAppVersion(() {
             if (isOnlyLoadFastModel && modelAddress == 0) {
               fetchABCDataByIsolate();

@@ -97,6 +97,7 @@ void main(List<String> args) async {
 bool isShowDialog = false;
 RxBool isGenerating = false.obs;
 EventBus eventBus = EventBus();
+
 EventBus isolateEventBus = EventBus();
 late ReceivePort mainReceivePort;
 late SendPort isolateSendPort;
@@ -348,6 +349,7 @@ void fetchABCDataByIsolate() async {
         userIsolate = null;
         debugPrint('userIsolate!.kill()');
         EasyLoading.dismiss();
+        eventBus.fire('EasyLoading dismiss');
       }
     } else if (data is EventBus) {
       isolateEventBus = data;
@@ -424,12 +426,13 @@ void getABCDataByLocalModel(var array) async {
   //   isStopGenerating = true;
   // });
 
-  EventBus eventBus = EventBus();
+  // EventBus eventBus = EventBus();
 
   eventBus.on().listen((event) {
     debugPrint('isolateReceivePort22==$event');
     isStopGenerating = true;
     sendPort.send(kFinish);
+    isVisibleWebview.value = true;
   });
 
   Pointer<Void> model;
