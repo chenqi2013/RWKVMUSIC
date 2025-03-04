@@ -210,7 +210,7 @@ void fetchABCDataByIsolate() async {
     // binPath.value = await CommonUtils.copyFileFromAssets(
     //     'RWKV-6-ABC-85M-v1-20240217-ctx1024-ncnn.bin');
     binPath.value = await CommonUtils.copyFileFromAssets(
-        'RWKV-6-ABC-85M-v1-20240217-ctx1024-webrwkv.st');
+        'RWKV-7-ABC-2024-11-22-webrwkv.st');
     configPath = await CommonUtils.copyFileFromAssets(
         'RWKV-6-ABC-85M-v1-20240217-ctx1024-ncnn.config');
     paramPath = await CommonUtils.copyFileFromAssets(
