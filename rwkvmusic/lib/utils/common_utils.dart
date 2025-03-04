@@ -85,7 +85,7 @@ class CommonUtils {
         if (File(modelCachePath).existsSync()) {
           path = modelCachePath;
         } else {
-          path = p.join(path, 'RWKV-6-ABC-85M-v1-20240217-ctx1024-QNN2.26.dll');
+          path = p.join(path, 'RWKV-7-ABC-2024-11-22-QNN2.26.dll');
         }
       } else {
         path = p.join(path, 'RWKV-7-ABC-2024-11-22-webrwkv.st');
