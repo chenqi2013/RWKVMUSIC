@@ -32,6 +32,7 @@ import 'package:rwkvmusic/mainwidget/text_btn.dart';
 import 'package:rwkvmusic/mainwidget/text_item.dart';
 import 'package:rwkvmusic/mainwidget/text_title.dart';
 import 'package:rwkvmusic/note_length.dart';
+import 'package:rwkvmusic/startpwd_dialog.dart';
 import 'package:rwkvmusic/state.dart';
 import 'package:rwkvmusic/store/config.dart';
 import 'package:rwkvmusic/style/color.dart';
@@ -307,8 +308,7 @@ class _HomePageState extends State<HomePage> {
       ..addJavaScriptChannel("flutterOnTapEmpty",
           onMessageReceived: _flutterOnTapEmptyReceived)
       ..addJavaScriptChannel("flutterOnClickChord",
-          onMessageReceived: _onReceiveChordClick)
-      ..enableZoom(false);
+          onMessageReceived: _onReceiveChordClick);
 
     controllerKeyboard = WebViewControllerPlus()
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
@@ -347,7 +347,6 @@ class _HomePageState extends State<HomePage> {
         updatePianoNote(int.parse(jsMessage.message));
       });
     controllerKeyboard.loadFlutterAssetServer(filePathKeyboardAnimation);
-    controllerKeyboard.enableZoom(false);
     // controllerKeyboard.loadRequest(Uri.parse(filePathKeyboardAnimation));
 
     eventBus.on().listen((event) {
@@ -393,47 +392,57 @@ class _HomePageState extends State<HomePage> {
         // controllerPiano.runJavaScript(event);
       }
     });
-    getAppVersion(() {
-      if (isOnlyLoadFastModel && modelAddress == 0) {
-        fetchABCDataByIsolate();
-        showLoading();
-      }
-      if (Platform.isAndroid) {
-        // debugger();
-        checkAppUpdate('android', context);
-      }
-    });
-    // if (Platform.isIOS || Platform.isAndroid) {
-    if (!ConfigStore.to.isFirstOpen) {
-      debugPrint('isFirstOpen');
-      if (Platform.isWindows) {
-        isVisibleWebview.value = false;
-      }
-      Future.delayed(const Duration(milliseconds: 1000), () {
-        showAgreementDialog(context, () {
-          if (isExe && Platform.isWindows) {
-            showDuihuanmaDialog(context, (bool isSuccess) {
-              if (isSuccess) {
-                isVisibleWebview.value = true;
-              }
-            });
-          } else {
-            isVisibleWebview.value = true;
-          }
-        });
-      });
-    } else if (!ConfigStore.to.isValidDuihuanma &&
-        isExe &&
-        Platform.isWindows) {
+    // // if (Platform.isIOS || Platform.isAndroid) {
+    // if (!ConfigStore.to.isFirstOpen) {
+    //   debugPrint('isFirstOpen');
+    //   if (Platform.isWindows) {
+    //     isVisibleWebview.value = false;
+    //   }
+    //   Future.delayed(const Duration(milliseconds: 1000), () {
+    //     showAgreementDialog(context, () {
+    //       if (isExe && Platform.isWindows) {
+    //         showDuihuanmaDialog(context, (bool isSuccess) {
+    //           if (isSuccess) {
+    //             isVisibleWebview.value = true;
+    //           }
+    //         });
+    //       } else {
+    //         isVisibleWebview.value = true;
+    //       }
+    //     });
+    //   });
+    // } else if (!ConfigStore.to.isValidDuihuanma &&
+    //     isExe &&
+    //     Platform.isWindows) {
+    //   isVisibleWebview.value = false;
+    //   Future.delayed(const Duration(milliseconds: 1000), () {
+    //     showDuihuanmaDialog(context, (bool isSuccess) {
+    //       if (isSuccess) {
+    //         isVisibleWebview.value = true;
+    //       }
+    //     });
+    //   });
+    // }
+
+    Future.delayed(const Duration(milliseconds: 1000), () {
       isVisibleWebview.value = false;
-      Future.delayed(const Duration(milliseconds: 1000), () {
-        showDuihuanmaDialog(context, (bool isSuccess) {
-          if (isSuccess) {
-            isVisibleWebview.value = true;
-          }
-        });
+      showStartPwdDialog(context, (bool isSuccess) {
+        if (isSuccess) {
+          isVisibleWebview.value = true;
+          getAppVersion(() {
+            if (isOnlyLoadFastModel && modelAddress == 0) {
+              fetchABCDataByIsolate();
+              showLoading();
+            }
+            if (Platform.isAndroid) {
+              // debugger();
+              checkAppUpdate('android', context);
+            }
+          });
+        }
       });
-    }
+    });
+
     // }
   }
 
