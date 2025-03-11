@@ -80,7 +80,7 @@ RxBool isdownloading = false.obs;
 bool isFirstOpen = true;
 bool isOnlyCPU = false;
 
-String appVersionNumber = '_1.6.1_20250118_RWKV7';
+String appVersionNumber = '_1.6.2_20250311_RWKV7';
 String appVersion = 'ncnn' + appVersionNumber;
 
 class _HomePageState extends State<HomePage> {
@@ -338,6 +338,7 @@ class _HomePageState extends State<HomePage> {
       ..addJavaScriptChannel("flutteronNoteOff",
           onMessageReceived: (JavaScriptMessage jsMessage) {
         debugPrint('flutteronNoteOff onMessageReceived=${jsMessage.message}');
+        // JustAudioPlayerManage().stopAudio();
       })
       // 按下 webview 中的琴键
       ..addJavaScriptChannel("flutteronNoteOn",
@@ -434,20 +435,20 @@ class _HomePageState extends State<HomePage> {
       if (Platform.isWindows) {
         isVisibleWebview.value = false;
       }
-      showStartPwdDialog(context, (bool isSuccess) {
-        if (isSuccess) {
-          getAppVersion(() {
-            if (isOnlyLoadFastModel && modelAddress == 0) {
-              fetchABCDataByIsolate();
-              showLoading();
-            }
-            if (Platform.isAndroid) {
-              // debugger();
-              checkAppUpdate('android', context);
-            }
-          });
+      // showStartPwdDialog(context, (bool isSuccess) {
+      //   if (isSuccess) {
+      getAppVersion(() {
+        if (isOnlyLoadFastModel && modelAddress == 0) {
+          fetchABCDataByIsolate();
+          showLoading();
+        }
+        if (Platform.isAndroid) {
+          // debugger();
+          checkAppUpdate('android', context);
         }
       });
+      // }
+      // });
     });
 
     // }
@@ -630,21 +631,21 @@ class _HomePageState extends State<HomePage> {
     if (currentSoundEffect != null) {
       String? mp3Folder = soundEffect[currentSoundEffect];
       debugPrint('mp3Folder==$mp3Folder');
-      if (isWindowsOrMac) {
-        AudioPlayerManage().playAudio('player/soundfont/$mp3Folder/$name');
-      } else {
-        JustAudioPlayerManage().playAudio('player/soundfont/$mp3Folder/$name');
-      }
+      // if (isWindowsOrMac) {
+      //   AudioPlayerManage().playAudio('player/soundfont/$mp3Folder/$name');
+      // } else {
+      JustAudioPlayerManage().playAudio('player/soundfont/$mp3Folder/$name');
+      // }
       debugPrint('player/soundfont/$mp3Folder/$name');
     } else {
       debugPrint('mp3Folder==null');
-      if (isWindowsOrMac) {
-        AudioPlayerManage()
-            .playAudio('player/soundfont/acoustic_grand_piano-mp3/$name');
-      } else {
-        JustAudioPlayerManage()
-            .playAudio('player/soundfont/acoustic_grand_piano-mp3/$name');
-      }
+      // if (isWindowsOrMac) {
+      //   AudioPlayerManage()
+      //       .playAudio('player/soundfont/acoustic_grand_piano-mp3/$name');
+      // } else {
+      JustAudioPlayerManage()
+          .playAudio('player/soundfont/acoustic_grand_piano-mp3/$name');
+      // }
     }
   }
 
