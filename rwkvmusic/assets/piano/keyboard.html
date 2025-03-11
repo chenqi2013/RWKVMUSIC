@@ -162,8 +162,9 @@
     </div>
   </div>
   <script>
-    const totalKeys = 61; 
-    const keyboardRatio = 0.1;
+    const totalKeys = 61;
+    const isMobile = window.innerWidth <= 1000;
+    const keyboardRatio = isMobile ? 0.15 : 0.1;
     let windowHigh = window.innerHeight;
     let keyboardWidth = Math.round(windowHigh * keyboardRatio * totalKeys);
     console.log("keyboardWidth", keyboardWidth);
@@ -171,8 +172,8 @@
     document.getElementById("keyboard").style.width = `${keyboardWidth}px`;
 
     window.setPiano = function (start, end) {
-      start = 24; 
-      end = 84; 
+      start = 24;
+      end = 84;
 
       const existElements = document.querySelectorAll(".key");
       if (existElements?.length) {
@@ -188,7 +189,7 @@
         return;
       }
       const piano = document.querySelector("#keyboard");
-      const blackKeyArray = [1, 3, 6, 8, 10]; 
+      const blackKeyArray = [1, 3, 6, 8, 10];
       let startNote = start;
       let endNote = end;
       if (blackKeyArray.includes(startNote % 12)) {
@@ -238,7 +239,7 @@
         piano.appendChild(key);
       }
       const allWhiteKeys = document.querySelectorAll(".white");
-  
+
       allWhiteKeys.forEach((key) => {
         var totalWhiteKeys = end - start;
         console.log("totalWhiteKeys", totalWhiteKeys);
