@@ -8,6 +8,7 @@ import 'package:app_installer/app_installer.dart';
 import 'package:crypto/crypto.dart';
 import 'package:filepicker_windows/filepicker_windows.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
@@ -398,7 +399,7 @@ class _HomePageState extends State<HomePage> {
         // controllerPiano.runJavaScript(event);
       }
     });
-    // // if (Platform.isIOS || Platform.isAndroid) {
+    // if (Platform.isIOS || Platform.isAndroid) {
     // if (!ConfigStore.to.isFirstOpen) {
     //   debugPrint('isFirstOpen');
     //   if (Platform.isWindows) {
@@ -1155,6 +1156,12 @@ class _HomePageState extends State<HomePage> {
                           // maintainState: true,
                           child: WebViewWidget(
                             controller: controllerPiano,
+                            gestureRecognizers: {
+                              // 允许所有手势穿透到 WebView
+                              Factory<OneSequenceGestureRecognizer>(
+                                () => EagerGestureRecognizer(),
+                              ),
+                            },
                           )),
                     )),
                 Obx(() {
@@ -1288,6 +1295,12 @@ class _HomePageState extends State<HomePage> {
                           borderRadius: BorderRadius.circular(9),
                           child: WebViewWidget(
                             controller: controllerKeyboard,
+                            gestureRecognizers: {
+                              // 允许所有手势穿透到 WebView
+                              Factory<OneSequenceGestureRecognizer>(
+                                () => EagerGestureRecognizer(),
+                              ),
+                            },
                           ),
                         ),
                       )),
