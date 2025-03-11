@@ -519,7 +519,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 11;
+				CURRENT_PROJECT_VERSION = 2;
 				DEVELOPMENT_TEAM = 3FTQ9PH6TL;
 				ENABLE_BITCODE = NO;
 				ENABLE_TESTABILITY = YES;
@@ -541,6 +541,7 @@
 					"$(PROJECT_DIR)/Classes/libfaster_rwkv_static.a/**",
 					"$(PROJECT_DIR)/Classes",
 				);
+				MARKETING_VERSION = 1.6.2.20250311;
 				ONLY_ACTIVE_ARCH = NO;
 				OTHER_LDFLAGS = (
 					"-ObjC",
@@ -726,7 +727,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 11;
+				CURRENT_PROJECT_VERSION = 2;
 				DEVELOPMENT_TEAM = 3FTQ9PH6TL;
 				ENABLE_BITCODE = NO;
 				ENABLE_TESTABILITY = YES;
@@ -747,6 +748,7 @@
 					"$(PROJECT_DIR)/Classes/libfaster_rwkv_static.a",
 					"$(PROJECT_DIR)/Classes",
 				);
+				MARKETING_VERSION = 1.6.2.20250311;
 				OTHER_CFLAGS = "";
 				OTHER_LDFLAGS = (
 					"-ObjC",
@@ -770,7 +772,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 11;
+				CURRENT_PROJECT_VERSION = 2;
 				DEVELOPMENT_TEAM = 3FTQ9PH6TL;
 				ENABLE_BITCODE = NO;
 				ENABLE_TESTABILITY = YES;
@@ -791,6 +793,7 @@
 					"$(PROJECT_DIR)/Classes/libfaster_rwkv_static.a",
 					"$(PROJECT_DIR)/Classes",
 				);
+				MARKETING_VERSION = 1.6.2.20250311;
 				ONLY_ACTIVE_ARCH = NO;
 				OTHER_LDFLAGS = (
 					"-ObjC",
