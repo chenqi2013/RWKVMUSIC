@@ -24,6 +24,7 @@ import 'package:rwkvmusic/utils/note.dart';
 import 'package:rwkvmusic/values/constantdata.dart';
 import 'package:rwkvmusic/values/values.dart';
 import 'package:sentry/sentry.dart';
+import 'package:shelf_static/shelf_static.dart';
 import 'package:universal_ble/universal_ble.dart';
 import 'package:webview_win_floating/webview_plugin.dart';
 
@@ -42,9 +43,10 @@ import 'package:path/path.dart' as p;
 
 void main(List<String> args) async {
   WidgetsFlutterBinding.ensureInitialized();
-  await shelf_io.serve(_handler, 'localhost', 3000);
-  await shelf_io.serve(_handler1, 'localhost', 3001);
-  await shelf_io.serve(_handler2, 'localhost', 3002);
+  await startWebServer1();
+  await startWebServer2();
+  await startWebServer3();
+
   if (Platform.isWindows || Platform.isMacOS) {
     WindowsWebViewPlatform.registerWith();
   } else {
@@ -83,73 +85,43 @@ void main(List<String> args) async {
   );
 }
 
-Future<Response> _handler(Request request) async {
-  const defaultDocument = "doctor.html";
-  const rootPath = "assets/doctor";
+Future<void> startWebServer1() async {
+  final rootDir = Directory('assets/doctor');
+  final handler = createStaticHandler(
+    rootDir.path,
+    defaultDocument: 'doctor.html',
+    serveFilesOutsidePath: false,
+  );
 
-  return responseResult(rootPath, defaultDocument, request);
+  HttpServer server = await shelf_io.serve(handler, 'localhost', 8081);
+  debugPrint('server==$server');
+  print('✅ Web server started at http://localhost:8081');
 }
 
-Future<Response> _handler1(Request request) async {
-  const defaultDocument = "keyboard.html";
-  const rootPath = "assets/piano";
+Future<void> startWebServer2() async {
+  final rootDir = Directory('assets/piano');
+  final handler = createStaticHandler(
+    rootDir.path,
+    defaultDocument: 'keyboard.html',
+    serveFilesOutsidePath: false,
+  );
 
-  return responseResult(rootPath, defaultDocument, request);
+  HttpServer server = await shelf_io.serve(handler, 'localhost', 8082);
+  debugPrint('server==$server');
+  print('✅ Web server started at http://localhost:8082');
 }
 
-Future<Response> _handler2(Request request) async {
-  const defaultDocument = "player.html";
-  const rootPath = "assets/player";
-  return responseResult(rootPath, defaultDocument, request);
-}
+Future<void> startWebServer3() async {
+  final rootDir = Directory('assets/player');
+  final handler = createStaticHandler(
+    rootDir.path,
+    defaultDocument: 'player.html',
+    serveFilesOutsidePath: false,
+  );
 
-Future<Response> responseResult(
-    String rootPath, String defaultDocument, Request request) async {
-  final mimeTypeResolver = MimeTypeResolver();
-
-  final segments = [rootPath, ...request.url.pathSegments];
-
-  String key = p.joinAll(segments);
-  if (kDebugMode) print("✅ $key");
-
-  Uint8List? body;
-
-  body = await _loadResource(key);
-
-  if (body == null) {
-    if (kDebugMode) print("😡 $key is null");
-    key = p.join(key, defaultDocument);
-    body = await _loadResource(key);
-  }
-
-  if (body == null) {
-    return Response.notFound('Not Found');
-  }
-
-  final contentType = mimeTypeResolver.lookup(key);
-
-  final headers = {
-    HttpHeaders.contentLengthHeader: '${body.length}',
-    if (contentType != null) HttpHeaders.contentTypeHeader: contentType,
-  };
-
-  return Response.ok((request.method == 'HEAD') ? null : body,
-      headers: headers);
-}
-
-Future<Uint8List?> _loadResource(String key) async {
-  try {
-    final byteData = await rootBundle.load(key);
-
-    return byteData.buffer.asUint8List();
-  } catch (e) {
-    if (kDebugMode) print("😡 $e");
-    if (e is FlutterError) {
-      if (kDebugMode) print("😡 ${e.diagnostics.join("\n")}");
-    }
-  }
-
-  return null;
+  HttpServer server = await shelf_io.serve(handler, 'localhost', 8083);
+  debugPrint('server==$server');
+  print('✅ Web server started at http://localhost:8083');
 }
 
 bool isShowDialog = false;

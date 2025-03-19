@@ -151,7 +151,7 @@ class _HomePageState extends State<HomePage> {
   // Platform messages are asynchronous, so we initialize in an async method.
   Future<void> initPlatformState() async {
     await WebviewManager().initialize(userAgent: "test/userAgent");
-    String url = "http://localhost:3001";
+    String url = "http://localhost:8082/";
     // _textController.text = url;
     //unified interface for all platforms set user agent
     linuxController.setWebviewListener(WebviewEventsListener(
@@ -265,7 +265,8 @@ class _HomePageState extends State<HomePage> {
           },
         ),
       )
-      ..loadFlutterAssetServer(filePathPiano)
+      // ..loadFlutterAssetServer(filePathPiano)
+      ..loadRequest(Uri.parse('http://localhost:8083/'))
       ..addJavaScriptChannel("flutteronStartPlay",
           onMessageReceived: (JavaScriptMessage jsMessage) {
         String message = jsMessage.message;
@@ -415,8 +416,8 @@ class _HomePageState extends State<HomePage> {
         playNoteMp3(name);
         updatePianoNote(int.parse(jsMessage.message));
       });
-    controllerKeyboard.loadFlutterAssetServer(filePathKeyboardAnimation);
-    // controllerKeyboard.loadRequest(Uri.parse(filePathKeyboardAnimation));
+    // controllerKeyboard.loadFlutterAssetServer(filePathKeyboardAnimation);
+    controllerKeyboard.loadRequest(Uri.parse('http://localhost:8081/'));
 
     eventBus.on().listen((event) {
       // debugPrint('event bus==$event');
@@ -1485,9 +1486,12 @@ class _HomePageState extends State<HomePage> {
                                           isFinishABCEvent = false;
                                           if (selectstate.value == 1) {
                                             isCreateGenerate.value = true;
-                                            controllerKeyboard
-                                                .loadFlutterAssetServer(
-                                                    filePathKeyboardAnimation);
+                                            // controllerKeyboard
+                                            //     .loadFlutterAssetServer(
+                                            //         filePathKeyboardAnimation);
+                                            controllerKeyboard.loadRequest(
+                                                Uri.parse(
+                                                    'http://localhost:8081/'));
                                           }
                                         } else {
                                           // isolateSendPort.send('stop Generating');
@@ -1588,8 +1592,8 @@ class _HomePageState extends State<HomePage> {
       _change(ABCHead.base64AbcString(finalabcStringPreset));
       debugPrint('finalabcStringPreset=$finalabcStringPreset');
       controllerPiano.runJavaScript("setPromptNoteNumberCount(3)");
-      controllerKeyboard.loadFlutterAssetServer(filePathKeyboardAnimation);
-      // controllerKeyboard.loadRequest(Uri.parse(filePathKeyboardAnimation));
+      // controllerKeyboard.loadFlutterAssetServer(filePathKeyboardAnimation);
+      controllerKeyboard.loadRequest(Uri.parse('http://localhost:8081/'));
       // controllerKeyboard.runJavaScript('resetPlay()');
       // controllerKeyboard.runJavaScript('setPiano(55, 76)');
     } else {
@@ -1613,7 +1617,9 @@ class _HomePageState extends State<HomePage> {
     _change(finalabcStringCreate);
     controllerPiano.runJavaScript("setPromptNoteNumberCount(0)");
     controllerPiano.runJavaScript("setStyle()");
-    controllerKeyboard.loadFlutterAssetServer(filePathKeyboard);
+    // controllerKeyboard.loadFlutterAssetServer(filePathKeyboard);
+    controllerKeyboard.loadRequest(Uri.parse('http://localhost:8082/'));
+
     // controllerKeyboard.runJavaScript('resetPlay()');
     createPrompt = '';
   }

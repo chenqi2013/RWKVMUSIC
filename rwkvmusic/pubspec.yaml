@@ -30,8 +30,11 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  shelf: ^1.4.1
-  mime: ^1.0.5
+  # shelf: ^1.4.1
+  # mime: ^1.0.5
+  shelf: ^1.4.2
+  shelf_static: ^1.0.0
+  # shelf_io: ^1.0.0
   webview_cef: ^0.2.2
   flutter_easyloading: ^3.0.5
   app_installer: ^1.2.0
