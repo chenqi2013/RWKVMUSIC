@@ -9,12 +9,13 @@ import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:get/get.dart';
+import 'package:get/get.dart' hide Response;
 import 'package:rwkvmusic/langs/translation_service.dart';
 
 import 'package:rwkvmusic/services/storage.dart';
 import 'package:rwkvmusic/state.dart';
 import 'package:rwkvmusic/store/config.dart';
+import 'package:rwkvmusic/test_linuxwindows.dart';
 import 'package:rwkvmusic/utils/abchead.dart';
 
 import 'package:rwkvmusic/utils/midiconvert_abc.dart';
@@ -34,26 +35,18 @@ import 'package:event_bus/event_bus.dart';
 
 import 'utils/automeasure_randomizeabc.dart';
 import 'utils/key_convert.dart';
+import 'package:shelf/shelf.dart';
+import 'package:shelf/shelf_io.dart' as shelf_io;
+import 'package:mime/mime.dart';
+import 'package:path/path.dart' as p;
 
 void main(List<String> args) async {
   WidgetsFlutterBinding.ensureInitialized();
+  await shelf_io.serve(_handler, 'localhost', 3000);
+  await shelf_io.serve(_handler1, 'localhost', 3001);
+  await shelf_io.serve(_handler2, 'localhost', 3002);
   if (Platform.isWindows || Platform.isMacOS) {
     WindowsWebViewPlatform.registerWith();
-    if (Platform.isWindows) {
-      WindowOptions windowOptions = const WindowOptions(
-        size: Size(800, 600),
-        center: true,
-        backgroundColor: Colors.transparent,
-        // skipTaskbar: false,
-        // titleBarStyle: TitleBarStyle.hidden,
-        // windowButtonVisibility: false,
-      );
-      windowManager.waitUntilReadyToShow(windowOptions, () async {
-        await windowManager.show();
-        await windowManager.focus();
-      });
-      windowManager.setResizable(false);
-    }
   } else {
     // 强制横屏显示
     SystemChrome.setPreferredOrientations([
@@ -69,12 +62,8 @@ void main(List<String> args) async {
     (options) {
       options.dsn =
           'https://e7b4e1cfa474037accf726c5893d86f8@o4507886670708736.ingest.us.sentry.io/4507886687944704';
-      // Set tracesSampleRate to 1.0 to capture 100% of transactions for tracing.
-      // We recommend adjusting this value in production.
+
       options.tracesSampleRate = 1.0;
-      // The sampling rate for profiling is relative to tracesSampleRate
-      // Setting to 1.0 will profile 100% of sampled transactions:
-      // options.profilesSampleRate = 1.0;
     },
     appRunner: () => runApp(
       ScreenUtilInit(
@@ -92,6 +81,75 @@ void main(List<String> args) async {
       ),
     ),
   );
+}
+
+Future<Response> _handler(Request request) async {
+  const defaultDocument = "doctor.html";
+  const rootPath = "assets/doctor";
+
+  return responseResult(rootPath, defaultDocument, request);
+}
+
+Future<Response> _handler1(Request request) async {
+  const defaultDocument = "keyboard.html";
+  const rootPath = "assets/piano";
+
+  return responseResult(rootPath, defaultDocument, request);
+}
+
+Future<Response> _handler2(Request request) async {
+  const defaultDocument = "player.html";
+  const rootPath = "assets/player";
+  return responseResult(rootPath, defaultDocument, request);
+}
+
+Future<Response> responseResult(
+    String rootPath, String defaultDocument, Request request) async {
+  final mimeTypeResolver = MimeTypeResolver();
+
+  final segments = [rootPath, ...request.url.pathSegments];
+
+  String key = p.joinAll(segments);
+  if (kDebugMode) print("✅ $key");
+
+  Uint8List? body;
+
+  body = await _loadResource(key);
+
+  if (body == null) {
+    if (kDebugMode) print("😡 $key is null");
+    key = p.join(key, defaultDocument);
+    body = await _loadResource(key);
+  }
+
+  if (body == null) {
+    return Response.notFound('Not Found');
+  }
+
+  final contentType = mimeTypeResolver.lookup(key);
+
+  final headers = {
+    HttpHeaders.contentLengthHeader: '${body.length}',
+    if (contentType != null) HttpHeaders.contentTypeHeader: contentType,
+  };
+
+  return Response.ok((request.method == 'HEAD') ? null : body,
+      headers: headers);
+}
+
+Future<Uint8List?> _loadResource(String key) async {
+  try {
+    final byteData = await rootBundle.load(key);
+
+    return byteData.buffer.asUint8List();
+  } catch (e) {
+    if (kDebugMode) print("😡 $e");
+    if (e is FlutterError) {
+      if (kDebugMode) print("😡 ${e.diagnostics.join("\n")}");
+    }
+  }
+
+  return null;
 }
 
 bool isShowDialog = false;

@@ -8,7 +8,6 @@ import 'package:app_installer/app_installer.dart';
 import 'package:crypto/crypto.dart';
 import 'package:filepicker_windows/filepicker_windows.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
@@ -66,6 +65,9 @@ import 'package:webview_flutter_plus/webview_flutter_plus.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:share_extend/share_extend.dart';
 
+import 'package:webview_cef/webview_cef.dart';
+import 'package:webview_cef/src/webview_inject_user_script.dart';
+
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
   @override
@@ -97,6 +99,7 @@ class _HomePageState extends State<HomePage> {
   var playProgress = 0.0.obs;
   var pianoAllTime = 0.0.obs;
   Timer? timer;
+
   late StreamSubscription subscription;
   late HttpClient httpClient;
   int preTimestamp = 0;
@@ -110,6 +113,8 @@ class _HomePageState extends State<HomePage> {
   var isVisibleWebview = true.obs;
 
   String? exportMidiStr; //导出midi需要的字符串数据
+
+  late WebViewController linuxController;
 
   void getAppVersion(Function() callBack) async {
     // debugger();
@@ -143,9 +148,65 @@ class _HomePageState extends State<HomePage> {
     callBack();
   }
 
+  // Platform messages are asynchronous, so we initialize in an async method.
+  Future<void> initPlatformState() async {
+    await WebviewManager().initialize(userAgent: "test/userAgent");
+    String url = "http://localhost:3001";
+    // _textController.text = url;
+    //unified interface for all platforms set user agent
+    linuxController.setWebviewListener(WebviewEventsListener(
+      onTitleChanged: (t) {
+        setState(() {
+          // title = t;
+        });
+      },
+      onUrlChanged: (url) {
+        // _textController.text = url;
+        final Set<JavascriptChannel> jsChannels = {
+          JavascriptChannel(
+              name: 'Print',
+              onMessageReceived: (JavascriptMessage message) {
+                print(message.message);
+                linuxController.sendJavaScriptChannelCallBack(
+                    false,
+                    "{'code':'200','message':'print succeed!'}",
+                    message.callbackId,
+                    message.frameId);
+              }),
+        };
+        //normal JavaScriptChannels
+        linuxController.setJavaScriptChannels(jsChannels);
+        //also you can build your own jssdk by execute JavaScript code to CEF
+        linuxController.executeJavaScript("function abc(e){return 'abc:'+ e}");
+        linuxController
+            .evaluateJavascript("abc('test')")
+            .then((value) => print(value));
+      },
+      onLoadStart: (controller, url) {
+        print("onLoadStart => $url");
+      },
+      onLoadEnd: (controller, url) {
+        print("onLoadEnd => $url");
+      },
+    ));
+
+    await linuxController.initialize(url);
+
+    if (!mounted) return;
+  }
+
   @override
   void initState() {
     super.initState();
+    var injectUserScripts = InjectUserScripts();
+    injectUserScripts.add(UserScript("console.log('injectScript_in_LoadStart')",
+        ScriptInjectTime.LOAD_START));
+    injectUserScripts.add(UserScript(
+        "console.log('injectScript_in_LoadEnd')", ScriptInjectTime.LOAD_END));
+    linuxController = WebviewManager().createWebView(
+        loading: const Text("not initialized"),
+        injectUserScripts: injectUserScripts);
+    initPlatformState();
     eventBus.on().listen((event) {
       debugPrint('listen event ==$event');
       if (event == 'EasyLoading dismiss') {
@@ -400,7 +461,7 @@ class _HomePageState extends State<HomePage> {
         // controllerPiano.runJavaScript(event);
       }
     });
-    // if (Platform.isIOS || Platform.isAndroid) {
+    // // if (Platform.isIOS || Platform.isAndroid) {
     // if (!ConfigStore.to.isFirstOpen) {
     //   debugPrint('isFirstOpen');
     //   if (Platform.isWindows) {
@@ -432,25 +493,25 @@ class _HomePageState extends State<HomePage> {
     //   });
     // }
 
-    Future.delayed(const Duration(milliseconds: 1000), () {
-      if (Platform.isWindows) {
-        isVisibleWebview.value = false;
-      }
-      // showStartPwdDialog(context, (bool isSuccess) {
-      //   if (isSuccess) {
-      getAppVersion(() {
-        if (isOnlyLoadFastModel && modelAddress == 0) {
-          fetchABCDataByIsolate();
-          showLoading();
-        }
-        if (Platform.isAndroid) {
-          // debugger();
-          checkAppUpdate('android', context);
-        }
-      });
-      // }
-      // });
-    });
+    // Future.delayed(const Duration(milliseconds: 1000), () {
+    //   if (Platform.isWindows) {
+    //     isVisibleWebview.value = false;
+    //   }
+    //   // showStartPwdDialog(context, (bool isSuccess) {
+    //   //   if (isSuccess) {
+    //   getAppVersion(() {
+    //     if (isOnlyLoadFastModel && modelAddress == 0) {
+    //       fetchABCDataByIsolate();
+    //       showLoading();
+    //     }
+    //     if (Platform.isAndroid) {
+    //       // debugger();
+    //       checkAppUpdate('android', context);
+    //     }
+    //   });
+    //   // }
+    //   // });
+    // });
 
     // }
   }
@@ -991,6 +1052,8 @@ class _HomePageState extends State<HomePage> {
   void dispose() {
     timer?.cancel();
     httpClient.close();
+    linuxController.dispose();
+    WebviewManager().quit();
     super.dispose();
   }
 
@@ -1004,6 +1067,22 @@ class _HomePageState extends State<HomePage> {
       createdTime: DateTime.now(),
     );
     await NotesDatabase.instance.create(note);
+  }
+
+  Future<void> loadHtmlFromAssets() async {
+    // 加载 assets 中的 HTML 文件
+    String htmlContent = await rootBundle.loadString(filePathKeyboard);
+
+    // 将 HTML 内容写入临时文件
+    final tempDir = Directory.systemTemp;
+    final tempFile = File('${tempDir.path}/index.html');
+    await tempFile.writeAsString(htmlContent);
+
+    // 获取文件的 file:// 路径
+    String filePath = tempFile.uri.toString();
+
+    // 加载到 WebView
+    linuxController.loadUrl(filePath);
   }
 
   @override
@@ -1120,6 +1199,9 @@ class _HomePageState extends State<HomePage> {
                               ),
                               onPressed: () {
                                 debugPrint('Settings');
+                                // linuxController.loadUrl(
+                                //     'http://localhost:63158/assets/piano/keyboard.html'); //http://localhost:3000
+                                // loadHtmlFromAssets();
                                 if (isShowOverlay) {
                                   closeOverlay();
                                 }
@@ -1157,14 +1239,18 @@ class _HomePageState extends State<HomePage> {
                           // maintainState: true,
                           child: WebViewWidget(
                             controller: controllerPiano,
-                            gestureRecognizers: {
-                              // 允许所有手势穿透到 WebView
-                              Factory<OneSequenceGestureRecognizer>(
-                                () => EagerGestureRecognizer(),
-                              ),
-                            },
                           )),
                     )),
+                ValueListenableBuilder(
+                  valueListenable: linuxController,
+                  builder: (context, value, child) {
+                    return linuxController.value
+                        ? Flexible(
+                            flex: isWindowsOrMac ? 2 : 2,
+                            child: linuxController.webviewWidget)
+                        : linuxController.loadingWidget;
+                  },
+                ),
                 Obx(() {
                   return Visibility(
                     visible: selectstate.value == 1,
@@ -1296,12 +1382,6 @@ class _HomePageState extends State<HomePage> {
                           borderRadius: BorderRadius.circular(9),
                           child: WebViewWidget(
                             controller: controllerKeyboard,
-                            gestureRecognizers: {
-                              // 允许所有手势穿透到 WebView
-                              Factory<OneSequenceGestureRecognizer>(
-                                () => EagerGestureRecognizer(),
-                              ),
-                            },
                           ),
                         ),
                       )),
