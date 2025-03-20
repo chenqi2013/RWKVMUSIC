@@ -114,7 +114,8 @@ class _HomePageState extends State<HomePage> {
 
   String? exportMidiStr; //导出midi需要的字符串数据
 
-  late WebViewController linuxController;
+  late WebViewController linuxKeyboardController;
+  late WebViewController linuxPianoController;
 
   void getAppVersion(Function() callBack) async {
     // debugger();
@@ -149,38 +150,49 @@ class _HomePageState extends State<HomePage> {
   }
 
   // Platform messages are asynchronous, so we initialize in an async method.
-  Future<void> initPlatformState() async {
-    await WebviewManager().initialize(userAgent: "test/userAgent");
-    String url = "http://localhost:8082/";
+  Future<void> initLinuxKeyboardController() async {
+    await WebviewManager().initialize();
+    String url = "http://localhost:8081/doctor.html";
     // _textController.text = url;
     //unified interface for all platforms set user agent
-    linuxController.setWebviewListener(WebviewEventsListener(
+    linuxKeyboardController.setWebviewListener(WebviewEventsListener(
       onTitleChanged: (t) {
         setState(() {
           // title = t;
         });
       },
       onUrlChanged: (url) {
+        debugPrint('onUrlChanged==$url');
         // _textController.text = url;
+        print("onLoadEnd => $url");
+        linuxKeyboardController.executeJavaScript('resetPlay()');
+        linuxKeyboardController.executeJavaScript('setPiano(55, 76)');
+        if (selectstate.value == 1) {
+          linuxKeyboardController.executeJavaScript('setPiano(21, 108)');
+        }
         final Set<JavascriptChannel> jsChannels = {
           JavascriptChannel(
-              name: 'Print',
+              name: 'flutteronNoteOff',
               onMessageReceived: (JavascriptMessage message) {
                 print(message.message);
-                linuxController.sendJavaScriptChannelCallBack(
-                    false,
-                    "{'code':'200','message':'print succeed!'}",
-                    message.callbackId,
-                    message.frameId);
+              }),
+          JavascriptChannel(
+              name: 'flutteronNoteOn',
+              onMessageReceived: (JavascriptMessage message) {
+                debugPrint(
+                    'flutteronNoteOn onMessageReceived=${message.message}');
+                if (isShowDialog) {
+                  debugPrint('isShowDialog return');
+                  return;
+                }
+                String name = MidiToABCConverter()
+                    .getNoteMp3Path(int.parse(message.message));
+                playNoteMp3(name);
+                updatePianoNote(int.parse(message.message));
               }),
         };
         //normal JavaScriptChannels
-        linuxController.setJavaScriptChannels(jsChannels);
-        //also you can build your own jssdk by execute JavaScript code to CEF
-        linuxController.executeJavaScript("function abc(e){return 'abc:'+ e}");
-        linuxController
-            .evaluateJavascript("abc('test')")
-            .then((value) => print(value));
+        linuxKeyboardController.setJavaScriptChannels(jsChannels);
       },
       onLoadStart: (controller, url) {
         print("onLoadStart => $url");
@@ -190,23 +202,174 @@ class _HomePageState extends State<HomePage> {
       },
     ));
 
-    await linuxController.initialize(url);
+    await linuxKeyboardController.initialize(url);
 
-    if (!mounted) return;
+    // if (!mounted) return;
+  }
+
+  Future<void> initLinuxPianoController() async {
+    // await WebviewManager().initialize(userAgent: "test/userAgent");
+    String url = "http://localhost:8083/player.html";
+    // _textController.text = url;
+    //unified interface for all platforms set user agent
+    linuxPianoController.setWebviewListener(WebviewEventsListener(
+      onTitleChanged: (t) {
+        setState(() {
+          // title = t;
+        });
+      },
+      onUrlChanged: (url) {},
+      onLoadStart: (controller, url) {
+        print("onLoadStart => $url");
+      },
+      onLoadEnd: (controller, url) {
+        print("onLoadEnd => $url");
+        debugPrint("controllerPiano onPageFinished$url");
+        int index = ConfigStore.to.getPromptsSelect();
+        if (index < 0) {
+          index = 0;
+        }
+
+        presentPrompt = CommonUtils.escapeString(promptsAbc[index]);
+        int subindex = presentPrompt.indexOf('L:');
+        String subpresentPrompt = presentPrompt.substring(subindex);
+        debugPrint('load presentPrompt=$presentPrompt');
+        finalabcStringPreset =
+            "setAbcString(\"${ABCHead.getABCWithInstrument(subpresentPrompt, midiProgramValue)}\",false)";
+        finalabcStringPreset =
+            ABCHead.appendTempoParam(finalabcStringPreset, tempo.value.toInt());
+
+        _change(finalabcStringPreset);
+        linuxPianoController.executeJavaScript("setPromptNoteNumberCount(3)");
+        linuxPianoController.executeJavaScript("setStyle()");
+        final Set<JavascriptChannel> jsChannels = {
+          JavascriptChannel(
+              name: 'flutteronStartPlay',
+              onMessageReceived: (JavascriptMessage jsMessage) {
+                String message = jsMessage.message;
+                debugPrint(
+                    'playOrPausePiano flutteronStartPlay onMessageReceived=$message');
+                pianoAllTime.value = double.parse(message.split(',')[1]);
+                debugPrint(
+                    'playOrPausePiano pianoAllTime:${pianoAllTime.value}');
+                playProgress.value = 0.0;
+                createTimer();
+                isPlay.value = true;
+                // isNeedRestart = false;
+              }),
+          JavascriptChannel(
+              name: 'flutteronPausePlay',
+              onMessageReceived: (JavascriptMessage jsMessage) {
+                debugPrint(
+                    'playOrPausePiano flutteronPausePlay onMessageReceived=${jsMessage.message}');
+                timer?.cancel();
+                isPlay.value = false;
+                // isNeedRestart = false;
+              }),
+          JavascriptChannel(
+              name: 'flutteronResumePlay',
+              onMessageReceived: (JavascriptMessage jsMessage) {
+                debugPrint(
+                    'playOrPausePiano flutteronResumePlay onMessageReceived=${jsMessage.message}');
+                createTimer();
+                isPlay.value = true;
+                // isNeedRestart = false;
+              }),
+          JavascriptChannel(
+              name: 'flutteronCountPromptNoteNumber',
+              onMessageReceived: (JavascriptMessage jsMessage) {
+                debugPrint(
+                    'flutteronCountPromptNoteNumber onMessageReceived=${jsMessage.message}');
+              }),
+          JavascriptChannel(
+              name: 'flutteronMidiExport',
+              onMessageReceived: (JavascriptMessage jsMessage) {
+                exportMidiStr = jsMessage.message;
+                // debugPrint('flutteronMidiExport onMessageReceived=$exportMidiStr');
+              }),
+          JavascriptChannel(
+              name: 'flutteronEvents',
+              onMessageReceived: (JavascriptMessage jsMessage) {
+                // debugPrint('flutteronEvents onMessageReceived=${jsMessage.message}');
+                midiNotes = jsonDecode(jsMessage.message);
+                // if (!isNeedConvertMidiNotes) {
+                //   // String jsstr =
+                //   //     r'startPlay("[[0,\"on\",49],[333,\"on\",46],[333,\"off\",49],[1000,\"off\",46]]")';
+                String jsstr = r'startPlay("' +
+                    jsMessage.message.replaceAll('"', r'\"') +
+                    r'")';
+                linuxKeyboardController.executeJavaScript(jsstr);
+                // linuxPianoController.executeJavaScript("startPlay()");
+                // debugPrint('isFinishABCEvent == true,,,controllerPiano startPlay()');
+                isFinishABCEvent = true;
+                debugPrint('isFinishABCEvent == true,,,');
+                // } else {
+                //   isNeedConvertMidiNotes = false;
+                // }
+
+                //生成midi数据
+                String abc = selectstate.value == 0
+                    ? finalabcStringPreset
+                    : finalabcStringCreate;
+                String result = abc
+                    .replaceAll('setAbcString("', '')
+                    .replaceAll('",false)', '');
+                result = result.replaceAll(r'\"', '"');
+                result = result.replaceAll('\\n', '\n');
+                // debugPrint('result==>>>>$result');
+                abc = base64.encode(utf8.encode(result));
+                linuxPianoController
+                    .executeJavaScript("exportMidiFile('$abc')");
+              }),
+          JavascriptChannel(
+              name: 'flutteronPlayFinish',
+              onMessageReceived: (JavascriptMessage jsMessage) {
+                debugPrint(
+                    'flutteronPlayFinish onMessageReceived=${jsMessage.message}');
+                isPlay.value = false;
+                isFinishABCEvent = false;
+                if (!isWindowsOrMac) {
+                  resetPianoAndKeyboard();
+                  debugPrint('resetPianoAndKeyboard');
+                }
+              }),
+          JavascriptChannel(
+              name: 'flutterOnClickTime',
+              onMessageReceived: (JavascriptMessage jsMessage) {
+                _showTimeChangingDialog();
+              }),
+          JavascriptChannel(
+              name: 'flutterOnTapEmpty',
+              onMessageReceived: (JavascriptMessage jsMessage) {}),
+          JavascriptChannel(
+              name: 'flutterOnClickChord',
+              onMessageReceived: (JavascriptMessage jsMessage) {}),
+        };
+        //normal JavaScriptChannels
+        linuxPianoController.setJavaScriptChannels(jsChannels);
+      },
+    ));
+
+    await linuxPianoController.initialize(url);
+    // if (!mounted) return;
   }
 
   @override
   void initState() {
     super.initState();
-    var injectUserScripts = InjectUserScripts();
-    injectUserScripts.add(UserScript("console.log('injectScript_in_LoadStart')",
-        ScriptInjectTime.LOAD_START));
-    injectUserScripts.add(UserScript(
-        "console.log('injectScript_in_LoadEnd')", ScriptInjectTime.LOAD_END));
-    linuxController = WebviewManager().createWebView(
-        loading: const Text("not initialized"),
-        injectUserScripts: injectUserScripts);
-    initPlatformState();
+    // var injectUserScripts = InjectUserScripts();
+    // injectUserScripts.add(UserScript("console.log('injectScript_in_LoadStart')",
+    //     ScriptInjectTime.LOAD_START));
+    // injectUserScripts.add(UserScript(
+    //     "console.log('injectScript_in_LoadEnd')", ScriptInjectTime.LOAD_END));
+    linuxKeyboardController = WebviewManager().createWebView(
+      loading: const Text("not initialized"),
+    );
+    initLinuxKeyboardController();
+    linuxPianoController = WebviewManager().createWebView(
+      loading: const Text("not initialized"),
+    );
+    initLinuxPianoController();
     eventBus.on().listen((event) {
       debugPrint('listen event ==$event');
       if (event == 'EasyLoading dismiss') {
@@ -234,190 +397,6 @@ class _HomePageState extends State<HomePage> {
       debugPrint('receiveCallback main =$data');
       updatePianoNote(data);
     };
-    controllerPiano = WebViewControllerPlus()
-      ..setJavaScriptMode(JavaScriptMode.unrestricted)
-      ..setNavigationDelegate(
-        NavigationDelegate(
-          onPageStarted: (url) {
-            // controllerPiano.onLoaded((msg) {
-            //   controllerPiano.getWebViewHeight().then((value) {});
-            // });
-          },
-          onPageFinished: (url) {
-            debugPrint("controllerPiano onPageFinished$url");
-            int index = ConfigStore.to.getPromptsSelect();
-            if (index < 0) {
-              index = 0;
-            }
-
-            presentPrompt = CommonUtils.escapeString(promptsAbc[index]);
-            int subindex = presentPrompt.indexOf('L:');
-            String subpresentPrompt = presentPrompt.substring(subindex);
-            debugPrint('load presentPrompt=$presentPrompt');
-            finalabcStringPreset =
-                "setAbcString(\"${ABCHead.getABCWithInstrument(subpresentPrompt, midiProgramValue)}\",false)";
-            finalabcStringPreset = ABCHead.appendTempoParam(
-                finalabcStringPreset, tempo.value.toInt());
-
-            _change(finalabcStringPreset);
-            controllerPiano.runJavaScript("setPromptNoteNumberCount(3)");
-            controllerPiano.runJavaScript("setStyle()");
-          },
-        ),
-      )
-      // ..loadFlutterAssetServer(filePathPiano)
-      ..loadRequest(Uri.parse('http://localhost:8083/'))
-      ..addJavaScriptChannel("flutteronStartPlay",
-          onMessageReceived: (JavaScriptMessage jsMessage) {
-        String message = jsMessage.message;
-        debugPrint(
-            'playOrPausePiano flutteronStartPlay onMessageReceived=$message');
-        pianoAllTime.value = double.parse(message.split(',')[1]);
-        debugPrint('playOrPausePiano pianoAllTime:${pianoAllTime.value}');
-        playProgress.value = 0.0;
-        createTimer();
-        isPlay.value = true;
-        // isNeedRestart = false;
-      })
-      ..addJavaScriptChannel("flutteronPausePlay",
-          onMessageReceived: (JavaScriptMessage jsMessage) {
-        debugPrint(
-            'playOrPausePiano flutteronPausePlay onMessageReceived=${jsMessage.message}');
-        timer?.cancel();
-        isPlay.value = false;
-        // isNeedRestart = false;
-      })
-      ..addJavaScriptChannel("flutteronResumePlay",
-          onMessageReceived: (JavaScriptMessage jsMessage) {
-        debugPrint(
-            'playOrPausePiano flutteronResumePlay onMessageReceived=${jsMessage.message}');
-        createTimer();
-        isPlay.value = true;
-        // isNeedRestart = false;
-      })
-      ..addJavaScriptChannel("flutteronCountPromptNoteNumber",
-          onMessageReceived: (JavaScriptMessage jsMessage) {
-        debugPrint(
-            'flutteronCountPromptNoteNumber onMessageReceived=${jsMessage.message}');
-      })
-      ..addJavaScriptChannel("flutteronMidiExport",
-          onMessageReceived: (JavaScriptMessage jsMessage) {
-        exportMidiStr = jsMessage.message;
-        // debugPrint('flutteronMidiExport onMessageReceived=$exportMidiStr');
-      })
-      ..addJavaScriptChannel("flutteronEvents",
-          onMessageReceived: (JavaScriptMessage jsMessage) {
-        // debugPrint('flutteronEvents onMessageReceived=${jsMessage.message}');
-        midiNotes = jsonDecode(jsMessage.message);
-        // if (!isNeedConvertMidiNotes) {
-        //   // String jsstr =
-        //   //     r'startPlay("[[0,\"on\",49],[333,\"on\",46],[333,\"off\",49],[1000,\"off\",46]]")';
-        String jsstr =
-            r'startPlay("' + jsMessage.message.replaceAll('"', r'\"') + r'")';
-        controllerKeyboard.runJavaScript(jsstr);
-        // controllerPiano.runJavaScript("startPlay()");
-        // debugPrint('isFinishABCEvent == true,,,controllerPiano startPlay()');
-        isFinishABCEvent = true;
-        debugPrint('isFinishABCEvent == true,,,');
-        // } else {
-        //   isNeedConvertMidiNotes = false;
-        // }
-
-        //生成midi数据
-        String abc = selectstate.value == 0
-            ? finalabcStringPreset
-            : finalabcStringCreate;
-        String result =
-            abc.replaceAll('setAbcString("', '').replaceAll('",false)', '');
-        result = result.replaceAll(r'\"', '"');
-        result = result.replaceAll('\\n', '\n');
-        // debugPrint('result==>>>>$result');
-        abc = base64.encode(utf8.encode(result));
-        controllerPiano.runJavaScript("exportMidiFile('$abc')");
-      })
-      ..addJavaScriptChannel("flutteronPlayFinish",
-          onMessageReceived: (JavaScriptMessage jsMessage) {
-        debugPrint(
-            'flutteronPlayFinish onMessageReceived=${jsMessage.message}');
-        isPlay.value = false;
-        isFinishABCEvent = false;
-        if (!isWindowsOrMac) {
-          resetPianoAndKeyboard();
-          debugPrint('resetPianoAndKeyboard');
-        }
-        // // isNeedRestart = true;
-        // if (isAutoSwitch.value) {
-        //   //自动切换下一个prompt
-        //   promptSelectedIndex.value += 1;
-        //   // isHideWebview.value = !isHideWebview.value;
-        //   if (isRememberPrompt.value) {
-        //     ConfigStore.to.savePromptsSelect(promptSelectedIndex.value);
-        //   }
-        //   presentPrompt =
-        //       CommonUtils.escapeString(promptsAbc[promptSelectedIndex.value]);
-        //   if (selectstate.value == 0) {
-        //     String abcstr =
-        //         ABCHead.getABCWithInstrument(presentPrompt, midiProgramValue);
-        //     abcstr = ABCHead.appendTempoParam(abcstr, tempo.value.toInt());
-        //     controllerPiano.runJavaScript("setAbcString(\"$abcstr\",false)");
-        //     controllerKeyboard.runJavaScript('resetPlay()');
-        //     debugPrint(abcstr);
-        //     // Future.delayed(const Duration(milliseconds: 300), () {
-        //     //   playOrPausePiano();
-        //     // });
-        //   }
-        // }
-      })
-      ..addJavaScriptChannel("flutteronClickNote",
-          onMessageReceived: _onClickNote)
-      ..addJavaScriptChannel("flutterOnClickTime",
-          onMessageReceived: (JavaScriptMessage javaScriptMessage) {
-        _showTimeChangingDialog();
-      })
-      ..addJavaScriptChannel("flutterOnTapEmpty",
-          onMessageReceived: _flutterOnTapEmptyReceived)
-      ..addJavaScriptChannel("flutterOnClickChord",
-          onMessageReceived: _onReceiveChordClick);
-
-    controllerKeyboard = WebViewControllerPlus()
-      ..setJavaScriptMode(JavaScriptMode.unrestricted)
-      ..setNavigationDelegate(
-        NavigationDelegate(
-          onPageStarted: (url) {
-            // controllerKeyboard.onLoaded((msg) {
-            //   controllerKeyboard.getWebViewHeight().then((value) {});
-            // });
-          },
-          onPageFinished: (url) {
-            debugPrint("controllerKeyboard onPageFinished$url");
-            controllerKeyboard.runJavaScript('resetPlay()');
-            controllerKeyboard.runJavaScript('setPiano(55, 76)');
-            if (selectstate.value == 1) {
-              controllerKeyboard.runJavaScript('setPiano(21, 108)');
-            }
-          },
-        ),
-      )
-      ..addJavaScriptChannel("flutteronNoteOff",
-          onMessageReceived: (JavaScriptMessage jsMessage) {
-        debugPrint('flutteronNoteOff onMessageReceived=${jsMessage.message}');
-        // JustAudioPlayerManage().stopAudio();
-      })
-      // 按下 webview 中的琴键
-      ..addJavaScriptChannel("flutteronNoteOn",
-          onMessageReceived: (JavaScriptMessage jsMessage) {
-        debugPrint('flutteronNoteOn onMessageReceived=${jsMessage.message}');
-        if (isShowDialog) {
-          debugPrint('isShowDialog return');
-          return;
-        }
-        String name =
-            MidiToABCConverter().getNoteMp3Path(int.parse(jsMessage.message));
-        playNoteMp3(name);
-        updatePianoNote(int.parse(jsMessage.message));
-      });
-    // controllerKeyboard.loadFlutterAssetServer(filePathKeyboardAnimation);
-    controllerKeyboard.loadRequest(Uri.parse('http://localhost:8081/'));
 
     eventBus.on().listen((event) {
       // debugPrint('event bus==$event');
@@ -459,7 +438,7 @@ class _HomePageState extends State<HomePage> {
         // String base64AbcString = "setAbcString('$encodedString',false)";
         _change(ABCHead.base64AbcString(event));
         // debugPrint('base64abctoEvents==$base64abctoEvents');
-        // controllerPiano.runJavaScript(event);
+        // linuxPianoController.executeJavaScript(event);
       }
     });
     // // if (Platform.isIOS || Platform.isAndroid) {
@@ -522,7 +501,7 @@ class _HomePageState extends State<HomePage> {
   /// 预设：这个过程一定调用了 setAbcString 这个函数
   Future<void> _change(String javaScript) async {
     try {
-      await controllerPiano.runJavaScript(javaScript);
+      await linuxPianoController.executeJavaScript(javaScript);
       final inCreateMode = selectstate.value == 1;
 
       if (inCreateMode) {
@@ -547,7 +526,7 @@ class _HomePageState extends State<HomePage> {
     if (selectstate.value != 1) return;
     selectedNote.value = null;
     GlobalState.tripleting.value = tripletHighlighted();
-    await controllerPiano.runJavaScript("unselectAll()");
+    await linuxPianoController.executeJavaScript("unselectAll()");
   }
 
   /// 使当前琴谱的 abc notation value 变为上一步的 abc notation value
@@ -581,7 +560,7 @@ class _HomePageState extends State<HomePage> {
       final virtualNotesStep =
           virtualNotesHistory[virtualNotesHistory.length - 2];
       // final intNodesStep = intNodesHistory[intNodesHistory.length - 2];
-      await controllerPiano.runJavaScript(historyStep);
+      await linuxPianoController.executeJavaScript(historyStep);
       history.removeLast();
       virtualNotes = [...virtualNotesStep];
       virtualNotesHistory.removeLast();
@@ -1003,11 +982,11 @@ class _HomePageState extends State<HomePage> {
     debugPrint('playAbcString==$playAbcString');
     if (isFinishABCEvent) {
       if (!isPlay.value) {
-        // controllerKeyboard.runJavaScript('resetPlay()');
-        controllerPiano.runJavaScript("startPlay()");
+        // linuxKeyboardController.executeJavaScript('resetPlay()');
+        linuxPianoController.executeJavaScript("startPlay()");
         debugPrint('playOrPausePiano controllerPiano startPlay()');
       } else {
-        controllerPiano.runJavaScript("pausePlay()");
+        linuxPianoController.executeJavaScript("pausePlay()");
         debugPrint('playOrPausePiano controllerPiano pausePlay()');
       }
     } else {
@@ -1019,16 +998,16 @@ class _HomePageState extends State<HomePage> {
         //&& !isNeedRestart && !isNeedConvertMidiNotes
         debugPrint(
             'playOrPausePiano isFinishABCEvent yes  resumePlay() keyboard');
-        controllerKeyboard.runJavaScript('resumePlay()');
+        linuxKeyboardController.executeJavaScript('resumePlay()');
       } else {
         String base64abctoEvents = ABCHead.base64abctoEvents(
             ABCHead.appendTempoParam(playAbcString, tempo.value.toInt()));
         _change(base64abctoEvents);
         debugPrint('playOrPausePiano base64abctoEvents==$base64abctoEvents');
-        controllerPiano.runJavaScript("startPlay()");
+        linuxPianoController.executeJavaScript("startPlay()");
       }
     } else {
-      controllerKeyboard.runJavaScript('pausePlay()');
+      linuxKeyboardController.executeJavaScript('pausePlay()');
       debugPrint('playOrPausePiano controllerKeyboard pausePlay()');
       // timer.cancel();
     }
@@ -1053,7 +1032,8 @@ class _HomePageState extends State<HomePage> {
   void dispose() {
     timer?.cancel();
     httpClient.close();
-    linuxController.dispose();
+    linuxKeyboardController.dispose();
+    linuxPianoController.dispose();
     WebviewManager().quit();
     super.dispose();
   }
@@ -1083,7 +1063,7 @@ class _HomePageState extends State<HomePage> {
     String filePath = tempFile.uri.toString();
 
     // 加载到 WebView
-    linuxController.loadUrl(filePath);
+    linuxKeyboardController.loadUrl(filePath);
   }
 
   @override
@@ -1200,9 +1180,6 @@ class _HomePageState extends State<HomePage> {
                               ),
                               onPressed: () {
                                 debugPrint('Settings');
-                                // linuxController.loadUrl(
-                                //     'http://localhost:63158/assets/piano/keyboard.html'); //http://localhost:3000
-                                // loadHtmlFromAssets();
                                 if (isShowOverlay) {
                                   closeOverlay();
                                 }
@@ -1233,25 +1210,19 @@ class _HomePageState extends State<HomePage> {
                 Obx(() => Flexible(
                       flex: isWindowsOrMac ? 2 : 2,
                       child: Visibility(
-                          key: const ValueKey('ValueKey11'),
-                          visible: isVisibleWebview.value,
-                          // maintainSize: true, // 保持占位空间
-                          // maintainAnimation: true, // 保持动画
-                          // maintainState: true,
-                          child: WebViewWidget(
-                            controller: controllerPiano,
-                          )),
+                        key: const ValueKey('ValueKey11'),
+                        visible: isVisibleWebview.value,
+                        child: ValueListenableBuilder(
+                          valueListenable: linuxPianoController,
+                          builder: (context, value, child) {
+                            return linuxPianoController.value
+                                ? linuxPianoController.webviewWidget
+                                : linuxPianoController.loadingWidget;
+                          },
+                        ),
+                      ),
                     )),
-                ValueListenableBuilder(
-                  valueListenable: linuxController,
-                  builder: (context, value, child) {
-                    return linuxController.value
-                        ? Flexible(
-                            flex: isWindowsOrMac ? 2 : 2,
-                            child: linuxController.webviewWidget)
-                        : linuxController.loadingWidget;
-                  },
-                ),
+
                 Obx(() {
                   return Visibility(
                     visible: selectstate.value == 1,
@@ -1375,14 +1346,16 @@ class _HomePageState extends State<HomePage> {
                       child: Visibility(
                         visible: isVisibleWebview.value &&
                             !showSelectStopSoHideWebviewInDesktop.value,
-                        // maintainSize: true, // 保持占位空间
-                        // maintainAnimation: true, // 保持动画
-                        // maintainState: true,
                         key: const ValueKey('ValueKey22'),
                         child: ClipRRect(
                           borderRadius: BorderRadius.circular(9),
-                          child: WebViewWidget(
-                            controller: controllerKeyboard,
+                          child: ValueListenableBuilder(
+                            valueListenable: linuxKeyboardController,
+                            builder: (context, value, child) {
+                              return linuxKeyboardController.value
+                                  ? linuxKeyboardController.webviewWidget
+                                  : linuxKeyboardController.loadingWidget;
+                            },
                           ),
                         ),
                       )),
@@ -1489,9 +1462,8 @@ class _HomePageState extends State<HomePage> {
                                             // controllerKeyboard
                                             //     .loadFlutterAssetServer(
                                             //         filePathKeyboardAnimation);
-                                            controllerKeyboard.loadRequest(
-                                                Uri.parse(
-                                                    'http://localhost:8081/'));
+                                            linuxKeyboardController.loadUrl(
+                                                'http://localhost:8081/doctor.html');
                                           }
                                         } else {
                                           // isolateSendPort.send('stop Generating');
@@ -1553,16 +1525,16 @@ class _HomePageState extends State<HomePage> {
   void resetPianoAndKeyboard() {
     // if (isPlay.value) {
     // playOrPausePiano();
-    // // controllerPiano.runJavaScript("setPlayButtonDisable(true)");
-    // controllerKeyboard.runJavaScript('resetPlay()');
+    // // linuxPianoController.executeJavaScript("setPlayButtonDisable(true)");
+    // linuxKeyboardController.executeJavaScript('resetPlay()');
     // debugPrint('pausePlay()');
 
-    controllerPiano.runJavaScript("pausePlay()");
-    controllerPiano.runJavaScript("resetTimingCallbacks()");
-    controllerPiano.runJavaScript("triggerRestartBtnClick()");
+    linuxPianoController.executeJavaScript("pausePlay()");
+    linuxPianoController.executeJavaScript("resetTimingCallbacks()");
+    linuxPianoController.executeJavaScript("triggerRestartBtnClick()");
 
-    controllerKeyboard.runJavaScript('clearAll()'); //resetPlay()
-    controllerKeyboard.runJavaScript('resetPlay()');
+    linuxKeyboardController.executeJavaScript('clearAll()'); //resetPlay()
+    linuxKeyboardController.executeJavaScript('resetPlay()');
 
     // if (selectstate.value == 0 || isCreateGenerate.value) {
     //   debugPrint('loadFlutterAssetServer-filePathKeyboardAnimation-');
@@ -1587,15 +1559,15 @@ class _HomePageState extends State<HomePage> {
     }
     if (index == 0) {
       //preset
-      // controllerPiano.runJavaScript(
+      // linuxPianoController.executeJavaScript(
       //     "setAbcString(\"%%MIDI program $midiProgramValue\\nL:1/4\\nM:4/4\\nK:D\\n\\\"D\\\" A F F\",false)");
       _change(ABCHead.base64AbcString(finalabcStringPreset));
       debugPrint('finalabcStringPreset=$finalabcStringPreset');
-      controllerPiano.runJavaScript("setPromptNoteNumberCount(3)");
+      linuxPianoController.executeJavaScript("setPromptNoteNumberCount(3)");
       // controllerKeyboard.loadFlutterAssetServer(filePathKeyboardAnimation);
-      controllerKeyboard.loadRequest(Uri.parse('http://localhost:8081/'));
-      // controllerKeyboard.runJavaScript('resetPlay()');
-      // controllerKeyboard.runJavaScript('setPiano(55, 76)');
+      linuxKeyboardController.loadUrl('http://localhost:8081/doctor.html');
+      // linuxKeyboardController.executeJavaScript('resetPlay()');
+      // linuxKeyboardController.executeJavaScript('setPiano(55, 76)');
     } else {
       resetToDefaulValueInCreateMode();
     }
@@ -1615,12 +1587,12 @@ class _HomePageState extends State<HomePage> {
         ABCHead.appendTempoParam(finalabcStringCreate, tempo.value.toInt());
     debugPrint('str112==$finalabcStringCreate');
     _change(finalabcStringCreate);
-    controllerPiano.runJavaScript("setPromptNoteNumberCount(0)");
-    controllerPiano.runJavaScript("setStyle()");
+    linuxPianoController.executeJavaScript("setPromptNoteNumberCount(0)");
+    linuxPianoController.executeJavaScript("setStyle()");
     // controllerKeyboard.loadFlutterAssetServer(filePathKeyboard);
-    controllerKeyboard.loadRequest(Uri.parse('http://localhost:8082/'));
+    linuxKeyboardController.loadUrl('http://localhost:8082/keyboard.html');
 
-    // controllerKeyboard.runJavaScript('resetPlay()');
+    // linuxKeyboardController.executeJavaScript('resetPlay()');
     createPrompt = '';
   }
 
