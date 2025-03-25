@@ -1063,12 +1063,15 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
         resizeToAvoidBottomInset: false,
-        floatingActionButton: FloatingActionButton(onPressed: () {
-          // print(linuxKeyboardController.javascriptChannels);
-          linuxKeyboardController.executeJavaScript("window.alert('???')");
-          linuxKeyboardController.openDevTools();
-          // print(Directory.systemTemp);
-        }),
+        floatingActionButton: kDebugMode
+            ? FloatingActionButton(
+                onPressed: () {
+                  // print(linuxKeyboardController.javascriptChannels);
+                  linuxKeyboardController.executeJavaScript("window.alert('???')");
+                  linuxKeyboardController.openDevTools();
+                  // print(Directory.systemTemp);
+                })
+            : null,
         body: GestureDetector(
           onTap: () {
             _unselectAll();

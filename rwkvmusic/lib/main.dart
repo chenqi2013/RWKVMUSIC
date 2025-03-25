@@ -73,6 +73,7 @@ void main(List<String> args) async {
       translations: TranslationService(), // 注册翻译类
     ),
   ));
+  // TODO: @WangCe Enable it for release mode
   // await Sentry.init(
   //   (options) {
   //     options.dsn =
