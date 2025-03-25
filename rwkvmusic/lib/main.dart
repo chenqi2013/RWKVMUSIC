@@ -60,29 +60,29 @@ void main(List<String> args) async {
   await Get.putAsync<StorageService>(() => StorageService().init());
   Get.put<ConfigStore>(ConfigStore());
   GlobalState.init();
-  await Sentry.init(
-    (options) {
-      options.dsn =
-          'https://e7b4e1cfa474037accf726c5893d86f8@o4507886670708736.ingest.us.sentry.io/4507886687944704';
-
-      options.tracesSampleRate = 1.0;
-    },
-    appRunner: () => runApp(
-      ScreenUtilInit(
-        designSize: Platform.isWindows
-            ? const Size(2880, 1600)
-            : const Size(2436, 1125), //812, 375
-        child: GetMaterialApp(
-          debugShowCheckedModeBanner: false,
-          home: HomePage(),
-          builder: EasyLoading.init(),
-          locale: Locale('en', 'US'), // 默认语言
-          fallbackLocale: Locale('en', 'US'), // 回退语言
-          translations: TranslationService(), // 注册翻译类
-        ),
-      ),
+  runApp(ScreenUtilInit(
+    designSize: Platform.isWindows
+        ? const Size(2880, 1600)
+        : const Size(2436, 1125), //812, 375
+    child: GetMaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: HomePage(),
+      builder: EasyLoading.init(),
+      locale: Locale('en', 'US'), // 默认语言
+      fallbackLocale: Locale('en', 'US'), // 回退语言
+      translations: TranslationService(), // 注册翻译类
     ),
-  );
+  ));
+  // await Sentry.init(
+  //   (options) {
+  //     options.dsn =
+  //         'https://e7b4e1cfa474037accf726c5893d86f8@o4507886670708736.ingest.us.sentry.io/4507886687944704';
+
+  //     options.tracesSampleRate = 1.0;
+  //   },
+  //   appRunner: () => ,
+  //   ),
+  // );
 }
 
 Future<void> startWebServer1() async {
@@ -106,9 +106,9 @@ Future<void> startWebServer2() async {
     serveFilesOutsidePath: false,
   );
 
-  HttpServer server = await shelf_io.serve(handler, 'localhost', 8082);
+  HttpServer server = await shelf_io.serve(handler, 'localhost', 8123);
   debugPrint('server==$server');
-  print('✅ Web server started at http://localhost:8082');
+  print('✅ Web server started at http://localhost:8123');
 }
 
 Future<void> startWebServer3() async {

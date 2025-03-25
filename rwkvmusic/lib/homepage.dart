@@ -177,19 +177,7 @@ class _HomePageState extends State<HomePage> {
                 print(message.message);
               }),
           JavascriptChannel(
-              name: 'flutteronNoteOn',
-              onMessageReceived: (JavascriptMessage message) {
-                debugPrint(
-                    'flutteronNoteOn onMessageReceived=${message.message}');
-                if (isShowDialog) {
-                  debugPrint('isShowDialog return');
-                  return;
-                }
-                String name = MidiToABCConverter()
-                    .getNoteMp3Path(int.parse(message.message));
-                playNoteMp3(name);
-                updatePianoNote(int.parse(message.message));
-              }),
+              name: 'flutteronNoteOn', onMessageReceived: _flutteronNoteOn),
         };
         //normal JavaScriptChannels
         linuxKeyboardController.setJavaScriptChannels(jsChannels);
@@ -205,6 +193,20 @@ class _HomePageState extends State<HomePage> {
     await linuxKeyboardController.initialize(url);
 
     // if (!mounted) return;
+  }
+
+  Future<void> _flutteronNoteOn(JavascriptMessage message) async {
+    debugPrint('flutteronNoteOn onMessageReceived=${message.message}');
+    if (isShowDialog) {
+      debugPrint('isShowDialog return');
+      return;
+    }
+    String m = message.message;
+    m = m.substring(1, m.length - 1);
+    final i = int.parse(m);
+    String name = MidiToABCConverter().getNoteMp3Path(i);
+    playNoteMp3(name);
+    updatePianoNote(i);
   }
 
   Future<void> initLinuxPianoController() async {
@@ -1580,7 +1582,7 @@ class _HomePageState extends State<HomePage> {
     linuxPianoController.executeJavaScript("setPromptNoteNumberCount(0)");
     linuxPianoController.executeJavaScript("setStyle()");
     // controllerKeyboard.loadFlutterAssetServer(filePathKeyboard);
-    linuxKeyboardController.loadUrl('http://localhost:8082/keyboard.html');
+    linuxKeyboardController.loadUrl('http://localhost:8123/keyboard.html');
     // linuxKeyboardController.loadUrl('http://www.baidu.com');
 
     // linuxKeyboardController.executeJavaScript('resetPlay()');
