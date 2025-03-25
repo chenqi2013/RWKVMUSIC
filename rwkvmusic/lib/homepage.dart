@@ -20,7 +20,7 @@ import 'package:rwkvmusic/agree_dialog.dart';
 import 'package:rwkvmusic/duihuanma_dialog.dart';
 import 'package:rwkvmusic/feedback_page.dart';
 import 'package:rwkvmusic/main.dart';
-import 'package:rwkvmusic/mainwidget/custom_segment_controller.dart';
+import 'package:rwkvmusic/mainwidget/Custom_Segment_Controller.dart';
 import 'package:rwkvmusic/mainwidget/play_progressbar.dart';
 import 'package:rwkvmusic/mainwidget/checkbox_item.dart';
 import 'package:rwkvmusic/mainwidget/container_line.dart';
@@ -1050,26 +1050,16 @@ class _HomePageState extends State<HomePage> {
     await NotesDatabase.instance.create(note);
   }
 
-  Future<void> loadHtmlFromAssets() async {
-    // 加载 assets 中的 HTML 文件
-    String htmlContent = await rootBundle.loadString(filePathKeyboard);
-
-    // 将 HTML 内容写入临时文件
-    final tempDir = Directory.systemTemp;
-    final tempFile = File('${tempDir.path}/index.html');
-    await tempFile.writeAsString(htmlContent);
-
-    // 获取文件的 file:// 路径
-    String filePath = tempFile.uri.toString();
-
-    // 加载到 WebView
-    linuxKeyboardController.loadUrl(filePath);
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
         resizeToAvoidBottomInset: false,
+        floatingActionButton: FloatingActionButton(onPressed: () {
+          // print(linuxKeyboardController.javascriptChannels);
+          linuxKeyboardController.executeJavaScript("window.alert('???')");
+          linuxKeyboardController.openDevTools();
+          // print(Directory.systemTemp);
+        }),
         body: GestureDetector(
           onTap: () {
             _unselectAll();
@@ -1591,6 +1581,7 @@ class _HomePageState extends State<HomePage> {
     linuxPianoController.executeJavaScript("setStyle()");
     // controllerKeyboard.loadFlutterAssetServer(filePathKeyboard);
     linuxKeyboardController.loadUrl('http://localhost:8082/keyboard.html');
+    // linuxKeyboardController.loadUrl('http://www.baidu.com');
 
     // linuxKeyboardController.executeJavaScript('resetPlay()');
     createPrompt = '';

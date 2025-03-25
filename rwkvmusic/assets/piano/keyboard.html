@@ -1,300 +1,301 @@
 <!DOCTYPE html>
 <html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0,user-scalable=no"
+    />
+    <title>Piano</title>
+    <style>
+      html,
+      body {
+        margin: 0;
+        font-family: 'Noto Serif', serif;
+      }
 
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0,user-scalable=no" />
-  <title>Piano</title>
-  <style>
-    html,
-    body {
-      margin: 0;
-      font-family: "Noto Serif", serif;
-    }
+      body {
+        position: absolute;
+        top: 0px;
+        bottom: 0px;
+        left: 0px;
+        right: 0px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background: #000000;
+      }
 
-    body {
-      position: absolute;
-      top: 0px;
-      bottom: 0px;
-      left: 0px;
-      right: 0px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      background: #000000;
-    }
+      .container {
+        border-bottom: 1px solid #ffffff99;
+        box-shadow: -1px -1px 0.5px 0px #ffffff99 inset;
+        border-radius: 9px;
+        margin: 0;
+        top: 0px;
+        bottom: 0px;
+        left: 0px;
+        right: 0px;
+        width: 100%;
+        height: calc(100% - 1px);
+        position: absolute;
+        display: flex;
+        justify-content: space-between;
+        overflow-x: scroll;
+      }
 
-    .container {
-      border-bottom: 1px solid #ffffff99;
-      box-shadow: -1px -1px 0.5px 0px #ffffff99 inset;
-      border-radius: 9px;
-      margin: 0;
-      top: 0px;
-      bottom: 0px;
-      left: 0px;
-      right: 0px;
-      width: 100%;
-      height: calc(100% - 1px);
-      position: absolute;
-      display: flex;
-      justify-content: space-between;
-      overflow-x: scroll;
-    }
+      #keyboard {
+        border: 5px solid #212121;
+        border-radius: 9px;
+        background: #212121;
+        margin: 0;
+        top: 0px;
+        bottom: 0px;
+        left: 0px;
+        right: 0px;
+        height: calc(100% - 10px);
+        position: absolute;
+        display: flex;
+        justify-content: space-between;
+      }
 
-    #keyboard {
-      border: 5px solid #212121;
-      border-radius: 9px;
-      background: #212121;
-      margin: 0;
-      top: 0px;
-      bottom: 0px;
-      left: 0px;
-      right: 0px;
-      height: calc(100% - 10px);
-      position: absolute;
-      display: flex;
-      justify-content: space-between;
-    }
+      .svg-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 100%;
+        height: 100%;
+      }
 
-    .svg-container {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      width: 100%;
-      height: 100%;
-    }
+      * {
+        overflow: hidden;
+        user-select: none;
+      }
 
-    * {
-      overflow: hidden;
-      user-select: none;
-    }
+      :root {
+        --keyboard: hsl(300, 100%, 16%);
+        --keyboard-shadow: hsla(19, 50%, 66%, 0.2);
+        --keyboard-border: hsl(20, 91%, 5%);
+        --black-10: hsla(0, 0%, 0%, 0.1);
+        --black-20: hsla(0, 0%, 0%, 0.2);
+        --black-30: hsla(0, 0%, 0%, 0.3);
+        --black-50: hsla(0, 0%, 0%, 0.5);
+        --black-60: hsla(0, 0%, 0%, 0.6);
+        --white-20: hsla(0, 0%, 100%, 0.2);
+        --white-50: hsla(0, 0%, 100%, 0.5);
+        --white-80: hsla(0, 0%, 100%, 0.8);
+      }
 
-    :root {
-      --keyboard: hsl(300, 100%, 16%);
-      --keyboard-shadow: hsla(19, 50%, 66%, 0.2);
-      --keyboard-border: hsl(20, 91%, 5%);
-      --black-10: hsla(0, 0%, 0%, 0.1);
-      --black-20: hsla(0, 0%, 0%, 0.2);
-      --black-30: hsla(0, 0%, 0%, 0.3);
-      --black-50: hsla(0, 0%, 0%, 0.5);
-      --black-60: hsla(0, 0%, 0%, 0.6);
-      --white-20: hsla(0, 0%, 100%, 0.2);
-      --white-50: hsla(0, 0%, 100%, 0.5);
-      --white-80: hsla(0, 0%, 100%, 0.8);
-    }
+      .white,
+      .black {
+        position: relative;
+        float: left;
+        display: flex;
+        justify-content: center;
+        align-items: flex-end;
+        user-select: none;
+        cursor: pointer;
+        font-size: 0.6rem;
+      }
 
-    .white,
-    .black {
-      position: relative;
-      float: left;
-      display: flex;
-      justify-content: center;
-      align-items: flex-end;
-      user-select: none;
-      cursor: pointer;
-      font-size: 0.6rem;
-    }
+      .white {
+        height: 100%;
+        width: 100%;
+        background: url('./assets/whiteKey.png');
+        background-size: 100% 100%;
+        background-repeat: no-repeat;
+        background-position: center;
+      }
 
-    .white {
-      height: 100%;
-      width: 100%;
-      background: url("./assets/whiteKey.png");
-      background-size: 100% 100%;
-      background-repeat: no-repeat;
-      background-position: center;
-    }
+      .black {
+        position: absolute;
+        height: 62%;
+        z-index: 2;
+        border-radius: 0 0 3px 3px;
+        background: url('./assets/blackKey.png');
+        background-size: 100% 100%;
+        background-repeat: no-repeat;
+        background-position: center;
+      }
 
-    .black {
-      position: absolute;
-      height: 62%;
-      z-index: 2;
-      border-radius: 0 0 3px 3px;
-      background: url("./assets/blackKey.png");
-      background-size: 100% 100%;
-      background-repeat: no-repeat;
-      background-position: center;
-    }
+      .white.pressed {
+        height: 99%;
+        width: 100%;
+        background: url('./assets/whiteKeyPressed.png');
+        background-size: 100% 100%;
+        background-repeat: no-repeat;
+        background-position: center;
+      }
 
-    .white.pressed {
-      height: 99%;
-      width: 100%;
-      background: url("./assets/whiteKeyPressed.png");
-      background-size: 100% 100%;
-      background-repeat: no-repeat;
-      background-position: center;
-    }
+      .black.pressed {
+        background: url('./assets/blackKeyPressed.png');
+        background-size: 100% 100%;
+        background-repeat: no-repeat;
+        background-position: center;
+        outline: none;
+      }
 
-    .black.pressed {
-      background: url("./assets/blackKeyPressed.png");
-      background-size: 100% 100%;
-      background-repeat: no-repeat;
-      background-position: center;
-      outline: none;
-    }
+      .offset {
+        margin: 0 0 0 -1rem;
+      }
 
-    .offset {
-      margin: 0 0 0 -1rem;
-    }
+      ::-webkit-scrollbar {
+        width: 12px;
+        height: 12px;
+      }
 
-    ::-webkit-scrollbar {
-      width: 12px;
-      height: 12px;
-    }
+      ::-webkit-scrollbar-track {
+        background: #f1f1f100;
+      }
 
-    ::-webkit-scrollbar-track {
-      background: #f1f1f100;
-    }
+      ::-webkit-scrollbar-thumb {
+        background: #888;
+        border-radius: 6px;
+      }
 
-    ::-webkit-scrollbar-thumb {
-      background: #888;
-      border-radius: 6px;
-    }
+      ::-webkit-scrollbar-thumb:hover {
+        background: #555;
+      }
+    </style>
+  </head>
 
-    ::-webkit-scrollbar-thumb:hover {
-      background: #555;
-    }
-  </style>
-</head>
-
-<body>
-  <div class="container">
-    <div id="keyboard">
+  <body>
+    <div class="container">
+      <div id="keyboard"></div>
     </div>
-  </div>
-  <script>
-    const totalKeys = 61;
-    const isMobile = window.innerWidth <= 1000;
-    const keyboardRatio = isMobile ? 0.15 : 0.1;
-    let windowHigh = window.innerHeight;
-    let keyboardWidth = Math.round(windowHigh * keyboardRatio * totalKeys);
-    console.log("keyboardWidth", keyboardWidth);
+    <script>
+      const totalKeys = 61
+      const isMobile = window.innerWidth <= 1000
+      const keyboardRatio = isMobile ? 0.15 : 0.1
+      let windowHigh = window.innerHeight
+      let keyboardWidth = Math.round(windowHigh * keyboardRatio * totalKeys)
+      console.log('keyboardWidth', keyboardWidth)
 
-    document.getElementById("keyboard").style.width = `${keyboardWidth}px`;
+      document.getElementById('keyboard').style.width = `${keyboardWidth}px`
 
-    window.setPiano = function (start, end) {
-      start = 24;
-      end = 84;
+      window.setPiano = function (start, end) {
+        start = 24
+        end = 84
 
-      const existElements = document.querySelectorAll(".key");
-      if (existElements?.length) {
-        existElements.forEach((element) => {
-          element.removeEventListener("touchstart", handleMouseDown);
-          element.removeEventListener("touchend", handleMouseUp);
-          element.removeEventListener("touchcancel", handleMouseUp);
-          element.remove();
-        });
-      }
-      if (start < 21 || end > 108) {
-        alert("please set number between 21 and 108");
-        return;
-      }
-      const piano = document.querySelector("#keyboard");
-      const blackKeyArray = [1, 3, 6, 8, 10];
-      let startNote = start;
-      let endNote = end;
-      if (blackKeyArray.includes(startNote % 12)) {
-        startNote = startNote - 1;
-      }
-      if (blackKeyArray.includes(endNote % 12)) {
-        endNote = endNote + 1;
-      }
-      let whiteCount = 0;
-      for (let i = startNote; i <= endNote; i++) {
-        if (!blackKeyArray.includes(i % 12)) {
-          whiteCount = whiteCount + 1;
+        const existElements = document.querySelectorAll('.key')
+        if (existElements?.length) {
+          existElements.forEach((element) => {
+            element.removeEventListener('touchstart', handleMouseDown)
+            element.removeEventListener('touchend', handleMouseUp)
+            element.removeEventListener('touchcancel', handleMouseUp)
+            element.remove()
+          })
         }
-      }
-      const everyWhiteKeyWidth = 100 / whiteCount;
-
-      console.log(whiteCount);
-
-      let prevWhiteKeyCount = 0;
-      for (let i = startNote; i <= endNote; i++) {
-        midiKey = i;
-
-        const key = document.createElement("div");
-
-        key.classList.add("key");
-
-        if (blackKeyArray.includes(i % 12)) {
-          key.classList.add("black");
-          const keyWidth = everyWhiteKeyWidth * (2 / 3);
-          key.style.width = `${keyWidth}%`;
-          key.style.left = `calc(${prevWhiteKeyCount * everyWhiteKeyWidth - keyWidth / 2
-            }% - 0.5px)`;
-        } else {
-          key.classList.add("white");
-
-          prevWhiteKeyCount = prevWhiteKeyCount + 1;
-
-          const renderMidiKey = midiKey - 20;
-          const whichGroup = parseInt(renderMidiKey / 12);
-          const currentNum = renderMidiKey % 12;
-
-          if (currentNum === 4) {
-            key.innerText = `C${whichGroup + 1}`;
+        if (start < 21 || end > 108) {
+          alert('please set number between 21 and 108')
+          return
+        }
+        const piano = document.querySelector('#keyboard')
+        const blackKeyArray = [1, 3, 6, 8, 10]
+        let startNote = start
+        let endNote = end
+        if (blackKeyArray.includes(startNote % 12)) {
+          startNote = startNote - 1
+        }
+        if (blackKeyArray.includes(endNote % 12)) {
+          endNote = endNote + 1
+        }
+        let whiteCount = 0
+        for (let i = startNote; i <= endNote; i++) {
+          if (!blackKeyArray.includes(i % 12)) {
+            whiteCount = whiteCount + 1
           }
         }
-        key.setAttribute("data-midiKey", midiKey);
-        piano.appendChild(key);
-      }
-      const allWhiteKeys = document.querySelectorAll(".white");
+        const everyWhiteKeyWidth = 100 / whiteCount
 
-      allWhiteKeys.forEach((key) => {
-        var totalWhiteKeys = end - start;
-        console.log("totalWhiteKeys", totalWhiteKeys);
-        if (totalWhiteKeys > 40) {
-          key.style.marginLeft = `.5px`;
-          key.style.marginRight = `.5px`;
-        } else {
-          key.style.marginLeft = `1px`;
-          key.style.marginRight = `1px`;
+        console.log(whiteCount)
+
+        let prevWhiteKeyCount = 0
+        for (let i = startNote; i <= endNote; i++) {
+          midiKey = i
+
+          const key = document.createElement('div')
+
+          key.classList.add('key')
+
+          if (blackKeyArray.includes(i % 12)) {
+            key.classList.add('black')
+            const keyWidth = everyWhiteKeyWidth * (2 / 3)
+            key.style.width = `${keyWidth}%`
+            key.style.left = `calc(${
+              prevWhiteKeyCount * everyWhiteKeyWidth - keyWidth / 2
+            }% - 0.5px)`
+          } else {
+            key.classList.add('white')
+
+            prevWhiteKeyCount = prevWhiteKeyCount + 1
+
+            const renderMidiKey = midiKey - 20
+            const whichGroup = parseInt(renderMidiKey / 12)
+            const currentNum = renderMidiKey % 12
+
+            if (currentNum === 4) {
+              key.innerText = `C${whichGroup + 1}`
+            }
+          }
+          key.setAttribute('data-midiKey', midiKey)
+          piano.appendChild(key)
         }
-      });
+        const allWhiteKeys = document.querySelectorAll('.white')
 
-      const keyElements = document.querySelectorAll(".key");
-      console.log(keyElements.length);
-      keyElements.forEach((element) => {
-        element.addEventListener("touchstart", handleMouseDown);
-        element.addEventListener("touchend", handleMouseUp);
-        element.addEventListener("touchcancel", handleMouseUp);
-        element.addEventListener("mousedown", handleMouseDown);
-        element.addEventListener("mouseup", handleMouseUp);
-      });
+        allWhiteKeys.forEach((key) => {
+          var totalWhiteKeys = end - start
+          console.log('totalWhiteKeys', totalWhiteKeys)
+          if (totalWhiteKeys > 40) {
+            key.style.marginLeft = `.5px`
+            key.style.marginRight = `.5px`
+          } else {
+            key.style.marginLeft = `1px`
+            key.style.marginRight = `1px`
+          }
+        })
 
-      function handleMouseDown(event) {
-        event.preventDefault();
-        event.stopPropagation();
-        const midiKey = event.target.getAttribute("data-midiKey");
-        if (!midiKey) return;
-        const key = document.querySelector(`.key[data-midiKey="${midiKey}"]`);
-        key.classList.add("pressed");
-        console.log("mousedown midiKey: ", midiKey);
-        flutteronNoteOn.postMessage(midiKey);
-      }
-
-      function handleMouseUp(e) {
-        event.preventDefault();
-        event.stopPropagation();
-        const keyElements = document.querySelectorAll(`.key`);
-        const midiKey = event.target.getAttribute("data-midiKey");
-
+        const keyElements = document.querySelectorAll('.key')
+        console.log(keyElements.length)
         keyElements.forEach((element) => {
-          element.classList.remove("pressed");
-        });
+          element.addEventListener('touchstart', handleMouseDown)
+          element.addEventListener('touchend', handleMouseUp)
+          element.addEventListener('touchcancel', handleMouseUp)
+          element.addEventListener('mousedown', handleMouseDown)
+          element.addEventListener('mouseup', handleMouseUp)
+        })
 
-        flutteronNoteOff.postMessage(midiKey);
+        function handleMouseDown(event) {
+          event.preventDefault()
+          event.stopPropagation()
+          const midiKey = event.target.getAttribute('data-midiKey')
+          if (!midiKey) return
+          const key = document.querySelector(`.key[data-midiKey="${midiKey}"]`)
+          key.classList.add('pressed')
+          console.log('mousedown midiKey: ', midiKey)
+          flutteronNoteOn(midiKey)
+        }
+
+        function handleMouseUp(e) {
+          event.preventDefault()
+          event.stopPropagation()
+          const keyElements = document.querySelectorAll(`.key`)
+          const midiKey = event.target.getAttribute('data-midiKey')
+
+          keyElements.forEach((element) => {
+            element.classList.remove('pressed')
+          })
+
+          flutteronNoteOff(midiKey)
+        }
       }
-    };
-    setPiano(24, 84);
-    const key55 = document.querySelector('.key[data-midikey="68"]');
-    console.log(key55);
-    key55.scrollIntoView({
-      behavior: "smooth",
-      block: "center",
-      inline: "center",
-    });
-  </script>
-</body>
-
+      setPiano(24, 84)
+      const key55 = document.querySelector('.key[data-midikey="68"]')
+      console.log(key55)
+      key55.scrollIntoView({
+        behavior: 'smooth',
+        block: 'center',
+        inline: 'center',
+      })
+    </script>
+  </body>
 </html>
