@@ -83,7 +83,7 @@ RxBool isdownloading = false.obs;
 bool isFirstOpen = true;
 bool isOnlyCPU = false;
 
-String appVersionNumber = '_1.6.2_20250311_RWKV7';
+String appVersionNumber = '_1.6.2_20250325';
 String appVersion = 'ncnn' + appVersionNumber;
 
 class _HomePageState extends State<HomePage> {
@@ -144,6 +144,13 @@ class _HomePageState extends State<HomePage> {
       }
     } else if (Platform.isIOS) {
       appVersion = 'webgpu' + appVersionNumber;
+    } else if (Platform.isLinux) {
+      if (ConfigStore.to.isOnlyCPU) {
+        // appVersion = 'ncnn' + appVersionNumber;
+        // currentModelType = ModelType.ncnn;
+        appVersion = 'rwkv.cpp' + appVersionNumber;
+        currentModelType = ModelType.rwkvcpp;
+      }
     }
     debugPrint('appVersion==$appVersion,currentModelType==$currentModelType');
     callBack();
@@ -152,7 +159,7 @@ class _HomePageState extends State<HomePage> {
   // Platform messages are asynchronous, so we initialize in an async method.
   Future<void> initLinuxKeyboardController() async {
     await WebviewManager().initialize();
-    String url = "http://localhost:8081/doctor.html";
+    String url = "http://localhost:28081/doctor.html";
     // _textController.text = url;
     //unified interface for all platforms set user agent
     linuxKeyboardController.setWebviewListener(WebviewEventsListener(
@@ -1455,7 +1462,7 @@ class _HomePageState extends State<HomePage> {
                                             //     .loadFlutterAssetServer(
                                             //         filePathKeyboardAnimation);
                                             linuxKeyboardController.loadUrl(
-                                                'http://localhost:8081/doctor.html');
+                                                'http://localhost:28081/doctor.html');
                                           }
                                         } else {
                                           // isolateSendPort.send('stop Generating');
@@ -1557,7 +1564,7 @@ class _HomePageState extends State<HomePage> {
       debugPrint('finalabcStringPreset=$finalabcStringPreset');
       linuxPianoController.executeJavaScript("setPromptNoteNumberCount(3)");
       // controllerKeyboard.loadFlutterAssetServer(filePathKeyboardAnimation);
-      linuxKeyboardController.loadUrl('http://localhost:8081/doctor.html');
+      linuxKeyboardController.loadUrl('http://localhost:28081/doctor.html');
       // linuxKeyboardController.executeJavaScript('resetPlay()');
       // linuxKeyboardController.executeJavaScript('setPiano(55, 76)');
     } else {

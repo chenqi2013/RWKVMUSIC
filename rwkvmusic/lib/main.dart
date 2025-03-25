@@ -93,9 +93,9 @@ Future<void> startWebServer1() async {
     serveFilesOutsidePath: false,
   );
 
-  HttpServer server = await shelf_io.serve(handler, 'localhost', 8081);
+  HttpServer server = await shelf_io.serve(handler, 'localhost', 28081);
   debugPrint('server==$server');
-  print('✅ Web server started at http://localhost:8081');
+  print('✅ Web server started at http://localhost:28081');
 }
 
 Future<void> startWebServer2() async {
@@ -206,7 +206,7 @@ ModelType currentModelType = ModelType.rwkvcpp;
 
 /// 打包时候需要修改这个开关
 bool isExe = false; //msix或者exe格式安装包
-bool isOnlyLoadFastModel = true; //提前模型初始化，加快生成速度
+bool isOnlyLoadFastModel = false; //提前模型初始化，加快生成速度
 String currentGeneratePrompt = '';
 RxString currentGeneratePromptTmp = ''.obs;
 var isVisibleWebview = true.obs;
@@ -246,7 +246,7 @@ void fetchABCDataByIsolate() async {
         'RWKV-6-ABC-85M-v1-20240217-ctx1024-ncnn.config');
     paramPath = await CommonUtils.copyFileFromAssets(
         'RWKV-6-ABC-85M-v1-20240217-ctx1024-ncnn.param');
-  } else if (Platform.isAndroid) {
+  } else if (Platform.isAndroid || Platform.isLinux) {
     String cachePath = await CommonUtils.getCachePath();
     String soPath = '$cachePath/libfaster_rwkvd.so';
     bool isFileExists = File(soPath).existsSync();
@@ -268,9 +268,9 @@ void fetchABCDataByIsolate() async {
       //     'RWKV-6-ABC-85M-v1-20240217-ctx1024-ncnn.param');
     } else if (currentModelType == ModelType.rwkvcpp) {
       binPath.value =
-          await CommonUtils.copyFileFromAssets('rwkv-7-abc-rwkvcpp.bin');
+          await CommonUtils.copyFileFromAssets('RWKV-6-ABC-85M-v1-20240217-ctx1024-rwkvcpp.bin');
       configPath =
-          await CommonUtils.copyFileFromAssets('rwkv-7-abc-rwkvcpp.config');
+          await CommonUtils.copyFileFromAssets('RWKV-6-ABC-85M-v1-20240217-ctx1024-rwkvcpp.config');
     } else if (currentModelType == ModelType.qnn) {
       if (!isFileExists) {
         String sopath = await CommonUtils.copyFileFromAssets(
@@ -476,7 +476,7 @@ void getABCDataByLocalModel(var array) async {
       .toNativeUtf8()
       .cast<Char>(); // webgpu auto  (通用pc上和ios上可以webgpu auto)
   // Pointer<Char> strategy = 'rwkv.cpp auto'.toNativeUtf8().cast<Char>();
-  if (Platform.isAndroid) {
+  if (Platform.isAndroid || Platform.isLinux) {
     // strategy = 'ncnn fp32'.toNativeUtf8().cast<Char>();
     strategy = 'rwkv.cpp fp32'.toNativeUtf8().cast<Char>();
   }
