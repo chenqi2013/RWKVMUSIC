@@ -37,6 +37,7 @@ import 'package:rwkvmusic/state.dart';
 import 'package:rwkvmusic/store/config.dart';
 import 'package:rwkvmusic/style/color.dart';
 import 'package:rwkvmusic/style/style.dart';
+import 'package:rwkvmusic/to_linux_message.dart';
 import 'package:rwkvmusic/transpose.dart';
 import 'package:rwkvmusic/utils/abchead.dart';
 import 'package:rwkvmusic/utils/audioplayer.dart';
@@ -184,7 +185,9 @@ class _HomePageState extends State<HomePage> {
                 print(message.message);
               }),
           JavascriptChannel(
-              name: 'flutteronNoteOn', onMessageReceived: _flutteronNoteOn),
+            name: 'flutteronNoteOn',
+            onMessageReceived: _flutteronNoteOn,
+          ),
         };
         //normal JavaScriptChannels
         linuxKeyboardController.setJavaScriptChannels(jsChannels);
@@ -208,8 +211,7 @@ class _HomePageState extends State<HomePage> {
       debugPrint('isShowDialog return');
       return;
     }
-    String m = message.message;
-    m = m.substring(1, m.length - 1);
+    String m = message.message.toLinux;
     final i = int.parse(m);
     String name = MidiToABCConverter().getNoteMp3Path(i);
     playNoteMp3(name);
@@ -255,7 +257,7 @@ class _HomePageState extends State<HomePage> {
           JavascriptChannel(
               name: 'flutteronStartPlay',
               onMessageReceived: (JavascriptMessage jsMessage) {
-                String message = jsMessage.message;
+                String message = jsMessage.message.toLinux;
                 debugPrint(
                     'playOrPausePiano flutteronStartPlay onMessageReceived=$message');
                 pianoAllTime.value = double.parse(message.split(',')[1]);
@@ -288,24 +290,24 @@ class _HomePageState extends State<HomePage> {
               name: 'flutteronCountPromptNoteNumber',
               onMessageReceived: (JavascriptMessage jsMessage) {
                 debugPrint(
-                    'flutteronCountPromptNoteNumber onMessageReceived=${jsMessage.message}');
+                    'flutteronCountPromptNoteNumber onMessageReceived=${jsMessage.message.toLinux}');
               }),
           JavascriptChannel(
               name: 'flutteronMidiExport',
               onMessageReceived: (JavascriptMessage jsMessage) {
-                exportMidiStr = jsMessage.message;
+                exportMidiStr = jsMessage.message.toLinux;
                 // debugPrint('flutteronMidiExport onMessageReceived=$exportMidiStr');
               }),
           JavascriptChannel(
               name: 'flutteronEvents',
               onMessageReceived: (JavascriptMessage jsMessage) {
                 // debugPrint('flutteronEvents onMessageReceived=${jsMessage.message}');
-                midiNotes = jsonDecode(jsMessage.message);
+                midiNotes = jsonDecode(jsMessage.message.toLinux);
                 // if (!isNeedConvertMidiNotes) {
                 //   // String jsstr =
                 //   //     r'startPlay("[[0,\"on\",49],[333,\"on\",46],[333,\"off\",49],[1000,\"off\",46]]")';
                 String jsstr = r'startPlay("' +
-                    jsMessage.message.replaceAll('"', r'\"') +
+                    jsMessage.message.toLinux.replaceAll('"', r'\"') +
                     r'")';
                 linuxKeyboardController.executeJavaScript(jsstr);
                 // linuxPianoController.executeJavaScript("startPlay()");
@@ -1064,13 +1066,13 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
         resizeToAvoidBottomInset: false,
         floatingActionButton: kDebugMode
-            ? FloatingActionButton(
-                onPressed: () {
-                  // print(linuxKeyboardController.javascriptChannels);
-                  linuxKeyboardController.executeJavaScript("window.alert('???')");
-                  linuxKeyboardController.openDevTools();
-                  // print(Directory.systemTemp);
-                })
+            ? FloatingActionButton(onPressed: () {
+                // print(linuxKeyboardController.javascriptChannels);
+                linuxKeyboardController
+                    .executeJavaScript("window.alert('???')");
+                linuxKeyboardController.openDevTools();
+                // print(Directory.systemTemp);
+              })
             : null,
         body: GestureDetector(
           onTap: () {

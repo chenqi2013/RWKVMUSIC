@@ -60,6 +60,23 @@ void main(List<String> args) async {
   await Get.putAsync<StorageService>(() => StorageService().init());
   Get.put<ConfigStore>(ConfigStore());
   GlobalState.init();
+
+  // TODO: @WangCe Enable it for release mode
+  if (kDebugMode) {
+    _initApp();
+    return;
+  }
+  await Sentry.init(
+    (options) {
+      options.dsn =
+          'https://e7b4e1cfa474037accf726c5893d86f8@o4507886670708736.ingest.us.sentry.io/4507886687944704';
+      options.tracesSampleRate = 1.0;
+    },
+    appRunner: _initApp,
+  );
+}
+
+void _initApp() {
   runApp(ScreenUtilInit(
     designSize: Platform.isWindows
         ? const Size(2880, 1600)
@@ -73,17 +90,6 @@ void main(List<String> args) async {
       translations: TranslationService(), // 注册翻译类
     ),
   ));
-  // TODO: @WangCe Enable it for release mode
-  // await Sentry.init(
-  //   (options) {
-  //     options.dsn =
-  //         'https://e7b4e1cfa474037accf726c5893d86f8@o4507886670708736.ingest.us.sentry.io/4507886687944704';
-
-  //     options.tracesSampleRate = 1.0;
-  //   },
-  //   appRunner: () => ,
-  //   ),
-  // );
 }
 
 Future<void> startWebServer1() async {
@@ -268,10 +274,10 @@ void fetchABCDataByIsolate() async {
       // paramPath = await CommonUtils.copyFileFromAssets(
       //     'RWKV-6-ABC-85M-v1-20240217-ctx1024-ncnn.param');
     } else if (currentModelType == ModelType.rwkvcpp) {
-      binPath.value =
-          await CommonUtils.copyFileFromAssets('RWKV-6-ABC-85M-v1-20240217-ctx1024-rwkvcpp.bin');
-      configPath =
-          await CommonUtils.copyFileFromAssets('RWKV-6-ABC-85M-v1-20240217-ctx1024-rwkvcpp.config');
+      binPath.value = await CommonUtils.copyFileFromAssets(
+          'RWKV-6-ABC-85M-v1-20240217-ctx1024-rwkvcpp.bin');
+      configPath = await CommonUtils.copyFileFromAssets(
+          'RWKV-6-ABC-85M-v1-20240217-ctx1024-rwkvcpp.config');
     } else if (currentModelType == ModelType.qnn) {
       if (!isFileExists) {
         String sopath = await CommonUtils.copyFileFromAssets(
