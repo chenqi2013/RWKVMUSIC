@@ -85,7 +85,7 @@ bool isFirstOpen = true;
 bool isOnlyCPU = false;
 
 String appVersionNumber = '_1.6.2_20250325';
-String appVersion = 'ncnn' + appVersionNumber;
+String appVersion = 'rwkv.cpp' + appVersionNumber;
 
 class _HomePageState extends State<HomePage> {
   /// 键盘 webview 控制器
