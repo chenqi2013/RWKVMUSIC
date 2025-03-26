@@ -172,6 +172,12 @@ class _HomePageState extends State<HomePage> {
       onUrlChanged: (url) {
         debugPrint('onUrlChanged==$url');
         // _textController.text = url;
+        print("onUrlChanged => $url");
+      },
+      onLoadStart: (controller, url) {
+        print("onLoadStart => $url");
+      },
+      onLoadEnd: (controller, url) {
         print("onLoadEnd => $url");
         linuxKeyboardController.executeJavaScript('resetPlay()');
         linuxKeyboardController.executeJavaScript('setPiano(55, 76)');
@@ -191,12 +197,6 @@ class _HomePageState extends State<HomePage> {
         };
         //normal JavaScriptChannels
         linuxKeyboardController.setJavaScriptChannels(jsChannels);
-      },
-      onLoadStart: (controller, url) {
-        print("onLoadStart => $url");
-      },
-      onLoadEnd: (controller, url) {
-        print("onLoadEnd => $url");
       },
     ));
 
@@ -302,13 +302,18 @@ class _HomePageState extends State<HomePage> {
               name: 'flutteronEvents',
               onMessageReceived: (JavascriptMessage jsMessage) {
                 // debugPrint('flutteronEvents onMessageReceived=${jsMessage.message}');
-                midiNotes = jsonDecode(jsMessage.message.toLinux);
+                // String str =
+                //     '[[0,"on",69],[333,"on",66],[333,"off",69],[666,"off",66],[667,"on",66],[1000,"off",66]]';
+                String str = jsMessage.message.toLinux.replaceAll('\\"', r'"');
+                debugPrint('11midinotes==$str');
+                midiNotes = jsonDecode(str);
+                debugPrint('22midinotes==$midiNotes');
                 // if (!isNeedConvertMidiNotes) {
                 //   // String jsstr =
                 //   //     r'startPlay("[[0,\"on\",49],[333,\"on\",46],[333,\"off\",49],[1000,\"off\",46]]")';
-                String jsstr = r'startPlay("' +
-                    jsMessage.message.toLinux.replaceAll('"', r'\"') +
-                    r'")';
+                String jsstr =
+                    r'startPlay("' + str.replaceAll('"', r'\"') + r'")';
+                debugPrint('33midinotes==$jsstr');
                 linuxKeyboardController.executeJavaScript(jsstr);
                 // linuxPianoController.executeJavaScript("startPlay()");
                 // debugPrint('isFinishABCEvent == true,,,controllerPiano startPlay()');
@@ -1009,7 +1014,7 @@ class _HomePageState extends State<HomePage> {
         //&& !isNeedRestart && !isNeedConvertMidiNotes
         debugPrint(
             'playOrPausePiano isFinishABCEvent yes  resumePlay() keyboard');
-        linuxPianoController.executeJavaScript('resumePlay()');
+        linuxKeyboardController.executeJavaScript('resumePlay()');
       } else {
         String base64abctoEvents = ABCHead.base64abctoEvents(
             ABCHead.appendTempoParam(playAbcString, tempo.value.toInt()));
@@ -1018,7 +1023,7 @@ class _HomePageState extends State<HomePage> {
         linuxPianoController.executeJavaScript("startPlay()");
       }
     } else {
-      linuxPianoController.executeJavaScript('pausePlay()');
+      linuxKeyboardController.executeJavaScript('pausePlay()');
       debugPrint('playOrPausePiano controllerKeyboard pausePlay()');
       // timer.cancel();
     }

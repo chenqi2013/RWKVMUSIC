@@ -7,7 +7,7 @@ import 'dart:io';
 
 extension ToLinuxMessage on String {
   String get toLinux {
-    if (!Platform.isLinux) return this;
+    // if (!Platform.isLinux) return this;
     if (startsWith("\"") && endsWith("\"")) return substring(1, length - 1);
     return this;
   }
