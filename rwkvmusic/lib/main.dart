@@ -61,7 +61,6 @@ void main(List<String> args) async {
   Get.put<ConfigStore>(ConfigStore());
   GlobalState.init();
 
-  // TODO: @WangCe Enable it for release mode
   if (kDebugMode) {
     _initApp();
     return;
