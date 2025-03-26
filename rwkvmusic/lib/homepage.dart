@@ -1009,7 +1009,7 @@ class _HomePageState extends State<HomePage> {
         //&& !isNeedRestart && !isNeedConvertMidiNotes
         debugPrint(
             'playOrPausePiano isFinishABCEvent yes  resumePlay() keyboard');
-        linuxKeyboardController.executeJavaScript('resumePlay()');
+        linuxPianoController.executeJavaScript('resumePlay()');
       } else {
         String base64abctoEvents = ABCHead.base64abctoEvents(
             ABCHead.appendTempoParam(playAbcString, tempo.value.toInt()));
@@ -1018,7 +1018,7 @@ class _HomePageState extends State<HomePage> {
         linuxPianoController.executeJavaScript("startPlay()");
       }
     } else {
-      linuxKeyboardController.executeJavaScript('pausePlay()');
+      linuxPianoController.executeJavaScript('pausePlay()');
       debugPrint('playOrPausePiano controllerKeyboard pausePlay()');
       // timer.cancel();
     }
