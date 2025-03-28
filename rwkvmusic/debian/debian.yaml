@@ -1,0 +1,14 @@
+flutter_app:
+  command: rwkvmusic
+  arch: arm64
+  parent: /usr/local/lib
+  nonInteractive: false
+
+control:
+  Package: RWKVMusic
+  Version: 1.0.0
+  Architecture: arm64
+  Priority: optional
+  Depends:
+  Maintainer: RWKV
+  Description: RWKV AI Music Composer
