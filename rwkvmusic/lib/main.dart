@@ -109,11 +109,7 @@ Future<void> startWebServer1() async {
     serveFilesOutsidePath: false,
   );
 
-  HttpServer server = await shelf_io.serve((req) async {
-    final res = await handler(req);
-    final r = await _resparse(req, res);
-    return r.$2;
-  }, 'localhost', 28081);
+  HttpServer server = await shelf_io.serve(handler, 'localhost', 28081);
   debugPrint('server==$server');
   print('✅ Web server started at http://localhost:28081');
 }
@@ -126,11 +122,7 @@ Future<void> startWebServer2() async {
     serveFilesOutsidePath: false,
   );
 
-  HttpServer server = await shelf_io.serve((req) async {
-    final res = await handler(req);
-    final r = await _resparse(req, res);
-    return r.$2;
-  }, 'localhost', 8123);
+  HttpServer server = await shelf_io.serve(handler, 'localhost', 8123);
   debugPrint('server==$server');
   print('✅ Web server started at http://localhost:8123');
 }
@@ -143,34 +135,81 @@ Future<void> startWebServer3() async {
     serveFilesOutsidePath: false,
   );
 
-  HttpServer server = await shelf_io.serve((req) async {
-    Response res = await handler(req);
-    final statusCodeString = res.statusCode.toString();
-    final isError =
-        statusCodeString.startsWith("4") || statusCodeString.startsWith("5");
-    if (isError && Platform.isLinux) {
-      if (req.requestedUri.path.contains("assets/player")) {
-        // I found that the router on linux is wrong
-        req = Request(
-          req.method,
-          Uri.parse(
-              req.requestedUri.toString().replaceAll("assets/player/", "")),
-          protocolVersion: req.protocolVersion,
-          headers: req.headers,
-          handlerPath: req.handlerPath,
-          url: Uri.parse(req.url.toString().replaceAll("assets/player/", "")),
-          body: null,
-          encoding: req.encoding,
-          context: req.context,
-        );
-        res = await handler(req);
-      }
-    }
-    return res;
-  }, 'localhost', 8083);
+  HttpServer server = await shelf_io.serve(handler, 'localhost', 8083);
   debugPrint('server==$server');
   print('✅ Web server started at http://localhost:8083');
 }
+
+// Future<void> startWebServer1() async {
+//   final rootDir = Directory('assets/doctor');
+//   final handler = createStaticHandler(
+//     rootDir.path,
+//     defaultDocument: 'doctor.html',
+//     serveFilesOutsidePath: false,
+//   );
+
+//   HttpServer server = await shelf_io.serve((req) async {
+//     final res = await handler(req);
+//     final r = await _resparse(req, res);
+//     return r.$2;
+//   }, 'localhost', 28081);
+//   debugPrint('server==$server');
+//   print('✅ Web server started at http://localhost:28081');
+// }
+
+// Future<void> startWebServer2() async {
+//   final rootDir = Directory('assets/piano');
+//   final handler = createStaticHandler(
+//     rootDir.path,
+//     defaultDocument: 'keyboard.html',
+//     serveFilesOutsidePath: false,
+//   );
+
+//   HttpServer server = await shelf_io.serve((req) async {
+//     final res = await handler(req);
+//     final r = await _resparse(req, res);
+//     return r.$2;
+//   }, 'localhost', 8123);
+//   debugPrint('server==$server');
+//   print('✅ Web server started at http://localhost:8123');
+// }
+
+// Future<void> startWebServer3() async {
+//   final rootDir = Directory('assets/player');
+//   final handler = createStaticHandler(
+//     rootDir.path,
+//     defaultDocument: 'player.html',
+//     serveFilesOutsidePath: false,
+//   );
+
+//   HttpServer server = await shelf_io.serve((req) async {
+//     Response res = await handler(req);
+//     final statusCodeString = res.statusCode.toString();
+//     final isError =
+//         statusCodeString.startsWith("4") || statusCodeString.startsWith("5");
+//     if (isError && Platform.isLinux) {
+//       if (req.requestedUri.path.contains("assets/player")) {
+//         // I found that the router on linux is wrong
+//         req = Request(
+//           req.method,
+//           Uri.parse(
+//               req.requestedUri.toString().replaceAll("assets/player/", "")),
+//           protocolVersion: req.protocolVersion,
+//           headers: req.headers,
+//           handlerPath: req.handlerPath,
+//           url: Uri.parse(req.url.toString().replaceAll("assets/player/", "")),
+//           body: null,
+//           encoding: req.encoding,
+//           context: req.context,
+//         );
+//         res = await handler(req);
+//       }
+//     }
+//     return res;
+//   }, 'localhost', 8083);
+//   debugPrint('server==$server');
+//   print('✅ Web server started at http://localhost:8083');
+// }
 
 // http://localhost:8083/soundfont/acoustic_grand_piano-mp3/Gb4.mp3
 // http://localhost:8083/assets/player/soundfont/acoustic_grand_piano-mp3/Gb4.mp3
