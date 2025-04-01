@@ -43,9 +43,6 @@ import 'package:path/path.dart' as p;
 
 void main(List<String> args) async {
   WidgetsFlutterBinding.ensureInitialized();
-  await startWebServer1();
-  await startWebServer2();
-  await startWebServer3();
 
   if (Platform.isWindows || Platform.isMacOS) {
     WindowsWebViewPlatform.registerWith();
@@ -101,43 +98,66 @@ Future<(Request req, Response res)> _resparse(Request req, Response res) async {
   return (req, res);
 }
 
-Future<void> startWebServer1() async {
-  final rootDir = Directory('assets/doctor');
-  final handler = createStaticHandler(
-    rootDir.path,
-    defaultDocument: 'doctor.html',
-    serveFilesOutsidePath: false,
-  );
+// Future<void> startWebServer1() async {
+//   final rootDir = Directory('assets/doctor');
+//   final handler = createStaticHandler(
+//     rootDir.path,
+//     defaultDocument: 'doctor.html',
+//     serveFilesOutsidePath: false,
+//   );
 
-  HttpServer server = await shelf_io.serve(handler, 'localhost', 28081);
-  debugPrint('server==$server');
-  print('✅ Web server started at http://localhost:28081');
-}
+//   HttpServer server = await shelf_io.serve(handler, 'localhost', 28081);
+//   debugPrint('server==$server');
+//   print('✅ Web server started at http://localhost:28081');
+// }
 
-Future<void> startWebServer2() async {
-  final rootDir = Directory('assets/piano');
-  final handler = createStaticHandler(
-    rootDir.path,
-    defaultDocument: 'keyboard.html',
-    serveFilesOutsidePath: false,
-  );
+// Future<void> startWebServer2() async {
+//   final rootDir = Directory('assets/piano');
+//   final handler = createStaticHandler(
+//     rootDir.path,
+//     defaultDocument: 'keyboard.html',
+//     serveFilesOutsidePath: false,
+//   );
 
-  HttpServer server = await shelf_io.serve(handler, 'localhost', 8123);
-  debugPrint('server==$server');
-  print('✅ Web server started at http://localhost:8123');
-}
+//   HttpServer server = await shelf_io.serve(handler, 'localhost', 8123);
+//   debugPrint('server==$server');
+//   print('✅ Web server started at http://localhost:8123');
+// }
 
-Future<void> startWebServer3() async {
-  final rootDir = Directory('assets/player');
-  final handler = createStaticHandler(
-    rootDir.path,
-    defaultDocument: 'player.html',
-    serveFilesOutsidePath: false,
-  );
+// Future<void> startWebServer3() async {
+//   final rootDir = Directory('assets/player');
+//   final handler = createStaticHandler(
+//     rootDir.path,
+//     defaultDocument: 'player.html',
+//     serveFilesOutsidePath: false,
+//   );
 
-  HttpServer server = await shelf_io.serve(handler, 'localhost', 8083);
-  debugPrint('server==$server');
-  print('✅ Web server started at http://localhost:8083');
+//   HttpServer server = await shelf_io.serve(handler, 'localhost', 8083);
+//   debugPrint('server==$server');
+//   print('✅ Web server started at http://localhost:8083');
+// }
+
+Future<void> startWebServer() async {
+  final handler = Cascade()
+      .add(createStaticHandler(
+        'assets/doctor',
+        defaultDocument: 'doctor.html',
+        serveFilesOutsidePath: false,
+      ))
+      .add(createStaticHandler(
+        'assets/piano',
+        defaultDocument: 'keyboard.html',
+        serveFilesOutsidePath: false,
+      ))
+      .add(createStaticHandler(
+        'assets/player',
+        defaultDocument: 'player.html',
+        serveFilesOutsidePath: false,
+      ))
+      .handler;
+
+  HttpServer server = await shelf_io.serve(handler, 'localhost', 8080);
+  print('✅ Web server started at http://localhost:8080');
 }
 
 // Future<void> startWebServer1() async {

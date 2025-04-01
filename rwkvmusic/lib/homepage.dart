@@ -161,14 +161,12 @@ class _HomePageState extends State<HomePage> {
   Future<void> initLinuxKeyboardController() async {
     await WebviewManager().initialize();
     String url = "http://localhost:28081/doctor.html";
+    debugPrint('33chenqi-----http://localhost:28081/doctor.html');
+
     // _textController.text = url;
     //unified interface for all platforms set user agent
     linuxKeyboardController.setWebviewListener(WebviewEventsListener(
-      onTitleChanged: (t) {
-        setState(() {
-          // title = t;
-        });
-      },
+      onTitleChanged: (t) {},
       onUrlChanged: (url) {
         debugPrint('onUrlChanged==$url');
         // _textController.text = url;
@@ -221,6 +219,7 @@ class _HomePageState extends State<HomePage> {
   Future<void> initLinuxPianoController() async {
     // await WebviewManager().initialize(userAgent: "test/userAgent");
     String url = "http://localhost:8083/player.html";
+    debugPrint('44chenqi-----http://localhost:8083/player.html');
     // _textController.text = url;
     //unified interface for all platforms set user agent
     linuxPianoController.setWebviewListener(WebviewEventsListener(
@@ -373,6 +372,10 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
+    startWebServer();
+    // startWebServer1();
+    // startWebServer2();
+    // startWebServer3();
     // var injectUserScripts = InjectUserScripts();
     // injectUserScripts.add(UserScript("console.log('injectScript_in_LoadStart')",
     //     ScriptInjectTime.LOAD_START));
@@ -1473,6 +1476,8 @@ class _HomePageState extends State<HomePage> {
                                             //         filePathKeyboardAnimation);
                                             linuxKeyboardController.loadUrl(
                                                 'http://localhost:28081/doctor.html');
+                                            debugPrint(
+                                                '55chenqi-----http://localhost:28081/doctor.html');
                                           }
                                         } else {
                                           // isolateSendPort.send('stop Generating');
@@ -1575,6 +1580,7 @@ class _HomePageState extends State<HomePage> {
       linuxPianoController.executeJavaScript("setPromptNoteNumberCount(3)");
       // controllerKeyboard.loadFlutterAssetServer(filePathKeyboardAnimation);
       linuxKeyboardController.loadUrl('http://localhost:28081/doctor.html');
+      debugPrint('11chenqi-----http://localhost:28081/doctor.html');
       // linuxKeyboardController.executeJavaScript('resetPlay()');
       // linuxKeyboardController.executeJavaScript('setPiano(55, 76)');
     } else {
@@ -1600,6 +1606,8 @@ class _HomePageState extends State<HomePage> {
     linuxPianoController.executeJavaScript("setStyle()");
     // controllerKeyboard.loadFlutterAssetServer(filePathKeyboard);
     linuxKeyboardController.loadUrl('http://localhost:8123/keyboard.html');
+    debugPrint('22chenqi-----http://localhost:8123/keyboard.html');
+
     // linuxKeyboardController.loadUrl('http://www.baidu.com');
 
     // linuxKeyboardController.executeJavaScript('resetPlay()');
