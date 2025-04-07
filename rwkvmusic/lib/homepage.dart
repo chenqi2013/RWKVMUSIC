@@ -852,7 +852,8 @@ class _HomePageState extends State<HomePage> {
   void _randomizeAbc() async {
     if (virtualNotes.isEmpty) {
       // || intNodes.isEmpty
-      Fluttertoast.showToast(msg: "Please play some notes before randomizing.");
+      Fluttertoast.showToast(
+          msg: "Please play some notes before randomizing.".tr);
       return;
     }
     // createPrompt = "L:1/4\nM:3/8\nK:C\n e a c' e' d' c' b c' a ^g";
