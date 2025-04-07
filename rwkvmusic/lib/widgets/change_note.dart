@@ -401,7 +401,7 @@ class _KeyWrapper extends StatelessWidget {
       ));
       child = Center(
           child: T(
-        "Random\nGroove",
+        "Random\nGroove".tr,
         textAlign: TextAlign.center,
         s: TS(
             w: FW.w900,
@@ -433,7 +433,7 @@ class _KeyWrapper extends StatelessWidget {
       ));
       child = Center(
           child: T(
-        "Delete",
+        "Delete".tr,
         s: TS(
             w: FW.w900,
             s: 14 * _kButtonHeight / 48.0,

@@ -138,8 +138,8 @@ class ChordEditing extends StatelessWidget {
               c: CAA.stretch,
               children: [
                 12.h,
-                const T(
-                  "Chord Editing",
+                T(
+                  "Chord Editing".tr,
                   textAlign: TextAlign.center,
                   s: TS(c: kW, s: 16, w: FW.w700),
                 ),

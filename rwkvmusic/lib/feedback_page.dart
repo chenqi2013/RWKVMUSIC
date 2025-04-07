@@ -71,7 +71,7 @@ class _FeedbackPageState extends State<FeedbackPage> {
                       Get.back();
                     },
                   ),
-                  TextItem(text: 'FeedBack').marginOnly(left: 26.w)
+                  TextItem(text: 'FeedBack'.tr).marginOnly(left: 26.w)
                 ],
               ).marginOnly(left: 20.w, top: 20.h),
               SizedBox(
@@ -91,7 +91,7 @@ class _FeedbackPageState extends State<FeedbackPage> {
                   expands: true,
                   style: TextStyle(fontSize: 40.sp, color: Colors.white),
                   decoration: InputDecoration(
-                    hintText: "Please input your opinions or suggestions",
+                    hintText: "Please input your opinions or suggestions".tr,
                     hintStyle: TextStyle(fontSize: 40.sp, color: Colors.grey),
                     contentPadding: EdgeInsets.symmetric(
                         horizontal: 20.0, vertical: 20.h), // 设置上下左右间距
@@ -110,28 +110,33 @@ class _FeedbackPageState extends State<FeedbackPage> {
                   height: isWindowsOrMac ? 113.h : 80.h,
                   onPressed: () async {
                     debugPrint('提交反馈');
+                    FocusScope.of(context).unfocus();
                     if (_controller.text.isEmpty) {
                       if (Platform.isWindows) {
-                        Get.snackbar('tips',
-                            'Please input your opinions or suggestions.',
-                            colorText: Colors.black);
-                      } else {
-                        Fluttertoast.showToast(
-                            msg: "Please input your opinions or suggestions.");
-                      }
-                    } else {
-                      if (Platform.isWindows) {
-                        Get.snackbar('tips',
-                            'Thank you, we have received your suggestions and feedback.',
+                        Get.snackbar('tips'.tr,
+                            'Please input your opinions or suggestions'.tr,
                             colorText: Colors.black);
                       } else {
                         Fluttertoast.showToast(
                             msg:
-                                "Thank you, we have received your suggestions and feedback.");
+                                "Please input your opinions or suggestions".tr);
+                      }
+                    } else {
+                      if (Platform.isWindows) {
+                        Get.snackbar(
+                            'tips'.tr,
+                            'Thank you, we have received your suggestions and feedback.'
+                                .tr,
+                            colorText: Colors.black);
+                      } else {
+                        Fluttertoast.showToast(
+                            msg:
+                                "Thank you, we have received your suggestions and feedback."
+                                    .tr);
                       }
                     }
                   },
-                  text: 'Submit',
+                  text: 'Submit'.tr,
                 ),
               ).marginOnly(top: 60.h),
             ],

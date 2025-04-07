@@ -39,7 +39,7 @@ void showAgreementDialog(BuildContext context, Function() callBack) {
             child: Column(
               children: [
                 TextItem(
-                  text: 'User Agreement',
+                  text: 'User Agreement'.tr,
                   fontSize: 48.sp,
                   fontWeight: FontWeight.bold,
                 ),
@@ -50,9 +50,9 @@ void showAgreementDialog(BuildContext context, Function() callBack) {
                         fontSize: 39.sp,
                         fontWeight: FontWeight.w400),
                     children: [
-                      TextSpan(text: "Please read and agree to our "),
+                      TextSpan(text: "Please read and agree to our ".tr),
                       TextSpan(
-                        text: "user agreement",
+                        text: "user agreement".tr,
                         style: TextStyle(
                             color: AppColor.color_A1D632,
                             decoration: TextDecoration.underline),
@@ -63,9 +63,9 @@ void showAgreementDialog(BuildContext context, Function() callBack) {
                             _openUserAgreement();
                           },
                       ),
-                      TextSpan(text: " and "),
+                      TextSpan(text: " and ".tr),
                       TextSpan(
-                        text: "privacy policy",
+                        text: "privacy policy".tr,
                         style: TextStyle(
                             color: AppColor.color_A1D632,
                             decoration: TextDecoration.underline),
@@ -75,7 +75,7 @@ void showAgreementDialog(BuildContext context, Function() callBack) {
                             _openPrivacyPolicy();
                           },
                       ),
-                      TextSpan(text: " to continue using this application."),
+                      TextSpan(text: " to continue using this application.".tr),
                     ],
                   ),
                 ).marginOnly(top: 24.h),
@@ -90,7 +90,7 @@ void showAgreementDialog(BuildContext context, Function() callBack) {
                           // 点击不同意，退出应用
                           _exitApp(context);
                         },
-                        text: 'Disagree',
+                        text: 'Disagree'.tr,
                         linearColorStart: AppColor.color_805353,
                         linearColorEnd: AppColor.color_5E1E1E,
                       ),
@@ -107,7 +107,7 @@ void showAgreementDialog(BuildContext context, Function() callBack) {
                           Navigator.of(context).pop();
                           callBack();
                         },
-                        text: 'Agree',
+                        text: 'Agree'.tr,
                       ),
                     ],
                   ),

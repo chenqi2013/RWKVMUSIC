@@ -1040,7 +1040,7 @@ class _HomePageState extends State<HomePage> {
                                       ),
                                       onPressed: () {
                                         debugPrint("Promptss");
-                                        showPromptDialog(context, 'Prompts',
+                                        showPromptDialog(context, 'Prompt'.tr,
                                             prompts, STORAGE_PROMPTS_SELECT);
                                       },
                                     )
@@ -2257,7 +2257,7 @@ class _HomePageState extends State<HomePage> {
                                             ? effectSelectedIndex.value == index
                                             : 0 == index),
                                 title: type == STORAGE_PROMPTS_SELECT
-                                    ? 'Prompt#${index + 1}'
+                                    ? '${'Prompt'.tr}#${index + 1}'
                                     : list[index],
                                 onChanged: (value) {
                                   if (type == STORAGE_PROMPTS_SELECT) {
