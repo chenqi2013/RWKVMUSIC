@@ -73,4 +73,9 @@ const Map<String, String> en_US = {
   "Delete": 'Delete',
   "Chord Editing": 'Chord Editing',
   "Time Changing": 'Time Changing',
+  "Transpose": 'Transpose',
+  "Enter the number of semitones to transpose":
+      'Enter the number of semitones to transpose',
+  "Please play some notes before randomizing.":
+      'Please play some notes before randomizing.',
 };

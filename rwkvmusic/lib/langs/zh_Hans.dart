@@ -67,4 +67,7 @@ const Map<String, String> zh_Hans = {
   "Delete": '删除',
   "Chord Editing": '编辑和弦',
   "Time Changing": '修改节拍',
+  "Transpose": '移调',
+  "Enter the number of semitones to transpose": '输入要移调的半音数量',
+  "Please play some notes before randomizing.": '请先演奏一些音符再进行随机律动.',
 };

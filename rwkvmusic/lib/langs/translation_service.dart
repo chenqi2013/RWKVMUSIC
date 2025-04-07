@@ -23,5 +23,6 @@ class TranslationService extends Translations {
         'en_US': en_US,
         'zh_Hans': zh_Hans,
         'zh_HK': zh_HK,
+        'zh_TW': zh_HK,
       };
 }
