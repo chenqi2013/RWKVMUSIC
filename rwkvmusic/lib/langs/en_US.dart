@@ -21,6 +21,11 @@ const Map<String, String> en_US = {
   'Export Midi File': 'Export Midi File',
   'Scan BlueTooth Device': 'Scan BlueTooth Device',
   'FeedBack': 'FeedBack',
+  'Please input your opinions or suggestions':
+      'Please input your opinions or suggestions',
+  'Thank you, we have received your suggestions and feedback.':
+      'Thank you, we have received your suggestions and feedback.',
+  'Submit': 'Submit',
   'Time signature': 'Time signature',
   'Tempo': 'Tempo',
   'show Prompt': 'show Prompt',
@@ -50,4 +55,27 @@ const Map<String, String> en_US = {
   'Midi keyboard': 'Midi keyboard',
   'This content is AI-generated, please carefully discern!':
       'This content is AI-generated, please carefully discern!',
+  'User Agreement': 'User Agreement',
+  "Please read and agree to our ": 'Please read and agree to our ',
+  "user agreement": 'user agreement',
+  " and ": ' and ',
+  "privacy policy": 'privacy policy',
+  " to continue using this application.":
+      ' to continue using this application.',
+  'Disagree': 'Disagree',
+  'Agree': 'Agree',
+  "Piano": 'Piano',
+  "Violin": 'Violin',
+  "Ocarina": 'Ocarina',
+  "Cello": 'Cello',
+  "Guitar": 'Guitar',
+  "Random\nGroove": 'Random\nGroove',
+  "Delete": 'Delete',
+  "Chord Editing": 'Chord Editing',
+  "Time Changing": 'Time Changing',
+  "Transpose": 'Transpose',
+  "Enter the number of semitones to transpose":
+      'Enter the number of semitones to transpose',
+  "Please play some notes before randomizing.":
+      'Please play some notes before randomizing.',
 };

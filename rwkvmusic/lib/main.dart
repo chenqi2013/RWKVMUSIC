@@ -62,6 +62,12 @@ void main(List<String> args) async {
     ]);
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: []);
   }
+
+  Locale local = PlatformDispatcher.instance.locale;
+  var localArr = local.toString().split('_');
+  debugPrint('local===$localArr');
+
+  debugPrint('language=${local.languageCode},,language=${local.countryCode},,');
   await Get.putAsync<StorageService>(() => StorageService().init());
   Get.put<ConfigStore>(ConfigStore());
   GlobalState.init();
@@ -84,8 +90,7 @@ void main(List<String> args) async {
         child: GetMaterialApp(
           debugShowCheckedModeBanner: false,
           home: HomePage(),
-          builder: EasyLoading.init(),
-          locale: Locale('en', 'US'), // 默认语言
+          locale: Locale(localArr[0], localArr[1]),
           fallbackLocale: Locale('en', 'US'), // 回退语言
           translations: TranslationService(), // 注册翻译类
         ),

@@ -400,58 +400,46 @@ class _HomePageState extends State<HomePage> {
         // controllerPiano.runJavaScript(event);
       }
     });
+    getAppVersion(() {
+      if (isOnlyLoadFastModel && modelAddress == 0) {
+        fetchABCDataByIsolate();
+      }
+      if (Platform.isAndroid) {
+        // debugger();
+        checkAppUpdate('android', context);
+      }
+    });
     // if (Platform.isIOS || Platform.isAndroid) {
-    // if (!ConfigStore.to.isFirstOpen) {
-    //   debugPrint('isFirstOpen');
-    //   if (Platform.isWindows) {
-    //     isVisibleWebview.value = false;
-    //   }
-    //   Future.delayed(const Duration(milliseconds: 1000), () {
-    //     showAgreementDialog(context, () {
-    //       if (isExe && Platform.isWindows) {
-    //         showDuihuanmaDialog(context, (bool isSuccess) {
-    //           if (isSuccess) {
-    //             isVisibleWebview.value = true;
-    //           }
-    //         });
-    //       } else {
-    //         isVisibleWebview.value = true;
-    //       }
-    //     });
-    //   });
-    // } else if (!ConfigStore.to.isValidDuihuanma &&
-    //     isExe &&
-    //     Platform.isWindows) {
-    //   isVisibleWebview.value = false;
-    //   Future.delayed(const Duration(milliseconds: 1000), () {
-    //     showDuihuanmaDialog(context, (bool isSuccess) {
-    //       if (isSuccess) {
-    //         isVisibleWebview.value = true;
-    //       }
-    //     });
-    //   });
-    // }
-
-    Future.delayed(const Duration(milliseconds: 1000), () {
+    if (!ConfigStore.to.isFirstOpen) {
+      debugPrint('isFirstOpen');
       if (Platform.isWindows) {
         isVisibleWebview.value = false;
       }
-      // showStartPwdDialog(context, (bool isSuccess) {
-      //   if (isSuccess) {
-      getAppVersion(() {
-        if (isOnlyLoadFastModel && modelAddress == 0) {
-          fetchABCDataByIsolate();
-          showLoading();
-        }
-        if (Platform.isAndroid) {
-          // debugger();
-          checkAppUpdate('android', context);
-        }
+      Future.delayed(const Duration(milliseconds: 1000), () {
+        showAgreementDialog(context, () {
+          if (isExe && Platform.isWindows) {
+            showDuihuanmaDialog(context, (bool isSuccess) {
+              if (isSuccess) {
+                isVisibleWebview.value = true;
+              }
+            });
+          } else {
+            isVisibleWebview.value = true;
+          }
+        });
       });
-      // }
-      // });
-    });
-
+    } else if (!ConfigStore.to.isValidDuihuanma &&
+        isExe &&
+        Platform.isWindows) {
+      isVisibleWebview.value = false;
+      Future.delayed(const Duration(milliseconds: 1000), () {
+        showDuihuanmaDialog(context, (bool isSuccess) {
+          if (isSuccess) {
+            isVisibleWebview.value = true;
+          }
+        });
+      });
+    }
     // }
   }
 
@@ -874,7 +862,8 @@ class _HomePageState extends State<HomePage> {
   void _randomizeAbc() async {
     if (virtualNotes.isEmpty) {
       // || intNodes.isEmpty
-      Fluttertoast.showToast(msg: "Please play some notes before randomizing.");
+      Fluttertoast.showToast(
+          msg: "Please play some notes before randomizing.".tr);
       return;
     }
     // createPrompt = "L:1/4\nM:3/8\nK:C\n e a c' e' d' c' b c' a ^g";
@@ -1062,7 +1051,7 @@ class _HomePageState extends State<HomePage> {
                                       ),
                                       onPressed: () {
                                         debugPrint("Promptss");
-                                        showPromptDialog(context, 'Prompts',
+                                        showPromptDialog(context, 'Prompt'.tr,
                                             prompts, STORAGE_PROMPTS_SELECT);
                                       },
                                     )
@@ -2291,7 +2280,7 @@ class _HomePageState extends State<HomePage> {
                                             ? effectSelectedIndex.value == index
                                             : 0 == index),
                                 title: type == STORAGE_PROMPTS_SELECT
-                                    ? 'Prompt#${index + 1}'
+                                    ? '${'Prompt'.tr}#${index + 1}'
                                     : list[index],
                                 onChanged: (value) {
                                   if (type == STORAGE_PROMPTS_SELECT) {
