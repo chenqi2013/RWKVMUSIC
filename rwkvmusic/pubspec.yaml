@@ -60,7 +60,7 @@ dependencies:
   loading_animations: ^2.2.0
   on_popup_window_widget: ^0.0.6
   on_process_button_widget: ^2.0.2
-  package_info:
+  package_info_plus:
   permission_handler: ^11.3.0
   pull_to_refresh: ^2.0.0
   sentry: ^8.8.0

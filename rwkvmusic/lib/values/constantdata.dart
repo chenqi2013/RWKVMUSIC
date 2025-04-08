@@ -51,8 +51,6 @@ const kFinish = "finish";
 const kLoadModelFail = "load model fail";
 
 const qnnSoList = {
-  'libQnnCpu.so',
-  'libQnnGpu.so',
   'libQnnGpuNetRunExtensions.so',
   'libQnnHtp.so',
   'libQnnHtpNetRunExtensions.so',
@@ -66,6 +64,10 @@ const qnnSoList = {
   'libQnnHtpV75Skel.so',
   'libQnnHtpV75Stub.so',
   'libQnnSystem.so',
+  'libQnnRwkvWkvOpPackageV68.so',
+  'libQnnRwkvWkvOpPackageV69.so',
+  'libQnnRwkvWkvOpPackageV73.so',
+  'libQnnRwkvWkvOpPackageV75.so',
 };
 
 const kNoteState = [

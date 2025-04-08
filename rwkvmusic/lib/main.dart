@@ -219,7 +219,8 @@ void fetchABCDataByIsolate() async {
   } else if (Platform.isAndroid) {
     String cachePath = await CommonUtils.getCachePath();
     String soPath = '$cachePath/libfaster_rwkvd.so';
-    bool isFileExists = File(soPath).existsSync();
+    // bool isFileExists = File(soPath).existsSync();
+    bool isFileExists = false;
     if (isFileExists) {
       debugPrint('file exits');
       dllPath.value = soPath;
@@ -243,24 +244,27 @@ void fetchABCDataByIsolate() async {
           await CommonUtils.copyFileFromAssets('rwkv-7-abc-rwkvcpp.config');
     } else if (currentModelType == ModelType.qnn) {
       if (!isFileExists) {
-        String sopath = await CommonUtils.copyFileFromAssets(
-            'libRWKV-7-ABC-2024-11-22-QNN.so');
-        binPath.value = "$sopath:$cachePath";
+        const modelFilePaths = {
+          'RWKV-7-ABC-8plusgen1.bin',
+          'RWKV-7-ABC-8gen2.bin',
+          'RWKV-7-ABC-8sgen3.bin',
+          'RWKV-7-ABC-8gen3.bin',
+        };
+        String modelPath = '';
+        for (String modelFilePath in modelFilePaths) {
+          modelPath = await CommonUtils.copyFileFromAssets(
+              modelFilePath);
+        }
+
+        binPath.value = "$modelPath:$cachePath";
         // debugPrint('binPath==$binPath');
         for (String soName in qnnSoList) {
           //拷贝qnn so文件
           await CommonUtils.copyFileFromAssets(soName);
         }
       } else {
-        if (File('$cachePath/model_cache.bin').existsSync()) {
-          // QNN加载成功过一次.so模型后，会生成model_cache.bin文件
-          // 之后加载模型时，加载model_cache.bin加载时间会短很多
-          String qnnsoPath = '$cachePath/model_cache.bin';
-          binPath.value = "$qnnsoPath:$cachePath";
-        } else {
-          String qnnsoPath = '$cachePath/libRWKV-7-ABC-2024-11-22-QNN.so';
-          binPath.value = "$qnnsoPath:$cachePath";
-        }
+        String modelPath = '$cachePath/RWKV-7-ABC-8gen3.bin';
+        binPath.value = "$modelPath:$cachePath";
         // debugPrint('file exits binpath==$binPath');
       }
       configPath = await CommonUtils.copyFileFromAssets(
@@ -452,6 +456,15 @@ void getABCDataByLocalModel(var array) async {
   }
   if (currentModelType == ModelType.qnn) {
     strategy = 'qnn auto'.toNativeUtf8().cast<Char>();
+    String socName = fastrwkv.rwkv_get_soc_name().cast<Utf8>().toDartString();
+    debugPrint('socName==$socName');
+    if (socName == "8 Gen 2") {
+      binPath = binPath.replaceAll('8gen3', '8gen2');
+    } else if (socName == "8+ Gen 1") {
+      binPath = binPath.replaceAll('8gen3', '8plusgen1');
+    } else if (socName == "8s Gen 3") {
+      binPath = binPath.replaceAll('8gen3', '8sgen3');
+    }
   } else if (currentModelType == ModelType.mtk) {
     strategy = 'mtk auto'.toNativeUtf8().cast<Char>();
   }
