@@ -84,7 +84,7 @@ String appVersion = 'ncnn' + appVersionNumber;
 class _HomePageState extends State<HomePage> {
   /// 键盘 webview 控制器
   late WebViewControllerPlus controllerKeyboard;
-  String filePathKeyboardAnimation = "assets/doctor/doctor.html";
+  String filePathKeyboardAnimation = "assets/doctor/index.html";
   String filePathKeyboard = 'assets/piano/keyboard.html';
   String filePathPiano = 'assets/player/player.html';
   late StringBuffer stringBuffer;
@@ -190,6 +190,7 @@ class _HomePageState extends State<HomePage> {
             _change(finalabcStringPreset);
             controllerPiano.runJavaScript("setPromptNoteNumberCount(3)");
             controllerPiano.runJavaScript("setStyle()");
+            controllerPiano.runJavaScript("handleScrollIntoCenter()");
           },
         ),
       )
