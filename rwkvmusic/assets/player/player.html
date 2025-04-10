@@ -1035,14 +1035,13 @@
     }
 
     function handleScrollIntoCenter() {
+      // alert('asdasdasd')
       var elem = document.getElementById("paper");
       elem.scrollIntoView({
         behavior: "smooth",
-        block: "center",
-        inline: "center",
+        block: "end",
+        inline: "end",
       });
-      alert("call")
-
     }
 
     function unselectAll() {
