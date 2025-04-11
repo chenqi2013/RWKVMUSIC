@@ -874,6 +874,9 @@ class _HomePageState extends State<HomePage> {
     int index = randomizeAbcStr.indexOf('|');
     String promptStr = randomizeAbcStr.substring(index + 1);
     splitMeasureAndChord(promptStr);
+    Future.delayed(const Duration(milliseconds: 500), () {
+      playOrPausePiano();
+    });
   }
 
   void resetLastNote() {
