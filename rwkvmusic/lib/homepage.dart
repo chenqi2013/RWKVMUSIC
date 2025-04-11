@@ -78,7 +78,7 @@ RxBool isdownloading = false.obs;
 bool isFirstOpen = true;
 bool isOnlyNCNN = false;
 
-String appVersionNumber = '_1.6.1_20241223';
+String appVersionNumber = '_1.6.2_20250411';
 String appVersion = 'ncnn' + appVersionNumber;
 
 class _HomePageState extends State<HomePage> {
