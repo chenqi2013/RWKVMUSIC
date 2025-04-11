@@ -611,21 +611,21 @@ class _HomePageState extends State<HomePage> {
     if (currentSoundEffect != null) {
       String? mp3Folder = soundEffect[currentSoundEffect];
       debugPrint('mp3Folder==$mp3Folder');
-      if (isWindowsOrMac) {
-        AudioPlayerManage().playAudio('player/soundfont/$mp3Folder/$name');
-      } else {
-        JustAudioPlayerManage().playAudio('player/soundfont/$mp3Folder/$name');
-      }
+      // if (isWindowsOrMac) {
+      //   AudioPlayerManage().playAudio('player/soundfont/$mp3Folder/$name');
+      // } else {
+      JustAudioPlayerManage().playAudio('player/soundfont/$mp3Folder/$name');
+      // }
       debugPrint('player/soundfont/$mp3Folder/$name');
     } else {
       debugPrint('mp3Folder==null');
-      if (isWindowsOrMac) {
-        AudioPlayerManage()
-            .playAudio('player/soundfont/acoustic_grand_piano-mp3/$name');
-      } else {
-        JustAudioPlayerManage()
-            .playAudio('player/soundfont/acoustic_grand_piano-mp3/$name');
-      }
+      // if (isWindowsOrMac) {
+      //   AudioPlayerManage()
+      //       .playAudio('player/soundfont/acoustic_grand_piano-mp3/$name');
+      // } else {
+      JustAudioPlayerManage()
+          .playAudio('player/soundfont/acoustic_grand_piano-mp3/$name');
+      // }
     }
   }
 
