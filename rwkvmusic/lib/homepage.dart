@@ -81,6 +81,9 @@ bool isOnlyNCNN = false;
 String appVersionNumber = '_1.6.2_20250411';
 String appVersion = 'ncnn' + appVersionNumber;
 
+///记录是否生成过
+bool isClickAiCompose = false;
+
 class _HomePageState extends State<HomePage> {
   /// 键盘 webview 控制器
   late WebViewControllerPlus controllerKeyboard;
@@ -273,6 +276,9 @@ class _HomePageState extends State<HomePage> {
           resetPianoAndKeyboard();
           debugPrint('resetPianoAndKeyboard');
         }
+        if (infiniteGeneration.value && isClickAiCompose) {
+          aiComposeMusic();
+        }
         // // isNeedRestart = true;
         // if (isAutoSwitch.value) {
         //   //自动切换下一个prompt
@@ -361,18 +367,8 @@ class _HomePageState extends State<HomePage> {
             // isPlay.value = false;
             playOrPausePiano();
             if (isFirstOpen) {
-              if (Platform.isWindows) {
-                Get.snackbar(
-                    'tips'.tr,
-                    'This content is AI-generated, please carefully discern!'
-                        .tr);
-              } else {
-                toastInfo(
-                    msg:
-                        'This content is AI-generated, please carefully discern!'
-                            .tr);
-              }
-
+              CommonUtils.showToast(
+                  'This content is AI-generated, please carefully discern!'.tr);
               isFirstOpen = false;
             }
           });
@@ -853,8 +849,7 @@ class _HomePageState extends State<HomePage> {
   void _randomizeAbc() async {
     if (virtualNotes.isEmpty) {
       // || intNodes.isEmpty
-      Fluttertoast.showToast(
-          msg: "Please play some notes before randomizing.".tr);
+      CommonUtils.showToast("Please play some notes before randomizing.".tr);
       return;
     }
     // createPrompt = "L:1/4\nM:3/8\nK:C\n e a c' e' d' c' b c' a ^g";
@@ -1349,42 +1344,7 @@ class _HomePageState extends State<HomePage> {
                                         height: isWindowsOrMac ? 75.h : 64.h,
                                       ),
                                       onPressed: () {
-                                        debugPrint('Generate');
-                                        if (isClicking || isOnlyLoadFastModel) {
-                                          debugPrint(
-                                              'isClicking || isOnlyLoadFastModel');
-                                          return;
-                                        }
-                                        if (selectstate.value == 1 &&
-                                            splitMeasure == null) {
-                                          Fluttertoast.showToast(
-                                              msg: "generating tips".tr);
-                                          return;
-                                        }
-                                        isClicking = true;
-                                        isGenerating.value =
-                                            !isGenerating.value;
-                                        if (isGenerating.value) {
-                                          resetPianoAndKeyboard();
-
-                                          // if (isWindowsOrMac) {
-                                          fetchABCDataByIsolate();
-                                          // } else {
-                                          //   getABCDataByAPI();
-                                          // }
-
-                                          isFinishABCEvent = false;
-                                          if (selectstate.value == 1) {
-                                            isCreateGenerate.value = true;
-                                            controllerKeyboard
-                                                .loadFlutterAssetServer(
-                                                    filePathKeyboardAnimation);
-                                          }
-                                        } else {
-                                          // isolateSendPort.send('stop Generating');
-                                          isolateEventBus
-                                              .fire("stop Generating");
-                                        }
+                                        aiComposeMusic();
                                       },
                                     ),
                                   ),
@@ -1425,6 +1385,39 @@ class _HomePageState extends State<HomePage> {
             ),
           ),
         ));
+  }
+
+  void aiComposeMusic() {
+    debugPrint('Generate');
+    isClickAiCompose = true;
+    if (isClicking || isOnlyLoadFastModel) {
+      debugPrint('isClicking || isOnlyLoadFastModel');
+      return;
+    }
+    if (selectstate.value == 1 && splitMeasure == null) {
+      CommonUtils.showToast("generating tips".tr);
+      return;
+    }
+    isClicking = true;
+    isGenerating.value = !isGenerating.value;
+    if (isGenerating.value) {
+      resetPianoAndKeyboard();
+
+      // if (isWindowsOrMac) {
+      fetchABCDataByIsolate();
+      // } else {
+      //   getABCDataByAPI();
+      // }
+
+      isFinishABCEvent = false;
+      if (selectstate.value == 1) {
+        isCreateGenerate.value = true;
+        controllerKeyboard.loadFlutterAssetServer(filePathKeyboardAnimation);
+      }
+    } else {
+      // isolateSendPort.send('stop Generating');
+      isolateEventBus.fire("stop Generating");
+    }
   }
 
   void playOrPausePiano() {
@@ -1468,6 +1461,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   void segmentChange(int index) {
+    isClickAiCompose = false;
     resetPianoAndKeyboard();
     if (isShowOverlay) {
       closeOverlay();
@@ -1490,6 +1484,7 @@ class _HomePageState extends State<HomePage> {
 
   /// 清除全部内容
   void resetToDefaulValueInCreateMode() {
+    debugPrint('resetToDefaulValueInCreateMode');
     selectedNote.value = null;
     virtualNotes.clear();
     gloableTranspose.value = 0;
@@ -1507,6 +1502,7 @@ class _HomePageState extends State<HomePage> {
     controllerKeyboard.loadFlutterAssetServer(filePathKeyboard);
     // controllerKeyboard.runJavaScript('resetPlay()');
     createPrompt = '';
+    isClickAiCompose = false;
   }
 
   void showSettingDialog(BuildContext context) {
@@ -1676,9 +1672,7 @@ class _HomePageState extends State<HomePage> {
                               }
                               await MidifileConvert.exportMidiFile(
                                   exportMidiStr!, result!.path);
-                              Get.snackbar('tips'.tr, 'save file success'.tr,
-                                  colorText: Colors.black);
-                              // toastInfo(msg: '文件保存成功');
+                              CommonUtils.showToast('save file success'.tr);
                             } else {
                               // phone save file
                               Directory tempDir =
@@ -1983,10 +1977,8 @@ class _HomePageState extends State<HomePage> {
                                     }
                                     await MidifileConvert.exportMidiFile(
                                         exportMidiStr!, result!.path);
-                                    Get.snackbar(
-                                        'tips'.tr, 'save file success'.tr,
-                                        colorText: Colors.black);
-                                    // toastInfo(msg: '文件保存成功');
+                                    CommonUtils.showToast(
+                                        'save file success'.tr);
                                   } else {
                                     // phone save file
                                     Directory tempDir =
@@ -2480,11 +2472,7 @@ class _HomePageState extends State<HomePage> {
       tips = "Bluetooth poweredOff".tr;
     }
     if (tips != null) {
-      if (isWindowsOrMac) {
-        Get.snackbar('tips'.tr, tips, colorText: Colors.red);
-      } else {
-        toastInfo(msg: tips);
-      }
+      CommonUtils.showToast(tips);
       return;
     }
 
@@ -2628,7 +2616,7 @@ class _HomePageState extends State<HomePage> {
         status = await Permission.location.request();
         debugPrint('11Permission==$status');
         if (status != PermissionStatus.granted) {
-          toastInfo(msg: 'need to open location permission'.tr);
+          CommonUtils.showToast('need to open location permission'.tr);
           // Get.snackbar('提示', '需要开启定位权限', colorText: Colors.red);
           return;
         }
@@ -2636,14 +2624,14 @@ class _HomePageState extends State<HomePage> {
         status = await Permission.bluetoothScan.request();
         debugPrint('22Permission==$status');
         if (status != PermissionStatus.granted) {
-          toastInfo(msg: 'need to open bluetooth scan permission'.tr);
+          CommonUtils.showToast('need to open bluetooth scan permission'.tr);
           // Get.snackbar('提示', '需要开启蓝牙扫描权限', colorText: Colors.red);
           return;
         }
         status = await Permission.bluetoothConnect.request();
         debugPrint('33Permission==$status');
         if (status != PermissionStatus.granted) {
-          toastInfo(msg: 'need to open bluetooth connect permission'.tr);
+          CommonUtils.showToast('need to open bluetooth connect permission'.tr);
           // Get.snackbar('提示', '需要开启蓝牙连接权限', colorText: Colors.red);
           return;
         }
@@ -2675,12 +2663,7 @@ class _HomePageState extends State<HomePage> {
       if (state == BleConnectionState.connected) {
         connectedLogic(device.deviceId);
       } else if (state == BleConnectionState.disconnected) {
-        if (isWindowsOrMac) {
-          Get.snackbar(device.name!, 'device disconnected'.tr,
-              colorText: Colors.red);
-        } else {
-          toastInfo(msg: 'device disconnected'.tr);
-        }
+        CommonUtils.showToast('device disconnected'.tr);
       }
     };
   }
@@ -2688,11 +2671,7 @@ class _HomePageState extends State<HomePage> {
   void connectedLogic(String deviceId) async {
     isShowDialog = false;
     connectDeviceId = deviceId;
-    if (isWindowsOrMac) {
-      Get.snackbar('', 'device connected'.tr, colorText: Colors.black);
-    } else {
-      toastInfo(msg: 'device connected'.tr);
-    }
+    CommonUtils.showToast('device connected'.tr);
     // Discover services of a specific device
     List<BleService> bleServices =
         await UniversalBle.discoverServices(deviceId);
@@ -2915,7 +2894,7 @@ class _HomePageState extends State<HomePage> {
       } else if (status == DownloadStatus.downloading) {
         downloadProgress.value = progress;
       } else if (status == DownloadStatus.fail) {
-        Fluttertoast.showToast(msg: "please check network,download fail".tr);
+        CommonUtils.showToast("please check network,download fail".tr);
       }
     });
   }
