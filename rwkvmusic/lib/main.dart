@@ -159,7 +159,7 @@ var isRememberEffect = false.obs;
 var isAutoSwitch = false.obs;
 
 ScrollController controller = ScrollController();
-var tokens = ''.obs;
+var tokens = 'tokens=0'.obs;
 
 String? splitMeasure;
 List chords = [];
@@ -505,7 +505,7 @@ void getABCDataByLocalModel(var array) async {
     var counts = 1000 * i;
     double tokens = counts / duration;
     // debugPrint('tokens==$tokens');
-    sendPort.send('tokens==$tokens');
+    sendPort.send('tokens=$tokens');
     // if (token == result && result == 124) {
     //   //双||abc展示出错
     //   continue;

@@ -358,7 +358,7 @@ class _HomePageState extends State<HomePage> {
       // debugPrint('event bus==$event');
       if (event.toString().startsWith('tokens')) {
         // debugPrint('chenqi $event');
-        tokens.value = ' -- ${event.toString()}';
+        tokens.value = event.toString();
       } else if (event == 'finish') {
         virtualNotes.clear();
         // intNodes.clear();
@@ -1641,9 +1641,9 @@ class _HomePageState extends State<HomePage> {
                     height: 20.h,
                   ),
                   Obx(() => CheckBoxItem(
-                        title: 'Demo Mode$tokens',
+                        title: '$tokens',
                         // visualDensity: VisualDensity.compact, // 去除空白间距
-                        isSelected: isAutoSwitch.value,
+                        isSelected: true, //isAutoSwitch.value
                         onChanged: (bool? value) {
                           isAutoSwitch.value = value!;
                           ConfigStore.to.saveAutoNext(value);
@@ -1946,9 +1946,9 @@ class _HomePageState extends State<HomePage> {
                           height: 20.h,
                         ),
                         Obx(() => CheckBoxItem(
-                              title: 'Demo Mode$tokens',
+                              title: '$tokens',
                               // visualDensity: VisualDensity.compact, // 去除空白间距
-                              isSelected: isAutoSwitch.value,
+                              isSelected: true, //isAutoSwitch.value,
                               onChanged: (bool? value) {
                                 isAutoSwitch.value = value!;
                                 ConfigStore.to.saveAutoNext(value);
