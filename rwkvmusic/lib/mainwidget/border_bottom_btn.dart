@@ -7,13 +7,13 @@ import 'package:rwkvmusic/style/color.dart';
 class BorderBottomBtn extends StatelessWidget {
   BorderBottomBtn(
       {super.key,
-      required this.width,
+      this.width,
       required this.height,
       required this.text,
       required this.icon,
       required this.onPressed,
       this.textColor});
-  final double width;
+  double? width;
   final double height;
   final String text;
   final Widget icon;
@@ -27,7 +27,8 @@ class BorderBottomBtn extends StatelessWidget {
           onPressed();
         },
         child: Container(
-          width: width,
+          // width: width,
+          padding: EdgeInsets.symmetric(horizontal: 30.w),
           height: height,
           decoration: BoxDecoration(
             gradient: const LinearGradient(
