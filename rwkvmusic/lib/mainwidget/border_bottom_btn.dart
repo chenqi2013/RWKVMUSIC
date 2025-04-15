@@ -8,12 +8,14 @@ class BorderBottomBtn extends StatelessWidget {
   BorderBottomBtn(
       {super.key,
       this.width,
+      this.padding,
       required this.height,
       required this.text,
       required this.icon,
       required this.onPressed,
       this.textColor});
   double? width;
+  double? padding;
   final double height;
   final String text;
   final Widget icon;
@@ -28,7 +30,7 @@ class BorderBottomBtn extends StatelessWidget {
         },
         child: Container(
           // width: width,
-          padding: EdgeInsets.symmetric(horizontal: 30.w),
+          padding: EdgeInsets.symmetric(horizontal: padding ?? 30.w),
           height: height,
           decoration: BoxDecoration(
             gradient: const LinearGradient(

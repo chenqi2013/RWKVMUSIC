@@ -1331,6 +1331,7 @@ class _HomePageState extends State<HomePage> {
                                   Obx(
                                     () => BorderBottomBtn(
                                       textColor: AppColor.color_A1D632,
+                                      padding: 120.w,
                                       width: selectstate.value == 0
                                           ? (isWindowsOrMac ? 666.w : 555.w)
                                           : (isWindowsOrMac ? 453.w : 354.w),
