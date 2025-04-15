@@ -69,5 +69,5 @@ const Map<String, String> zh_HK = {
   "Time Changing": '修改節拍',
   "Transpose": '移調',
   "Enter the number of semitones to transpose": '輸入要移調的半音數量',
-  "Please play some notes before randomizing.": '請先演奏一些音符再進行隨機律動.'
+  "Please play some notes before randomizing.": '使用隨機律動前請先輸入音符'
 };
