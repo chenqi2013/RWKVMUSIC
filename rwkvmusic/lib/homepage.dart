@@ -78,7 +78,7 @@ RxBool isdownloading = false.obs;
 bool isFirstOpen = true;
 bool isOnlyNCNN = false;
 
-String appVersionNumber = '_1.6.2_20250411';
+String appVersionNumber = '_1.6.3_20250415';
 String appVersion = 'ncnn' + appVersionNumber;
 
 ///记录是否生成过

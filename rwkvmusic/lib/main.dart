@@ -65,7 +65,9 @@ void main(List<String> args) async {
   Locale local = PlatformDispatcher.instance.locale;
   var localArr = local.toString().split('_');
   debugPrint('local===$localArr');
-
+  if (localArr.length == 2) {
+    local = Locale(localArr[0], localArr[1]);
+  }
   debugPrint('language=${local.languageCode},,language=${local.countryCode},,');
   await Get.putAsync<StorageService>(() => StorageService().init());
   Get.put<ConfigStore>(ConfigStore());
@@ -89,7 +91,7 @@ void main(List<String> args) async {
         child: GetMaterialApp(
           debugShowCheckedModeBanner: false,
           home: HomePage(),
-          locale: Locale(localArr[0], localArr[1]),
+          locale: local,
           fallbackLocale: Locale('en', 'US'), // 回退语言
           translations: TranslationService(), // 注册翻译类
         ),
