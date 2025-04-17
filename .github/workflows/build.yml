@@ -51,7 +51,6 @@ jobs:
 
   windows-arm64-vs2022:
     needs: [setup]
-    # 使用官方为公共仓库提供的 Windows ARM64 运行器标签
     runs-on: windows-11-arm
     env:
       VERSION: ${{ needs.setup.outputs.VERSION }}
@@ -59,23 +58,32 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-           # - name: Setup Flutter # Remove or comment out the subosito/flutter-action step
-      #   uses: subosito/flutter-action@v2
-      #   with:
-      #     flutter-version: '3.22.2'
-      #     architecture: arm64
-      #     cache: true
+      # (可选，但推荐) 安装 Visual Studio 构建工具
+      - name: Install Visual Studio Build Tools
+        uses: microsoft/setup-msbuild@v1.3
+        with:
+          vs-version: 'latest'
+          msbuild-architecture: 'arm64'
+          components: 'Microsoft.VisualStudio.Component.VC.Tools.ARM64;Microsoft.VisualStudio.Component.Windows10SDK.19041' # Adjust if needed
 
-      - name: Download Flutter SDK
+      # (可选) 安装 7-Zip
+      - name: Install 7-Zip
+        run: choco install 7zip -y --force
+
+      # --- Manual Flutter SDK Installation (Using Beta Channel) ---
+      - name: Download Flutter SDK (Beta)
         shell: pwsh
         run: |
-          $flutterVersion = "3.22.2" # Specify desired Flutter version
-          $flutterZip = "flutter_windows_${flutterVersion}-stable.zip"
-          $downloadUrl = "https://storage.googleapis.com/flutter_infra_release/releases/stable/windows/$flutterZip"
-          Write-Host "Downloading Flutter SDK from $downloadUrl"
-          Invoke-WebRequest -Uri $downloadUrl -OutFile $flutterZip
+          # Find the latest beta version from: https://docs.flutter.dev/release/archive?tab=windows (look under Beta channel)
+          # Or just try a recent known beta, e.g., 3.23.0-1.0.pre
+          $flutterChannel = "beta"
+          $flutterVersion = "3.23.0-1.0.pre" # Specify a recent Beta version
+          $flutterZip = "flutter_windows_${flutterVersion}-${flutterChannel}.zip"
+          $downloadUrl = "https://storage.googleapis.com/flutter_infra_release/releases/${flutterChannel}/windows/$flutterZip"
+          Write-Host "Downloading Flutter SDK ($flutterChannel - $flutterVersion) from $downloadUrl"
+          Invoke-WebRequest -Uri $downloadUrl -OutFile $flutterZip -ErrorAction Stop
           Write-Host "Extracting Flutter SDK..."
-          Expand-Archive -Path $flutterZip -DestinationPath C:\ # Extract to C:\flutter
+          Expand-Archive -Path $flutterZip -DestinationPath C:\ -ErrorAction Stop # Extract to C:\flutter
           Remove-Item $flutterZip
           Write-Host "Flutter SDK extracted to C:\flutter"
 
@@ -85,25 +93,13 @@ jobs:
           echo "C:\flutter\bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
           echo "Adding C:\flutter\bin to PATH"
 
-      - name: Verify Flutter Installation
-        run: flutter doctor -v # Verify installation and see available devices/targets
+      - name: Verify Flutter Installation & Enable Desktop
+        run: |
+          flutter --version
+          flutter config --enable-windows-desktop
+          flutter doctor -v
 
-      # (可选，但推荐) 安装 Visual Studio 构建工具
-      # 虽然 runner 镜像可能包含一些工具，但显式安装可以确保所需组件存在
-      - name: Install Visual Studio Build Tools
-        uses: microsoft/setup-msbuild@v1.3
-        with:
-          vs-version: 'latest' # 或者指定具体版本
-          # 添加构建 Windows 应用所需的组件，根据你的项目需求调整
-          msbuild-architecture: 'arm64'
-          components: 'Microsoft.VisualStudio.Component.VC.Tools.ARM64;Microsoft.VisualStudio.Component.Windows10SDK.19041' # 示例，可能需要调整
-
-      # (可选) 安装 7-Zip
-      # runner 镜像可能不包含 7-Zip，如果打包步骤需要它，则安装
-      - name: Install 7-Zip
-        # 使用 choco (通常在 Windows runner 上可用) 或其他方式安装
-        run: choco install 7zip -y --force
-
+      # --- Build Steps ---
       - name: Install dependencies
         run: |
           cd rwkvmusic
@@ -112,14 +108,13 @@ jobs:
       - name: Build Windows arm64
         run: |
           cd rwkvmusic
-          # 明确指定目标平台为 windows-arm64
-          flutter build windows
+          # This flag should now be recognized with a recent beta version
+          flutter build windows --target-platform=windows-arm64
 
+      # --- Packaging and Upload Steps ---
       - name: Package Windows arm64
         run: |
           Invoke-WebRequest -Uri https://uwuhome.momosan.cc:3000/molly/rwkvmusic-models/releases/download/master/release-windows-arm64.zip -OutFile release-windows-arm64.zip
-          # 确保 7z 命令在 PATH 中，或者提供完整路径
-          # 如果 choco 安装了，通常会自动添加到 PATH
           7z x release-windows-arm64.zip
           cd rwkvmusic
           Copy-Item -Path ../runtime/* -Destination build/windows/arm64/runner/Release/ -Recurse
