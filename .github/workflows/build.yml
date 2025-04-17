@@ -113,7 +113,7 @@ jobs:
         run: |
           cd rwkvmusic
           # 明确指定目标平台为 windows-arm64
-          flutter build windows --target-platform=windows-arm64
+          flutter build windows
 
       - name: Package Windows arm64
         run: |
