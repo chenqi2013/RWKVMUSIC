@@ -57,7 +57,7 @@ jobs:
     steps:
       - name: Check system architecture
         run: |
-        echo "Architecture: $env:PROCESSOR_ARCHITECTURE"
+          echo "Architecture: $env:PROCESSOR_ARCHITECTURE"
       - name: Checkout
         uses: actions/checkout@v4
 
