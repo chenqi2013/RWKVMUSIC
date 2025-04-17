@@ -51,7 +51,9 @@ class AgreementPolicyPage extends StatelessWidget {
                   Get.back();
                 },
               ),
-              TextItem(text: type == 1 ? 'privacy policy' : 'user agreement')
+              TextItem(
+                      text:
+                          type == 1 ? "privacy policy".tr : "user agreement".tr)
                   .marginOnly(left: 26.w)
             ],
           ).marginOnly(left: 20.w, top: 20.h),

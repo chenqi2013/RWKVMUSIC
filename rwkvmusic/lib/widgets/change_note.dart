@@ -238,8 +238,8 @@ class ChangeNote extends StatelessWidget {
           },
           initialSelectedActionKey: gloableTranspose.value,
           context: context,
-          title: "Transpose",
-          message: "Enter the number of semitones to transpose",
+          title: "Transpose".tr,
+          message: "Enter the number of semitones to transpose".tr,
           actions: _kAvailableTranspose
               .map((e) => AlertDialogAction(key: e, label: e.toString()))
               .toList(),
@@ -401,7 +401,7 @@ class _KeyWrapper extends StatelessWidget {
       ));
       child = Center(
           child: T(
-        "Random\nGroove",
+        "Random\nGroove".tr,
         textAlign: TextAlign.center,
         s: TS(
             w: FW.w900,
@@ -433,7 +433,7 @@ class _KeyWrapper extends StatelessWidget {
       ));
       child = Center(
           child: T(
-        "Delete",
+        "Delete".tr,
         s: TS(
             w: FW.w900,
             s: 14 * _kButtonHeight / 48.0,

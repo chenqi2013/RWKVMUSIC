@@ -13,8 +13,17 @@ import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:rwkvmusic/main.dart';
 import 'package:rwkvmusic/values/values.dart';
+import 'package:rwkvmusic/widgets/toast.dart';
 
 class CommonUtils {
+  static void showToast(String content) {
+    if (Platform.isWindows || Platform.isMacOS || Platform.isLinux) {
+      Get.snackbar('tips'.tr, content);
+    } else {
+      toastInfo(msg: content);
+    }
+  }
+
   static String? extractTextValue(String jsonData) {
     // 正则表达式匹配 "text" 字段的值
     RegExp regExp = RegExp(r'"text":\s*"(.*?)"');

@@ -44,24 +44,27 @@ enum DownloadStatus {
 
 const kTriplet = "(3";
 
-const qnnSoList = [
-  'libQnnDspV66Skel.so',
+const kFinish = "finish";
+
+const kLoadModelFail = "load model fail";
+
+const qnnSoList = {
+  'libQnnCpu.so',
+  'libQnnGpu.so',
+  'libQnnGpuNetRunExtensions.so',
   'libQnnHtp.so',
   'libQnnHtpNetRunExtensions.so',
   'libQnnHtpPrepare.so',
   'libQnnHtpV68Skel.so',
   'libQnnHtpV68Stub.so',
   'libQnnHtpV69Skel.so',
-  'libQnnHtpV69Skel.so',
+  'libQnnHtpV69Stub.so',
   'libQnnHtpV73Skel.so',
   'libQnnHtpV73Stub.so',
   'libQnnHtpV75Skel.so',
   'libQnnHtpV75Stub.so',
   'libQnnSystem.so',
-  'libQnnCpu.so',
-  'libQnnGpu.so',
-  'libQnnGpuNetRunExtensions.so',
-];
+};
 
 const kNoteState = [
   "4",
@@ -115,19 +118,19 @@ List<String> prompts = [
 ];
 
 Map<String, String> soundEffect = {
-  "Piano": 'acoustic_grand_piano-mp3',
-  "Violin": 'violin-mp3',
-  "Ocarina": 'ocarina-mp3',
-  "Cello": 'cello-mp3',
-  "Guitar": 'acoustic_guitar_steel-mp3',
+  "Piano".tr: 'acoustic_grand_piano-mp3',
+  "Violin".tr: 'violin-mp3',
+  "Ocarina".tr: 'ocarina-mp3',
+  "Cello".tr: 'cello-mp3',
+  "Guitar".tr: 'acoustic_guitar_steel-mp3',
 };
 
 Map<String, int> soundEffectInt = {
-  "Piano": 0,
-  "Violin": 40,
-  "Ocarina": 79,
-  "Cello": 42,
-  "Guitar": 25,
+  "Piano".tr: 0,
+  "Violin".tr: 40,
+  "Ocarina".tr: 79,
+  "Cello".tr: 42,
+  "Guitar".tr: 25,
 };
 
 List<String> instruments = [

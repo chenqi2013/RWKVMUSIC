@@ -61,6 +61,14 @@ void main(List<String> args) async {
     ]);
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: []);
   }
+
+  Locale local = PlatformDispatcher.instance.locale;
+  var localArr = local.toString().split('_');
+  debugPrint('local===$localArr');
+  if (localArr.length == 2) {
+    local = Locale(localArr[0], localArr[1]);
+  }
+  debugPrint('language=${local.languageCode},,language=${local.countryCode},,');
   await Get.putAsync<StorageService>(() => StorageService().init());
   Get.put<ConfigStore>(ConfigStore());
   GlobalState.init();
@@ -83,7 +91,7 @@ void main(List<String> args) async {
         child: GetMaterialApp(
           debugShowCheckedModeBanner: false,
           home: HomePage(),
-          locale: Locale('en', 'US'), // 默认语言
+          locale: local,
           fallbackLocale: Locale('en', 'US'), // 回退语言
           translations: TranslationService(), // 注册翻译类
         ),
@@ -153,7 +161,7 @@ var isRememberEffect = false.obs;
 var isAutoSwitch = false.obs;
 
 ScrollController controller = ScrollController();
-var tokens = ''.obs;
+var tokens = 'tokens=0'.obs;
 
 String? splitMeasure;
 List chords = [];
@@ -341,23 +349,23 @@ void fetchABCDataByIsolate() async {
       }
     } else if (data is EventBus) {
       isolateEventBus = data;
-    } else if (data == "finish") {
+    } else if (data == kFinish) {
       mainReceivePort.close(); // 操作完成后，关闭 ReceivePort
       userIsolate!.kill(priority: Isolate.immediate);
       userIsolate = null;
       debugPrint('userIsolate!.kill()');
       isGenerating.value = false;
-      eventBus.fire('finish');
+      eventBus.fire(kFinish);
       isClicking = false;
-    } else if (data == "load model fail") {
+    } else if (data == kLoadModelFail) {
       //加载模型失败,使用ncnn模型
       mainReceivePort.close(); // 操作完成后，关闭 ReceivePort
       userIsolate!.kill(priority: Isolate.immediate);
       userIsolate = null;
-      debugPrint('load model fail,userIsolate!.kill()');
+      debugPrint('$kLoadModelFail,userIsolate!.kill()');
       ConfigStore.to.saveDeviceOnlyNCNN();
       currentModelType = ModelType.ncnn;
-      appVersion = 'ncnn_1.6.1_20241108';
+      appVersion = 'ncnn' + appVersionNumber;
       fetchABCDataByIsolate();
     } else if (data.toString().startsWith('tokens')) {
       isClicking = false;
@@ -418,7 +426,7 @@ void getABCDataByLocalModel(var array) async {
   eventBus.on().listen((event) {
     debugPrint('isolateReceivePort22==$event');
     isStopGenerating = true;
-    sendPort.send('finish');
+    sendPort.send(kFinish);
   });
 
   Pointer<Void> model;
@@ -456,7 +464,7 @@ void getABCDataByLocalModel(var array) async {
   debugPrint(
       'model address=${model.address},abcTokenizer address==${abcTokenizer.address},sampler address==${sampler.address}');
   if (model.address == 0 || abcTokenizer.address == 0 || sampler.address == 0) {
-    sendPort.send('load model fail');
+    sendPort.send(kLoadModelFail);
     return;
   }
   sendPort.send(isolateReceivePort.sendPort);
@@ -499,7 +507,7 @@ void getABCDataByLocalModel(var array) async {
     var counts = 1000 * i;
     double tokens = counts / duration;
     // debugPrint('tokens==$tokens');
-    sendPort.send('tokens==$tokens');
+    sendPort.send('tokens=$tokens');
     // if (token == result && result == 124) {
     //   //双||abc展示出错
     //   continue;
@@ -544,6 +552,6 @@ void getABCDataByLocalModel(var array) async {
   isGenerating.value = false;
 
   sendPort.send(abcString.toString());
-  sendPort.send('finish');
+  sendPort.send(kFinish);
   debugPrint('getABCDataByLocalModel all data=${stringBuffer.toString()}');
 }

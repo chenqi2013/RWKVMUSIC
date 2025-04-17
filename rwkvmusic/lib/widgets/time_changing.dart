@@ -34,8 +34,8 @@ class TimeChanging extends StatelessWidget {
               c: CAA.stretch,
               children: [
                 12.h,
-                const T(
-                  "Time Changing",
+                T(
+                  "Time Changing".tr,
                   textAlign: TextAlign.center,
                   s: TS(c: kW, s: 16, w: FW.w700),
                 ),
