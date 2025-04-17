@@ -76,8 +76,8 @@ jobs:
         run: |
           # Find the latest beta version from: https://docs.flutter.dev/release/archive?tab=windows (look under Beta channel)
           # Or just try a recent known beta, e.g., 3.23.0-1.0.pre
-          $flutterChannel = "beta"
-          $flutterVersion = "3.23.0-1.0.pre" # Specify a recent Beta version
+          $flutterChannel = "stable"
+          $flutterVersion = "3.27.2" # Specify a recent Beta version
           $flutterZip = "flutter_windows_${flutterVersion}-${flutterChannel}.zip"
           $downloadUrl = "https://storage.googleapis.com/flutter_infra_release/releases/${flutterChannel}/windows/$flutterZip"
           Write-Host "Downloading Flutter SDK ($flutterChannel - $flutterVersion) from $downloadUrl"
