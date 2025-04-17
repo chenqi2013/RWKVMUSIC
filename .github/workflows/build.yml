@@ -63,8 +63,9 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          channel: 'stable' # 或者指定你需要的 channel, e.g., 'beta'
+          flutter-version: '3.22.2' # 尝试一个较新的稳定版本，你可以根据需要调整
           architecture: arm64
+          cache: true # (可选) 启用缓存可以加快后续构建速度
 
       # (可选，但推荐) 安装 Visual Studio 构建工具
       # 虽然 runner 镜像可能包含一些工具，但显式安装可以确保所需组件存在
