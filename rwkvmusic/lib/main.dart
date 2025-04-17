@@ -66,7 +66,9 @@ void main(List<String> args) async {
   Locale local = PlatformDispatcher.instance.locale;
   var localArr = local.toString().split('_');
   debugPrint('local===$localArr');
-
+  if (localArr.length == 2) {
+    local = Locale(localArr[0], localArr[1]);
+  }
   debugPrint('language=${local.languageCode},,language=${local.countryCode},,');
   await Get.putAsync<StorageService>(() => StorageService().init());
   Get.put<ConfigStore>(ConfigStore());
@@ -90,7 +92,7 @@ void main(List<String> args) async {
         child: GetMaterialApp(
           debugShowCheckedModeBanner: false,
           home: HomePage(),
-          locale: Locale(localArr[0], localArr[1]),
+          locale: local,
           fallbackLocale: Locale('en', 'US'), // 回退语言
           translations: TranslationService(), // 注册翻译类
         ),
@@ -161,7 +163,7 @@ var isRememberEffect = false.obs;
 var isAutoSwitch = false.obs;
 
 ScrollController controller = ScrollController();
-var tokens = ''.obs;
+var tokens = 'tokens=0'.obs;
 
 String? splitMeasure;
 List chords = [];
@@ -532,7 +534,7 @@ void getABCDataByLocalModel(var array) async {
     var counts = 1000 * i;
     double tokens = counts / duration;
     // debugPrint('tokens==$tokens');
-    sendPort.send('tokens==$tokens');
+    sendPort.send('tokens=$tokens');
     // if (token == result && result == 124) {
     //   //双||abc展示出错
     //   continue;

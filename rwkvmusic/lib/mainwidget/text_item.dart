@@ -23,35 +23,32 @@ class TextItem extends StatelessWidget {
       style: TextStyle(
         fontSize: fontSize ?? (isWindowsOrMac ? 45.sp : 40.sp),
         fontWeight: fontWeight ?? FontWeight.w400,
-        // color: Colors.white,
         foreground: Paint()
           ..shader = LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: linearColor ??
-                [
-                  AppColor.color_ffffff,
-                  AppColor.color_999999,
-                ],
-          ).createShader(Rect.zero),
-        shadows: [
-          BoxShadow(
-            color: Colors.black.withOpacity(.25),
+            colors: [
+              const Color(0xFF999999), // #FFFFFF
+              const Color(0xFF999999), // #999999
+            ],
+          ).createShader(Rect.zero), // 你可以根据文本宽高自行调节
+        shadows: const [
+          // Drop Shadow
+          Shadow(
+            offset: Offset(0, 2),
             blurRadius: 1,
-            spreadRadius: 0,
-            offset: const Offset(
-              0.0,
-              2,
-            ),
+            color: Color.fromRGBO(0, 0, 0, 0.25), // 黑色 25%
           ),
-          BoxShadow(
-            color: Colors.white.withOpacity(.86),
+          // Inner shadow (simulated)
+          Shadow(
+            offset: Offset(0, 1),
             blurRadius: 0.5,
-            spreadRadius: 0,
-            offset: const Offset(
-              0.0,
-              1,
-            ),
+            color: Color.fromRGBO(255, 255, 255, 0.86), // 白色 86%
+          ),
+          Shadow(
+            offset: Offset(0, -1),
+            blurRadius: 0.5,
+            color: Color.fromRGBO(0, 0, 0, 0.25), // 黑色 25%
           ),
         ],
       ),

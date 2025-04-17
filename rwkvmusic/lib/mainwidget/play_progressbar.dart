@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
@@ -23,7 +22,7 @@ class PlayProgressBar extends StatelessWidget {
 
     return Obx(
       () => Container(
-        padding: EdgeInsets.symmetric(horizontal: 15.w, vertical: 5.h),
+        padding: EdgeInsets.only(left: 15.w, top: 5.h, bottom: 5.h),
         width: isWindowsOrMac ? 1163.w : 984.w,
         height: isWindowsOrMac ? 113.h : 96.h,
         decoration: BoxDecoration(
@@ -103,18 +102,23 @@ class PlayProgressBar extends StatelessWidget {
                 fontWeight: FontWeight.w400,
                 fontSize: isWindowsOrMac ? 36.sp : 30.sp),
           ),
-
-          InkWell(
-              onTap: () {
-                // 按钮被点击时执行的操作
-                onPressed();
-              },
-              child: SvgPicture.asset(
-                'assets/images/$imgName.svg',
-                width: isWindowsOrMac ? 50.w : 42.w,
-                height: isWindowsOrMac ? 56.h : 48.h,
-                fit: BoxFit.cover,
-              )),
+          GestureDetector(
+            onTap: () {
+              onPressed();
+            },
+            child: SizedBox(
+              width: 70.w,
+              height: 80.h,
+              child: Center(
+                child: SvgPicture.asset(
+                  'assets/images/$imgName.svg',
+                  width: isWindowsOrMac ? 50.w : 42.w,
+                  height: isWindowsOrMac ? 56.h : 48.h,
+                  fit: BoxFit.cover,
+                ),
+              ),
+            ),
+          )
         ]),
       ),
     );

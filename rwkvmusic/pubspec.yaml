@@ -172,7 +172,7 @@ flutter:
     - assets/piano/
     - assets/piano/assets/
     - assets/images/change_node/
-    - assets/doctor/pngList/
+    - assets/doctor/images/
     - assets/doctor/static/css/
     - assets/doctor/static/js/
     # - assets/doctor/static/
