@@ -109,7 +109,7 @@ jobs:
         run: |
           cd rwkvmusic
           # This flag should now be recognized with a recent beta version
-          flutter build windows --target-platform=windows-arm64
+          flutter build windows
 
       # --- Packaging and Upload Steps ---
       - name: Package Windows arm64
