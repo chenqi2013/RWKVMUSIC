@@ -59,13 +59,34 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # 设置 Flutter SDK 环境，指定 arm64 架构
-      - name: Setup Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          flutter-version: '3.22.2' # 尝试一个较新的稳定版本，你可以根据需要调整
-          architecture: arm64
-          cache: true # (可选) 启用缓存可以加快后续构建速度
+           # - name: Setup Flutter # Remove or comment out the subosito/flutter-action step
+      #   uses: subosito/flutter-action@v2
+      #   with:
+      #     flutter-version: '3.22.2'
+      #     architecture: arm64
+      #     cache: true
+
+      - name: Download Flutter SDK
+        shell: pwsh
+        run: |
+          $flutterVersion = "3.22.2" # Specify desired Flutter version
+          $flutterZip = "flutter_windows_${flutterVersion}-stable.zip"
+          $downloadUrl = "https://storage.googleapis.com/flutter_infra_release/releases/stable/windows/$flutterZip"
+          Write-Host "Downloading Flutter SDK from $downloadUrl"
+          Invoke-WebRequest -Uri $downloadUrl -OutFile $flutterZip
+          Write-Host "Extracting Flutter SDK..."
+          Expand-Archive -Path $flutterZip -DestinationPath C:\ # Extract to C:\flutter
+          Remove-Item $flutterZip
+          Write-Host "Flutter SDK extracted to C:\flutter"
+
+      - name: Add Flutter to PATH
+        shell: pwsh
+        run: |
+          echo "C:\flutter\bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+          echo "Adding C:\flutter\bin to PATH"
+
+      - name: Verify Flutter Installation
+        run: flutter doctor -v # Verify installation and see available devices/targets
 
       # (可选，但推荐) 安装 Visual Studio 构建工具
       # 虽然 runner 镜像可能包含一些工具，但显式安装可以确保所需组件存在
