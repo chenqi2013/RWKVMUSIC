@@ -144,6 +144,7 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
+    CommonUtils.reportStatistics();
     midiProgramValue = ConfigStore.to.getMidiProgramSelect();
     isRememberPrompt.value = ConfigStore.to.getRemberPromptSelect();
     isRememberEffect.value = ConfigStore.to.getRemberEffectSelect();

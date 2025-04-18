@@ -384,6 +384,68 @@ class CommonUtils {
     return isValid;
   }
 
+  ///统计上报日活数据
+  static Future<void> reportStatistics() async {
+    Dio dio = Dio();
+    String url = 'https://analytics.rwkv.cn/api/send';
+    Map<String, dynamic> data = {
+      "type": "event",
+      "payload": {
+        "website": "437f0685-d42b-4527-a590-73e687f69983",
+        "hostname": "fake-url.com",
+        "screen": "${Get.width.toInt()}x${Get.height.toInt()}",
+        "language": Get.locale.toString(),
+        "url": "/"
+      }
+    };
+    String userAgent =
+        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36';
+    String secChUa =
+        '"Google Chrome";v="135", "Not-A.Brand";v="8", "Chromium";v="135"';
+    String secChUaMobile = '?0';
+    String secChUaPlatform = 'Windows';
+    if (Platform.isAndroid) {
+      userAgent =
+          'Mozilla/5.0 (Linux; Android 13; SM-S908B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Mobile Safari/537.36';
+      secChUa =
+          '"Google Chrome";v="135", "Not-A.Brand";v="8", "Chromium";v="135"';
+      secChUaMobile = '?1';
+      secChUaPlatform = 'Android';
+    } else if (Platform.isIOS) {
+      userAgent =
+          'Mozilla/5.0 (iPhone; CPU iPhone OS 17_4_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.4 Mobile/15E148 Safari/604.1';
+      secChUa = '"Safari";v="17", "Not-A.Brand";v="8"';
+      secChUaMobile = '?1';
+      secChUaPlatform = 'iOS';
+    } else if (Platform.isLinux) {
+      userAgent =
+          'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36';
+      secChUa =
+          '"Google Chrome";v="135", "Not-A.Brand";v="8", "Chromium";v="135"';
+      secChUaMobile = '?0';
+      secChUaPlatform = 'Linux';
+    }
+    // 设置 headers
+    dio.options.headers = {
+      'Accept': '*/*',
+      'Accept-Language': 'zh-CN,zh;q=0.9,en-US;q=0.8,en;q=0.7',
+      'Connection': 'keep-alive',
+      'Content-Type': 'application/json',
+      'User-Agent': userAgent,
+      'sec-ch-ua': secChUa,
+      'sec-ch-ua-mobile': secChUaMobile,
+      'sec-ch-ua-platform': secChUaPlatform,
+    };
+    try {
+      Response response = await dio.post(url, data: data);
+      var statusCode = response.statusCode!;
+      debugPrint('statusCode=$statusCode');
+      debugPrint('Response data:${response.data}');
+    } catch (e) {
+      print('reportStatistics Error: $e');
+    }
+  }
+
   // void getABCDataByAPI() async {
   //   var dic = {
   //     "frequency_penalty": 0.4,
