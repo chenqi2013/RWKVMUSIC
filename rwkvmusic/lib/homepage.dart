@@ -393,7 +393,7 @@ class _HomePageState extends State<HomePage> {
       }
       if (Platform.isAndroid) {
         // debugger();
-        checkAppUpdate('android', context);
+        // checkAppUpdate('android', context);
       }
     });
     // if (Platform.isIOS || Platform.isAndroid) {
@@ -1331,7 +1331,8 @@ class _HomePageState extends State<HomePage> {
                                   Obx(
                                     () => BorderBottomBtn(
                                       textColor: AppColor.color_A1D632,
-                                      padding: 120.w,
+                                      padding:
+                                          selectstate.value == 0 ? 120.w : 60.w,
                                       width: selectstate.value == 0
                                           ? (isWindowsOrMac ? 666.w : 555.w)
                                           : (isWindowsOrMac ? 453.w : 354.w),
